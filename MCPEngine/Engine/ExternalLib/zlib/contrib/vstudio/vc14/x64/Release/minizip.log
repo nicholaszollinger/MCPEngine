@@ -1,0 +1,4 @@
+﻿  minizip.c
+D:\C++Libraries\zLib\zlib-1.2.13\contrib\minizip\minizip.c(203,25): warning C4267: '=': conversion from 'size_t' to 'unsigned long', possible loss of data
+D:\C++Libraries\zLib\zlib-1.2.13\contrib\minizip\minizip.c(421,56): warning C4267: 'function': conversion from 'size_t' to 'unsigned long', possible loss of data
+  minizip.vcxproj -> D:\C++Libraries\zLib\zlib-1.2.13\contrib\vstudio\vc14\x64\Release\minizip.exe

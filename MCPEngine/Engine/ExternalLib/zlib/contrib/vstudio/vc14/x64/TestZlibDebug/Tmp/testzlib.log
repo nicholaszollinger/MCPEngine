@@ -1,0 +1,14 @@
+﻿  adler32.c
+  compress.c
+  crc32.c
+  deflate.c
+  infback.c
+  inffast.c
+  inflate.c
+  inftrees.c
+  testzlib.c
+  trees.c
+  uncompr.c
+  zutil.c
+  Generating Code...
+  testzlib.vcxproj -> D:\C++Libraries\zLib\zlib-1.2.13\contrib\vstudio\vc14\x64\TestZlibDebug\testzlib.exe
