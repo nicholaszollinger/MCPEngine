@@ -8,5 +8,5 @@ Build/
 # Don't include any .user files.
 **/*.user
 
-# Don't include the .sln. I am going to have a build system that will create this for you.
-*.sln
+# Don't include the dev .sln file specifically.
+MCPDev.sln
