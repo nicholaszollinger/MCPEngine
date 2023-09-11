@@ -57,7 +57,7 @@ function m.CloneRepoAndCreateBranch()
     os.chdir(m.solutionRoot);
 
     -- Clone the main branch
-    os.execute("git clone " .. EngineRepoURL);
+    --os.execute("git clone " .. EngineRepoURL);
     
     -- Create a new branch of the repo with the title of the new project
     os.chdir(m.engineRoot);
