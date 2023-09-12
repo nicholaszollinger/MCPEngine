@@ -4,9 +4,6 @@
     <ClCompile Include="Source\utility\Random\RNG.cpp">
       <Filter>Random</Filter>
     </ClCompile>
-    <ClCompile Include="Source\utility\Format\FormatString.cpp">
-      <Filter>String</Filter>
-    </ClCompile>
     <ClCompile Include="Source\utility\Time\Time.cpp">
       <Filter>Time</Filter>
     </ClCompile>
@@ -28,46 +25,19 @@
     <ClCompile Include="Source\Utility\String\StringId.cpp">
       <Filter>String</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Utility\String\FormatString.cpp">
+      <Filter>String</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\utility\Bit.h">
-      <Filter>Generic</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\ConceptTypes.h">
-      <Filter>Generic</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\Hash.h">
-      <Filter>Generic</Filter>
-    </ClInclude>
     <ClInclude Include="Source\utility\Random\RNG.h">
       <Filter>Random</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\Format\FormatString.h">
-      <Filter>String</Filter>
     </ClInclude>
     <ClInclude Include="Source\utility\Time\Time.h">
       <Filter>Time</Filter>
     </ClInclude>
-    <ClInclude Include="Source\utility\Color.h">
-      <Filter>Types</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\Rect.h">
-      <Filter>Types</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\Vector2.h">
-      <Filter>Types</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\EnumHelpers.h">
-      <Filter>Types</Filter>
-    </ClInclude>
     <ClInclude Include="Source\utility\Time\FrameTimer.h">
       <Filter>Time</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\FloatTester.h">
-      <Filter>Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\CustomDataTypes\UnorderedDenseArray.h">
-      <Filter>Types\Containers</Filter>
     </ClInclude>
     <ClInclude Include="Source\Utility\Profiling\SimpleInstrumentationProfiler.h">
       <Filter>Profiling</Filter>
@@ -83,6 +53,36 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\String\StringId.h">
       <Filter>String</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Generic\Bit.h">
+      <Filter>Generic</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Generic\ConceptTypes.h">
+      <Filter>Generic</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Generic\Hash.h">
+      <Filter>Generic</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Math\FloatTester.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\String\FormatString.h">
+      <Filter>String</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Types\Color.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Types\EnumHelpers.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Types\Rect.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Types\Vector2.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Types\Containers\UnorderedDenseArray.h">
+      <Filter>Types\Containers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -4,7 +4,7 @@
 
 #include <cassert>
 #include "MCP/Debug/Log.h"
-#include "utility/Hash.h"
+#include "Utility/Generic/Hash.h"
 
 namespace mcp::Internal
 {

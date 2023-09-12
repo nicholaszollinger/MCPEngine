@@ -1,7 +1,7 @@
 #pragma once
 // EnumHelpers
 
-#include "Bit.h"
+#include "../Generic/Bit.h"
 
 //-----------------------------------------------------------------------------------------------------------------------------
 ///		@brief : Create the bitwise operators for an Enum, to be able to use the enum as a bitmask.

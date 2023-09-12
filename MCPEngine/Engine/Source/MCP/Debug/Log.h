@@ -25,7 +25,7 @@
 #include "MCP/Core/Config.h"
 #include "MCP/Core/GlobalManager.h"
 #include "MCP/Core/Macros.h"
-#include "utility/Format/FormatString.h"
+#include "Utility/String/FormatString.h"
 
 namespace mcp
 {

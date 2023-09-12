@@ -2,7 +2,7 @@
 // Texture.h
 
 #include "MCP/Core/Resource/Resource.h"
-#include "utility/Vector2.h"
+#include "Utility/Types/Vector2.h"
 
 // TODO: Need to figure out what I want to do as far as copying, copy-assignment, etc.
 

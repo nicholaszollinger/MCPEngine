@@ -4,7 +4,7 @@
 #include "Component.h"
 #include "MCP/Core/Event/MulticastDelegate.h"
 #include "MCP/Core/Event/Message.h"
-#include "utility/Vector2.h"
+#include "Utility/Types/Vector2.h"
 
 namespace mcp
 {

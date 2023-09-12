@@ -5,7 +5,7 @@
 #include <cmath>
 #include <type_traits>
 
-#include "FloatTester.h"
+#include "../Math/FloatTester.h"
 
 template<typename Type>
 struct Vector2

@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include "MCP/Core/Macros.h"
 #include "MCP/Debug/Log.h"
-#include "utility/ConceptTypes.h"
+#include "Utility/Generic/ConceptTypes.h"
 
 GENERATE_DEPENDENT_TYPE_CHECK(CanCallEvent, EventType, FuncType, std::declval<FuncType>()(std::declval<const EventType&>()));
 

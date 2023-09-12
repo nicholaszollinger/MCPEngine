@@ -2,7 +2,7 @@
 
 #include "SDLHelpers.h"
 
-#include "utility/Color.h"
+#include "Utility/Types/Color.h"
 
 namespace mcp
 {

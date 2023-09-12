@@ -1,7 +1,7 @@
 #pragma once
 // SDLGraphics.h
 
-#include "utility/Rect.h"
+#include "Utility/Types/Rect.h"
 
 struct SDL_Renderer;
 struct Color;

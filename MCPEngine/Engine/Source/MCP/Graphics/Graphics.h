@@ -4,7 +4,7 @@
 #include "MCP/Core/GlobalManager.h"
 #include "MCP/Core/Application/Window/WindowBase.h"
 #include "RenderData/BaseRenderData.h"
-#include "utility/Color.h"
+#include "Utility/Types/Color.h"
 
 namespace mcp
 {
