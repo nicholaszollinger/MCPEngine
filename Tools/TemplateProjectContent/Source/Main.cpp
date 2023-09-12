@@ -1,7 +1,7 @@
 // Main.cpp
 // [Author name here]
 
-#include "MCP/Application/Application.h"
+#include "MCP/Core/Application/Application.h"
 
 int main()
 {
