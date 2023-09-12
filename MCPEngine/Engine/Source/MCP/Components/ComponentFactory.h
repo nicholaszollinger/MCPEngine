@@ -4,7 +4,7 @@
 #include <cassert>
 #include <functional>
 #include <unordered_map>
-#include "MCP/Application/Debug/Log.h"
+#include "MCP/Debug/Log.h"
 #include "utility/Hash.h"
 
 namespace mcp

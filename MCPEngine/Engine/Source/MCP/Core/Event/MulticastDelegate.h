@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-#include "MCP/Application/Debug/Log.h"
+#include "MCP/Debug/Log.h"
 
 namespace mcp
 {

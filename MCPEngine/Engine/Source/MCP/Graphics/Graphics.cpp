@@ -2,9 +2,9 @@
 
 #include "Graphics.h"
 
-#include "MCP/Application/Core/Config.h"
-#include "MCP/Application/Debug/Log.h"
-#include "MCP/Application/Window/WindowBase.h"
+#include "MCP/Core/Config.h"
+#include "MCP/Debug/Log.h"
+#include "MCP/Core/Application/Window/WindowBase.h"
 
 #if MCP_RENDERER_API == MCP_RENDERER_API_SDL
 

@@ -12,8 +12,8 @@
 #include <unordered_map>
 #include "PackageManager.h"
 #include "Resource.h"
-#include "MCP/Application/Core/GlobalManager.h"
-#include "MCP/Application/Debug/Log.h"
+#include "MCP/Core/GlobalManager.h"
+#include "MCP/Debug/Log.h"
 
 namespace mcp
 {
@@ -222,11 +222,6 @@ namespace mcp
         ResourceManager(ResourceManager&&) = delete;
         ResourceManager& operator=(const ResourceManager&) = delete;
         ResourceManager& operator=(ResourceManager&&) = delete;
-
-        //static void Create();
-        //static ResourceManager*& Get() { return s_pInstance; }
-        //static void Destroy();
-
 
         //-----------------------------------------------------------------------------------------------------------------------------
         //		NOTES:

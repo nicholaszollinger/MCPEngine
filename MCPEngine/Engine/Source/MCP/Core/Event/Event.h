@@ -4,8 +4,8 @@
 
 #include <functional>
 #include <unordered_map>
-#include "../Application/Core/Macros.h"
-#include "../Application/Debug/Log.h"
+#include "MCP/Core/Macros.h"
+#include "MCP/Debug/Log.h"
 #include "utility/ConceptTypes.h"
 
 GENERATE_DEPENDENT_TYPE_CHECK(CanCallEvent, EventType, FuncType, std::declval<FuncType>()(std::declval<const EventType&>()));

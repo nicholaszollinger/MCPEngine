@@ -3,7 +3,7 @@
 #include "TiledMapComponent.h"
 
 #include <BleachNew.h>
-#include "MCP/Application/Resources/ResourceManager.h"
+#include "MCP/Core/Resource/ResourceManager.h"
 #include "MCP/Scene/Scene.h"
 #include "Platform/TinyXML2/tinyxml2.h"
 
@@ -301,9 +301,6 @@ namespace mcp
                             pComponentElement->SetAttribute("x", (x + (width/2.f)));
                             pComponentElement->SetAttribute("y", (y + (height/2.f)));
                         }
-
-                        //pComponentElement->SetAttribute("x", x);
-                        //pComponentElement->SetAttribute("y", y);
                     }
 
                     else if (width > 0.f && componentName == colliderName)

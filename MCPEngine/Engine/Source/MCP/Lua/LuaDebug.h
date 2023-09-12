@@ -30,6 +30,4 @@ namespace mcp
     // C++ Type Checks
     void AssertIsLuaType(lua_State* pState, const int luaType, const int stackIndex = -1);
     bool IsLuaType(lua_State* pState, const int luaType, const int stackIndex = -1);
-    //bool IsValidLuaType(lua_State* pState, const int stackIndex = -1);
-
 }

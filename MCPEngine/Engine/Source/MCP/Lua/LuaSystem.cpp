@@ -2,10 +2,8 @@
 
 #include "LuaSystem.h"
 
-//#pragma warning(push)
 #pragma warning(disable : 4701)
 #include <lua.hpp>
-//#pragma warning(pop)
 
 #include "MCP/Lua/LuaDebug.h"
 

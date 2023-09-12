@@ -2,7 +2,7 @@
 
 #include "Box2DCollider.h"
 
-#include "MCP/Application/Debug/Log.h"
+#include "MCP/Debug/Log.h"
 #include "MCP/Components/ColliderComponent.h"
 
 #ifdef MCP_DATA_PARSER_TINYXML2
@@ -19,7 +19,6 @@ namespace mcp
         , m_height(height)
     {
         //Log("Box: (%,%) w: % | h: %", position.x, position.y, width, height);
-        //Log()
     }
 
     RectF Box2DCollider::GetEstimateRectRelative() const
@@ -81,9 +80,6 @@ namespace mcp
 #if RENDER_COLLIDER_VISUALS
     void Box2DCollider::Render() const
     {
-        //RectF rect = GetEstimateRectRelative();
-        //rect.position += m_pOwner->GetTransformComponent()->GetLocation();
-        
         DrawRect(GetEstimateRectWorld(), kColliderDebugColor);
     }
 #endif

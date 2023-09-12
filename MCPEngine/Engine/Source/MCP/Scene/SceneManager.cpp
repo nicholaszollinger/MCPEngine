@@ -3,7 +3,7 @@
 #include "SceneManager.h"
 #include <BleachNew.h>
 
-#include "MCP/Application/Debug/Log.h"
+#include "MCP/Debug/Log.h"
 #include "MCP/Graphics/Graphics.h"
 
 namespace mcp

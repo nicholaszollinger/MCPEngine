@@ -7,7 +7,7 @@
 #include <string>
 #define ZLIB_WINAPI
 #include <zlib.h>
-#include "MCP/Application/Debug/Log.h"
+#include "MCP/Debug/Log.h"
 
 #if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__CYGWIN__)
 #  include <fcntl.h>

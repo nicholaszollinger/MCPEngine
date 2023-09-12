@@ -1,6 +1,6 @@
 // SDLResources.cpp
 
-#include "MCP/Application/Resources/ResourceManager.h"
+#include "MCP/Core/Resource/ResourceManager.h"
 
 #pragma warning(push)
 #pragma warning(disable : 26819)
@@ -9,7 +9,7 @@
 #include <SDL_render.h>
 #pragma warning(pop)
 
-#include "MCP/Application/Window/WindowBase.h"
+#include "MCP/Core/Application/Window/WindowBase.h"
 #include "MCP/Graphics/Graphics.h"
 
 namespace mcp

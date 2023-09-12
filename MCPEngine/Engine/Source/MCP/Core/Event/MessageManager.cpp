@@ -1,7 +1,7 @@
 // MessageManager.cpp
 
 #include "MessageManager.h"
-#include "../Components/Component.h"
+#include "MCP/Components/Component.h"
 
 namespace mcp
 {

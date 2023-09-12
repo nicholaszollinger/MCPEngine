@@ -3,7 +3,7 @@
 #include "Message.h"
 
 #include "MCP/Components/Component.h"
-#include "MCP/Objects/Object.h"
+#include "MCP/Scene/Object.h"
 #include "MCP/Scene/Scene.h"
 
 namespace mcp

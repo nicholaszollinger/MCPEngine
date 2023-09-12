@@ -4,7 +4,7 @@
 #include <BleachNew.h>
 #include <cstdint>
 #include <vector>
-#include "MCP/Application/Debug/Log.h"
+#include "MCP/Debug/Log.h"
 #include "MCP/Components/Component.h"
 
 // TODO: Need to create a type for the ComponentType that checks to make sure it follows the necessary requirements.
@@ -49,11 +49,6 @@ namespace mcp
         template<typename ComponentType, typename...ConstructorParams>
         ComponentType* AddComponent(ConstructorParams&&...params)
         {
-            //static_assert(ComponentType::kComponentTypeId, "ComponentType has not setup kComponentTypeId. Use 'MCP_DEFINE_COMPONENT_ID(ComponentName)' "
-            //    "in the public body of the Component subclass.");
-
-            //static_assert({ComponentType(Object*, params...)} -> std::same_as<ComponentType>)
-
             // Check to see if we already have the component on this Object.
             if (GetComponent<ComponentType>() != nullptr)
             {
@@ -83,9 +78,6 @@ namespace mcp
         template<typename ComponentType>
         void RemoveComponent()
         {
-            //static_assert(ComponentType::kComponentTypeId, "ComponentType has not setup kComponentTypeId. Use 'MCP_DEFINE_COMPONENT_ID(ComponentName)' "
-            //    "in the public body of the Component subclass.");
-
             for (auto iterator = m_components.begin(); iterator != m_components.end(); ++iterator)
             {
                 if (ComponentType::GetStaticTypeId() == (*iterator)->GetTypeId())
@@ -112,9 +104,6 @@ namespace mcp
         template<typename ComponentType>
         ComponentType* GetComponent()
         {
-            //static_assert(std::is_same_v<typename ComponentType::kComponentTypeId, ComponentTypeId>, "ComponentType has not setup kComponentTypeId. Use 'MCP_DEFINE_COMPONENT_ID(ComponentName)' "
-            //                                               "in the public body of the Component subclass.");
-
             for (auto& pComponent : m_components)
             {
                 if (ComponentType::GetStaticTypeId() == pComponent->GetTypeId())

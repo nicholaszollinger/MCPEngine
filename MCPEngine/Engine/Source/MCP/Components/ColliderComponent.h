@@ -26,7 +26,7 @@ namespace mcp
 
         using ColliderContainer = std::unordered_map<Collider::ColliderNameId, Collider*>;
 
-        ColliderContainer m_colliders;             // Colliders that we own.
+        ColliderContainer m_colliders;              // Colliders that we own.
         CollisionSystem* m_pSystem;                 // CollisionSystem reference.
         void* m_pCell;
         TransformComponent* m_pTransformComponent;  // The transform component we are attached to.

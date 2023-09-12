@@ -1,6 +1,6 @@
 #pragma once
-#include <cstdint>
 // IUpdateable.h
+#include <cstdint>
 
 namespace mcp
 {

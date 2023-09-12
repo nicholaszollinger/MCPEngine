@@ -1,7 +1,7 @@
 #pragma once
 // SceneManager.h
 #include "Scene.h"
-#include "MCP/Application/Core/GlobalManager.h"
+#include "MCP/Core/GlobalManager.h"
 
 namespace mcp
 {

@@ -1,11 +1,12 @@
--- CreateNewProject
+-- CreateNewProject.lua
+-- Lua Documentation: https://premake.github.io/docs/
 
 -- PARAMS:
     -- _ARGS[1] = ProjectName
-    -- _ARGS[2] = Path
+    -- _ARGS[2] = Path, the current directory of where the .bat file was called from.
     -- TODO: Maybe a Branch name? So that we could reuse branches?
 local NewProjectName = _ARGS[1];
-local NewSolutionRoot = "../" .. _ARGS[2] .. NewProjectName;
+local NewSolutionRoot = _ARGS[2];
 
 --local LauncherRoot = path.getabsolute("../");
 --local EngineVersionsFolder = path.getabsolute("../MCP/Versions/");
@@ -42,38 +43,85 @@ function m.Initialize()
     -- m.projectName = m._defaultOrOption("projectName", m.GetDefaultProjectName());
     -- m.projectLocation = m._defaultOrOption("projectLocation", )
 
-    -- Create the folder structure that we want.
+    -- Module variables for main root folders.
     m.solutionRoot = NewSolutionRoot;
     m.projectRoot = NewSolutionRoot .. "/" .. NewProjectName .. "/";
     m.engineRoot = NewSolutionRoot .."/MCPEngine/";
-    os.mkdir(m.solutionRoot);
+    --os.mkdir(m.solutionRoot);
+
+    -- Make the Project folder structure.
     os.mkdir(m.projectRoot);
-    os.mkdir(m.engineRoot);
+    --os.mkdir(m.projectRoot .. "/Source/");
+    --os.mkdir(m.projectRoot .. "/Assets/");
+    -- TODO: Should I make the log folders as well?
 end
 
 --- Creates an engine folder where the 
-function m.CloneRepoAndCreateBranch()
+function m.CreateBranch()
     
-    os.chdir(m.solutionRoot);
+    --os.chdir(m.solutionRoot);
 
     -- Clone the main branch
     --os.execute("git clone " .. EngineRepoURL);
     
     -- Create a new branch of the repo with the title of the new project
-    os.chdir(m.engineRoot);
-    os.execute("git checkout -b " .. NewProjectName);
+    --os.chdir(m.engineRoot);
+    --os.execute("git checkout -b " .. NewProjectName);
 
-    os.execute("git push -u origin" .. NewProjectName);
+    -- TODO Figure out what this is doing.
+    --os.execute("git push -u origin " .. NewProjectName);
 
     -- Change our directory back to the solution root.
-    os.chdir(m.solutionRoot);
+    --os.chdir(m.solutionRoot);
 end
 
 --- TODO: Create the Default project files for a new MCP project.
-function m.GenerateProjectFiles()
+function m.GenerateDefaultFiles()
+    -- Create tokens used in the boilerplate code
+    m.AddToken("PRJ_NAME", NewProjectName);
+    --m.listTokens();
+
+    -- Get the directories in the TemplateProjectContent.
+    local dirs = os.matchdirs("TemplateProjectContent/**");
+    for _, match in pairs(dirs) do
+        local newDirName = m._replaceTokens(match);
+        newDirName = string.gsub(newDirName, "TemplateProjectContent", m.projectRoot);
+        local success = os.mkdir(newDirName);
+
+        if success then
+            print("Making Dir: " .. newDirName);
+        else
+            print("Failed to make Dir: " .. newDirName);
+        end
+
+    end
+    
+    local files = os.matchfiles("TemplateProjectContent/**.*");
+
+    -- For each template file, we need to 
+    for _, match in pairs(files) do
+
+        -- Set the correct filename, with the updated path.
+        local newFilename = m._replaceTokens(match);
+        newFilename = string.gsub(newFilename, "TemplateProjectContent", m.projectRoot);
+
+        -- Read the file and replace any tokens
+        local fileData = m._readFile(match);
+        local result = m._replaceTokens(fileData);
+
+        -- Write the new file to the project location.
+        local writeSuccess = io.writefile(newFilename, result);
+
+        -- Check for success.
+        if writeSuccess then 
+            print("Writing file: " .. newFilename);
+        else
+            print("Failed to write file: " .. newFilename);
+        end
+
+    end
 
 end
-
 
 --- Tokens are stand in string values that are found in the names of the boilerplate
 --- code. Example: 
@@ -103,9 +151,72 @@ function m.AddToken(token, replacement)
         return false;
     end
 
-    m.PrintDebug("Adding token: " .. token);
+    --m.PrintDebug("Adding token: " .. token);
     m._tokens[token] = replacement;
+end
 
+-- Print out all of the tokens currently registered with the module.
+-- Used for debugging
+function m.listTokens()
+    if m._tokens ~= nil then
+        for token, replacement in pairs(m._tokens) do
+            print("\t- " .. token .. ": ");
+            local replacementType = type(replacement);
+
+            if replacementType == "string" then
+                print(replacement);
+            else
+                print(replacementType);
+            end
+        end
+    end
+end
+
+-- Read an entire file into a string, and return the result.
+-- @param filename : "Name of the file to read."
+function m._readFile(filename)
+    local f = assert(io.open(filename, "rb"));
+    local content = f:read("*all");
+    f:close();
+    return content;
+end
+
+-- Get the replacement part for the token.
+function m._getTokenReplacement(token)
+    local replacement = m._tokens[token] or nil;
+
+    if replacement ~= nil then
+        local replacementType = type(replacement);
+
+        if replacementType == "string" then
+            return replacement;
+        else
+            return nil;
+        end
+
+    else
+        print("Found token but failed to find replacement. Token: " .. token);
+    end
+end
+
+-- Replace all tokens and replace them in the string.
+-- @returns : "A string containing the replaced values."
+function m._replaceTokens(string)
+    -- Function to grab the token.
+    local replacementFunc = function(token)
+        local result = m._getTokenReplacement(token);
+        return result;
+        end
+
+    -- Find every token matching the following pattern
+    local result, num = string.gsub(string, "@{(.-)}@", replacementFunc);
+
+    -- Debugging func:
+    if num ~= 0 then
+        print("Substitutions made: ", num);
+    end
+
+    return result;
 end
 
 --- Print out some debug information for this module.
@@ -125,8 +236,11 @@ end
 
 -- PROGRAM STARTS HERE
 m.Initialize();
-m.CloneRepoAndCreateBranch();
+m.CreateBranch();
+
 local ObjDirectoryPath = "!$(SolutionDir)Build/Intermediate/$(ProjectName)/$(Configuration)/$(PlatformTarget)/";
+local UtilitySourcePath = "$(SolutionDir)MCPEngine/Utility/Source/";
+local EngineSourcePath = "$(SolutionDir)MCPEngine/Engine/Source/";
 
 -- CREATE THE NEW SOLUTION
 -- These are Premake functions.
@@ -155,12 +269,12 @@ workspace(NewProjectName);
 group "Engine"
     externalproject("Utility")
         location(m.engineRoot .. "Utility/")
-        uuid("b61061c3-ac16-458d-9348-cd7a73565573") -- TODO: Look this up
+        uuid("b61061c3-ac16-458d-9348-cd7a73565573")
         kind "StaticLib"
         language "C++"
 
-    externalproject("MCP")
-        location (m.engineRoot .. "MCP/")
+    externalproject("MCPEngine")
+        location (m.engineRoot .. "Engine/")
         uuid("0a2bae05-3362-489b-902d-2b9015220220")
         kind "StaticLib"
         language "C++"
@@ -174,26 +288,33 @@ group "Game"
         language "C++"
         targetdir("$(SolutionDir)Build/Bin/$(PlatformTarget)/$(Configuration)/");
         objdir(ObjDirectoryPath);
-        links {"MCP", "Utility"}
+        links {"MCPEngine", "Utility"}
         cppdialect "C++17"
         warnings "Extra"
-        libdirs {"$(SolutionDir)Build/Lib/MCP/$(PlatformTarget)/$(Configuration)/"}
+        libdirs {"$(SolutionDir)Build/Lib/MCPEngine/$(PlatformTarget)/$(Configuration)/"}
         includedirs 
         {
-            "../Utility/Source/", -- Utility Source
-            "../MCP/Source/", -- Engine Source
+            UtilitySourcePath,
+            EngineSourcePath,
         };
+
+        dependenciesfile("MCPEngine.lib")
 
         -- System SDK version.
         filter "system:windows"
             systemversion "latest"
         
+        -- GENERATE DEFAULT ASSETS
+        m.GenerateDefaultFiles();
+
         -- -- Copy over the boilerplate code immediately, so that we can include the files in the project.
         -- os.execute("xCopyToDir.bat \"Game Boilerplate Source\" \"" .. GameRootFolder .. "/Source/\"");
         
-        -- -- This will add all of the source files that have been copied into our source folder into the project.
-        -- files 
-        -- {   m.projectRoot .. "/Source/" .. "**.h", 
-        --     m.projectRoot .. "/Source/" .. "**.cpp",
-        --     m.projectRoot .. "/Source/" .. "**.ixx"
-        -- };
+        -- This will add all of the source files that have been copied into our source folder into the project.
+        files 
+        {   m.projectRoot .. "/Source/" .. "**.h",
+            m.projectRoot .. "/Source/" .. "**.cpp",
+            m.projectRoot .. "/Source/" .. "**.ixx"
+        };
+
+

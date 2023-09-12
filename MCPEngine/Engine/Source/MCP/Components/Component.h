@@ -11,7 +11,7 @@ namespace mcp
 
     // TODO: Attribute to require other components:
     // This should take in what? The name of the components? Or their static Ids? <- That feels better.
-    #define MCP_REQUIRE_COMPONENTS(...)
+    //#define MCP_REQUIRE_COMPONENTS(...)
 
     #define MCP_DEFINE_COMPONENT_DEFAULT_CONSTRUCTOR(ComponentName) ComponentName(Object* pObject) : Component(pObject) {}
 
@@ -23,10 +23,6 @@ namespace mcp
     ///         is a static getter (GetStaticTypeId()) for getting the id from the type.
     ///		@param ComponentName : Name of the ComponentType. We want a type name not a string!
     //-----------------------------------------------------------------------------------------------------------------------------
-
-    // private:                                                                                                                                                \
-    // virtual void RegisterFactoryFunction() const override final { mcp::ComponentFactory::RegisterFactoryFunction(kComponentTypeId, #ComponentName); }
-    
 #define MCP_DEFINE_COMPONENT_ID(ComponentName)                                                                                                          \
 private:                                                                                                                                                \
     static inline const mcp::ComponentTypeId kComponentTypeId = mcp::ComponentFactory::RegisterComponentType<ComponentName>(#ComponentName);            \

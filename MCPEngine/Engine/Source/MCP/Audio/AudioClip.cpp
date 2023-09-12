@@ -2,7 +2,7 @@
 
 #include "AudioClip.h"
 
-#include "MCP/Application/Resources/ResourceManager.h"
+#include "MCP/Core/Resource/ResourceManager.h"
 
 #if MCP_AUDIO_PLATFORM == MCP_AUDIO_PLATFORM_SDL
 struct Mix_Chunk;

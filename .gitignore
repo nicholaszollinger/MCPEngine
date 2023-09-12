@@ -10,3 +10,11 @@ Build/
 
 # Don't include the dev .sln file specifically.
 MCPDev.sln
+MCPDev/
+
+# Don't include the project in our repository.
+@{PRJ_NAME}@/
+@{PRJ_NAME}@.sln
+
+# Don't include the project's log files
+@{PRJ_NAME}@/Log/**.*

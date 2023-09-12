@@ -1,133 +1,405 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Base">
-      <UniqueIdentifier>{164b0506-f1a0-4dbf-810b-c39dc5a11e9d}</UniqueIdentifier>
+    <Filter Include="MCP">
+      <UniqueIdentifier>{d06b7b82-5398-4453-a538-c11d932de337}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform">
+      <UniqueIdentifier>{36f4aa4d-2c06-46fc-a9e5-b564c3f7e617}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform\SDL2">
+      <UniqueIdentifier>{f648ef7e-2c73-4c19-a6f1-da7494c63f55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform\Tiled">
+      <UniqueIdentifier>{1aa8e0c0-409f-467a-9ec2-74b2d65f269e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform\TinyXML2">
+      <UniqueIdentifier>{852214f2-58db-43e2-ac54-560abca36975}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform\Windows">
+      <UniqueIdentifier>{7965043e-4f38-44a8-a7b1-216288a76255}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Core">
+      <UniqueIdentifier>{ef5421b2-e047-4682-ae84-1d8638e234c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Debug">
+      <UniqueIdentifier>{211e3833-d5b7-4c29-ad56-7648fd0f9f70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Core\Resource">
+      <UniqueIdentifier>{b67c0341-0e73-49d6-a3dc-0a02c4cb9810}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Audio">
+      <UniqueIdentifier>{0ef71222-98b4-43a8-a567-c329db4ba313}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Collision">
+      <UniqueIdentifier>{fa65e406-6aec-47f9-9b7f-e46680c94305}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Components">
+      <UniqueIdentifier>{5a545a3c-a543-4c3c-b02b-ccb2693fd302}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Core\Event">
+      <UniqueIdentifier>{36f05e3a-f531-4f4f-9504-2b00de923e11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Graphics">
+      <UniqueIdentifier>{5df5b415-8f3c-4908-9baf-1fb45413bd10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Input">
+      <UniqueIdentifier>{2f1cc59c-e21d-4836-b98e-66f5521e14af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Lua">
+      <UniqueIdentifier>{b901e794-5f55-42e5-8a5e-2a7bda9de9b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Scene">
+      <UniqueIdentifier>{6b4da999-b8ed-48f4-8b81-a4e69a0343c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Core\Memory">
+      <UniqueIdentifier>{ade7d7b4-3538-4c52-920c-04627015359a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Core\Application">
+      <UniqueIdentifier>{92b22143-1c9a-4a55-a3b2-7e038ca2c2b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Core\Application\Window">
+      <UniqueIdentifier>{0df1724c-a207-4bd0-a69f-e36e0d854002}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\MCP\Application\Application.h">
-      <Filter>Base</Filter>
+    <ClInclude Include="Source\Platform\SDL2\SDL2Window.h">
+      <Filter>Platform\SDL2</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MCP\Application\Debug\Log.h" />
-    <ClInclude Include="Source\MCP\Application\Window\WindowBase.h" />
-    <ClInclude Include="Source\MCP\Application\Core\Config.h" />
-    <ClInclude Include="Source\Platform\Windows\WindowsWindow.h" />
-    <ClInclude Include="Source\Platform\SDL2\SDL2Window.h" />
-    <ClInclude Include="Source\Platform\Windows\WindowsConsoleWindow.h" />
-    <ClInclude Include="Source\MCP\Application\Debug\LogFontTypes.h" />
-    <ClInclude Include="Source\MCP\Graphics\Graphics.h" />
-    <ClInclude Include="Source\Platform\SDL2\SDLRenderer.h" />
-    <ClInclude Include="Source\MCP\Input\InputCodes.h" />
-    <ClInclude Include="Source\MCP\Application\Core\Macros.h" />
-    <ClInclude Include="Source\MCP\Events\Event.h" />
-    <ClInclude Include="Source\MCP\Events\KeyEvent.h" />
-    <ClInclude Include="Source\MCP\Events\UserEvent.h" />
-    <ClInclude Include="Source\Platform\SDL2\SDLHelpers.h" />
-    <ClInclude Include="Source\MCP\Input\Input.h" />
-    <ClInclude Include="Source\Platform\SDL2\SDLInput.h" />
-    <ClInclude Include="Source\MCP\Application\Resources\ResourceManager.h" />
-    <ClInclude Include="Source\MCP\Scene\Scene.h" />
-    <ClInclude Include="Source\MCP\Scene\SceneManager.h" />
-    <ClInclude Include="Source\MCP\Components\Component.h" />
-    <ClInclude Include="Source\MCP\Scene\IUpdateable.h" />
-    <ClInclude Include="Source\MCP\Scene\IRenderable.h" />
-    <ClInclude Include="Source\MCP\Graphics\RenderData\BaseRenderData.h" />
-    <ClInclude Include="Source\MCP\Graphics\Texture.h" />
-    <ClInclude Include="Source\MCP\Components\ScriptComponent.h" />
-    <ClInclude Include="Source\MCP\Audio\AudioData.h" />
-    <ClInclude Include="Source\MCP\Audio\AudioClip.h" />
-    <ClInclude Include="Source\MCP\Audio\AudioTrack.h" />
-    <ClInclude Include="Source\MCP\Audio\AudioManager.h" />
-    <ClInclude Include="Source\Platform\SDL2\SDLAudio.h" />
-    <ClInclude Include="Source\MCP\Application\Resources\Zip.h" />
-    <ClInclude Include="Source\MCP\Application\Resources\TextFile.h" />
-    <ClInclude Include="Source\MCP\Application\Resources\AssetPackage.h" />
-    <ClInclude Include="Source\MCP\Application\Resources\PackageManager.h" />
-    <ClInclude Include="Source\MCP\Application\Resources\Resource.h" />
-    <ClInclude Include="Source\MCP\Components\TransformComponent.h" />
-    <ClInclude Include="Source\MCP\Components\ImageComponent.h" />
-    <ClInclude Include="Source\MCP\Components\ComponentId.h" />
-    <ClInclude Include="Source\MCP\ComponentSystems\ComponentSystem.h" />
-    <ClInclude Include="Source\MCP\Components\ComponentArray.h" />
-    <ClInclude Include="Source\MCP\Objects\Object.h" />
-    <ClInclude Include="Source\Platform\TinyXML2\tinyxml2.h" />
-    <ClInclude Include="Source\MCP\Components\ComponentFactory.h" />
-    <ClInclude Include="Source\MCP\Application\Core\Process.h" />
-    <ClInclude Include="Source\MCP\Application\Core\GlobalManager.h" />
-    <ClInclude Include="Source\MCP\Events\Message.h" />
-    <ClInclude Include="Source\MCP\Events\MessageManager.h" />
-    <ClInclude Include="Source\MCP\Components\PrimitiveComponent.h" />
-    <ClInclude Include="Source\MCP\Components\Rect2DComponent.h" />
-    <ClInclude Include="Source\MCP\Lua\LuaSystem.h" />
-    <ClInclude Include="Source\MCP\Lua\LuaDebug.h" />
-    <ClInclude Include="Source\MCP\Lua\Lua.h" />
-    <ClInclude Include="Source\Platform\Tiled\TiledMapComponent.h" />
-    <ClInclude Include="Source\Platform\Tiled\TiledTileSet.h" />
-    <ClInclude Include="Source\MCP\Collision\Collider.h" />
-    <ClInclude Include="Source\MCP\Collision\CollisionSystem.h" />
-    <ClInclude Include="Source\MCP\Components\ColliderComponent.h" />
-    <ClInclude Include="Source\MCP\Events\MulticastDelegate.h" />
-    <ClInclude Include="Source\MCP\Collision\Box2DCollider.h" />
-    <ClInclude Include="Source\MCP\Collision\ColliderFactory.h" />
-    <ClInclude Include="ExternalLib\BleachLeakDetector\include\BleachNew.h" />
-    <ClInclude Include="ExternalLib\BleachLeakDetector\include\BleachNewConfig.h" />
-    <ClInclude Include="Source\MCP\Collision\CollisionProfile.h" />
-    <ClInclude Include="Source\MCP\Collision\CollisionChannels.h" />
+    <ClInclude Include="Source\Platform\SDL2\SDLAudio.h">
+      <Filter>Platform\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Platform\SDL2\SDLHelpers.h">
+      <Filter>Platform\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Platform\SDL2\SDLInput.h">
+      <Filter>Platform\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Platform\SDL2\SDLRenderer.h">
+      <Filter>Platform\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Platform\Tiled\TiledMapComponent.h">
+      <Filter>Platform\Tiled</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Platform\Tiled\TiledTileSet.h">
+      <Filter>Platform\Tiled</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Platform\TinyXML2\tinyxml2.h">
+      <Filter>Platform\TinyXML2</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Platform\Windows\WindowsConsoleWindow.h">
+      <Filter>Platform\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Audio\AudioClip.h">
+      <Filter>MCP\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Audio\AudioData.h">
+      <Filter>MCP\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Audio\AudioManager.h">
+      <Filter>MCP\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Audio\AudioTrack.h">
+      <Filter>MCP\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Collision\CollisionSystem.h">
+      <Filter>MCP\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Collision\Box2DCollider.h">
+      <Filter>MCP\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Collision\Collider.h">
+      <Filter>MCP\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\ColliderComponent.h">
+      <Filter>MCP\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Collision\ColliderFactory.h">
+      <Filter>MCP\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Collision\CollisionChannels.h">
+      <Filter>MCP\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Collision\CollisionProfile.h">
+      <Filter>MCP\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\Component.h">
+      <Filter>MCP\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\ComponentFactory.h">
+      <Filter>MCP\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\ComponentId.h">
+      <Filter>MCP\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\ImageComponent.h">
+      <Filter>MCP\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\PrimitiveComponent.h">
+      <Filter>MCP\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\Rect2DComponent.h">
+      <Filter>MCP\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\TransformComponent.h">
+      <Filter>MCP\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\ScriptComponent.h">
+      <Filter>MCP\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Graphics\Graphics.h">
+      <Filter>MCP\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Graphics\RenderData\BaseRenderData.h">
+      <Filter>MCP\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Graphics\Texture.h">
+      <Filter>MCP\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Input\Input.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Input\InputCodes.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Lua\Lua.h">
+      <Filter>MCP\Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Lua\LuaDebug.h">
+      <Filter>MCP\Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Lua\LuaSystem.h">
+      <Filter>MCP\Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\SceneManager.h">
+      <Filter>MCP\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\Scene.h">
+      <Filter>MCP\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\IUpdateable.h">
+      <Filter>MCP\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\IRenderable.h">
+      <Filter>MCP\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="ExternalLib\BleachLeakDetector\include\BleachNew.h">
+      <Filter>MCP\Core\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="ExternalLib\BleachLeakDetector\include\BleachNewConfig.h">
+      <Filter>MCP\Core\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Application\Application.h">
+      <Filter>MCP\Core\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Application\Window\WindowBase.h">
+      <Filter>MCP\Core\Application\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Event\Event.h">
+      <Filter>MCP\Core\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Event\KeyEvent.h">
+      <Filter>MCP\Core\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Event\Message.h">
+      <Filter>MCP\Core\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Event\MessageManager.h">
+      <Filter>MCP\Core\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Event\MulticastDelegate.h">
+      <Filter>MCP\Core\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Resource\AssetPackage.h">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Resource\PackageManager.h">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Resource\Resource.h">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Resource\ResourceManager.h">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Resource\TextFile.h">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Resource\Zip.h">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Config.h">
+      <Filter>MCP\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\GlobalManager.h">
+      <Filter>MCP\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Macros.h">
+      <Filter>MCP\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Process.h">
+      <Filter>MCP\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Debug\Log.h">
+      <Filter>MCP\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Debug\LogFontTypes.h">
+      <Filter>MCP\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\Object.h">
+      <Filter>MCP\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\MCP\Application\Application.cpp">
-      <Filter>Base</Filter>
+    <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
+      <Filter>Platform\SDL2</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MCP\Application\Debug\Log.cpp" />
-    <ClCompile Include="Source\Platform\Windows\WindowsWindow.cpp" />
-    <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp" />
-    <ClCompile Include="Source\Platform\Windows\WindowsConsoleWindow.cpp" />
-    <ClCompile Include="Source\MCP\Graphics\Graphics.cpp" />
-    <ClCompile Include="Source\Platform\SDL2\SDLRenderer.cpp" />
-    <ClCompile Include="Source\Platform\SDL2\SDLHelpers.cpp" />
-    <ClCompile Include="Source\MCP\Input\Input.cpp" />
-    <ClCompile Include="Source\Platform\SDL2\SDLInput.cpp" />
-    <ClCompile Include="Source\MCP\Application\Resources\ResourceManager.cpp" />
-    <ClCompile Include="Source\MCP\Scene\SceneManager.cpp" />
-    <ClCompile Include="Source\MCP\Scene\Scene.cpp" />
-    <ClCompile Include="Source\Platform\SDL2\SDLResources.cpp" />
-    <ClCompile Include="Source\MCP\Graphics\Texture.cpp" />
-    <ClCompile Include="Source\MCP\Audio\AudioClip.cpp" />
-    <ClCompile Include="Source\MCP\Audio\AudioTrack.cpp" />
-    <ClCompile Include="Source\MCP\Audio\AudioManager.cpp" />
-    <ClCompile Include="Source\Platform\SDL2\SDLAudio.cpp" />
-    <ClCompile Include="Source\MCP\Application\Resources\Zip.cpp" />
-    <ClCompile Include="Source\MCP\Application\Resources\TextFile.cpp" />
-    <ClCompile Include="Source\MCP\Application\Resources\AssetPackage.cpp" />
-    <ClCompile Include="Source\MCP\Application\Resources\PackageManager.cpp" />
-    <ClCompile Include="Source\MCP\Components\ComponentId.cpp" />
-    <ClCompile Include="Source\MCP\Objects\Object.cpp" />
-    <ClCompile Include="Source\MCP\Components\ImageComponent.cpp" />
-    <ClCompile Include="Source\MCP\Components\ScriptComponent.cpp" />
-    <ClCompile Include="Source\MCP\Scene\IRenderable.cpp" />
-    <ClCompile Include="Source\MCP\Scene\IUpdateable.cpp" />
-    <ClCompile Include="Source\Platform\TinyXML2\tinyxml2.cpp" />
-    <ClCompile Include="Source\MCP\Components\TransformComponent.cpp" />
-    <ClCompile Include="Source\MCP\Components\ComponentFactory.cpp" />
-    <ClCompile Include="Source\MCP\Application\Window\WindowBase.cpp" />
-    <ClCompile Include="Source\MCP\Events\MessageManager.cpp" />
-    <ClCompile Include="Source\MCP\Events\Message.cpp" />
-    <ClCompile Include="Source\MCP\Components\Component.cpp" />
-    <ClCompile Include="Source\MCP\Components\PrimitiveComponent.cpp" />
-    <ClCompile Include="Source\MCP\Components\Rect2DComponent.cpp" />
-    <ClCompile Include="Source\MCP\Lua\LuaSystem.cpp" />
-    <ClCompile Include="Source\MCP\Lua\LuaDebug.cpp" />
-    <ClCompile Include="Source\MCP\Lua\Lua.cpp" />
-    <ClCompile Include="Source\Platform\Tiled\TiledMapComponent.cpp" />
-    <ClCompile Include="Source\Platform\Tiled\TiledTileSet.cpp" />
-    <ClCompile Include="Source\MCP\Collision\CollisionSystem.cpp" />
-    <ClCompile Include="Source\MCP\Collision\Collider.cpp" />
-    <ClCompile Include="Source\MCP\Components\ColliderComponent.cpp" />
-    <ClCompile Include="Source\MCP\Collision\Box2DCollider.cpp" />
-    <ClCompile Include="Source\MCP\Collision\ColliderFactory.cpp" />
-    <ClCompile Include="ExternalLib\BleachLeakDetector\include\BleachNew.cpp" />
-    <ClCompile Include="Source\MCP\Collision\CollisionChannels.cpp" />
-    <ClCompile Include="Source\MCP\Collision\CollisionProfile.cpp" />
+    <ClCompile Include="Source\Platform\SDL2\SDLAudio.cpp">
+      <Filter>Platform\SDL2</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Platform\SDL2\SDLHelpers.cpp">
+      <Filter>Platform\SDL2</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Platform\SDL2\SDLInput.cpp">
+      <Filter>Platform\SDL2</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Platform\SDL2\SDLRenderer.cpp">
+      <Filter>Platform\SDL2</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Platform\SDL2\SDLResources.cpp">
+      <Filter>Platform\SDL2</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Platform\Tiled\TiledMapComponent.cpp">
+      <Filter>Platform\Tiled</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Platform\Tiled\TiledTileSet.cpp">
+      <Filter>Platform\Tiled</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Platform\TinyXML2\tinyxml2.cpp">
+      <Filter>Platform\TinyXML2</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Platform\Windows\WindowsConsoleWindow.cpp">
+      <Filter>Platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Audio\AudioClip.cpp">
+      <Filter>MCP\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Audio\AudioManager.cpp">
+      <Filter>MCP\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Audio\AudioTrack.cpp">
+      <Filter>MCP\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Collision\Box2DCollider.cpp">
+      <Filter>MCP\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Collision\Collider.cpp">
+      <Filter>MCP\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\ColliderComponent.cpp">
+      <Filter>MCP\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Collision\ColliderFactory.cpp">
+      <Filter>MCP\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Collision\CollisionChannels.cpp">
+      <Filter>MCP\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Collision\CollisionProfile.cpp">
+      <Filter>MCP\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Collision\CollisionSystem.cpp">
+      <Filter>MCP\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\Component.cpp">
+      <Filter>MCP\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\ComponentFactory.cpp">
+      <Filter>MCP\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\ComponentId.cpp">
+      <Filter>MCP\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\ImageComponent.cpp">
+      <Filter>MCP\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\PrimitiveComponent.cpp">
+      <Filter>MCP\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\Rect2DComponent.cpp">
+      <Filter>MCP\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\TransformComponent.cpp">
+      <Filter>MCP\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\ScriptComponent.cpp">
+      <Filter>MCP\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Graphics\Graphics.cpp">
+      <Filter>MCP\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Graphics\Texture.cpp">
+      <Filter>MCP\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Input\Input.cpp">
+      <Filter>MCP\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Lua\Lua.cpp">
+      <Filter>MCP\Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Lua\LuaDebug.cpp">
+      <Filter>MCP\Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Lua\LuaSystem.cpp">
+      <Filter>MCP\Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\SceneManager.cpp">
+      <Filter>MCP\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\Scene.cpp">
+      <Filter>MCP\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\IUpdateable.cpp">
+      <Filter>MCP\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\IRenderable.cpp">
+      <Filter>MCP\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="ExternalLib\BleachLeakDetector\include\BleachNew.cpp">
+      <Filter>MCP\Core\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Application\Application.cpp">
+      <Filter>MCP\Core\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Application\Window\WindowBase.cpp">
+      <Filter>MCP\Core\Application\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Event\Message.cpp">
+      <Filter>MCP\Core\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Event\MessageManager.cpp">
+      <Filter>MCP\Core\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Resource\AssetPackage.cpp">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Resource\PackageManager.cpp">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Resource\ResourceManager.cpp">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Resource\TextFile.cpp">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Resource\Zip.cpp">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Debug\Log.cpp">
+      <Filter>MCP\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\Object.cpp">
+      <Filter>MCP\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -2,8 +2,8 @@
 
 #include "AudioManager.h"
 
-#include "MCP/Application/Core/Config.h"
-#include "MCP/Application/Debug/Log.h"
+#include "MCP/Core/Config.h"
+#include "MCP/Debug/Log.h"
 
 #if MCP_AUDIO_PLATFORM == MCP_AUDIO_PLATFORM_SDL
 

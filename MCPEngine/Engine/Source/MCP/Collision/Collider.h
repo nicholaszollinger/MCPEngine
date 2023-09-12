@@ -6,7 +6,7 @@
 #include "ColliderFactory.h"
 
 #include "CollisionProfile.h"
-#include "MCP/Events/MulticastDelegate.h"
+#include "MCP/Core/Event/MulticastDelegate.h"
 #include "utility/Rect.h"
 
 #ifdef _DEBUG

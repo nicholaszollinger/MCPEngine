@@ -9,9 +9,9 @@
 #pragma warning(pop)
 
 #include "SDLHelpers.h"
-#include "MCP/Application/Debug/Log.h"
-#include "MCP/Events/KeyEvent.h"
-#include "MCP/Events/UserEvent.h"
+#include "MCP/Debug/Log.h"
+#include "MCP/Core/Event/KeyEvent.h"
+#include "MCP/Core/Event/UserEvent.h"
 #include "MCP/Graphics/Graphics.h"
 
 

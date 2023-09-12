@@ -8,9 +8,7 @@ namespace mcp
     class Rect2DComponent final : public PrimitiveComponent
     {
         MCP_DEFINE_COMPONENT_ID(Rect2DComponent)
-    //public:
-    //    static inline const mcp::ComponentTypeId kComponentTypeId = mcp::ComponentFactory::RegisterComponentType<Rect2DComponent>("Rect2DComponent");
-    //    virtual mcp::ComponentTypeId GetTypeId() const override { return kComponentTypeId; }
+    
     private:
         float m_width;
         float m_height;

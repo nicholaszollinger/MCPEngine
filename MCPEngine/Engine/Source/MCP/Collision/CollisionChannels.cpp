@@ -3,7 +3,7 @@
 #include "CollisionChannels.h"
 
 #include <cassert>
-#include "MCP/Application/Debug/Log.h"
+#include "MCP/Debug/Log.h"
 #include "utility/Hash.h"
 
 namespace mcp::Internal

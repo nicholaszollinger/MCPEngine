@@ -2,7 +2,7 @@
 
 #include "Texture.h"
 
-#include "MCP/Application/Resources/ResourceManager.h"
+#include "MCP/Core/Resource/ResourceManager.h"
 
 #if MCP_RENDERER_API == MCP_RENDERER_API_SDL
 

@@ -5,8 +5,8 @@
 #include <algorithm>
 
 #include "IRenderable.h"
-#include "MCP/Objects/Object.h"
-#include "MCP/Application/Resources/PackageManager.h"
+#include "MCP/Scene/Object.h"
+#include "MCP/Core/Resource/PackageManager.h"
 #include "MCP/Components/ComponentFactory.h"
 #include "MCP/Components/TransformComponent.h"
 #include "MCP/Scene/IUpdateable.h"

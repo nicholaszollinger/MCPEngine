@@ -2,15 +2,15 @@
 #include "Application.h"
 
 #include "BleachNew.h"
-#include "Debug/Log.h"
+#include "MCP/Debug/Log.h"
 #include "MCP/Audio/AudioManager.h"
 #include "MCP/Collision/ColliderFactory.h"
 #include "MCP/Components/ComponentFactory.h"
-#include "MCP/Events/KeyEvent.h"
+#include "MCP/Core/Event/KeyEvent.h"
 #include "MCP/Graphics/Graphics.h"
 #include "MCP/Lua/Lua.h"
 #include "MCP/Scene/SceneManager.h"
-#include "Resources/ResourceManager.h"
+#include "MCP/Core/Resource/ResourceManager.h"
 #include "utility/Time/FrameTimer.h"
 #include "Window/WindowBase.h"
 

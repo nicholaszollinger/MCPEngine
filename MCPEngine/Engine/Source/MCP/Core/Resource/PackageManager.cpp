@@ -4,7 +4,7 @@
 
 #include <BleachNew.h>
 #include "AssetPackage.h"
-#include "MCP/Application/Debug/Log.h"
+#include "MCP/Debug/Log.h"
 
 namespace mcp
 {

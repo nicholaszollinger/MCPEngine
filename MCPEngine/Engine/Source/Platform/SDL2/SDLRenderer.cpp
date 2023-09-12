@@ -9,8 +9,8 @@
 
 #include <cassert>
 #include <SDL_image.h>
-#include "MCP/Application/Debug/Log.h"
-#include "MCP/Application/Window/WindowBase.h"
+#include "MCP/Debug/Log.h"
+#include "MCP/Core/Application/Window/WindowBase.h"
 #include "MCP/Graphics/Graphics.h"
 #include "Platform/SDL2/SDLHelpers.h"
 

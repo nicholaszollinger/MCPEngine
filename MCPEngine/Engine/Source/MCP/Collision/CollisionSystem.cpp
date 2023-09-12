@@ -1,7 +1,6 @@
 // CollisionSystem.cpp
 
 #include "CollisionSystem.h"
-
 #include "Box2DCollider.h"
 #include "Collider.h"
 #include "MCP/Components/ColliderComponent.h"
@@ -182,11 +181,6 @@ namespace mcp
         for (auto* pOldCell : cells)
         {
             RemoveFromCell(pOldCell, pColliderComponent);
-
-            /*if (!DoIntersect(rect, pOldCell->dimensions))
-            {
-                RemoveFromCell(pOldCell, pComponent);
-            }*/
         }
 
         // Try inserting again, from our reference point.
@@ -196,9 +190,9 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : 
-    ///		@param cells : 
-    ///		@param pColliderComponent : 
+    ///		@brief : Takes in the cells that the Collider Component is in and Checks for collisions in each cell.
+    ///		@param cells : Cells that the Collider Component is in.
+    ///		@param pColliderComponent : Component we are testing.
     //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::RunCollisionForColliderComponent(const std::vector<QuadtreeCell*>& cells, ColliderComponent* pColliderComponent)
     {
@@ -324,7 +318,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : 
+    ///		@brief : Checks to see if every collider that was overlapping is still overlapping.
     //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::UpdateOverlappingColliders()
     {
@@ -382,12 +376,11 @@ namespace mcp
         }
     }
 
-
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //      TODO: I want to use this at some point. I would rather calculate the grid once up front.
     //		
-    ///		@brief : Calculate the Quadtree divisions for the world.
+    ///		@brief : [NOT IMPLEMENTED YET] Calculate the Quadtree divisions for the world.
     //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::CalculateGrid()
     {
@@ -572,6 +565,11 @@ namespace mcp
         DeleteAllCells(m_pRoot);
     }
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Deletes 'pCell' and each QuadtreeCell attached to it.
+    //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::DeleteAllCells(QuadtreeCell* pCell)
     {
         if (pCell)
