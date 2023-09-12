@@ -5,12 +5,11 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
 #include "utility/Rect.h"
 #include "utility/Vector2.h"
 
 #ifdef _DEBUG
-    #define DEBUG_RENDER_COLLISION_TREE 1
+    #define DEBUG_RENDER_COLLISION_TREE 0
 
 #if DEBUG_RENDER_COLLISION_TREE
     #include "MCP/Scene/IRenderable.h"

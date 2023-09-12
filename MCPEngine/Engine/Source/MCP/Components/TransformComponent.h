@@ -2,10 +2,9 @@
 // TransformComponent.h
 
 #include "Component.h"
-#include "MCP/Events/MulticastDelegate.h"
-#include "MCP/Events/Message.h"
+#include "MCP/Core/Event/MulticastDelegate.h"
+#include "MCP/Core/Event/Message.h"
 #include "utility/Vector2.h"
-
 
 namespace mcp
 {

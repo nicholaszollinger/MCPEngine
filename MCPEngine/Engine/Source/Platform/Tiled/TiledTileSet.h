@@ -25,10 +25,6 @@ namespace mcp
 
         [[nodiscard]] TextureRenderData GetRenderData(const size_t tileIndex) const;
         [[nodiscard]] const Properties& GetTileSetProps() const { return m_props; }
-
-    private:
-        //virtual void Load(const char* pFilePath, const char* pPackageName = nullptr, const bool isPersistent = false) override;
-        //virtual void Free() override;
     };
     
 }

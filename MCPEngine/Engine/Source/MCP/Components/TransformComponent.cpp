@@ -2,8 +2,8 @@
 
 #include "TransformComponent.h"
 
-#include "MCP/Application/Core/Config.h"
-#include "MCP/Objects/Object.h"
+#include "MCP/Core/Config.h"
+#include "MCP/Scene/Object.h"
 
 #ifdef MCP_DATA_PARSER_TINYXML2
     #include "Platform/TinyXML2/tinyxml2.h"

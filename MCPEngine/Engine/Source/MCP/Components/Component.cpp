@@ -2,7 +2,7 @@
 
 #include "Component.h"
 
-#include "MCP/Objects/Object.h"
+#include "MCP/Scene/Object.h"
 #include "MCP/Scene/Scene.h"
 
 namespace mcp
@@ -11,7 +11,7 @@ namespace mcp
         : m_pOwner(pObject)
         , m_isActive(true)
     {
-        //RegisterComponentFactoryFunction(this);
+        //
     }
 
 

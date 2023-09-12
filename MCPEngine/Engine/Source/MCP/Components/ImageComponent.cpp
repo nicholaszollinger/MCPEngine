@@ -3,7 +3,7 @@
 #include "ImageComponent.h"
 
 #include "TransformComponent.h"
-#include "MCP/Objects/Object.h"
+#include "MCP/Scene/Object.h"
 #include "MCP/Scene/Scene.h"
 #include "MCP/Graphics/Graphics.h"
 

@@ -8,7 +8,6 @@ namespace mcp
     struct KeyEvent;
     class Scene;
     class IProcess;
-    //class LuaSystem;
 
     struct ApplicationProperties
     {

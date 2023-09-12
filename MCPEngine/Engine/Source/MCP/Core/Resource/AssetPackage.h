@@ -14,7 +14,13 @@ namespace mcp
         int size = 0;
     };
 
-    class AssetPackage // Zip file.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : On disk, an AssetPackage is a .zip file. This class unzips the raw data and creates mappings to that data for
+    ///         to each resource.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    class AssetPackage
     {
         using Assets = std::unordered_map<std::string, RawData>;
         Assets m_packageAssets;

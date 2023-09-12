@@ -1,7 +1,7 @@
 #pragma once
 // AudioClip.h
 
-#include "MCP/Application/Resources/Resource.h"
+#include "MCP/Core/Resource/Resource.h"
 
 namespace mcp
 {

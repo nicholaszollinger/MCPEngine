@@ -1,10 +1,9 @@
 // Rect2DComponent.cpp
 
 #include "Rect2DComponent.h"
-
 #include "MCP/Graphics/Graphics.h"
 #include "MCP/Components/TransformComponent.h"
-#include "MCP/Objects/Object.h"
+#include "MCP/Scene/Object.h"
 
 #ifdef MCP_DATA_PARSER_TINYXML2
     #include "Platform/TinyXML2/tinyxml2.h"

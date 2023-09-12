@@ -14,6 +14,7 @@
 //       - I am looking at spdlog's github to get ideas on the formatting and basic capabilities that
 //           I would like to support.
 //       - Formatting like printf: https://stackoverflow.com/questions/2342162/stdstring-formatting-like-sprintf
+//       - TODO: Update to Roody's Logging system if you can.
 //
 //-----------------------------------------------------------------------------------------------------------------------------
 
@@ -21,9 +22,9 @@
 //      This is so that I reduce the weight of the Logging system in release mode to 'zero'.
 #include <string>
 #include "LogFontTypes.h"
-#include "MCP/Application/Core/Config.h"
-#include "MCP/Application/Core/GlobalManager.h"
-#include "MCP/Application/Core/Macros.h"
+#include "MCP/Core/Config.h"
+#include "MCP/Core/GlobalManager.h"
+#include "MCP/Core/Macros.h"
 #include "utility/Format/FormatString.h"
 
 namespace mcp

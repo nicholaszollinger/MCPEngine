@@ -2,7 +2,7 @@
 
 #include "Input.h"
 
-#include "MCP/Application/Core/Config.h"
+#include "MCP/Core/Config.h"
 
 #if MCP_INPUT_PLATFORM == MCP_INPUT_PLATFORM_SDL
 #include "Platform/SDL2/SDLInput.h"

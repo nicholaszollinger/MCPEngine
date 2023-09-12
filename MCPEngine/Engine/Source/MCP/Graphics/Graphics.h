@@ -1,8 +1,8 @@
 #pragma once
 // Graphics.h
 
-#include "MCP/Application/Core/GlobalManager.h"
-#include "MCP/Application/Window/WindowBase.h"
+#include "MCP/Core/GlobalManager.h"
+#include "MCP/Core/Application/Window/WindowBase.h"
 #include "RenderData/BaseRenderData.h"
 #include "utility/Color.h"
 

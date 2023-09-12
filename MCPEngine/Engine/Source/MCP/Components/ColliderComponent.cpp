@@ -2,7 +2,7 @@
 
 #include "ColliderComponent.h"
 
-#include "MCP/Events/MessageManager.h"
+#include "MCP/Core/Event/MessageManager.h"
 #include "TransformComponent.h"
 #include "MCP/Scene/Scene.h"
 

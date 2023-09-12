@@ -2,7 +2,7 @@
 
 #include "WindowBase.h"
 
-#include "../Core/Config.h"
+#include "MCP/Core/Config.h"
 
 #if MCP_WINDOW_PLATFORM == MCP_WINDOW_PLATFORM_SDL
 #include "Platform/SDL2/SDL2Window.h"

@@ -2,7 +2,7 @@
 #include "ScriptComponent.h"
 
 #include <cassert>
-#include "MCP/Objects/Object.h"
+#include "MCP/Scene/Object.h"
 #include "MCP/Scene/Scene.h"
 
 namespace mcp

@@ -2,8 +2,8 @@
 
 #include "TiledTileSet.h"
 
-#include "MCP/Application/Debug/Log.h"
-#include "MCP/Application/Resources/ResourceManager.h"
+#include "MCP/Debug/Log.h"
+#include "MCP/Core/Resource/ResourceManager.h"
 #include "Platform/TinyXML2/tinyxml2.h"
 
 namespace mcp

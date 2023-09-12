@@ -1,12 +1,11 @@
 #pragma once
 // Scene.h
 
-#include <array>
 #include "IRenderable.h"
 #include "IUpdateable.h"
 #include "MCP/Collision/CollisionSystem.h"
-#include "MCP/Events/MessageManager.h"
-#include "MCP/Objects/Object.h"
+#include "MCP/Core/Event/MessageManager.h"
+#include "MCP/Scene/Object.h"
 #include "utility/CustomDataTypes/UnorderedDenseArray.h"
 
 namespace mcp

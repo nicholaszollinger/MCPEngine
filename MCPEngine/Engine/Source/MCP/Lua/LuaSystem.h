@@ -2,7 +2,7 @@
 // LuaSystem.h
 
 #include <optional>
-#include "MCP/Application/Debug/Log.h"
+#include "MCP/Debug/Log.h"
 
 #ifdef _DEBUG
     #define DEBUG_LUA 1

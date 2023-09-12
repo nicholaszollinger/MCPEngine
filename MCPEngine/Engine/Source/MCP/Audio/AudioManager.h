@@ -1,11 +1,10 @@
 #pragma once
 // AudioManager.h
 
-//#include <vector>
 #include "AudioClip.h"
 #include "AudioData.h"
 #include "AudioTrack.h"
-#include "MCP/Application/Core/GlobalManager.h"
+#include "MCP/Core/GlobalManager.h"
 
 namespace mcp
 {
@@ -20,5 +19,4 @@ namespace mcp
 
     void PlayClip(const AudioClip& clip, AudioData& data);
     void PlayTrack(const AudioTrack& track, AudioData& data);
-    //void PlayTrackList()
 }

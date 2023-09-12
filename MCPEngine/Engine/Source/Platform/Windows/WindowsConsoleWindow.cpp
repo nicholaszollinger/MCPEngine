@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <Windows.h>
-#include "MCP/Application/Debug/LogFontTypes.h"
+#include "MCP/Debug/LogFontTypes.h"
 
 namespace mcp
 {

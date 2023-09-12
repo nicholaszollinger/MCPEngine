@@ -3,8 +3,7 @@
 
 #include <cassert>
 #include <functional>
-
-#include "MCP/Application/Debug/Log.h"
+#include "MCP/Debug/Log.h"
 #include "utility/Hash.h"
 
 namespace mcp

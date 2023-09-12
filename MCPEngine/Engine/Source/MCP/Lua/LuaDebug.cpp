@@ -8,7 +8,7 @@
 #include <lua.hpp>
 //#pragma warning(pop)
 
-#include "MCP/Application/Debug/Log.h"
+#include "MCP/Debug/Log.h"
 
 namespace mcp
 {

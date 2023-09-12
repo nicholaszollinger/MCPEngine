@@ -10,7 +10,7 @@
 #include "MCP/Audio/AudioClip.h"
 #include "MCP/Audio/AudioData.h"
 #include "MCP/Audio/AudioTrack.h"
-#include "MCP/Application/Debug/Log.h"
+#include "MCP/Debug/Log.h"
 
 bool SDLAudioManager::Init()
 {

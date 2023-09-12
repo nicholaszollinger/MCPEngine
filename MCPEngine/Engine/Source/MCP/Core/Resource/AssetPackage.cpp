@@ -7,8 +7,8 @@
 #include <fstream>
 #define ZLIB_WINAPI
 #include <zlib.h>
-#include "MCP/Application/Debug/Log.h"
-#include "MCP/Application/Resources/Zip.h"
+#include "MCP/Debug/Log.h"
+#include "MCP/Core/Resource/Zip.h"
 
 namespace mcp
 {

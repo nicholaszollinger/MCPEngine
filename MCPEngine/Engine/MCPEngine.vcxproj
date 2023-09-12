@@ -148,7 +148,7 @@ copy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0.
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Utility\Source\;$(ProjectDir)ExternalLib\SDL2\SDL\include;$(ProjectDir)ExternalLib\SDL2\SDL_image\include;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\include;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\include;$(ProjectDir)Source\;$(ProjectDir)ExternalLib\BleachLeakDetector\include;$(ProjectDir)ExternalLib\zlib\;$(ProjectDir)ExternalLib\Lua\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)MCPEngine\Utility\Source\;$(ProjectDir)ExternalLib\SDL2\SDL\include;$(ProjectDir)ExternalLib\SDL2\SDL_image\include;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\include;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\include;$(ProjectDir)Source\;$(ProjectDir)ExternalLib\BleachLeakDetector\include;$(ProjectDir)ExternalLib\zlib\;$(ProjectDir)ExternalLib\Lua\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -193,7 +193,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Utility\Source\;$(ProjectDir)ExternalLib\SDL2\SDL\include;$(ProjectDir)ExternalLib\SDL2\SDL_image\include;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\include;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\include;$(ProjectDir)Source\;$(ProjectDir)ExternalLib\BleachLeakDetector\include;$(ProjectDir)ExternalLib\zlib\;$(ProjectDir)ExternalLib\Lua\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)MCPEngine\Utility\Source\;$(ProjectDir)ExternalLib\SDL2\SDL\include;$(ProjectDir)ExternalLib\SDL2\SDL_image\include;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\include;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\include;$(ProjectDir)Source\;$(ProjectDir)ExternalLib\BleachLeakDetector\include;$(ProjectDir)ExternalLib\zlib\;$(ProjectDir)ExternalLib\Lua\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -233,14 +233,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ExternalLib\BleachLeakDetector\include\BleachNew.cpp" />
-    <ClCompile Include="Source\MCP\Application\Application.cpp" />
-    <ClCompile Include="Source\MCP\Application\Debug\Log.cpp" />
-    <ClCompile Include="Source\MCP\Application\Resources\AssetPackage.cpp" />
-    <ClCompile Include="Source\MCP\Application\Resources\PackageManager.cpp" />
-    <ClCompile Include="Source\MCP\Application\Resources\ResourceManager.cpp" />
-    <ClCompile Include="Source\MCP\Application\Resources\TextFile.cpp" />
-    <ClCompile Include="Source\MCP\Application\Resources\Zip.cpp" />
-    <ClCompile Include="Source\MCP\Application\Window\WindowBase.cpp" />
     <ClCompile Include="Source\MCP\Audio\AudioClip.cpp" />
     <ClCompile Include="Source\MCP\Audio\AudioManager.cpp" />
     <ClCompile Include="Source\MCP\Audio\AudioTrack.cpp" />
@@ -259,17 +251,25 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Components\Rect2DComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\ScriptComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\TransformComponent.cpp" />
-    <ClCompile Include="Source\MCP\Events\Message.cpp" />
-    <ClCompile Include="Source\MCP\Events\MessageManager.cpp" />
+    <ClCompile Include="Source\MCP\Core\Application\Application.cpp" />
+    <ClCompile Include="Source\MCP\Core\Application\Window\WindowBase.cpp" />
+    <ClCompile Include="Source\MCP\Core\Event\Message.cpp" />
+    <ClCompile Include="Source\MCP\Core\Event\MessageManager.cpp" />
+    <ClCompile Include="Source\MCP\Core\Resource\AssetPackage.cpp" />
+    <ClCompile Include="Source\MCP\Core\Resource\PackageManager.cpp" />
+    <ClCompile Include="Source\MCP\Core\Resource\ResourceManager.cpp" />
+    <ClCompile Include="Source\MCP\Core\Resource\TextFile.cpp" />
+    <ClCompile Include="Source\MCP\Core\Resource\Zip.cpp" />
+    <ClCompile Include="Source\MCP\Debug\Log.cpp" />
     <ClCompile Include="Source\MCP\Graphics\Graphics.cpp" />
     <ClCompile Include="Source\MCP\Graphics\Texture.cpp" />
     <ClCompile Include="Source\MCP\Input\Input.cpp" />
     <ClCompile Include="Source\MCP\Lua\Lua.cpp" />
     <ClCompile Include="Source\MCP\Lua\LuaDebug.cpp" />
     <ClCompile Include="Source\MCP\Lua\LuaSystem.cpp" />
-    <ClCompile Include="Source\MCP\Objects\Object.cpp" />
     <ClCompile Include="Source\MCP\Scene\IRenderable.cpp" />
     <ClCompile Include="Source\MCP\Scene\IUpdateable.cpp" />
+    <ClCompile Include="Source\MCP\Scene\Object.cpp" />
     <ClCompile Include="Source\MCP\Scene\Scene.cpp" />
     <ClCompile Include="Source\MCP\Scene\SceneManager.cpp" />
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp" />
@@ -282,25 +282,10 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\Platform\Tiled\TiledTileSet.cpp" />
     <ClCompile Include="Source\Platform\TinyXML2\tinyxml2.cpp" />
     <ClCompile Include="Source\Platform\Windows\WindowsConsoleWindow.cpp" />
-    <ClCompile Include="Source\Platform\Windows\WindowsWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExternalLib\BleachLeakDetector\include\BleachNew.h" />
     <ClInclude Include="ExternalLib\BleachLeakDetector\include\BleachNewConfig.h" />
-    <ClInclude Include="Source\MCP\Application\Application.h" />
-    <ClInclude Include="Source\MCP\Application\Core\Config.h" />
-    <ClInclude Include="Source\MCP\Application\Core\GlobalManager.h" />
-    <ClInclude Include="Source\MCP\Application\Core\Macros.h" />
-    <ClInclude Include="Source\MCP\Application\Core\Process.h" />
-    <ClInclude Include="Source\MCP\Application\Debug\Log.h" />
-    <ClInclude Include="Source\MCP\Application\Debug\LogFontTypes.h" />
-    <ClInclude Include="Source\MCP\Application\Resources\AssetPackage.h" />
-    <ClInclude Include="Source\MCP\Application\Resources\PackageManager.h" />
-    <ClInclude Include="Source\MCP\Application\Resources\Resource.h" />
-    <ClInclude Include="Source\MCP\Application\Resources\ResourceManager.h" />
-    <ClInclude Include="Source\MCP\Application\Resources\TextFile.h" />
-    <ClInclude Include="Source\MCP\Application\Resources\Zip.h" />
-    <ClInclude Include="Source\MCP\Application\Window\WindowBase.h" />
     <ClInclude Include="Source\MCP\Audio\AudioClip.h" />
     <ClInclude Include="Source\MCP\Audio\AudioData.h" />
     <ClInclude Include="Source\MCP\Audio\AudioManager.h" />
@@ -313,7 +298,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Collision\CollisionSystem.h" />
     <ClInclude Include="Source\MCP\Components\ColliderComponent.h" />
     <ClInclude Include="Source\MCP\Components\Component.h" />
-    <ClInclude Include="Source\MCP\Components\ComponentArray.h" />
     <ClInclude Include="Source\MCP\Components\ComponentFactory.h" />
     <ClInclude Include="Source\MCP\Components\ComponentId.h" />
     <ClInclude Include="Source\MCP\Components\ImageComponent.h" />
@@ -321,12 +305,25 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Components\ScriptComponent.h" />
     <ClInclude Include="Source\MCP\Components\PrimitiveComponent.h" />
     <ClInclude Include="Source\MCP\Components\TransformComponent.h" />
-    <ClInclude Include="Source\MCP\Events\Event.h" />
-    <ClInclude Include="Source\MCP\Events\KeyEvent.h" />
-    <ClInclude Include="Source\MCP\Events\Message.h" />
-    <ClInclude Include="Source\MCP\Events\MessageManager.h" />
-    <ClInclude Include="Source\MCP\Events\MulticastDelegate.h" />
-    <ClInclude Include="Source\MCP\Events\UserEvent.h" />
+    <ClInclude Include="Source\MCP\Core\Application\Application.h" />
+    <ClInclude Include="Source\MCP\Core\Application\Window\WindowBase.h" />
+    <ClInclude Include="Source\MCP\Core\Config.h" />
+    <ClInclude Include="Source\MCP\Core\Event\Event.h" />
+    <ClInclude Include="Source\MCP\Core\Event\KeyEvent.h" />
+    <ClInclude Include="Source\MCP\Core\Event\Message.h" />
+    <ClInclude Include="Source\MCP\Core\Event\MessageManager.h" />
+    <ClInclude Include="Source\MCP\Core\Event\MulticastDelegate.h" />
+    <ClInclude Include="Source\MCP\Core\GlobalManager.h" />
+    <ClInclude Include="Source\MCP\Core\Macros.h" />
+    <ClInclude Include="Source\MCP\Core\Process.h" />
+    <ClInclude Include="Source\MCP\Core\Resource\AssetPackage.h" />
+    <ClInclude Include="Source\MCP\Core\Resource\PackageManager.h" />
+    <ClInclude Include="Source\MCP\Core\Resource\Resource.h" />
+    <ClInclude Include="Source\MCP\Core\Resource\ResourceManager.h" />
+    <ClInclude Include="Source\MCP\Core\Resource\TextFile.h" />
+    <ClInclude Include="Source\MCP\Core\Resource\Zip.h" />
+    <ClInclude Include="Source\MCP\Debug\Log.h" />
+    <ClInclude Include="Source\MCP\Debug\LogFontTypes.h" />
     <ClInclude Include="Source\MCP\Graphics\Graphics.h" />
     <ClInclude Include="Source\MCP\Graphics\RenderData\BaseRenderData.h" />
     <ClInclude Include="Source\MCP\Graphics\Texture.h" />
@@ -335,12 +332,11 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Lua\Lua.h" />
     <ClInclude Include="Source\MCP\Lua\LuaDebug.h" />
     <ClInclude Include="Source\MCP\Lua\LuaSystem.h" />
-    <ClInclude Include="Source\MCP\Objects\Object.h" />
     <ClInclude Include="Source\MCP\Scene\IRenderable.h" />
     <ClInclude Include="Source\MCP\Scene\IUpdateable.h" />
+    <ClInclude Include="Source\MCP\Scene\Object.h" />
     <ClInclude Include="Source\MCP\Scene\Scene.h" />
     <ClInclude Include="Source\MCP\Scene\SceneManager.h" />
-    <ClInclude Include="Source\MCP\ComponentSystems\ComponentSystem.h" />
     <ClInclude Include="Source\Platform\SDL2\SDL2Window.h" />
     <ClInclude Include="Source\Platform\SDL2\SDLAudio.h" />
     <ClInclude Include="Source\Platform\SDL2\SDLRenderer.h" />
@@ -350,7 +346,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\Platform\Tiled\TiledTileSet.h" />
     <ClInclude Include="Source\Platform\TinyXML2\tinyxml2.h" />
     <ClInclude Include="Source\Platform\Windows\WindowsConsoleWindow.h" />
-    <ClInclude Include="Source\Platform\Windows\WindowsWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
