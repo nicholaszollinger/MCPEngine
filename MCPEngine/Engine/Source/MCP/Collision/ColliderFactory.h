@@ -17,16 +17,17 @@ namespace mcp
     class ColliderFactory
     {
         using FactoryFunction = std::function<bool(const void*, mcp::ColliderComponent*)>;
-        static inline std::unordered_map<ColliderTypeId, FactoryFunction> s_factoryFunctions = {};
+        using FactoryFuncContainer = std::unordered_map<ColliderTypeId, FactoryFunction>;
 
     public:
-
         static bool AddNewFromData(const char* pColliderTypeName, const void* pData, mcp::ColliderComponent* pComponent)
         {
             const ColliderTypeId id = HashString32(pColliderTypeName);
 
-            const auto result = s_factoryFunctions.find(id);
-            if (result == s_factoryFunctions.end())
+            FactoryFuncContainer& factoryFunctions = GetFactoryContainer();
+
+            const auto result = factoryFunctions.find(id);
+            if (result == factoryFunctions.end())
             {
                 LogError("Failed create '%'! No matching ColliderTypeId was found!", pColliderTypeName);
                 return false;
@@ -49,21 +50,34 @@ namespace mcp
         template<typename ColliderType>
         static ColliderTypeId RegisterColliderType(const char* pColliderTypeName)
         {
-            //const ColliderTypeId id = HashString(pColliderTypeName);
             const ColliderTypeId id = HashString32(pColliderTypeName);
 
+            FactoryFuncContainer& factoryFunctions = GetFactoryContainer();
+
             // Check to see if we already have the id in our map:
-            if (const auto result = s_factoryFunctions.find(id); result != s_factoryFunctions.end())
+            if (const auto result = factoryFunctions.find(id); result != factoryFunctions.end())
             {
                 //LogError("Failed to register ColliderType! Id from the name '%' was already registered! This could mean that you have two colliders with the same name!", pColliderTypeName);
                 assert(false && "Failed to register Collider! This could mean that you have two colliders with the same name!"); 
             }
 
-            s_factoryFunctions.emplace(id, [](const void* pData, mcp::ColliderComponent* pComponent ){ return ColliderType::AddFromData(pData, pComponent); });
+            factoryFunctions.emplace(id, [](const void* pData, mcp::ColliderComponent* pComponent ){ return ColliderType::AddFromData(pData, pComponent); });
 
             return id;
         }
-        
-        static void RegisterEngineColliderTypes();
+
+    private:
+        //-----------------------------------------------------------------------------------------------------------------------------
+        //		NOTES:
+        //      This is to force the container to exist. I had an issue where we were trying to register a collider BEFORE our
+        //      static factory function container existed. This forces the container to exist when we ask for it!
+        //		
+        ///		@brief : Get a reference to the static container of factory functions.
+        //-----------------------------------------------------------------------------------------------------------------------------
+        static FactoryFuncContainer& GetFactoryContainer()
+        {
+            static FactoryFuncContainer factoryFunctions {};
+            return factoryFunctions;
+        }
     };
 }

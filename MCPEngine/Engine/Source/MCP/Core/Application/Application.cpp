@@ -87,10 +87,6 @@ namespace mcp
             }
         }
 
-        // Register Collider and Component Types:
-        ColliderFactory::RegisterEngineColliderTypes();
-        ComponentFactory::RegisterEngineComponentTypes();
-
         // Initialize the Window:
         if (!GraphicsManager::Get()->GetWindow()->Init(props.pWindowName, props.defaultWindowWidth, props.defaultWindowHeight))
         {

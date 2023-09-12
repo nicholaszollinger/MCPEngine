@@ -238,13 +238,11 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Audio\AudioTrack.cpp" />
     <ClCompile Include="Source\MCP\Collision\Box2DCollider.cpp" />
     <ClCompile Include="Source\MCP\Collision\Collider.cpp" />
-    <ClCompile Include="Source\MCP\Collision\ColliderFactory.cpp" />
     <ClCompile Include="Source\MCP\Collision\CollisionChannels.cpp" />
     <ClCompile Include="Source\MCP\Collision\CollisionProfile.cpp" />
     <ClCompile Include="Source\MCP\Collision\CollisionSystem.cpp" />
     <ClCompile Include="Source\MCP\Components\ColliderComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\Component.cpp" />
-    <ClCompile Include="Source\MCP\Components\ComponentFactory.cpp" />
     <ClCompile Include="Source\MCP\Components\ComponentId.cpp" />
     <ClCompile Include="Source\MCP\Components\ImageComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\PrimitiveComponent.cpp" />
