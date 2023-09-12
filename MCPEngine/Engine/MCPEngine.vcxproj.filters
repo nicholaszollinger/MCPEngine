@@ -299,9 +299,6 @@
     <ClCompile Include="Source\MCP\Components\ColliderComponent.cpp">
       <Filter>MCP\Collision</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MCP\Collision\ColliderFactory.cpp">
-      <Filter>MCP\Collision</Filter>
-    </ClCompile>
     <ClCompile Include="Source\MCP\Collision\CollisionChannels.cpp">
       <Filter>MCP\Collision</Filter>
     </ClCompile>
@@ -312,9 +309,6 @@
       <Filter>MCP\Collision</Filter>
     </ClCompile>
     <ClCompile Include="Source\MCP\Components\Component.cpp">
-      <Filter>MCP\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MCP\Components\ComponentFactory.cpp">
       <Filter>MCP\Components</Filter>
     </ClCompile>
     <ClCompile Include="Source\MCP\Components\ComponentId.cpp">
