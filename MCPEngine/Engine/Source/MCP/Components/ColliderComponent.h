@@ -82,7 +82,7 @@ public:
     ColliderType* ColliderComponent::GetCollider(const char* pColliderName)
     {
         // Try to get our collider from our map,
-        if (auto result = m_colliders.find(HashString(pColliderName)); result != m_colliders.end())
+        if (auto result = m_colliders.find(HashString32(pColliderName)); result != m_colliders.end())
         {
             // If the types don't match, report the issue and return nullptr.
             if (ColliderType::GetStaticTypeId() != result->second->GetTypeId())

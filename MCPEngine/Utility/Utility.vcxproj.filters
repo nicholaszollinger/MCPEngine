@@ -1,33 +1,117 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Source\utility\IdGenerator.cpp" />
-    <ClCompile Include="Source\utility\Time\Time.cpp" />
-    <ClCompile Include="Source\utility\Time\Timer.cpp" />
-    <ClCompile Include="Source\utility\Random\MersenneTwisterRngEngine.cpp" />
-    <ClCompile Include="Source\utility\Random\XorShift128RngEngine.cpp" />
-    <ClCompile Include="Source\utility\Random\RNG.cpp" />
-    <ClCompile Include="Source\utility\Format\FormatString.cpp" />
-    <ClCompile Include="Source\utility\Time\FrameTimer.cpp" />
+    <ClCompile Include="Source\utility\Random\RNG.cpp">
+      <Filter>Random</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\utility\Format\FormatString.cpp">
+      <Filter>String</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\utility\Time\Time.cpp">
+      <Filter>Time</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\utility\Time\FrameTimer.cpp">
+      <Filter>Time</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Time\HighPrecisionTimer.cpp">
+      <Filter>Time</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Profiling\SimpleInstrumentationProfiler.cpp">
+      <Filter>Profiling</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Thread\ThreadIdleEvent.cpp">
+      <Filter>Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Thread\WorkerThread.cpp">
+      <Filter>Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\String\StringId.cpp">
+      <Filter>String</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\utility\FloatTester.h" />
-    <ClInclude Include="Source\utility\IdGenerator.h" />
-    <ClInclude Include="Source\utility\Rect.h" />
-    <ClInclude Include="Source\utility\Vector2.h" />
-    <ClInclude Include="Source\utility\Time\Time.h" />
-    <ClInclude Include="Source\utility\Time\Timer.h" />
-    <ClInclude Include="Source\utility\Random\XorShift128RngEngine.h" />
-    <ClInclude Include="Source\utility\Random\MersenneTwisterRngEngine.h" />
-    <ClInclude Include="Source\utility\ConceptTypes.h" />
-    <ClInclude Include="Source\utility\Random\RNG.h" />
-    <ClInclude Include="Source\utility\Color.h" />
-    <ClInclude Include="Source\utility\Format\FormatString.h" />
-    <ClInclude Include="Source\utility\Bit.h" />
-    <ClInclude Include="Source\utility\Time\FrameTimer.h" />
-    <ClInclude Include="Source\utility\CustomDataTypes\UnorderedDenseArray.h" />
-    <ClInclude Include="Source\utility\Hash.h" />
-    <ClInclude Include="Source\utility\Macros.h" />
-    <ClInclude Include="Source\utility\EnumHelpers.h" />
+    <ClInclude Include="Source\utility\Bit.h">
+      <Filter>Generic</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\ConceptTypes.h">
+      <Filter>Generic</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\Hash.h">
+      <Filter>Generic</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\Random\RNG.h">
+      <Filter>Random</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\Format\FormatString.h">
+      <Filter>String</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\Time\Time.h">
+      <Filter>Time</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\Color.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\Rect.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\Vector2.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\EnumHelpers.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\Time\FrameTimer.h">
+      <Filter>Time</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\FloatTester.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\CustomDataTypes\UnorderedDenseArray.h">
+      <Filter>Types\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Profiling\SimpleInstrumentationProfiler.h">
+      <Filter>Profiling</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Time\HighPrecisionTimer.h">
+      <Filter>Time</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Thread\ThreadIdleEvent.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Thread\WorkerThread.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\String\StringId.h">
+      <Filter>String</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Generic">
+      <UniqueIdentifier>{61064d0a-ca1d-4e3e-8861-3facc8d108fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math">
+      <UniqueIdentifier>{8ec9f031-fb34-432f-adfa-49476bd449e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Profiling">
+      <UniqueIdentifier>{11bad576-8ad7-46e4-845a-3703c272e205}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Random">
+      <UniqueIdentifier>{2b0faa9a-33de-4f07-8dc7-d6023d1baf26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="String">
+      <UniqueIdentifier>{61719c7e-1889-42bb-b979-bedf5aab5dd0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thread">
+      <UniqueIdentifier>{eff4cb2a-f663-4b94-a477-4e981b25e825}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Time">
+      <UniqueIdentifier>{2f92750d-8060-4d7d-ac38-17af1d5b957b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Types">
+      <UniqueIdentifier>{3e5c2957-7578-4e0b-8ecf-23945ca76684}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Types\Containers">
+      <UniqueIdentifier>{12381fcf-197f-4fc7-9fe4-df28c7fcceb9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

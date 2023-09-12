@@ -23,7 +23,7 @@ namespace mcp
 
         static bool AddNewFromData(const char* pColliderTypeName, const void* pData, mcp::ColliderComponent* pComponent)
         {
-            const ColliderTypeId id = HashString(pColliderTypeName);
+            const ColliderTypeId id = HashString32(pColliderTypeName);
 
             const auto result = s_factoryFunctions.find(id);
             if (result == s_factoryFunctions.end())
@@ -50,7 +50,7 @@ namespace mcp
         static ColliderTypeId RegisterColliderType(const char* pColliderTypeName)
         {
             //const ColliderTypeId id = HashString(pColliderTypeName);
-            const ColliderTypeId id = HashString(pColliderTypeName);
+            const ColliderTypeId id = HashString32(pColliderTypeName);
 
             // Check to see if we already have the id in our map:
             if (const auto result = s_factoryFunctions.find(id); result != s_factoryFunctions.end())

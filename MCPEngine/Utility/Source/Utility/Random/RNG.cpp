@@ -1,11 +1,18 @@
 // RNG.cpp
 
 #include "RNG.h"
+#include <ctime>
+
+RandomNumberGenerator::RandomNumberGenerator()
+    : m_internalSeed{}
+{
+    Seed();
+}
 
 RandomNumberGenerator::RandomNumberGenerator(const unsigned seed)
-    : m_engine(seed)
+    : m_internalSeed{}
 {
-    //
+    Seed(seed);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
@@ -15,7 +22,8 @@ RandomNumberGenerator::RandomNumberGenerator(const unsigned seed)
 //-----------------------------------------------------------------------------------------------------------------------------
 void RandomNumberGenerator::Seed()
 {
-    m_engine.Seed();
+    m_internalSeed[0] = std::time(nullptr);
+    m_internalSeed[1] = std::time(nullptr);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
@@ -25,18 +33,26 @@ void RandomNumberGenerator::Seed()
 //-----------------------------------------------------------------------------------------------------------------------------
 void RandomNumberGenerator::Seed(const unsigned seed)
 {
-    m_engine.Seed(seed);
+    m_internalSeed[0] = seed;
+    m_internalSeed[1] = seed;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
 //		NOTES:
+//      Source: XorShift128+ https://en.wikipedia.org/wiki/Xorshift
 //
 ///		@brief : Return a random number. To be used the same way as rand() in the standard library.
 ///		@returns : Random unsigned long long value.
 //-----------------------------------------------------------------------------------------------------------------------------
 uint64_t RandomNumberGenerator::Rand()
 {
-    return m_engine.Rand();
+    // Xorshift_128+
+    uint64_t x = m_internalSeed[0];
+    const uint64_t y = m_internalSeed[1];
+    m_internalSeed[0] = y;
+    x ^= x << 23; // a
+    m_internalSeed[1] = x ^ y ^ (x >> 17) ^ (y >> 26); // b, c
+    return m_internalSeed[1] + y;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
@@ -46,7 +62,7 @@ uint64_t RandomNumberGenerator::Rand()
 //-----------------------------------------------------------------------------------------------------------------------------
 bool RandomNumberGenerator::FlipACoin()
 {
-    return Rand() % 2 == 0 ? false : true;
+    return Rand() % 2;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
@@ -56,7 +72,8 @@ bool RandomNumberGenerator::FlipACoin()
 //-----------------------------------------------------------------------------------------------------------------------------
 int RandomNumberGenerator::RandRange(const int min, const int max)
 {
-    return m_engine.RandRange(min, max);
+    const int range = max - min;
+    return min + static_cast<int>((Rand() % (range + 1)));
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
@@ -66,7 +83,10 @@ int RandomNumberGenerator::RandRange(const int min, const int max)
 //-----------------------------------------------------------------------------------------------------------------------------
 float RandomNumberGenerator::RandRange(const float min, const float max)
 {
-    return m_engine.RandRange(min, max);
+    const float range = max - min;
+    const float roll = NormalizedRand();
+    
+    return min + roll * range;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
@@ -76,7 +96,8 @@ float RandomNumberGenerator::RandRange(const float min, const float max)
 //-----------------------------------------------------------------------------------------------------------------------------
 float RandomNumberGenerator::NormalizedRand()
 {
-    return m_engine.NormalizedRand();
+    const float result = static_cast<float>(Rand()) / static_cast<float>(kRandMax);
+    return result;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
@@ -86,7 +107,10 @@ float RandomNumberGenerator::NormalizedRand()
 //-----------------------------------------------------------------------------------------------------------------------------
 float RandomNumberGenerator::SignedNormalizedRand()
 {
-    return m_engine.SignedNormalizedRand();
+    static constexpr float kHalfRandMax = static_cast<float>(kRandMax) / 2.f;
+    
+    const float result = (static_cast<float>(Rand()) - kHalfRandMax) / kHalfRandMax;
+    return result;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------

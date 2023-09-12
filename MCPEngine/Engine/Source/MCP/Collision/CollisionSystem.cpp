@@ -71,7 +71,7 @@ namespace mcp
         const RectF rect = pColliderComponent->GetEstimationRect();
         std::vector<QuadtreeCell*> cells;
 
-        if (!IsInside(rect, pCell->dimensions))
+        if (!rect.IsInside(pCell->dimensions))
         {
             pCell = FindParentThatEncapsulatesRect(pCell, rect);
         }
@@ -164,7 +164,7 @@ namespace mcp
         const RectF rect = pColliderComponent->GetEstimationRect();
 
         // If we aren't, then find the cell that encapsulates the cell.
-        if (!IsInside(rect, pCell->dimensions))
+        if (!rect.IsInside(pCell->dimensions))
         {
             pCell = FindLowestCellThatEncapsulatesRect(pCell, rect);
         }
@@ -217,7 +217,7 @@ namespace mcp
                     continue;
 
                 // If the bounding boxes of the ColliderComponents don't intersect, then we can leave.
-                if (!DoIntersect(pComponent->GetEstimationRect(), estimationRect))
+                if (!pComponent->GetEstimationRect().Intersects(estimationRect))
                     continue;
 
                 // If they do intersect, then we need to check our individual colliders.
@@ -267,8 +267,8 @@ namespace mcp
                                 // collided object, and vice versa.
                                 float distanceScalar = 1.f;
                                 // If we are below or to the left of the the object we are hitting, then we need to be moving back.
-                                if (significantFaceIsWidth && myEstimateRect.position.y < otherEstimateRect.position.y
-                                    || !significantFaceIsWidth && myEstimateRect.position.x < otherEstimateRect.position.x)
+                                if (significantFaceIsWidth && myEstimateRect.y < otherEstimateRect.y
+                                    || !significantFaceIsWidth && myEstimateRect.x < otherEstimateRect.x)
                                 {
                                     distanceScalar = -1.f;
                                 }
@@ -348,7 +348,7 @@ namespace mcp
                 }
 
                 // If we are no longer intersecting,
-                if (!DoIntersect(pCollider->GetEstimateRectWorld(), (*iterator)->GetEstimateRectWorld()))
+                if (!pCollider->GetEstimateRectWorld().Intersects((*iterator)->GetEstimateRectWorld()))
                 {
                     // We need to send the OnOverlapExit events,
                     pCollider->m_onExitOverlap.Broadcast((*iterator), (*iterator)->m_pOwner->GetOwner());
@@ -401,7 +401,7 @@ namespace mcp
     void CollisionSystem::TryInsert(QuadtreeCell* pCell, const RectF& rect, ColliderComponent* pColliderComponent)
     {
         // If we don't intersect, then return.
-        if (!DoIntersect(rect, pCell->dimensions))
+        if (!rect.Intersects(pCell->dimensions))
         {
             return;
         }
@@ -423,7 +423,7 @@ namespace mcp
         {
             // As we go further down the tree, if this is the smallest parent that contains us,
             // then we need to set it for the collider as a reference point.
-            if (IsInside(rect, pCell->dimensions))
+            if (rect.IsInside(pCell->dimensions))
             {
                 pColliderComponent->m_pCell = pCell;
             }
@@ -458,13 +458,13 @@ namespace mcp
         const float childHeight = parentRect.height / 2.f;
 
         // Top Left
-        childRects[0] = { parentRect.position.x, parentRect.position.y, childWidth, childHeight};
+        childRects[0] = { parentRect.x, parentRect.y, childWidth, childHeight};
         // Top Right
-        childRects[1] = {parentRect.position.x + childWidth, parentRect.position.y, childWidth, childHeight};
+        childRects[1] = {parentRect.x + childWidth, parentRect.y, childWidth, childHeight};
         // Bottom Left
-        childRects[2] = { parentRect.position.x, parentRect.position.y + childHeight, childWidth, childHeight};
+        childRects[2] = { parentRect.x, parentRect.y + childHeight, childWidth, childHeight};
         // Bottom Right
-        childRects[3] = {parentRect.position.x + childWidth, parentRect.position.y + childHeight, childWidth, childHeight};
+        childRects[3] = {parentRect.x + childWidth, parentRect.y + childHeight, childWidth, childHeight};
 
         // Create the Children.
         auto& children = pCell->children;
@@ -595,7 +595,7 @@ namespace mcp
     void CollisionSystem::FindCellsForRect(QuadtreeCell* pCell, const RectF& rect, std::vector<QuadtreeCell*>& outCells)
     {
         // If we don't intersect with this cell, then return.
-        if (!DoIntersect(rect, pCell->dimensions))
+        if (!rect.Intersects(pCell->dimensions))
         {
             return;
         }

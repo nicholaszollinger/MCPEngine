@@ -12,7 +12,7 @@ namespace mcp
         : m_relativePosition(position)
         , m_pSystem(nullptr)
         , m_pOwner(nullptr)
-        , m_colliderName(HashString(name))
+        , m_colliderName(HashString32(name))
         , m_isEnabled(isEnabled)
     {
         // By default, we are going to be blocking all Channels, and a part of the first channel.

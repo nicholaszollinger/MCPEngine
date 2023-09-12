@@ -8,7 +8,7 @@
 
 namespace mcp::Internal
 {
-    static constexpr uint32_t kDefaultChannelHashed = HashString(kDefaultChannelName);
+    static constexpr uint32_t kDefaultChannelHashed = HashString32(kDefaultChannelName);
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -18,7 +18,7 @@ namespace mcp::Internal
     //-----------------------------------------------------------------------------------------------------------------------------
     CollisionChannel CollisionChannelManager::GetOrAssignCollisionChannel(const char* pChannelName)
     {
-        const uint32_t hashedName = HashString(pChannelName);
+        const uint32_t hashedName = HashString32(pChannelName);
 
         // Check for our only reserved channel.
         if (hashedName == kDefaultChannelHashed)

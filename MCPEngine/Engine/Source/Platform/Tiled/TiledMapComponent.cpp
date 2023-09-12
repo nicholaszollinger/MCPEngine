@@ -112,8 +112,8 @@ namespace mcp
 
         // Get the the window dimensions.
         const auto windowDimensions = GraphicsManager::Get()->GetWindow()->GetDimensions();
-        RectF windowRect = ToFloat(windowDimensions);
-        windowRect.position = Vec2{};
+        RectF windowRect = windowDimensions.GetRectAs<float>();
+        windowRect.SetPosition(Vec2{});
 
         // Get the tileSet properties.
         const auto props = m_tileSet.GetTileSetProps();
@@ -136,15 +136,15 @@ namespace mcp
         for (size_t i = 0; i < m_mapSize; ++i)
         {
             // Calculate the destination rect m_position.
-            destinationRect.position.x = destinationRect.width * (static_cast<float>(i % m_mapWidth));
-            destinationRect.position.y = destinationRect.height * (static_cast<float>(i / m_mapWidth));
+            destinationRect.x = destinationRect.width * (static_cast<float>(i % m_mapWidth));
+            destinationRect.y = destinationRect.height * (static_cast<float>(i / m_mapWidth));
 
             // Offset the m_position of the rect up to the left corner of the map.
-            destinationRect.position = leftCornerPos + destinationRect.position;
+            destinationRect.SetPosition(leftCornerPos + destinationRect.GetPosition());
 
             // If the rect is not in the window space, then don't render it.
             // TODO: This needs to be the camera space.
-            if (!DoIntersect(windowRect, destinationRect))
+            if (!windowRect.Intersects(destinationRect))
             {
                 continue;
             }
@@ -243,6 +243,7 @@ namespace mcp
                 {
                     LogError("Failed to create Object from Tiled data! No prefab found for object!");
                     // Return?
+                    return false;
                 }
 
                 auto result = prefabIndexes.find(*pPrefabPath);

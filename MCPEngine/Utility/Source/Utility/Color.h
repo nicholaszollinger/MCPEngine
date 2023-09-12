@@ -1,14 +1,14 @@
 #pragma once
 // Color.h
 
+#include <cstdint>
+
 struct Color
 {
-    using Uint8 = unsigned char;
-
-    Uint8 r;
-    Uint8 g;
-    Uint8 b;
-    Uint8 alpha;
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+    uint8_t alpha;
 
     constexpr Color()
         : r(255)
@@ -19,7 +19,7 @@ struct Color
         // Default to white.
     }
 
-    constexpr Color(const Uint8 r, const Uint8 g, const Uint8 b, const Uint8 alpha = 255)
+    constexpr Color(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t alpha = 255)
         : r(r)
         , g(g)
         , b(b)

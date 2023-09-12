@@ -16,6 +16,20 @@ GENERATE_TYPE_CHECK(AddableToStringType, std::declval<std::string>() += std::dec
 //-----------------------------------------------------------------------------------------------------------------------------
 //		NOTES:
 //
+///		@brief : Calculate the size of a c-style string at compile time.
+//-----------------------------------------------------------------------------------------------------------------------------
+constexpr size_t StrLength(const char* str)
+{
+    const char* pCursor = str;
+    while (*pCursor != '\0')
+        ++pCursor;
+
+    return pCursor - str;
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------
+//		NOTES:
+//
 ///		@brief : Adds a value of type Arg to a string, if possible.
 ///		@tparam Arg : Type must either be able to be used in std::to_string, or is addable to a std::string. 
 ///		@param str : std::string to add to.

@@ -1,12 +1,20 @@
 #pragma once
 // FrameTimer.h
+#include "HighPrecisionTimer.h"
 
+//-----------------------------------------------------------------------------------------------------------------------------
+//		NOTES:
+//		
+///		@brief : Wraps the HighPrecisionTimer in a frame time API. You simply create this timer on the stack (its constructor
+///         will start the timer) then call NewFrame() at the top of the main loop to get the delta time for that frame.
+//-----------------------------------------------------------------------------------------------------------------------------
 class FrameTimer
 {
-public:
-    void Init();
-    float NewFrame();
+    HighPrecisionTimer m_timer;
 
-private:
-    long long m_lastFrameTime = 0;
+public:
+    FrameTimer();
+
+    void ResetTimer();
+    double NewFrame();
 };

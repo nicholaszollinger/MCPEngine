@@ -23,7 +23,7 @@ namespace mcp
 
         static bool AddToObjectFromData(const char* pComponentName, const void* pData, Object* pOwner)
         {
-            const ComponentTypeId id = HashString(pComponentName);
+            const ComponentTypeId id = HashString32(pComponentName);
 
             const auto result = s_factoryFunctions.find(id);
             if (result == s_factoryFunctions.end())
@@ -46,7 +46,7 @@ namespace mcp
         template<typename ComponentType>
         static ComponentTypeId RegisterComponentType(const char* pComponentName)
         {
-            const ComponentTypeId id = HashString(pComponentName);
+            const ComponentTypeId id = HashString32(pComponentName);
 
             // Check to see if we already have that id in our map:
             if (const auto result = s_factoryFunctions.find(id); result != s_factoryFunctions.end())

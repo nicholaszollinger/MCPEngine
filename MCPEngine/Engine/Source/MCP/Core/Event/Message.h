@@ -11,16 +11,15 @@
 //-----------------------------------------------------------------------------------------------------------------------------
 
 #include "utility/Hash.h"
-#include "utility/IdGenerator.h"
 
 namespace mcp
 {
     class Component;
     using MessageIdType = uint32_t;
 
-#define MCP_GET_MESSAGE_ID(MessageTypeName) HashString(#MessageTypeName)
+#define MCP_GET_MESSAGE_ID(MessageTypeName) HashString32(#MessageTypeName)
 
-    static constexpr uint32_t GetMessageId(const char* messageTypeName) { return HashString(messageTypeName); }
+    static constexpr uint32_t GetMessageId(const char* messageTypeName) { return HashString32(messageTypeName); }
 
     struct Message
     {

@@ -104,8 +104,7 @@ namespace mcp
             return false;
         }
 
-        crop.position.x = pCrop->IntAttribute("x");
-        crop.position.y = pCrop->IntAttribute("y");
+        crop.SetPosition(pCrop->IntAttribute("x"), pCrop->IntAttribute("y"));
         crop.width = pCrop->IntAttribute("w");
         crop.height = pCrop->IntAttribute("h");
 

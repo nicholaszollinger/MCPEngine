@@ -103,8 +103,8 @@ namespace mcp
 
         RectInt crop{0, 0, static_cast<int>(m_props.tileWidth), static_cast<int>(m_props.tileHeight)};
 
-        crop.position.x = static_cast<int>(m_props.tileWidth * (tileIndex % m_props.tileColumnCount));
-        crop.position.y  = static_cast<int>(m_props.tileHeight * (tileIndex / m_props.tileColumnCount));
+        crop.x = static_cast<int>(m_props.tileWidth * (tileIndex % m_props.tileColumnCount));
+        crop.y  = static_cast<int>(m_props.tileHeight * (tileIndex / m_props.tileColumnCount));
 
         TextureRenderData renderData;
         renderData.pTexture = m_tileSetImage.Get();

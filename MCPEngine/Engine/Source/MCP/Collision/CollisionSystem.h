@@ -58,7 +58,7 @@ namespace mcp
 
             std::array<QuadtreeCell*, 4> children {};
             std::vector<ColliderComponent*> m_colliderComponents {};
-            RectF dimensions;
+            RectF dimensions = {};
             QuadtreeCell* pParent = nullptr;
             unsigned depth = 0;
         };
