@@ -8,7 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include <ostream>
-#include "utility/Format/FormatString.h"
+#include "Utility/String/FormatString.h"
 
 // Define which implementation that we are going to be using for this program, based on Platform (maybe renderer).
 #ifdef MCP_PLATFORM_WINDOWS

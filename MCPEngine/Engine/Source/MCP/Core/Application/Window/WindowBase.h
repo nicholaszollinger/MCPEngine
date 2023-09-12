@@ -1,7 +1,7 @@
 #pragma once
 // WindowBase.h
 
-#include "utility/Rect.h"
+#include "Utility/Types/Rect.h"
 
 namespace mcp
 {

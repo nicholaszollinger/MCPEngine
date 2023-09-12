@@ -1,7 +1,7 @@
 // StringId.cpp
 
 #include "StringId.h"
-#include "../Hash.h"
+#include "Generic/Hash.h"
 
 StringId::StringId(const char* str)
     : m_pStrRef(GetStringPtr(str))
@@ -52,7 +52,7 @@ std::string* StringId::GetStringPtr(const char* str)
     const uint32_t hash = HashString32(str);
 
     // If we don't have the string already, add it to our container.
-    if (!s_strings.contains(hash))
+    if (s_strings.find(hash) != s_strings.end())
     {
         s_strings[hash] = str;
     }

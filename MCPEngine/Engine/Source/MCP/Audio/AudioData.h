@@ -1,7 +1,7 @@
 #pragma once
 // AudioData.h
 
-#include "utility/Vector2.h"
+#include "Utility/Types/Vector2.h"
 
 //-----------------------------------------------------------------------------------------------------------------------------
 //  NOTE: The choice of Data here is based on when I was using SDL. I may need to rethink this.

@@ -5,8 +5,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include "utility/Rect.h"
-#include "utility/Vector2.h"
+#include "Utility/Types/Rect.h"
+#include "Utility/Types/Vector2.h"
 
 #ifdef _DEBUG
     #define DEBUG_RENDER_COLLISION_TREE 0

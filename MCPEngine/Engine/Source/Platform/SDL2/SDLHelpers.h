@@ -13,7 +13,7 @@
 
 #include "MCP/Graphics/RenderData/BaseRenderData.h"
 #include "MCP/Input/InputCodes.h"
-#include "utility/Rect.h"
+#include "Utility/Types/Rect.h"
 
 struct Color;
 

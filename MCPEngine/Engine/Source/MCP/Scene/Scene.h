@@ -6,7 +6,7 @@
 #include "MCP/Collision/CollisionSystem.h"
 #include "MCP/Core/Event/MessageManager.h"
 #include "MCP/Scene/Object.h"
-#include "utility/CustomDataTypes/UnorderedDenseArray.h"
+#include "Utility/Types/Containers/UnorderedDenseArray.h"
 
 namespace mcp
 {

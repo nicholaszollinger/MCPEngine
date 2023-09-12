@@ -2,7 +2,7 @@
 // CollisionProfile.h
 
 #include "CollisionChannels.h"
-#include "utility/EnumHelpers.h"
+#include "Utility/Types/EnumHelpers.h"
 
 enum class CollisionResponse
 {

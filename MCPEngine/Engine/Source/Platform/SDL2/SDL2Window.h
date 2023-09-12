@@ -1,8 +1,7 @@
 #pragma once
 // SDL2Window.h
 
-//#include <functional>
-#include "utility/Rect.h"
+#include "Utility/Types/Rect.h"
 
 struct SDL_Window;
 struct SDL_Renderer;

@@ -2,7 +2,7 @@
 // CombineIntoString.h
 
 #include <string>
-#include "../ConceptTypes.h"
+#include "../Generic/ConceptTypes.h"
 
 // Checks to see if we can perform 'std::ostream << Type;'
 GENERATE_TYPE_CHECK(OutStreamableType, std::declval<std::ostream>() << std::declval<Type>());

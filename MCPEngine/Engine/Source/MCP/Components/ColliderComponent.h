@@ -9,7 +9,7 @@
 
 #if _DEBUG && RENDER_COLLIDER_VISUALS
     #include "MCP/Scene/IRenderable.h"
-    #include "utility/Color.h"
+    #include "Utility/Types/Color.h"
 #endif
 
 namespace mcp

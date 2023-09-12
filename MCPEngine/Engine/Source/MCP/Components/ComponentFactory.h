@@ -5,7 +5,7 @@
 #include <functional>
 #include <unordered_map>
 #include "MCP/Debug/Log.h"
-#include "utility/Hash.h"
+#include "Utility/Generic/Hash.h"
 
 namespace mcp
 {

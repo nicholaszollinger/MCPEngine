@@ -5,7 +5,7 @@
 
 #include "Component.h"
 #include "../Scene/IRenderable.h"
-#include "utility/Color.h"
+#include "Utility/Types/Color.h"
 
 namespace mcp
 {
