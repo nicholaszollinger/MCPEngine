@@ -2,27 +2,29 @@
 // RNG.h
 
 #include <cstdint>
-#include "MersenneTwisterRngEngine.h"
-#include "XorShift128RngEngine.h"
+#include <limits>
 #include "../Vector2.h"
  
 //-----------------------------------------------------------------------------------------------------------------------------
-//		NOTES:
-//      I have the using statement as a hold over from a previous project, and it allows me to plug in different implementations.
-//      TODO: Once I get the XorShift Engine up and running, I should use that.
+//		NOTES
 //
-///		@brief : 
+///		@brief : Class for generating random numbers.
 //-----------------------------------------------------------------------------------------------------------------------------
 class RandomNumberGenerator
 {
-    using RngEngine = RandomInternal::XorShiftRngEngine;
+    static constexpr uint64_t kRandMax = std::numeric_limits<uint64_t>::max();
+    uint64_t m_internalSeed[2];
+
 public:
-    RandomNumberGenerator() = default;
+    // Constructors
+    RandomNumberGenerator();
     RandomNumberGenerator(const unsigned seed);
 
+    // Seeding
     void Seed();
     void Seed(const unsigned seed);
 
+    // RNG Functions
     uint64_t Rand();
     bool FlipACoin();
     int RandRange(const int min, const int max);
@@ -30,7 +32,6 @@ public:
     float NormalizedRand();
     float SignedNormalizedRand();
     Vec2 RandVectorInRange(const Vec2& minRange, const Vec2& maxRange);
-
-private:
-    RngEngine m_engine;
 };
+
+using Rng = RandomNumberGenerator;

@@ -11,9 +11,7 @@
 #include "SDLHelpers.h"
 #include "MCP/Debug/Log.h"
 #include "MCP/Core/Event/KeyEvent.h"
-#include "MCP/Core/Event/UserEvent.h"
 #include "MCP/Graphics/Graphics.h"
-
 
 namespace mcp
 {
@@ -39,8 +37,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     bool SDL2Window::Init(const char* pWindowName, const int width, const int height)
     {
-        m_dimensions.position.x = SDL_WINDOWPOS_CENTERED;
-        m_dimensions.position.y = SDL_WINDOWPOS_CENTERED;
+        m_dimensions.SetPosition(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
         Uint32 flags{};
 
@@ -51,8 +48,8 @@ namespace mcp
 
         // Create the Window.
         m_pWindow = SDL_CreateWindow(pWindowName
-            , m_dimensions.position.x
-            , m_dimensions.position.x
+            , m_dimensions.x
+            , m_dimensions.y
             , width
             , height
             , flags);

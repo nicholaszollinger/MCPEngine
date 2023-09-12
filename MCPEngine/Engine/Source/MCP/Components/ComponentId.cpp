@@ -5,7 +5,7 @@
 #include <cassert>
 #include <unordered_map>
 #include "MCP/Debug/Log.h"
-#include "utility/IdGenerator.h"
+#include "utility/Hash.h"
 
 namespace mcp::ComponentInternal
 {
@@ -30,7 +30,7 @@ namespace mcp::ComponentInternal
             assert(false); // Assert false to quit in debug.
         }
        
-        return GenerateId(pComponentName);
+        return HashString64(pComponentName);
     }
 
 #else

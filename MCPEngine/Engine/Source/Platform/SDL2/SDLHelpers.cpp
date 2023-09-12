@@ -99,12 +99,12 @@ namespace mcp
 
     SDL_Rect RectToSdl(const RectInt& rect)
     {
-        return SDL_Rect{ rect.position.x, rect.position.y, rect.width, rect.height };
+        return SDL_Rect{ rect.x, rect.y, rect.width, rect.height };
     }
 
     SDL_FRect RectToSdlF(const RectF& rect)
     {
-        return SDL_FRect{ rect.position.x, rect.position.y, rect.width, rect.height };
+        return SDL_FRect{ rect.x, rect.y, rect.width, rect.height };
     }
 
     SDL_Color ColorToSdl(const Color& color)

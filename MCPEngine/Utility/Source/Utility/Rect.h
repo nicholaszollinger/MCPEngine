@@ -7,24 +7,122 @@
 template<typename Type>
 struct Rect
 {
-    constexpr Rect()
-        : width()
-        , height()
-    {
-        //
-    }
+    static_assert(std::is_integral_v<Type> || std::is_floating_point_v<Type>, "Rect Type must be an integral or floating point type!");
 
+    Type x;
+    Type y;
+    Type width;
+    Type height;
+
+    constexpr Rect() = default;
     constexpr Rect(const Type x, const Type y, const Type width, const Type height)
-        : position(x, y)
+        : x(x)
+        , y(y)
         , width(width)
         , height(height)
     {
         //
     }
 
-    Vector2<Type> position;
-    Type width;
-    Type height;
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Return the x and y values of the Rect as a Vector2.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    constexpr Vector2<Type> GetPosition() const
+    {
+        return Vector2<Type>(x, y);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Set the x and y values of the Rect using a Vector2.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void SetPosition(const Vector2<Type> pos)
+    {
+        SetPosition(pos.x, pos.y);
+    }
+
+    void SetPosition(const Type _x, const Type _y)
+    {
+        x = _x;
+        y = _y;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Returns true if the 'other' Rect is intersecting with this Rect.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template<typename OtherRectType>
+    [[nodiscard]] constexpr bool Intersects(const Rect<OtherRectType>& other) const
+    {
+        static_assert(std::is_integral_v<OtherRectType> || std::is_floating_point_v<OtherRectType>, "Rect Type must be an integral or floating point type!");
+
+        // If this type is integral and the other is floating point, promote this type to floating
+        // point and check the intersection.
+        if constexpr (std::is_integral_v<Type> && std::is_floating_point_v<OtherRectType>)
+        {
+            return other.Intersects(GetRectAs<OtherRectType>());
+        }
+
+        // If this type is floating point and the other is integral, then we need to promote the
+        // other type to floating point precision and check.
+        if constexpr (std::is_floating_point_v<Type> && std::is_integral_v<OtherRectType>)
+        {
+            return Intersects(other.GetRectAs<Type>());
+        }
+
+        return x < other.x + other.width
+            && x + width > other.x
+            && y < other.y + other.height
+            && y + height > other.y;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Calculates the intersect of this and another Rect as another rect. If no collision was
+    ///             made, then the width and height would be 0.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    [[nodiscard]] constexpr Rect GetIntersectionAsRect(const Rect& other) const
+    {
+        Rect result;
+        result.x = std::max(x, other.x);
+        result.y = std::max(y, other.y);
+        result.width = std::min(x + width, other.x + other.width) - result.x;
+        result.height = std::min(y + height, other.y + other.height) - result.y;
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Returns true if both width and height are greater than zero. 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    [[nodiscard]] constexpr bool HasValidDimensions() const
+    {
+        return width > static_cast<Type>(0) && height > static_cast<Type>(0);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Returns a copy of this rect converted to another type.
+    ///		@tparam OtherType : The Type you want the copy to be.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template<typename OtherType>
+    [[nodiscard]] constexpr Rect<OtherType> GetRectAs() const
+    {
+        if constexpr (std::is_same_v<OtherType, Type>)
+        {
+            return *this;
+        }
+
+        Rect<OtherType> result;
+        result.x = static_cast<OtherType>(x);
+        result.y = static_cast<OtherType>(y);
+        result.width = static_cast<OtherType>(width);
+        result.height = static_cast<OtherType>(height);
+
+        return result;
+    }
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -34,77 +132,12 @@ struct Rect
     //-----------------------------------------------------------------------------------------------------------------------------
     [[nodiscard]] bool IsInside(const Rect& outer) const
     {
-        return outer.position.x < position.x
-            && outer.position.x + outer.width > position.x + width
-            && outer.position.y < position.y
-            && outer.position.y + outer.height > position.y + height;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Calculates the intersect of this and another Rect as another rect. If no collision was
-    ///             made, then the width and height would be 0.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    [[nodiscard]] Rect GetIntersectionAsRect(const Rect& other) const
-    {
-        Rect result;
-        result.position.x = std::max(position.x, other.position.x);
-        result.position.y = std::max(position.y, other.position.y);
-        result.width = std::min(position.x + width, other.position.x + other.width) - result.position.x;
-        result.height = std::min(position.y + height, other.position.y + other.height) - result.position.y;
-
-        return result;
-    }
-
-    [[nodiscard]] bool HasValidDimensions() const
-    {
-        return width > static_cast<Type>(0) && height > static_cast<Type>(0);
+        return outer.x < x
+            && outer.x + outer.width > x + width
+            && outer.y < y
+            && outer.y + outer.height > y + height;
     }
 };
 
 using RectF = Rect<float>;
 using RectInt = Rect<int>;
-
-template<typename IntegralType>
-inline RectF ToFloat(const Rect<IntegralType>& rect)
-{
-    return RectF( static_cast<float>(rect.position.x)
-        , static_cast<float>(rect.position.y) 
-        , static_cast<float>(rect.width) 
-        , static_cast<float>(rect.height));
-}
-
-template<typename LeftRectType, typename RightRectType>
-bool DoIntersect(const Rect<LeftRectType>& left, const Rect<RightRectType> right)
-{
-    // If there is a integral/floating point mismatch, promote the integral type to the floating point type.
-    if constexpr (std::is_floating_point_v<LeftRectType> && std::is_integral_v<RightRectType>)
-    {
-        return DoIntersect(left, ToFloat<RightRectType>(right));
-    }
-
-    if constexpr (std::is_floating_point_v<RightRectType> && std::is_integral_v<LeftRectType>)
-    {
-        return DoIntersect(ToFloat<LeftRectType>(left), right);
-    }
-
-    return left.position.x < right.position.x + right.width
-        && left.position.x + left.width > right.position.x
-        && left.position.y < right.position.y + right.height
-        && left.position.y + left.height > right.position.y;
-}
-
-//-----------------------------------------------------------------------------------------------------------------------------
-//		NOTES:
-//		
-///		@brief : Checks to see if the 'inner' rect is completely inside the 'outer' rect, meaning that there are no points
-///             of the inner rect that are outside the outer rect.
-//-----------------------------------------------------------------------------------------------------------------------------
-inline bool IsInside(const RectF& inner, const RectF& outer)
-{
-    return outer.position.x <= inner.position.x
-            && outer.position.x + outer.width >= inner.position.x + inner.width
-            && outer.position.y <= inner.position.y
-            && outer.position.y + outer.height >= inner.position.y + inner.height;
-}

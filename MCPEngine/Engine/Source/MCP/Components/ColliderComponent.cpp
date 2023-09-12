@@ -266,30 +266,30 @@ namespace mcp
 
             // If the left corner is to the left of our rect, increase our width by the difference and
             // move our point over to to match the left most distance.
-            if (colliderEstimation.position.x < m_myRelativeEstimationRect.position.x)
+            if (colliderEstimation.x < m_myRelativeEstimationRect.x)
             {
-                m_myRelativeEstimationRect.width += colliderEstimation.position.x - m_myRelativeEstimationRect.position.x;
-                m_myRelativeEstimationRect.position.x = colliderEstimation.position.x;
+                m_myRelativeEstimationRect.width += colliderEstimation.x - m_myRelativeEstimationRect.x;
+                m_myRelativeEstimationRect.x = colliderEstimation.x;
             }
             
             // If the right corner is to the right of our estimation increase our width by the difference
-            if (colliderEstimation.position.x + colliderEstimation.width > m_myRelativeEstimationRect.position.x + m_myRelativeEstimationRect.width)
+            if (colliderEstimation.x + colliderEstimation.width > m_myRelativeEstimationRect.x + m_myRelativeEstimationRect.width)
             {
-                m_myRelativeEstimationRect.width += (colliderEstimation.position.x + colliderEstimation.width) - (m_myRelativeEstimationRect.position.x + m_myRelativeEstimationRect.width);
+                m_myRelativeEstimationRect.width += (colliderEstimation.x + colliderEstimation.width) - (m_myRelativeEstimationRect.x + m_myRelativeEstimationRect.width);
             }
 
             // If the top of the collider is higher than our top, increase our height by the difference
             // and move our point up to match it.
-            if (colliderEstimation.position.y < m_myRelativeEstimationRect.position.y)
+            if (colliderEstimation.y < m_myRelativeEstimationRect.y)
             {
-                m_myRelativeEstimationRect.height += m_myRelativeEstimationRect.position.y - colliderEstimation.position.y;
-                m_myRelativeEstimationRect.position.y = colliderEstimation.position.y;
+                m_myRelativeEstimationRect.height += m_myRelativeEstimationRect.y - colliderEstimation.y;
+                m_myRelativeEstimationRect.y = colliderEstimation.y;
             }
 
             // If the bottom of the collider is lower than our bottom, increase our height by the difference.
-            if (colliderEstimation.position.y + colliderEstimation.height > m_myRelativeEstimationRect.position.y + m_myRelativeEstimationRect.height)
+            if (colliderEstimation.y + colliderEstimation.height > m_myRelativeEstimationRect.y + m_myRelativeEstimationRect.height)
             {
-                m_myRelativeEstimationRect.height += colliderEstimation.position.y + colliderEstimation.height - m_myRelativeEstimationRect.position.y + m_myRelativeEstimationRect.height;
+                m_myRelativeEstimationRect.height += colliderEstimation.y + colliderEstimation.height - m_myRelativeEstimationRect.y + m_myRelativeEstimationRect.height;
             }
         }
     }
@@ -302,7 +302,7 @@ namespace mcp
     RectF ColliderComponent::GetEstimationRect() const
     {
         RectF result = m_myRelativeEstimationRect;
-        result.position += m_pTransformComponent->GetLocation();
+        result.SetPosition(result.GetPosition() + m_pTransformComponent->GetLocation());
         return result;
     }
 

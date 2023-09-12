@@ -129,13 +129,12 @@ namespace mcp
 
         // Start the timer.
         FrameTimer timer;
-        timer.Init();
 
         auto* pWindow = GraphicsManager::Get()->GetWindow();
 
         while (m_isRunning)
         {
-            const float deltaTime = timer.NewFrame();
+            const float deltaTime = static_cast<float>(timer.NewFrame());
 
             m_isRunning = pWindow->ProcessEvents();
 

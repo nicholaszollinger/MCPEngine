@@ -1,6 +1,7 @@
 #pragma once
 // Vector2.h
 
+#include <cassert>
 #include <cmath>
 #include <type_traits>
 
@@ -14,9 +15,11 @@ struct Vector2
     Type x;
     Type y;
 
+    // Constructors, Assignment, Move, Destructor
+
     constexpr Vector2()
-        : x{}   // Should default to zero.
-        , y{}   // Should default to zero.
+        : x{}
+        , y{}
     {
         //
     }
@@ -28,42 +31,33 @@ struct Vector2
         //
     }
 
-    constexpr Vector2(const Vector2& right)
-        : x(right.x)
-        , y(right.y)
-    {
-        //
-    }
-    
-    constexpr Vector2& operator=(const Vector2& right)
-    {
-        x = right.x;
-        y = right.y;
-
-        return *this;
-    }
-
+    constexpr Vector2(const Vector2& right) = default;
+    constexpr Vector2(Vector2&& right) noexcept = default;
+    constexpr Vector2& operator=(const Vector2& right) = default;
+    constexpr Vector2& operator=(Vector2&& right) noexcept = default;
     ~Vector2() = default;
 
-    Vector2 GenerateUnitVector()
-    {
-        return Vector2{ static_cast<Type>(1), static_cast<Type>(1), static_cast<Type>(1) };
-    }
+    // Helpful functions
 
-    float GetMagnitude() const
+    [[nodiscard]] float GetMagnitude() const
     {
         auto sum = (x * x) + (y * y);
         return std::sqrt(sum);
     }
 
-    Type GetSquaredMagnitude() const
+    [[nodiscard]] constexpr float GetSquaredMagnitude() const
     {
-        return (x * x) + (y * y);
+        return static_cast<float>((x * x) + (y * y));
     }
 
-    Type GetDotProduct(const Vector2 right) const
+    [[nodiscard]] constexpr float GetDotProduct(const Vector2 right) const
     {
-        return  (x * right.x) + (y * right.y);
+        return static_cast<float>((x * right.x) + (y * right.y));
+    }
+
+    Vector2 GenerateUnitVector()
+    {
+        return Vector2{ static_cast<Type>(1), static_cast<Type>(1), static_cast<Type>(1) };
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -99,6 +93,8 @@ struct Vector2
         output.Normalize();
         return output;
     }*/
+
+    // Operators
 
     bool operator==(const Vector2& right) const
     {
@@ -170,44 +166,58 @@ struct Vector2
     }
 
     template<typename ScalarType>
-    Vector2 operator*(const ScalarType right) const
+    Vector2 operator*(const ScalarType scalar) const
     {
         static_assert(std::is_integral_v<ScalarType> || std::is_floating_point_v<ScalarType> && "Scalar Type must be an integral or floating-point type!");
 
         Vector2 result = *this;
-        result.x *= static_cast<Type>(right);
-        result.y *= static_cast<Type>(right);
+        result.x *= static_cast<Type>(scalar);
+        result.y *= static_cast<Type>(scalar);
         return result;
     }
 
     template<typename ScalarType>
-    Vector2& operator*=(const ScalarType right)
+    Vector2& operator*=(const ScalarType scalar)
     {
         static_assert(std::is_integral_v<ScalarType> || std::is_floating_point_v<ScalarType> && "Scalar Type must be an integral or floating-point type!");
 
-        *this = *this * right;
+        *this = *this * scalar;
         return *this;
     }
 
     template<typename ScalarType>
-    Vector2 operator/(const ScalarType right) const
+    Vector2 operator/(const ScalarType scalar) const
     {
         static_assert(std::is_integral_v<ScalarType> || std::is_floating_point_v<ScalarType> && "Scalar Type must be an integral or floating-point type!");
+
+        // Assert that the value isn't zero.
+        assert(scalar != static_cast<decltype(scalar)>(0) && "Cannot divide by zero!");
 
         Vector2 result = *this;
-        result.x /= static_cast<Type>(right);
-        result.y /= static_cast<Type>(right);
+        result.x /= static_cast<Type>(scalar);
+        result.y /= static_cast<Type>(scalar);
         return result;
     }
 
     template<typename ScalarType>
-    Vector2& operator/=(const ScalarType right)
+    Vector2& operator/=(const ScalarType scalar)
     {
         static_assert(std::is_integral_v<ScalarType> || std::is_floating_point_v<ScalarType> && "Scalar Type must be an integral or floating-point type!");
 
-        *this = *this / right;
+        *this = *this / scalar;
         return *this;
     }
+
+    // TODO
+    /*std::string ToString() const
+    {
+        return CombineToString("(", x, ", " , y, ")");
+    }*/
+
+    // Common Values.
+    static constexpr Vector2 ZeroVector() { return Vector2(0,0); }
+    static constexpr Vector2 UpVector() { return Vector2(0, static_cast<Type>(1)); }
+    static constexpr Vector2 RightVector() { return Vector2(static_cast<Type>(1), 0); }
 };
 
 template<typename Type, typename ScalarType>
@@ -270,7 +280,3 @@ Vector2<float> GetNormalized(const Vector2<Type>& vec)
 
 using Vec2 = Vector2<float>;
 using Vec2Int = Vector2<int>;
-
-constexpr Vector2<float> kVec2Zero{ 0.f, 0.f };
-constexpr Vector2<float> kVec2Up{ 0.f, 1.f };
-constexpr Vector2<float> kVec2Right{ 1.f, 0.f };
