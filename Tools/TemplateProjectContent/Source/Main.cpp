@@ -5,13 +5,8 @@
 
 int main()
 {
-    mcp::ApplicationProperties props {};
-    props.pWindowName = "@{PRJ_NAME}@";
-    props.defaultWindowWidth = 1600;
-    props.defaultWindowHeight = 900;
-
     mcp::Application::Create();
-    if (!mcp::Application::Get()->Init(props, "Content/SceneData/@{PRJ_NAME}@SceneData.xml"))
+    if (!mcp::Application::Get()->Init("Content/SceneData/@{PRJ_NAME}@SceneData.xml"))
     {
         return -1;
     }

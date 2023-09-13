@@ -50,7 +50,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     int LuaLog(lua_State* pState)
     {
-        const char* msg = lua_tostring(pState, -1);
+        [[maybe_unused]] const char* msg = lua_tostring(pState, -1);
 
         // TODO: This log category needs to be changed to know what the lua script is. I need to add another param.
         MCP_LOG("Script", msg);
@@ -72,7 +72,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     int LuaLogWarning(lua_State* pState)
     {
-        const char* msg = lua_tostring(pState, -1);
+        [[maybe_unused]] const char* msg = lua_tostring(pState, -1);
 
         // TODO: I need to be able to add the script name to this warning message.
         MCP_WARN("Script", msg);
@@ -94,7 +94,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     int LuaLogError(lua_State* pState)
     {
-        const char* msg = lua_tostring(pState, -1);
+        [[maybe_unused]] const char* msg = lua_tostring(pState, -1);
 
         // TODO: I need to be able to add the script name to this warning message.
         MCP_ERROR("Script", msg);
