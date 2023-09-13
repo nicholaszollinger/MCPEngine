@@ -20,7 +20,7 @@ namespace mcp
             // Make sure that we don't already have callback from that owner.
             if (auto result = m_listeners.find(pOwner); result != m_listeners.end())
             {
-                LogWarning("Attempted to add second callback to Delegate from the same owner.");
+                MCP_WARN("MulticastDelegate", "Attempted to add second callback to Delegate from the same owner.");
                 return;
             }
 
@@ -36,8 +36,7 @@ namespace mcp
 
             else
             {
-                // TODO: Make a better warning message?
-                LogWarning("Attempted to remove listener from Delegate that doesn't exist.");
+                MCP_WARN("MulticastDelegate", "Attempted to remove listener from Delegate that doesn't exist.");
             }
         }
 

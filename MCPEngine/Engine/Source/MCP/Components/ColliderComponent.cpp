@@ -62,7 +62,7 @@ namespace mcp
         m_pTransformComponent = m_pOwner->GetComponent<TransformComponent>();
         if (!m_pTransformComponent)
         {
-            LogError("Failed to initialize ColliderComponent! TransformComponent was nullptr!");
+            MCP_ERROR("Collision", "Failed to initialize ColliderComponent! TransformComponent was nullptr!");
             return false;
         }
 
@@ -214,7 +214,7 @@ namespace mcp
         const Collider::ColliderNameId nameId = pCollider->GetNameId();
         if (const auto result = m_colliders.find(nameId); result != m_colliders.end())
         {
-            LogWarning("Tried to add a Collider that already exists with that name! You may have a memory leak depending on how you are trying to add this!");
+            MCP_WARN("Collision", "Tried to add a Collider that already exists with that name! You may have a memory leak depending on how you are trying to add this!");
             return;
         }
 
@@ -321,7 +321,7 @@ namespace mcp
         // Add the component to the Object
         if (!pNewComponent)
         {
-            LogError("Failed to add ColliderComponent from data!");
+            MCP_ERROR("Collision", "Failed to add ColliderComponent from data!");
             return false;
         }
 
@@ -333,7 +333,7 @@ namespace mcp
             // Create the Collider from data, using a factory
             if (!ColliderFactory::AddNewFromData(pCollider->Value(), pCollider, pNewComponent))
             {
-                LogError("Failed to add Collider to new ColliderComponent from data!");
+                MCP_ERROR("Collision", "Failed to add Collider to new ColliderComponent from data!");
                 return false;
             }
 

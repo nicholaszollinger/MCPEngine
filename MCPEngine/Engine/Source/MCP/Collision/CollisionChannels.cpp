@@ -35,7 +35,7 @@ namespace mcp::Internal
         // If we have already defined the maximum amount, we need to throw an error.
         if (m_channelsDefined >= kMaxChannels)
         {
-            LogError("Failed to assign name to Collision Channel! Exceeded the max allowable channel mappings!");
+            MCP_ERROR("Collision", "Failed to assign name to Collision Channel! Exceeded the max allowable channel mappings!");
             assert(false); // This error should be caught in debug.
             return CollisionChannel::kChannel1; // Dummy return.
         }

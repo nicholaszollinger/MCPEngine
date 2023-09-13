@@ -208,48 +208,48 @@ namespace mcp
 
         if (fopen_s(&pSourceFile, pFileName, "r") != 0)
         {
-            LogError("Failed to Compress file! Failed to open file for read at path: '%'", pFileName);
+            MCP_ERROR("Zip", "Failed to Compress file! Failed to open file for read at path: ", pFileName);
             return false;
         }
 
         if (fopen_s(&pDestFile, pDestFileName, "w") != 0)
         {
-            LogError("Failed to Compress file! Failed to open file for write at path: '%'", pDestFileName);
+            MCP_ERROR("Zip", "Failed to Compress file! Failed to open file for write at path: ", pDestFileName);
 
             // Close the source file.
             if (fclose(pSourceFile) != 0)
-                LogError("Failed to Compress file! Failed to close file at path: '%'", pFileName);
+                MCP_ERROR("Zip", "Failed to Compress file! Failed to close file at path: ", pFileName);
 
             return false;
         }
 
         if (const int code = Compress(pSourceFile, pDestFile, Z_DEFAULT_COMPRESSION); code != Z_OK)
         {
-            LogError("Failed to Compress file! ZLib Error: '%'", GetZLibError(code));
+            MCP_ERROR("Zip", "Failed to Compress file! ZLib Error: ", GetZLibError(code));
 
             // Try to close the files.
             if (fclose(pSourceFile) != 0)
-                LogError("Failed to Compress file! Failed to close file at path: '%'", pFileName);
+                MCP_ERROR("Zip", "Failed to Compress file! Failed to close file at path: ", pFileName);
 
             if (fclose(pDestFile) != 0)
-                LogError("Failed to Compress file! Failed to close file at path: '%'", pDestFileName);
+                MCP_ERROR("Zip", "Failed to Compress file! Failed to close file at path: ", pDestFileName);
 
             return false;
         }
 
         if (fclose(pSourceFile) != 0)
         {
-            LogError("Failed to Compress file! Failed to close file at path: '%'", pFileName);
+            MCP_ERROR("Zip", "Failed to Compress file! Failed to close file at path: ", pFileName);
 
             if (fclose(pDestFile) != 0)
-                LogError("Failed to Compress file! Failed to close file at path: '%'", pDestFileName);
+                MCP_ERROR("Zip", "Failed to Compress file! Failed to close file at path: ", pDestFileName);
 
             return false;
         }
 
         if (fclose(pDestFile) != 0)
         {
-            LogError("Failed to Compress file! Failed to close file at path: '%'", pDestFileName);
+            MCP_ERROR("Zip", "Failed to Compress file! Failed to close file at path: ", pDestFileName);
             return false;
         }
 
@@ -271,31 +271,31 @@ namespace mcp
 
         if (fopen_s(&pSourceFile, pFileName, "r") != 0)
         {
-            LogError("Failed to Expand file! Failed to open file for read at path: '%'", pFileName);
+            MCP_ERROR("Zip", "Failed to Expand file! Failed to open file for read at path: ", pFileName);
             return false;
         }
 
         if (fopen_s(&pDestFile, pDestFileName, "w") != 0)
         {
-            LogError("Failed to Expand file! Failed to open file for write at path: '%'", pDestFileName);
+            MCP_ERROR("Zip", "Failed to Expand file! Failed to open file for write at path: ", pDestFileName);
 
             // Close the Source file.
             if (fclose(pSourceFile) != 0)
-                LogError("Failed to Expand file! Failed to close file at path: '%'", pDestFileName);
+                MCP_ERROR("Zip", "Failed to Expand file! Failed to close file at path: ", pDestFileName);
 
             return false;
         }
 
         if (const int code = Expand(pSourceFile, pDestFile); code != Z_OK)
         {
-            LogError("Failed to Expand file! ZLib Error: '%'", GetZLibError(code));
+            MCP_ERROR("Zip", "Failed to Expand file! ZLib Error: ", GetZLibError(code));
 
             // Try to close the files.
             if (fclose(pSourceFile) != 0)
-                LogError("Failed to Expand file! Failed to close file at path: '%'", pFileName);
+                MCP_ERROR("Zip", "Failed to Expand file! Failed to close file at path: ", pFileName);
 
             if (fclose(pDestFile) != 0)
-                LogError("Failed to Expand file! Failed to close file at path: '%'", pDestFileName);
+                MCP_ERROR("Zip", "Failed to Expand file! Failed to close file at path: ", pDestFileName);
             
 
             return false;
@@ -303,17 +303,17 @@ namespace mcp
 
         if (fclose(pSourceFile) != 0)
         {
-            LogError("Failed to Expand file! Failed to close file at path: '%'", pFileName);
+            MCP_ERROR("Zip", "Failed to Expand file! Failed to close file at path: ", pFileName);
 
             if (fclose(pDestFile) != 0)
-                LogError("Failed to Expand file! Failed to close file at path: '%'", pDestFileName);
+                MCP_ERROR("Zip", "Failed to Expand file! Failed to close file at path: ", pDestFileName);
 
             return false;
         }
 
         if (fclose(pDestFile) != 0)
         {
-            LogError("Failed to Expand file! Failed to close file at path: '%'", pDestFileName);
+            MCP_ERROR("Zip", "Failed to Expand file! Failed to close file at path: ", pDestFileName);
             return false;
         }
 

@@ -91,7 +91,7 @@ namespace mcp
         // TODO: Need to figure out how we are getting this value:
         if (m_pActiveScene->Load(""))
         {
-            LogError("Failed to Load Scene =%", m_sceneToTransitionTo);
+            MCP_ERROR("SceneManager", "Failed to Load Scene =", m_sceneToTransitionTo);
             return false;
         }
 

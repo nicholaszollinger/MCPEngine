@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include "Logging/Log.h"
+
 SimpleInstrumentationProfiler::SimpleInstrumentationProfiler(const char* label)
     : m_label(label)
 {
@@ -13,8 +15,7 @@ SimpleInstrumentationProfiler::SimpleInstrumentationProfiler(const char* label)
 SimpleInstrumentationProfiler::~SimpleInstrumentationProfiler()
 {
     const double result = m_timer.GetTimer();
-
-    // TODO: Change this to use our Logger!!!
+    
     // Log the time.
-    std::cout << "[" << m_label << "] Result: " << result << "ms\n";
+    _LOG("Profiler", "[", m_label, "] Result: " , result , "ms");
 }

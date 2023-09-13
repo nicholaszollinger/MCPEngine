@@ -35,7 +35,7 @@ namespace mcp
         // If we already have that package loaded into memory, don't load it.
         if (const auto result = m_packages.find(pZipFileName); result != m_packages.end())
         {
-            LogWarning("Tried to reload a package with name: '%'", pZipFileName);
+            MCP_WARN("PackageManager", "Tried to reload a package with name: ", pZipFileName);
             return true;
         }
 
@@ -43,7 +43,7 @@ namespace mcp
 
         if (!pPackage->LoadPackage(pZipFileName))
         {
-            LogError("Failed to load package: '%'", pZipFileName);
+            MCP_WARN("PackageManager", "Failed to load package: ", pZipFileName);
             return false;
         }
         
@@ -56,7 +56,7 @@ namespace mcp
         const auto result = m_packages.find(pZipFileName);
         if (result == m_packages.end())
         {
-            LogWarning("Tried to unload a package not loaded with name: '%'", pZipFileName);
+            MCP_WARN("PackageManager", "Tried to unload a package not loaded with name: ", pZipFileName);
             return;
         }
 
@@ -78,7 +78,7 @@ namespace mcp
         auto result = m_packages.find(pPackagePath);
         if (result == m_packages.end())
         {
-            LogWarning("Trying to get data from unloaded package. Loading now...\nPackage name: '%'", pPackagePath);
+            MCP_WARN("PackageManager", "Trying to get data from unloaded package. Loading now...\nPackage name: ", pPackagePath);
 
             if (!LoadPackage(pPackagePath))
             {
@@ -94,7 +94,7 @@ namespace mcp
         auto* pRawData = pPackage->GetRawData(pFileName);
         if (!pRawData)
         {
-            LogError("Failed to find asset with name: '%', in package named: '%'", pFileName, pPackagePath);
+            MCP_ERROR("AssetPackage", "Failed to find asset with name: ", pFileName, ", in package named: ", pPackagePath);
             return nullptr;
         }
 

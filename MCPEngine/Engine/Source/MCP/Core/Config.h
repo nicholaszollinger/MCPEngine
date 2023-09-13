@@ -48,3 +48,10 @@
 //      DATA LOADING LIB - What library or system we are using to load XML files
 //--------------------------------------------------------------------------------------------------------------
 #define MCP_DATA_PARSER_TINYXML2
+
+//-----------------------------------------------------------------------------------------------------------------------------
+//		NOTES:
+//		
+///		@brief : NOT SUPPORTED YET!!! Set this to true if you want the engine to be multithreaded.
+//-----------------------------------------------------------------------------------------------------------------------------
+#define MCP_MULTITHREADING_ENABLED 0

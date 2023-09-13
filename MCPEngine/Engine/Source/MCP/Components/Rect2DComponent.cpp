@@ -53,7 +53,7 @@ namespace mcp
         auto* pRect2DComponent = pOwner->AddComponent<Rect2DComponent>(width, height);
         if (!pRect2DComponent)
         {
-            LogError("Failed to add Rect2DComponent from data!");
+            MCP_ERROR("Rect2DComponent", "Failed to add Rect2DComponent from data!");
             return false;
         }
 
@@ -61,7 +61,7 @@ namespace mcp
         const auto* pRenderTypeElement = pRect2DElement->FirstChildElement("RenderType");
         if (!pRenderTypeElement)
         {
-            LogError("Failed to add ImageComponent from Data! Couldn't find RenderType Attribute!");
+            MCP_ERROR("Rect2DComponent", "Failed to add ImageComponent from Data! Couldn't find RenderType Attribute!");
             return false;
         }
 
@@ -73,7 +73,7 @@ namespace mcp
         const auto* pColorElement = pRenderTypeElement->NextSiblingElement("Color");
         if (!pColorElement)
         {
-            LogError("Failed to add ImageComponent from Data! Couldn't find Color Attribute!");
+            MCP_ERROR("Rect2DComponent", "Failed to add ImageComponent from Data! Couldn't find Color Attribute!");
             return false;
         }
 

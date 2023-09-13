@@ -26,7 +26,7 @@ namespace mcp::ComponentInternal
         // Debug check to see if we have a unique id or not.
         if (const auto result = sIdMap.find(pComponentName); result != sIdMap.end())
         {
-            LogError("Component with name: '%' , is already defined!");
+            MCP_ERROR("ComponentId", "Component with name: ", pComponentName, ", is already defined!");
             assert(false); // Assert false to quit in debug.
         }
        

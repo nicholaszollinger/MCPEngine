@@ -52,7 +52,7 @@ namespace mcp
             // Check to see if we already have the component on this Object.
             if (GetComponent<ComponentType>() != nullptr)
             {
-                LogWarning("Failed to add Component! Tried to add ComponentType that already exists on Object!");
+                MCP_WARN("Object", "Failed to add Component! Tried to add ComponentType that already exists on Object!");
                 return nullptr;
             }
 
@@ -60,7 +60,7 @@ namespace mcp
             ComponentType* pNewComponent = BLEACH_NEW(ComponentType(this, params...));
             if (!pNewComponent->Init())
             {
-                LogError("Failed to add Component! Initialization of Component failed!");
+                MCP_ERROR("Object", "Failed to add Component! Initialization of Component failed!");
                 BLEACH_DELETE(pNewComponent);
                 return nullptr;
             }
@@ -93,7 +93,7 @@ namespace mcp
                 }
             }
 
-            LogWarning("Failed to remove Component! Object doesn't have a Component of that type!");
+            MCP_WARN("Object", "Failed to remove Component! Object doesn't have a Component of that type!");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------

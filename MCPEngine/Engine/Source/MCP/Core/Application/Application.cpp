@@ -60,15 +60,30 @@ namespace mcp
         // Initialize Bleach Leak Detector:
         BLEACH_INIT_LEAK_DETECTOR();
 
+#if MCP_LOGGING_ENABLED
+        // Initialize the Logger
+        if (!Logger::Init("Log/"))
+        {
+            Close();
+            return false;
+        }
+
+        // Load the Engine log categories.
+        if (!Logger::LoadCategories("../MCPEngine/Engine/Config/EngineLogs.config"))
+        {
+            MCP_ERROR("Application", "Failed to load EngineLog Categories!");
+            Close();
+            return false;
+        }
+#endif
+
         // Create GlobalManagers and save a reference in processes.
-        GlobalManagerFactory::Create<LoggerInternal::Logger>();
         GlobalManagerFactory::Create<lua::LuaLayer>();
         GlobalManagerFactory::Create<GraphicsManager>();
         GlobalManagerFactory::Create<AudioManager>();
         GlobalManagerFactory::Create<ResourceManager>();
         GlobalManagerFactory::Create<SceneManager>();
-
-        m_processes.emplace_back(LoggerInternal::Logger::Get());
+        
         m_processes.emplace_back(GraphicsManager::Get());
         m_processes.emplace_back(AudioManager::Get());
         m_processes.emplace_back(ResourceManager::Get());
@@ -81,7 +96,7 @@ namespace mcp
             // If any fail, then we need to close and quit.
             if (!pProcess->Init())
             {
-                LogError("Failed to Initialize Application!");
+                MCP_ERROR("Application", "Failed to Initialize Application!");
                 Close();
                 return false;
             }
@@ -90,7 +105,7 @@ namespace mcp
         // Initialize the Window:
         if (!GraphicsManager::Get()->GetWindow()->Init(props.pWindowName, props.defaultWindowWidth, props.defaultWindowHeight))
         {
-            LogError("Failed to initialize Application! Failed to initialize the Window!");
+            MCP_ERROR("Application", "Failed to initialize Application! Failed to initialize the Window!");
             Close();
             return false;
         }
@@ -98,7 +113,7 @@ namespace mcp
         // Set the Window as the RenderTarget for the Renderer.
         if (!GraphicsManager::Get()->SetRenderTarget())
         {
-            LogError("Failed to initialize Application! Failed to set the main window as the Render Target!");
+            MCP_ERROR("Application", "Failed to initialize Application! Failed to set the main window as the Render Target!");
             Close();
             return false;
         }
@@ -106,7 +121,99 @@ namespace mcp
         // Load the GameData:
         if (!LoadGameData(pGameDataFilepath))
         {
-            LogError("Failed to load the GameData at filepath: '%'", pGameDataFilepath);
+            MCP_ERROR("Application", "Failed to load the GameData at filepath: '%'", pGameDataFilepath);
+            Close();
+            return false;
+        }
+
+        return true;
+    }
+
+    bool Application::Init(const char* pGameDataFilepath)
+    {
+        // Initialize Bleach Leak Detector:
+        BLEACH_INIT_LEAK_DETECTOR();
+
+#if MCP_LOGGING_ENABLED
+        // Initialize the Logger
+        if (!Logger::Init("Log/NewLog.txt"))
+        {
+            Close();
+            return false;
+        }
+
+        // Load the Engine log categories.
+        if (!Logger::LoadCategories("../MCPEngine/Engine/Config/EngineLogs.config"))
+        {
+            MCP_ERROR("Application", "Failed to load EngineLog Categories!");
+            Close();
+            return false;
+        }
+
+        // Load the Game log categories.
+        if (!Logger::LoadCategories("Config/GameLogs.config"))
+        {
+            MCP_ERROR("Application", "Failed to load Game log categories!");
+            Close();
+            return false;
+        }
+
+#endif
+
+        ApplicationProperties props;
+        /*
+        if (!LoadApplicationProperties(props, "Config/AppProps.config"))
+        {
+            MCP_CRITICAL("Application", "Failed to load ApplicationProperties!");
+            Close();
+            return false;
+        }*/
+
+        // Create GlobalManagers and save a reference in processes.
+        GlobalManagerFactory::Create<lua::LuaLayer>();
+        GlobalManagerFactory::Create<GraphicsManager>();
+        GlobalManagerFactory::Create<AudioManager>();
+        GlobalManagerFactory::Create<ResourceManager>();
+        GlobalManagerFactory::Create<SceneManager>();
+        
+        m_processes.emplace_back(GraphicsManager::Get());
+        m_processes.emplace_back(AudioManager::Get());
+        m_processes.emplace_back(ResourceManager::Get());
+        m_processes.emplace_back(SceneManager::Get());
+        m_processes.emplace_back(lua::LuaLayer::Get());
+
+        // Initialize each process.
+        for (auto* pProcess : m_processes)
+        {
+            // If any fail, then we need to close and quit.
+            if (!pProcess->Init())
+            {
+                MCP_ERROR("Application", "Failed to Initialize Application!");
+                Close();
+                return false;
+            }
+        }
+
+        // Initialize the Window:
+        if (!GraphicsManager::Get()->GetWindow()->Init(props.pWindowName, props.defaultWindowWidth, props.defaultWindowHeight))
+        {
+            MCP_ERROR("Application", "Failed to initialize Application! Failed to initialize the Window!");
+            Close();
+            return false;
+        }
+
+        // Set the Window as the RenderTarget for the Renderer.
+        if (!GraphicsManager::Get()->SetRenderTarget())
+        {
+            MCP_ERROR("Application", "Failed to initialize Application! Failed to set the main window as the Render Target!");
+            Close();
+            return false;
+        }
+
+        // Load the GameData:
+        if (!LoadGameData(pGameDataFilepath))
+        {
+            MCP_ERROR("Application", "Failed to load the GameData at filepath: '%'", pGameDataFilepath);
             Close();
             return false;
         }
@@ -143,6 +250,13 @@ namespace mcp
         }
     }
 
+    bool Application::LoadApplicationProperties(ApplicationProperties& outProps, const char* pFilepath)
+    {
+
+        return true;
+    }
+
+
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //
@@ -155,7 +269,7 @@ namespace mcp
         tinyxml2::XMLDocument doc;
         if (doc.LoadFile(pGameDataFilepath) != tinyxml2::XML_SUCCESS)
         {
-            LogError("Failed to load game data from file '%'", pGameDataFilepath);
+            MCP_ERROR("Application", "Failed to load game data from file '%'", pGameDataFilepath);
             return false;
         }
 
@@ -163,27 +277,27 @@ namespace mcp
         const auto* pSceneList = doc.FirstChildElement("SceneList");
         if (!pSceneList)
         {
-            LogError("Failed to load game data! Couldn't find SceneList element!");
+            MCP_ERROR("Application", "Failed to load game data! Couldn't find SceneList element!");
             return false;
         }
 
         const auto* pDefaultScene = pSceneList->FirstChildElement("Default");
         if (!pDefaultScene)
         {
-            LogError("Failed to load game data! Couldn't find Default Scene element!");
+            MCP_ERROR("Application", "Failed to load game data! Couldn't find Default Scene element!");
             return false;
         }
 
         const char* pDefaultSceneFilepath = pDefaultScene->Attribute("sceneDataPath");
         if (!pDefaultSceneFilepath)
         {
-            LogError("Failed to load game data! Couldn't find Default Scene Path attribute!");
+            MCP_ERROR("Application", "Failed to load game data! Couldn't find Default Scene Path attribute!");
             return false;
         }
 
         if (!SceneManager::Get()->LoadSceneData(pDefaultSceneFilepath))
         {
-            LogError("Failed to load the initial Scene!");
+            MCP_ERROR("Application", "Failed to load the initial Scene!");
             return false;
         }
 
@@ -200,7 +314,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Application::Close() const
     {
-        Log("Closing MCPEngine...");
+        MCP_LOG("Application", "Closing MCPEngine...");
 
         // Close the processes in reverse order.
         for (auto it = m_processes.rbegin(); it != m_processes.rend(); ++it)
@@ -214,7 +328,11 @@ namespace mcp
         GlobalManagerFactory::Destroy<AudioManager>();
         GlobalManagerFactory::Destroy<GraphicsManager>();
         GlobalManagerFactory::Destroy<lua::LuaLayer>();
-        GlobalManagerFactory::Destroy<LoggerInternal::Logger>();
+
+#if MCP_LOGGING_ENABLED
+        Logger::Close();
+#endif
+
         BLEACH_DUMP_AND_DESTROY_LEAK_DETECTOR();
     }
 }

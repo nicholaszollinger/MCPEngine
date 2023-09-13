@@ -87,7 +87,7 @@ public:
             // If the types don't match, report the issue and return nullptr.
             if (ColliderType::GetStaticTypeId() != result->second->GetTypeId())
             {
-                LogWarning("Failed to find Collider! Collider '%' did not match requested type!", pColliderName);
+                MCP_WARN("Collision", "Failed to find Collider! Collider ", pColliderName, " did not match requested type!");
                 return nullptr;
             }
 
@@ -95,7 +95,7 @@ public:
             return static_cast<ColliderType*>(result->second);
         }
 
-        LogWarning("Failed to find Collider! No collider found with the name: %", pColliderName);
+        MCP_WARN("Collision", "Failed to find Collider! No collider found with the name: ", pColliderName);
         // If we don't have it, return nullptr.
         return nullptr;
     }

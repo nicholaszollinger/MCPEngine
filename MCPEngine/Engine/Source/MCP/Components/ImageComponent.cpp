@@ -54,7 +54,7 @@ namespace mcp
         m_pTransformComponent = m_pOwner->GetComponent<TransformComponent>();
         if (!m_pTransformComponent)
         {
-            LogError("Failed to initialize ImageComponent! TransformComponent was nullptr!");
+            MCP_ERROR("ImageComponent", "Failed to initialize ImageComponent! TransformComponent was nullptr!");
             return false;
         }
 
@@ -91,7 +91,7 @@ namespace mcp
         const char* pTextureFilePath = pImageComponentElement->Attribute("imagePath");
         if (!pTextureFilePath)
         {
-            LogError("Failed to add ImageComponent from Data! Couldn't find imagePath Attribute!");
+            MCP_ERROR("ImageComponent","Failed to add ImageComponent from Data! Couldn't find imagePath Attribute!");
             return false;
         }
 
@@ -100,7 +100,7 @@ namespace mcp
         const auto* pCrop = pImageComponentElement->FirstChildElement("Crop");
         if (!pCrop)
         {
-            LogError("Failed to add ImageComponent from Data! Couldn't find Crop Attribute!");
+            MCP_ERROR("ImageComponent","Failed to add ImageComponent from Data! Couldn't find Crop Attribute!");
             return false;
         }
 
@@ -113,7 +113,7 @@ namespace mcp
         const auto* pSize = pCrop->NextSiblingElement("Size");
         if (!pSize)
         {
-            LogError("Failed to add ImageComponent from Data! Couldn't find Size Attribute!");
+            MCP_ERROR("ImageComponent","Failed to add ImageComponent from Data! Couldn't find Size Attribute!");
             return false;
         }
 
@@ -128,7 +128,7 @@ namespace mcp
         // Add the component to the Object
         if (!pOwner->AddComponent<ImageComponent>(pTextureFilePath, crop, size, layer, zOrder))
         {
-            LogError("Failed to add ImageComponent from data!");
+            MCP_ERROR("ImageComponent","Failed to add ImageComponent from data!");
             return false;
         }
 

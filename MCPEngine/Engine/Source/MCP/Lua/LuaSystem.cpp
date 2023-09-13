@@ -40,7 +40,7 @@ namespace mcp
 #if defined(DEBUG_LUA) && DEBUG_LUA
         if (!IStackEmpty())
         {
-            LogError("LUA: Stack was not cleaned up correctly!");
+            MCP_ERROR("Lua", "Stack was not cleaned up correctly!");
             DumpStack();
             PopStack();
         }
@@ -60,7 +60,7 @@ namespace mcp
     {
         if (luaL_dofile(m_pState, pFilepath) != 0)
         {
-            LogError("Failed to load Lua Script! Filepath: %", pFilepath);
+            MCP_ERROR("Lua", "Failed to load Lua Script! Filepath: ", pFilepath);
             return false;
         }
 
@@ -78,7 +78,7 @@ namespace mcp
     {
         if (!lua_getglobal(m_pState, varName))
         {
-            LogError("LUA: No global string found with name '%'", varName);
+            MCP_ERROR("Lua", "No global string found with name: ", varName);
             return nullptr;
         }
 
@@ -113,7 +113,7 @@ namespace mcp
     {
         if (!lua_getglobal(m_pState, varName))
         {
-            LogError("LUA: No global string found with name '%'", varName);
+            MCP_ERROR("Lua", "No global string found with name: ", varName);
             return {};
         }
 
@@ -148,7 +148,7 @@ namespace mcp
     {
         if (!lua_getglobal(m_pState, varName))
         {
-            LogError("LUA: No global integer found with name '%'", varName);
+            MCP_ERROR("Lua", "No global integer found with name: ", varName);
             return {};
         }
 
@@ -182,7 +182,7 @@ namespace mcp
     {
         if (!lua_getglobal(m_pState, varName))
         {
-            LogError("LUA: No global float found with name '%'", varName);
+            MCP_ERROR("Lua", "No global float found with name: ", varName);
             return {};
         }
 
@@ -221,7 +221,7 @@ namespace mcp
 
         if (!lua_getglobal(m_pState, globalName))
         {
-            LogError("LUA: No global found with name '%'", globalName);
+            MCP_ERROR("Lua", "No global found with name: ", globalName);
             return nullptr;
         }
 
@@ -247,14 +247,14 @@ namespace mcp
         // Check to see if the variable exists.
         if (!lua_getglobal(m_pState, varName))
         {
-            LogWarning("LUA: Tried to set string to global that doesn't exist! No global found with name '%'", varName);
+            MCP_WARN("Lua","Tried to set string to global that doesn't exist! No global found with name ", varName);
             return;
         }
 
         // Check to see if the global is a string type.
         if (!IsLuaType(m_pState, LUA_TSTRING))
         {
-            LogWarning("LUA: Setting string value to global of a different type. Global name: '%'", varName);
+            MCP_WARN("Lua","Setting string value to global of a different type. Global name: ", varName);
         }
             
         lua_pop(m_pState, 1);
@@ -277,14 +277,14 @@ namespace mcp
         // Check to see if the variable exists.
         if (!lua_getglobal(m_pState, varName))
         {
-            LogWarning("LUA: Tried to set bool to global that doesn't exist! No global found with name '%'", varName);
+            MCP_WARN("Lua", "Tried to set bool to global that doesn't exist! No global found with name ", varName);
             return;
         }
 
         // Check to see if the global is a boolean type.
         if (!IsLuaType(m_pState, LUA_TBOOLEAN))
         {
-            LogWarning("LUA: Setting boolean value to global of a different type. Global name: '%'", varName);
+            MCP_WARN("Lua", "Setting boolean value to global of a different type. Global name: ", varName);
         }
             
         lua_pop(m_pState, 1);
@@ -305,14 +305,14 @@ namespace mcp
         // Check to see if the variable exists.
         if (!lua_getglobal(m_pState, varName))
         {
-            LogWarning("LUA: Tried to set integer to global that doesn't exist! No global found with name '%'", varName);
+            MCP_WARN("Lua","Tried to set integer to global that doesn't exist! No global found with name ", varName);
             return;
         }
 
         // Check to see if the global is a number type.
         if (!IsLuaType(m_pState, LUA_TNUMBER))
         {
-            LogWarning("LUA: Setting integer value to global of a different type. Global name: '%'", varName);
+            MCP_WARN("Lua","Setting integer value to global of a different type. Global name: ", varName);
         }
             
         lua_pop(m_pState, 1);
@@ -333,14 +333,14 @@ namespace mcp
         // Check to see if the variable exists.
         if (!lua_getglobal(m_pState, varName))
         {
-            LogWarning("LUA: Tried to set float to global that doesn't exist! No global found with name '%'", varName);
+            MCP_WARN("Lua", "Tried to set float to global that doesn't exist! No global found with name ", varName);
             return;
         }
 
         // Check to see if the global is a number type.
         if (!IsLuaType(m_pState, LUA_TNUMBER))
         {
-            LogWarning("LUA: Setting float value to global of a different type. Global name: '%'", varName);
+            MCP_WARN("Lua", "Setting float value to global of a different type. Global name: ", varName);
         }
             
         lua_pop(m_pState, 1);
@@ -362,14 +362,14 @@ namespace mcp
         // Get the global function
         if (!lua_getglobal(m_pState, pFunctionName))
         {
-            LogError("Failed to push function! No function with name '%' found!");
+            MCP_ERROR("Lua", "Failed to push function! No function with name ", pFunctionName, " found!");
             return false;
         }
 
         // Check to see if it is a lua function.
         if (lua_isfunction(m_pState, -1) == 0)
         {
-            LogError("Failed to push function '%'! Value was not a function-type", pFunctionName);
+            MCP_ERROR("Lua", "Failed to push function ", pFunctionName, "! Value was not a function-type");
             lua_pop(m_pState, 1);
             return false;
         }
@@ -440,7 +440,7 @@ namespace mcp
     {
         if (!lua_getglobal(m_pState, tableName))
         {
-            LogError("LUA: No global table found with name '%'", tableName);
+            MCP_ERROR("Lua", "No global table found with name ", tableName);
             return false;
         }
 
@@ -464,7 +464,7 @@ namespace mcp
 
         if (!lua_gettable(m_pState, -2))
         {
-            LogError("LUA: Failed to find element with name: %", elementName);
+            MCP_ERROR("Lua", "Failed to find element with name: ", elementName);
             return false;
         }
 
@@ -546,7 +546,7 @@ namespace mcp
     {
         if (IStackEmpty())
         {
-            Log("Lua Stack Empty!");
+            MCP_LOG("Lua", "Lua Stack Empty!");
             return;
         }
 
@@ -603,7 +603,7 @@ namespace mcp
             }
         }
 
-        Log("%", stackString);
+        MCP_LOG("Lua", stackString);
     }
 
 #endif

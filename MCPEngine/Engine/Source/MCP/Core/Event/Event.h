@@ -114,8 +114,8 @@ namespace mcp
 
             else
             {
-                // TODO: Make a better warning message?
-                LogWarning("Attempted to remove listener that doesn't exist.");
+                // TODO: Make a better warning message?]
+                MCP_WARN("Event", "Attempted to remove listener that doesn't exist.");
             }
         }
 

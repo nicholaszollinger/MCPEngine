@@ -28,7 +28,7 @@ namespace mcp
             const auto result = factoryFunctions.find(id);
             if (result == factoryFunctions.end())
             {
-                LogError("Failed to add '%' to object! No matching ComponentId was found!", pComponentName);
+                MCP_ERROR("ComponentFactory", "Failed to add '", pComponentName, "' to object! No matching ComponentId was found!");
                 return false;
             }
 

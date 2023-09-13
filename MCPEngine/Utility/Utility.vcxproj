@@ -160,12 +160,15 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Utility\Logging\LogCategory.cpp" />
+    <ClCompile Include="Source\Utility\Logging\Logger.cpp" />
+    <ClCompile Include="Source\Utility\Logging\LogTarget.cpp" />
+    <ClCompile Include="Source\Utility\Logging\LogTargetConsoleWindow.cpp" />
     <ClCompile Include="Source\Utility\Profiling\SimpleInstrumentationProfiler.cpp" />
     <ClCompile Include="Source\utility\Random\RNG.cpp" />
     <ClCompile Include="Source\Utility\String\FormatString.cpp" />
     <ClCompile Include="Source\Utility\String\StringId.cpp" />
     <ClCompile Include="Source\Utility\Thread\ThreadIdleEvent.cpp" />
-    <ClCompile Include="Source\Utility\Thread\WorkerThread.cpp" />
     <ClCompile Include="Source\utility\Time\FrameTimer.cpp" />
     <ClCompile Include="Source\Utility\Time\HighPrecisionTimer.cpp" />
     <ClCompile Include="Source\utility\Time\Time.cpp" />
@@ -174,6 +177,13 @@
     <ClInclude Include="Source\Utility\Generic\Bit.h" />
     <ClInclude Include="Source\Utility\Generic\ConceptTypes.h" />
     <ClInclude Include="Source\Utility\Generic\Hash.h" />
+    <ClInclude Include="Source\Utility\Logging\LogCategory.h" />
+    <ClInclude Include="Source\Utility\Logging\Logger.h" />
+    <ClInclude Include="Source\Utility\Logging\LogTargetConsoleWindow.h" />
+    <ClInclude Include="Source\Utility\Logging\Log.h" />
+    <ClInclude Include="Source\Utility\Logging\LogConfig.h" />
+    <ClInclude Include="Source\Utility\Logging\LogTarget.h" />
+    <ClInclude Include="Source\Utility\Logging\LogType.h" />
     <ClInclude Include="Source\Utility\Math\FloatTester.h" />
     <ClInclude Include="Source\Utility\Profiling\SimpleInstrumentationProfiler.h" />
     <ClInclude Include="Source\utility\Random\RNG.h" />

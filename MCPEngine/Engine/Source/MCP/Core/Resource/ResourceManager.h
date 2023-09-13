@@ -115,7 +115,7 @@ namespace mcp
                 pResource = LoadFromDiskImpl(pFilePath, args...);
                 if (!pResource)
                 {
-                    LogError("Failed to load Resource at filePath: '%'", pFilePath);
+                    MCP_ERROR("PackageManager", "Failed to load Resource at filePath: ", pFilePath);
                     return nullptr;
                 }
             }
@@ -137,7 +137,7 @@ namespace mcp
 
             if (!pResourceData)
             {
-                LogWarning("Tried to free a resource at filepath = '%' that wasn't in memory!", pFilePath);
+                MCP_WARN("Lua", "Tried to free a resource at filepath = '", pFilePath, "' that wasn't in memory!");
                 return;
             }
 

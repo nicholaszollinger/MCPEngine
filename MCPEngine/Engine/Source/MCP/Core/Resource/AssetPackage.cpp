@@ -31,7 +31,7 @@ namespace mcp
         stream.open(pZipFileName, std::ios::in | std::ios::binary);
         if (!stream.is_open())
         {
-            LogError("Failed to load AssetPackage! Failed to open file: '%'", pZipFileName);
+            MCP_ERROR("AssetPackage", "Failed to load AssetPackage! Failed to open file: ", pZipFileName);
             return false;
         }
 
@@ -47,7 +47,7 @@ namespace mcp
         // Make sure that we have the correct zip signature.
         if (zipHeader.signature != kZipSignature)
         {
-            LogError("Failed to load AssetPackage! Package file was not a .zip!");
+            MCP_ERROR("AssetPackage", "Failed to load AssetPackage! Package file was not a .zip!");
             stream.close();
             return false;
         }
@@ -66,7 +66,7 @@ namespace mcp
         FileHeader* pFileHeader = reinterpret_cast<FileHeader*>(pDirData);
         if (pFileHeader->signature != kFileSignature)
         {
-            LogError("Failed to load AssetPackage! Failed to get FileHeader!");
+            MCP_ERROR("AssetPackage", "Failed to load AssetPackage! Failed to get FileHeader!");
             stream.close();
             BLEACH_DELETE_ARRAY(pDirData);
             return false;
@@ -93,7 +93,7 @@ namespace mcp
             // If we failed to get a data header signature, then something went horribly wrong and we need to quit.
             if (dataHeader.signature != kDataSignature)
             {
-                LogError("Failed to load AssetPackage! Failed to get DataHeader of file: '%'", pName);
+                MCP_ERROR("AssetPackage", "Failed to load AssetPackage! Failed to get DataHeader of file: ", pName);
                 FreePackageData();
                 BLEACH_DELETE_ARRAY(pName);
                 stream.close();
@@ -171,7 +171,7 @@ namespace mcp
         const auto result = m_packageAssets.find(pFileName);
         if (result == m_packageAssets.end())
         {
-            LogError("Failed to find asset in package! Filename: '%'", pFileName);
+            MCP_ERROR("AssetPackage", "Failed to find asset in package! Filename: ", pFileName);
             return nullptr; // Returns an invalid piece of data.
         }
 

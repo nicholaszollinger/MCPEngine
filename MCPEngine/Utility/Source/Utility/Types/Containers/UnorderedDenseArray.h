@@ -67,7 +67,7 @@ public:
         const auto result = m_keyToIndexMap.find(key);
         if (result == m_keyToIndexMap.end())
         {
-            //LogWarning("Attempting to remove a value that doesn't exist on with key: '%'");
+            _WARN("UnorderedDenseArray", "Attempting to remove a value that doesn't exist on with key: ", key);
             return;
         }
 
@@ -92,7 +92,7 @@ public:
         const auto result = m_keyToIndexMap.find(key);
         if (result == m_keyToIndexMap.end())
         {
-            //LogWarning("Attempting to get a value that doesn't exist on with key: '%'");
+            _WARN("UnorderedDenseArray", "Attempting to get a value that doesn't exist on with key: ", key);
             return nullptr;
         }
 
