@@ -39,7 +39,7 @@ namespace mcp
         {
             if (!pComponent->PostLoadInit())
             {
-                LogError("Object failed post Init!");
+                MCP_ERROR("Object", "Object failed post Init!");
                 return false;
             }
         }

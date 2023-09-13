@@ -17,7 +17,7 @@ namespace mcp
         tinyxml2::XMLDocument doc;
         if (doc.LoadFile(pFilePath) != tinyxml2::XML_SUCCESS)
         {
-            LogError("Failed to Load TileSetData! XML Error: %", tinyxml2::XMLDocument::ErrorIDToName(doc.ErrorID()));
+            MCP_ERROR("Tiled", "Failed to Load TileSetData! XML Error: ", tinyxml2::XMLDocument::ErrorIDToName(doc.ErrorID()));
             return nullptr;
         }
 
@@ -25,7 +25,7 @@ namespace mcp
 
         if (!pTileSetAttribute)
         {
-            LogError("Failed to Load TileSetData! XML Error: %", tinyxml2::XMLDocument::ErrorIDToName(doc.ErrorID()));
+            MCP_ERROR("Tiled", "Failed to Load TileSetData! XML Error: ", tinyxml2::XMLDocument::ErrorIDToName(doc.ErrorID()));
             return nullptr;
         }
 
@@ -45,7 +45,7 @@ namespace mcp
     TiledTileSet* ResourceContainer<TiledTileSet>::LoadFromRawDataImpl(char*, const int)
     {
         // TODO ?
-        LogError("Failed to Load TileSetData! Load from Raw not implemented yet!");
+        MCP_ERROR("Tiled", "Failed to Load TileSetData! Load from Raw not implemented yet!");
         return nullptr;
     }
 
@@ -67,7 +67,7 @@ namespace mcp
         tinyxml2::XMLDocument doc;
         if (doc.LoadFile(pTileSetPath) != tinyxml2::XML_SUCCESS)
         {
-            LogError("Failed to Load TileSetData! XML Error: %", tinyxml2::XMLDocument::ErrorIDToName(doc.ErrorID()));
+            MCP_ERROR("Tiled", "Failed to Load TileSetData! XML Error: ", tinyxml2::XMLDocument::ErrorIDToName(doc.ErrorID()));
             return false;
         }
 
@@ -75,7 +75,7 @@ namespace mcp
 
         if (!pTileSetAttribute)
         {
-            LogError("Failed to Load TileSetData! XML Error: %", tinyxml2::XMLDocument::ErrorIDToName(doc.ErrorID()));
+            MCP_ERROR("Tiled", "Failed to Load TileSetData! XML Error: ", tinyxml2::XMLDocument::ErrorIDToName(doc.ErrorID()));
             return false;
         }
 

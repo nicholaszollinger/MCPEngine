@@ -18,7 +18,7 @@ static std::string* GetPrefabPath(const tinyxml2::XMLElement* pProperty)
     const char* pPrefabPropName = pProperty->Attribute("name", "Prefab");
     if (!pPrefabPropName)
     {
-        mcp::LogError("Failed to get Prefab! No prefab property found!");
+        MCP_ERROR("TiledMapComponent", "Failed to get Prefab! No prefab property found!");
         return nullptr;
     }
 
@@ -71,14 +71,14 @@ namespace mcp
         // Load the TileSet.
         if (!m_tileSet.Load(pTileSetPath, pTileSetImagePath))
         {
-            LogError("Failed to load TiledMapComponent! Failed to Load TileSet!");
+            MCP_ERROR("TiledMapComponent","Failed to load TiledMapComponent! Failed to Load TileSet!");
             return;
         }
 
         // Load the map.
         if (!LoadMapData(pMapPath))
         {
-            LogError("Failed to load TiledMapComponent! Failed to Load Map!");
+            MCP_ERROR("TiledMapComponent", "Failed to load TiledMapComponent! Failed to Load Map!");
             return;
         }
     }
@@ -93,7 +93,7 @@ namespace mcp
         m_pTransformComponent = m_pOwner->GetComponent<TransformComponent>();
         if (!m_pTransformComponent)
         {
-            LogError("Failed to initialize TiledMapComponent! TransformComponent was nullptr!");
+            MCP_ERROR("TiledMapComponent", "Failed to initialize TiledMapComponent! TransformComponent was nullptr!");
             return false;
         }
 
@@ -163,7 +163,7 @@ namespace mcp
         tinyxml2::XMLDocument mapDoc;
         if (mapDoc.LoadFile(pMapFilepath) != tinyxml2::XML_SUCCESS)
         {
-            LogError("Failed to Load Map! XML Error: %", tinyxml2::XMLDocument::ErrorIDToName(mapDoc.ErrorID()));
+            MCP_ERROR("TiledMapComponent", "Failed to Load Map! XML Error: ", tinyxml2::XMLDocument::ErrorIDToName(mapDoc.ErrorID()));
             return false;
         }
 
@@ -184,7 +184,7 @@ namespace mcp
             const auto* pData = pLayer->FirstChildElement("data");
             if (!pData)
             {
-                LogError("Failed to Load Tiled Texture! Failed to find layer data!");
+                MCP_ERROR("TiledMapComponent", "Failed to Load Tiled Texture! Failed to find layer data!");
                 return false;
             }
 
@@ -230,7 +230,7 @@ namespace mcp
                 auto* pProperties = pObjectElement->FirstChildElement("properties");
                 if (!pProperties)
                 {
-                    LogError("Failed to create Object from Tiled data! Failed to find Properties for Object!");
+                    MCP_ERROR("TiledMapComponent", "Failed to create Object from Tiled data! Failed to find Properties for Object!");
                     // Return?
                 }
 
@@ -241,7 +241,7 @@ namespace mcp
 
                 if (!pPrefabPath)
                 {
-                    LogError("Failed to create Object from Tiled data! No prefab found for object!");
+                    MCP_ERROR("TiledMapComponent", "Failed to create Object from Tiled data! No prefab found for object!");
                     // Return?
                     return false;
                 }
@@ -258,7 +258,7 @@ namespace mcp
                     // Load the prefab file.
                     if (loadedPrefabs.back()->LoadFile((*pPrefabPath).c_str()) != tinyxml2::XML_SUCCESS)
                     {
-                        LogError("Failed to Load Prefab! XML Error: %", tinyxml2::XMLDocument::ErrorIDToName(mapDoc.ErrorID()));
+                        MCP_ERROR("TiledMapComponent", "Failed to Load Prefab! XML Error: ", tinyxml2::XMLDocument::ErrorIDToName(mapDoc.ErrorID()));
 
                         for (auto* pDoc : loadedPrefabs)
                         {
@@ -366,7 +366,7 @@ namespace mcp
         const char* mapPath = pTiledMapComponent->Attribute("mapPath");
         if (!mapPath)
         {
-            LogError("Failed to add TiledMapComponent from Data! Couldn't find mapPath Attribute!");
+            MCP_ERROR("TiledMapComponent","Failed to add TiledMapComponent from Data! Couldn't find mapPath Attribute!");
             return false;
         }
 
@@ -374,7 +374,7 @@ namespace mcp
         const char* tileSetPath = pTiledMapComponent->Attribute("tileSetPath");
         if (!tileSetPath)
         {
-            LogError("Failed to add TiledMapComponent from Data! Couldn't find tileSetPath Attribute!");
+            MCP_ERROR("TiledMapComponent","Failed to add TiledMapComponent from Data! Couldn't find tileSetPath Attribute!");
             return false;
         }
 
@@ -382,7 +382,7 @@ namespace mcp
         const char* tileSetImagePath = pTiledMapComponent->Attribute("tileSetImagePath");
         if (!tileSetImagePath)
         {
-            LogError("Failed to add TiledMapComponent from Data! Couldn't find tileSetImagePath Attribute!");
+            MCP_ERROR("TiledMapComponent", "Failed to add TiledMapComponent from Data! Couldn't find tileSetImagePath Attribute!");
             return false;
         }
 
@@ -390,7 +390,7 @@ namespace mcp
         const auto* pScaleAttribute = pTiledMapComponent->FirstChildElement("Scale");
         if (!pScaleAttribute)
         {
-            LogError("Failed to add TiledMapComponent from Data! Couldn't find Scale Element!");
+            MCP_ERROR("TiledMapComponent","Failed to add TiledMapComponent from Data! Couldn't find Scale Element!");
             return false;
         }
 
@@ -399,7 +399,7 @@ namespace mcp
         // Add the Component to the object
         if (!pOwner->AddComponent<TiledMapComponent>(mapPath, tileSetPath, tileSetImagePath, scale))
         {
-            LogError("Failed to add TiledMapComponent from data!");
+            MCP_ERROR("TiledMapComponent","Failed to add TiledMapComponent from data!");
             return false;
         }
 

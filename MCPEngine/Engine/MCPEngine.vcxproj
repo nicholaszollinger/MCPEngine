@@ -258,7 +258,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Core\Resource\ResourceManager.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\TextFile.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\Zip.cpp" />
-    <ClCompile Include="Source\MCP\Debug\Log.cpp" />
     <ClCompile Include="Source\MCP\Graphics\Graphics.cpp" />
     <ClCompile Include="Source\MCP\Graphics\Texture.cpp" />
     <ClCompile Include="Source\MCP\Input\Input.cpp" />
@@ -279,7 +278,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\Platform\Tiled\TiledMapComponent.cpp" />
     <ClCompile Include="Source\Platform\Tiled\TiledTileSet.cpp" />
     <ClCompile Include="Source\Platform\TinyXML2\tinyxml2.cpp" />
-    <ClCompile Include="Source\Platform\Windows\WindowsConsoleWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExternalLib\BleachLeakDetector\include\BleachNew.h" />
@@ -321,7 +319,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Core\Resource\TextFile.h" />
     <ClInclude Include="Source\MCP\Core\Resource\Zip.h" />
     <ClInclude Include="Source\MCP\Debug\Log.h" />
-    <ClInclude Include="Source\MCP\Debug\LogFontTypes.h" />
     <ClInclude Include="Source\MCP\Graphics\Graphics.h" />
     <ClInclude Include="Source\MCP\Graphics\RenderData\BaseRenderData.h" />
     <ClInclude Include="Source\MCP\Graphics\Texture.h" />
@@ -343,7 +340,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\Platform\Tiled\TiledMapComponent.h" />
     <ClInclude Include="Source\Platform\Tiled\TiledTileSet.h" />
     <ClInclude Include="Source\Platform\TinyXML2\tinyxml2.h" />
-    <ClInclude Include="Source\Platform\Windows\WindowsConsoleWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

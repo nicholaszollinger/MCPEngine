@@ -5,6 +5,8 @@
 #include <queue>
 #include <thread>
 #include <functional>
+
+#include "Logging/Log.h"
 // #include Logger
 
 //-----------------------------------------------------------------------------------------------------------------------------
@@ -84,7 +86,7 @@ void WorkerThread<InstructionType>::Start(ThreadInstructionHandler&& handlerFunc
 {
     if (m_thread.joinable())
     {
-        //_WARN("Thread", "Tried to initialize a WorkerThread that is already running!");
+        _WARN("Thread", "Tried to initialize a WorkerThread that is already running!");
         return;
     }
 

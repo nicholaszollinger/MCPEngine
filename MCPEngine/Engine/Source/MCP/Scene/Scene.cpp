@@ -42,7 +42,7 @@ namespace mcp
         tinyxml2::XMLDocument doc;
         if (doc.LoadFile(pFilePath) != tinyxml2::XML_SUCCESS)
         {
-            LogError("Failed to load Scene! XML Error: %", tinyxml2::XMLDocument::ErrorIDToName(doc.ErrorID()));
+            MCP_ERROR("Scene", "Failed to load Scene! XML Error: ", tinyxml2::XMLDocument::ErrorIDToName(doc.ErrorID()));
             return false;
         }
 
@@ -54,14 +54,14 @@ namespace mcp
             const char* pPackageFilePath = pPackageElement->Attribute("path");
             if (!pPackageFilePath)
             {
-                LogError("Failed to load scene! Couldn't find Package path in xml file!");
+                MCP_ERROR("Scene", "Failed to load scene! Couldn't find Package path in xml file!");
                 return false;
             }
 
             // Load the package.
             if (!PackageManager::Get()->LoadPackage(pPackageFilePath))
             {
-                LogError("Failed to load scene! Couldn't load package defined in xml 'path' attribute");
+                MCP_ERROR("Scene", "Failed to load scene! Couldn't load package defined in xml 'path' attribute");
                 return false;
             }
         }
@@ -71,7 +71,7 @@ namespace mcp
         if (!pSceneElement)
         {
             // Oh no the formatting of the xml document isn't standardized!
-            LogError("Failed to load scene! Couldn't find <%> Element!", kSceneElementName);
+            MCP_ERROR("Scene", "Failed to load scene! Couldn't find <%> Element!", kSceneElementName);
             return false;
         }
 
@@ -120,7 +120,7 @@ namespace mcp
             if (!pObject->PostLoadInit())
             {
                 // Log an error, but don't 
-                LogError("Object failed to successfully initialize!");
+                MCP_ERROR("Scene", "Object failed to successfully initialize!");
                 return false;
             }
         }
@@ -215,7 +215,7 @@ namespace mcp
         const auto result = m_objects.find(id);
         if (result == m_objects.end())
         {
-            LogWarning("Failed to Destroy Object! Object Id was invalid.");
+            MCP_WARN("Scene", "Failed to Destroy Object! Object Id was invalid.");
             return;
         }
 

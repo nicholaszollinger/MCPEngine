@@ -31,7 +31,7 @@ namespace mcp
         SDL_Texture* pTexture = SDL_CreateTextureFromSurface(static_cast<SDL_Renderer*>(pRenderer), pSurface);
         if (!pTexture)
         {
-            LogError("Failed to Create SDL_Texture from SDL_Surface! SDL_Error: %", SDL_GetError());
+            MCP_ERROR("SDL", "Failed to Create SDL_Texture from SDL_Surface! SDL_Error: ", SDL_GetError());
             SDL_FreeSurface(pSurface);
             return nullptr;
         }
@@ -51,7 +51,7 @@ namespace mcp
 
         if (!pSurface)
         {
-            LogError("Failed to Load SDL_Surface at filepath: %. SDL_Error: %", pFilePath, SDL_GetError());
+            MCP_ERROR("SDL", "Failed to Load SDL_Surface at filepath: ", pFilePath, ". SDL_Error: ", SDL_GetError());
             return nullptr;
         }
 
@@ -69,7 +69,7 @@ namespace mcp
 
         if (!pSurface)
         {
-            LogError("Failed to Load SDL_Surface from raw data! SDL_Error: %", SDL_GetError());
+            MCP_ERROR("SDL", "Failed to Load SDL_Surface from raw data! SDL_Error: ", SDL_GetError());
             return nullptr;
         }
 
@@ -93,7 +93,7 @@ namespace mcp
         auto* pChunk = Mix_LoadWAV(pFilePath);
         if (!pChunk)
         {
-            LogError("Failed to load Mix_Chunk at filepath: '%'!", pFilePath);
+            MCP_ERROR("SDL", "Failed to load Mix_Chunk at filepath: ", pFilePath);
             return nullptr;
         }
 
@@ -108,7 +108,7 @@ namespace mcp
         auto* pChunk = Mix_LoadWAV_RW(pSdlData, 0);
         if (!pChunk)
         {
-            LogError("Failed to load Mix_Chunk from data! SDL_Error: %", Mix_GetError());
+            MCP_ERROR("SDL", "Failed to load Mix_Chunk from data! SDL_Error: ", Mix_GetError());
             return nullptr;
         }
 
@@ -132,7 +132,7 @@ namespace mcp
         auto* pMusic = Mix_LoadMUS(pFilePath);
         if (!pMusic)
         {
-            LogError("Failed to load Mix_Music at filepath: '%'!", pFilePath);
+            MCP_ERROR("SDL", "Failed to load Mix_Music at filepath: ", pFilePath);
             return nullptr;
         }
 
@@ -147,7 +147,7 @@ namespace mcp
         auto* pMusic = Mix_LoadMUS_RW(pSdlData, 0);
         if (!pMusic)
         {
-            LogError("Failed to load Mix_Chunk from data! SDL_Error: %", Mix_GetError());
+            MCP_ERROR("SDL", "Failed to load Mix_Chunk from data! SDL_Error: ", Mix_GetError());
             return nullptr;
         }
 

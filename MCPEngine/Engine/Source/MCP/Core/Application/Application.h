@@ -45,10 +45,12 @@ namespace mcp
         Application& operator=(Application&&) = delete;
         
         bool Init(const ApplicationProperties& props, const char* pGameDataFilepath);
+        bool Init(const char* pGameDataFilepath);
         void Run();
         void Close() const;
 
     private:
+        bool LoadApplicationProperties(ApplicationProperties& outProps, const char* pFilepath);
         bool LoadGameData(const char* pGameDataFilepath);
     };
 

@@ -18,14 +18,14 @@ bool SdlRenderer::Init()
 {
     if (SDL_VideoInit(nullptr) != 0)
     {
-        mcp::LogError("Failed to initialize SDL_Video! SDL_Error: '%'", SDL_GetError());
+        MCP_ERROR("SDL", "Failed to initialize SDL_Video! SDL_Error: ", SDL_GetError());
         return false;
     }
 
     constexpr int kFlags = IMG_INIT_JPG | IMG_INIT_PNG;
     if (IMG_Init(kFlags) != kFlags)
     {
-        mcp::LogError("Failed to initialize SDL_Image! IMG_Error: '%'", IMG_GetError());
+        MCP_ERROR("SDL", "Failed to initialize SDL_Image! IMG_Error: ", IMG_GetError());
         return false;
     }
 
@@ -40,7 +40,7 @@ bool SdlRenderer::SetRenderTarget(mcp::WindowBase* pWindow)
     s_pRenderer = static_cast<SDL_Renderer*>(s_pWindow->GetRenderer());
     if (!s_pRenderer)
     {
-        mcp::LogError("Failed to get SDL_Renderer from mcp::WindowBase*!");
+        MCP_ERROR("SDLRenderer", "Failed to get SDL_Renderer from mcp::WindowBase*!");
         return false;
     }
 
@@ -62,7 +62,7 @@ void SdlRenderer::SetDrawColor(const Color& color)
 {
     if(SDL_SetRenderDrawColor(s_pRenderer, color.r, color.g, color.b, color.alpha) < 0)
     {
-        mcp::LogError("Failed to set color! SDL_Error: %", SDL_GetError());
+        MCP_ERROR("SDL", "Failed to set color! SDL_Error: ", SDL_GetError());
     }
 }
 
@@ -71,7 +71,7 @@ void SdlRenderer::FillScreen(const Color& color)
     SetDrawColor(color);
     if (SDL_RenderClear(s_pRenderer) != 0)
     {
-        mcp::LogError("Failed to clear screen! SDL_Error: %", SDL_GetError());
+        MCP_ERROR("SDL", "Failed to clear screen! SDL_Error: ", SDL_GetError());
     }
 }
 
@@ -80,7 +80,7 @@ void SdlRenderer::DrawLine(const Vec2Int& a, const Vec2Int& b, const Color& colo
     SetDrawColor(color);
     if (SDL_RenderDrawLine(s_pRenderer, a.x, a.y, b.x, b.y) != 0)
     {
-        mcp::LogError("Failed to draw line! SDL_Error: %", SDL_GetError());
+        MCP_ERROR("SDL", "Failed to draw line! SDL_Error: ", SDL_GetError());
     }
 }
 
@@ -91,7 +91,7 @@ void SdlRenderer::DrawFillRect(const RectInt& rect, const Color& color)
 
     if (SDL_RenderFillRect(s_pRenderer, &sdlRect) != 0)
     {
-        mcp::LogError("Failed to draw fill rect! SDL_Error: %", SDL_GetError());
+        MCP_ERROR("SDL", "Failed to draw fill rect! SDL_Error: ", SDL_GetError());
     }
 }
 
@@ -102,7 +102,7 @@ void SdlRenderer::DrawFillRect(const RectF& rect, const Color& color)
 
     if (SDL_RenderFillRectF(s_pRenderer, &sdlRect) != 0)
     {
-        mcp::LogError("Failed to draw fill rect! SDL_Error: %", SDL_GetError());
+        MCP_ERROR("SDL", "Failed to draw fill rect! SDL_Error: ", SDL_GetError());
     }
 }
 
@@ -113,7 +113,7 @@ void SdlRenderer::DrawRect(const RectInt& rect, const Color& color)
 
     if (SDL_RenderDrawRect(s_pRenderer, &sdlRect) != 0)
     {
-        mcp::LogError("Failed to draw rect! SDL_Error: %", SDL_GetError());
+        MCP_ERROR("SDL", "Failed to draw rect! SDL_Error: ", SDL_GetError());
     }
 }
 
@@ -124,7 +124,7 @@ void SdlRenderer::DrawRect(const RectF& rect, const Color& color)
 
     if (SDL_RenderDrawRectF(s_pRenderer, &sdlRect) != 0)
     {
-        mcp::LogError("Failed to draw rect! SDL_Error: %", SDL_GetError());
+        MCP_ERROR("SDL", "Failed to draw rect! SDL_Error: ", SDL_GetError());
     }
 }
 
@@ -191,6 +191,6 @@ void SdlRenderer::DrawTexture(const mcp::TextureRenderData& context)
         , mcp::FlipToSdl(context.flip)
     ) != 0)
     {
-        mcp::LogError("Failed to draw texture! SDL_Error: %", SDL_GetError());
+        MCP_ERROR("SDL", "Failed to draw texture! SDL_Error: ", SDL_GetError());
     }
 }

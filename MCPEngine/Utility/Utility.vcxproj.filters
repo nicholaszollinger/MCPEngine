@@ -19,14 +19,23 @@
     <ClCompile Include="Source\Utility\Thread\ThreadIdleEvent.cpp">
       <Filter>Thread</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Utility\Thread\WorkerThread.cpp">
-      <Filter>Thread</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Utility\String\StringId.cpp">
       <Filter>String</Filter>
     </ClCompile>
     <ClCompile Include="Source\Utility\String\FormatString.cpp">
       <Filter>String</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Logging\LogTarget.cpp">
+      <Filter>Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Logging\LogTargetConsoleWindow.cpp">
+      <Filter>Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Logging\LogCategory.cpp">
+      <Filter>Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Logging\Logger.cpp">
+      <Filter>Logging</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -84,6 +93,27 @@
     <ClInclude Include="Source\Utility\Types\Containers\UnorderedDenseArray.h">
       <Filter>Types\Containers</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Utility\Logging\Log.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Logging\LogConfig.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Logging\LogTarget.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Logging\LogType.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Logging\LogTargetConsoleWindow.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Logging\LogCategory.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Logging\Logger.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generic">
@@ -112,6 +142,9 @@
     </Filter>
     <Filter Include="Types\Containers">
       <UniqueIdentifier>{12381fcf-197f-4fc7-9fe4-df28c7fcceb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Logging">
+      <UniqueIdentifier>{a0902572-75b0-478d-9a6e-d6829a9ed94d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

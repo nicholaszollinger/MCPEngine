@@ -16,13 +16,13 @@ bool SDLAudioManager::Init()
 {
     if(SDL_AudioInit(nullptr) != 0)
     {
-        mcp::LogError("Failed to initialize SDL_Audio! SDL_Error: '%'", SDL_GetError());
+        MCP_ERROR("SDL", "Failed to initialize SDL_Audio! SDL_Error: ", SDL_GetError());
         return false;
     }
 
     if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) < 0)
     {
-        mcp::LogError("Failed to open SDL Mix_Audio: Mix_Error: '%'", Mix_GetError());
+        MCP_ERROR("SDL", "Failed to open SDL Mix_Audio: Mix_Error: ", Mix_GetError());
         return false;
     }
 
@@ -30,7 +30,7 @@ bool SDLAudioManager::Init()
     int audioFlags = MIX_INIT_MP3;
     if (Mix_Init(audioFlags) != audioFlags)
     {
-        mcp::LogError("Failed to initialize SDL_Mixer! Mix_Error: '%'", Mix_GetError());
+        MCP_ERROR("SDL", "Failed to initialize SDL_Mixer! Mix_Error: ", Mix_GetError());
         return false;
     }
 

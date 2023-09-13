@@ -6,6 +6,7 @@
 #include <type_traits>
 
 #include "../Math/FloatTester.h"
+#include "../String/FormatString.h"
 
 template<typename Type>
 struct Vector2
@@ -68,17 +69,19 @@ struct Vector2
     ///		@brief : Normalizes THIS vector! If you want to get a normalized version without changing this vector, use
     ///             'GetNormalized()'.
     //-----------------------------------------------------------------------------------------------------------------------------
-    //void Normalize()
-    //{
-    //    auto magnitude = GetMagnitude();
-    //    
-    //    // If our magnitude is zero, then return immediately.
-    //    if (CheckEqualFloats(magnitude, 0.0f, 0.0001f)) 
-    //        return;
+    void Normalize()
+    {
+        static_assert(std::is_floating_point_v<Type>, "Vector must have floating point data type to be Normalized!");
 
-    //    x = x / magnitude;
-    //    y = y / magnitude;
-    //}
+        auto magnitude = GetMagnitude();
+        
+        // If our magnitude is zero, then return immediately.
+        if (CheckEqualFloats(magnitude, 0.0f, 0.0001f)) 
+            return;
+
+        x = x / magnitude;
+        y = y / magnitude;
+    }
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -87,12 +90,14 @@ struct Vector2
     //
     ///		@brief : Returns a normalized Vector2 based on this vector's values. NOTE: This does not modify this vector.
     //-----------------------------------------------------------------------------------------------------------------------------
-    /*Vector2 GetNormalized() const
+    Vector2 GetNormalized() const
     {
+        static_assert(std::is_floating_point_v<Type>, "Vector must have floating point data type to get Normalized version!");
+
         Vector2 output = *this;
         output.Normalize();
         return output;
-    }*/
+    }
 
     // Operators
 
@@ -207,12 +212,11 @@ struct Vector2
         *this = *this / scalar;
         return *this;
     }
-
-    // TODO
-    /*std::string ToString() const
+    
+    std::string ToString() const
     {
-        return CombineToString("(", x, ", " , y, ")");
-    }*/
+        return CombineIntoString("(", x, ", " , y, ")");
+    }
 
     // Common Values.
     static constexpr Vector2 ZeroVector() { return Vector2(0,0); }
@@ -239,43 +243,6 @@ template<typename Type>
 float GetDistance(const Vector2<Type>& left, const Vector2<Type>& right)
 {
     return std::sqrt(GetSquaredDistance(left, right));
-}
-
-//-----------------------------------------------------------------------------------------------------------------------------
-//		NOTES:
-//
-///		@brief : Normalizes the vector. \n NOTE: If you want to get a normalized version without changing this vector, use
-///             'GetNormalized()'.
-//-----------------------------------------------------------------------------------------------------------------------------
-template<typename Type>
-void Normalize(Vector2<Type>& vec)
-{
-    static_assert(std::is_floating_point_v<Type> && "Normalizing Vectors should be done on floating-point typed Vectors!");
-
-    auto magnitude = vec.GetMagnitude();
-
-    // If our magnitude is zero, then return immediately.
-    if (CheckEqualFloats(magnitude, 0.f))
-        return;
-
-    vec.x = vec.x / magnitude;
-    vec.y = vec.y / magnitude;
-}
-
-//-----------------------------------------------------------------------------------------------------------------------------
-//		NOTES:
-//
-///		@brief : Returns a normalized Vector2 based on this vector's values. NOTE: This does not modify this vector.
-//-----------------------------------------------------------------------------------------------------------------------------
-template<typename Type>
-Vector2<float> GetNormalized(const Vector2<Type>& vec)
-{
-    Vector2<float> output;
-    output.x = static_cast<float>(vec.x);
-    output.y = static_cast<float>(vec.y);
-
-    Normalize(output);
-    return output;
 }
 
 using Vec2 = Vector2<float>;

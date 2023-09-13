@@ -56,7 +56,7 @@ namespace mcp
 
         if (!m_pWindow)
         {
-            LogError("Failed to create SDL_Window! SDL_Error: ", SDL_GetError());
+            MCP_ERROR("SDLWindow", "Failed to create SDL_Window! SDL_Error: ", SDL_GetError());
             return false;
         }
 
@@ -67,7 +67,7 @@ namespace mcp
 
         if (!m_pRenderer)
         {
-            LogError("Failed to create SDL_Renderer! SDL_Error: ", SDL_GetError());
+            MCP_ERROR("SDLWindow", "Failed to create SDL_Renderer! SDL_Error: ", SDL_GetError());
             SDL_DestroyWindow(m_pWindow);
             return false;
         }
@@ -75,7 +75,7 @@ namespace mcp
         // Set the blend mode to allow alpha blending:
         if (SDL_SetRenderDrawBlendMode(m_pRenderer, SDL_BLENDMODE_BLEND) < 0)
         {
-            LogError("Failed to Set the BlendMode of the Renderer! SDL_Error: ", SDL_GetError());
+            MCP_ERROR("SDLWindow", "Failed to Set the BlendMode of the Renderer! SDL_Error: ", SDL_GetError());
             SDL_DestroyRenderer(m_pRenderer);
             SDL_DestroyWindow(m_pWindow);
             return false;

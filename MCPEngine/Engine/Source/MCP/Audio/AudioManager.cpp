@@ -21,7 +21,7 @@ namespace mcp
     {
         if (!AudioPlatform::Init())
         {
-            LogError("Failed to initialize AudioManager!");
+            MCP_ERROR("Audio", "Failed to initialize AudioManager!");
             return false;
         }
 

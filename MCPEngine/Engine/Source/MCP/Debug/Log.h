@@ -2,168 +2,97 @@
 // Log.h
 
 //-----------------------------------------------------------------------------------------------------------------------------
-//		NOTES/PLANS:
-//  
-//      Needs:
-//       - KISS!!!
-//       - I need to decide whether I want to still create a log file in release mode, or if I just turn off
-//         logging entirely... I was thinking about saving some sort of runtime history in release for bug reports
-//         or something. Perhaps the logging of the game's state on a bug is in a different system...
+//		SIMPLE OVERVIEW:
+//      Each log macro takes in a "who" and then the "what". The "who" is the class or system responsible for the message.
+//      The "what" is whatever you want to write in the message. Arguments are separated by a comma and each argument must be
+//      'addable' to a string.
 //
-//      Resources:
-//       - I am looking at spdlog's github to get ideas on the formatting and basic capabilities that
-//           I would like to support.
-//       - Formatting like printf: https://stackoverflow.com/questions/2342162/stdstring-formatting-like-sprintf
-//       - TODO: Update to Roody's Logging system if you can.
+//          -EXAMPLE: MCP_LOG("Application", "The Application has started! Application name: ", applicationName);
+//              - Result -> "[Time of the Log] [Application] The Application has started! Application name: Cool Game"
+//
+//      MCP_LOG     -> Simple logging messages.
+//      MCP_WARN    -> Warnings, will always be posted.
+//      MCP_ERROR   -> Errors, will always be posted.
+//      MCP_CRITICAL-> Used for errors that completely break the program. Mainly engine level stuff.
 //
 //-----------------------------------------------------------------------------------------------------------------------------
 
-// TODO: I want to wrap my includes in Macros.
-//      This is so that I reduce the weight of the Logging system in release mode to 'zero'.
 #include <string>
-#include "LogFontTypes.h"
 #include "MCP/Core/Config.h"
 #include "MCP/Core/GlobalManager.h"
 #include "MCP/Core/Macros.h"
 #include "Utility/String/FormatString.h"
 
-namespace mcp
-{
-    namespace LoggerInternal
-    {
-        class Logger final : public IProcess
-        {
-            static constexpr const char* kDirectory = "Log";            // This folder will be located in the Game's ProjectDir.
-            static constexpr const char* kLogFilePath = "/MCPLog.txt";  // Name of the Default log file.
-            static inline void* m_pOutFile = nullptr;                   // Pointer to the std::ofstream construct.
+// NEW LOGGING SYSTEM
+#include "Utility/Logging/Log.h"
 
-            DEFINE_GLOBAL_MANAGER(Logger)
-
-        public:
-            Logger() = default;
-
-            virtual bool Init() override;
-            virtual void Close() override;
-
-            void Log(const char* pMsg);
-            void Log(const std::string& msg);
-
-            template<typename...Args>
-            void Log(const char* pFormat, const Args&...args)
-            {
-                const std::string output(FormatString(pFormat, args...));
-                Log(output.c_str());
-            }
-
-            void Warn(const char* pMsg);
-            void Warn(const std::string& msg);
-
-            template<typename...Args>
-            void Warn(const char* pFormat, const Args&...args)
-            {
-                const std::string output(FormatString(pFormat, args...));
-                Warn(output.c_str());
-            }
-
-            void Error(const char* pMsg);
-            void Error(const std::string& msg);
-
-            template<typename...Args>
-            void Error(const char* pFormat, const Args&...args)
-            {
-                const std::string output(FormatString(pFormat, args...));
-                Error(output.c_str());
-            }
-
-        private:
-            std::string FormatLog(const LogType type, const char* msg);
-            void Post(const std::string& msg);
-
-            template<typename LoggerTarget>
-            LoggerTarget& GetLoggerTarget()
-            {
-                static LoggerTarget target;
-                return target;
-            }
-        };
-    }
-}
+#ifdef _DEBUG
+    #define MCP_LOGGING_ENABLED 1
+#else 
+    #define MCP_LOGGING_ENABLED 0
+#endif
 
 //-----------------------------------------------------------------------------------------------------------------------------
-//  GLOBAL INTERFACE BELOW
+//		NOTES:
+//      Pretty up the File Name for Debugging Messages:
+//      Adapted from: https://stackoverflow.com/questions/8487986/file-macro-shows-full-path
+//           - strrchr() gets the last occurrence of a certain character in a const char*.
+//           - It either returns a pointer to the spot where it finishes, or it returns nullptr if nothing is found.
+//           - So, we either return the pointer to the path just after the final '\' OR we return the file path.
+//		
+///		@brief : Get just the filename and extension from the __FILE__ macro.
 //-----------------------------------------------------------------------------------------------------------------------------
-namespace mcp
-{
-    void Log(const char* pMsg);
-    void LogWarning(const char* pMsg);
-    void LogError(const char* pMsg);
+#define GET_CURRENT_FILENAME (strrchr(__FILE__, '\\')? strrchr(__FILE__, '\\') + 1 : __FILE__)
 
-    //-----------------------------------------------------------------------------------------------------------------------------
-    ///		@brief : Log a message that follows the format rules below.
-    ///         \n Log messages can also be found in the output log file in the Log folder in the game project.
-    /// 
-    ///         \n\n FORMAT RULES:
-    ///         \n Anytime you want to insert an argument, put a '%' character into the formatted string.
-    ///         \n Each argument following the format string will be added to the final string in order.
-    ///         \n\n EXAMPLE:
-    ///         \n FormatString("% world% %", "Hello", '!', 123); will produce the message: "Hello World! 123".
-    ///         \n (You can add a newline char to the format string, I can't here because of comment formatting.)\n
-    /// 
-    ///		@tparam Args : Any type'd arguments that you want to add into the std::string.
-    ///		@param pFormat : String that defines the format of the final output.
-    ///		@param args : Values to add into the string in sequential order.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    template<typename...Args>
-    void Log([[maybe_unused]] const char* pFormat, [[maybe_unused]] const Args&...args)
-    {
-#ifdef _DEBUG
-        LoggerInternal::Logger::Get()->Log(pFormat, args...);
+// Enable Multithreaded logging if the engine is multithreaded.
+#if MCP_LOGGING_ENABLED
+#if MCP_MULTITHREADING_ENABLED
+#pragma warning (push)
+#pragma warning (disable : 4005) // Disable the macro redefinition warning.
+#define LOGGER_IS_MULTITHREADED 1
+#pragma warning (pop)
 #endif
-    }
 
-    //-----------------------------------------------------------------------------------------------------------------------------
-    ///		@brief : Log a warning message that follows the format rules below.
-    ///         \n Log messages can also be found in the output log file in the Log folder in the game project.
-    /// 
-    ///         \n\n FORMAT RULES:
-    ///         \n Anytime you want to insert an argument, put a '%' character into the formatted string.
-    ///         \n Each argument following the format string will be added to the final string in order.
-    ///         \n\n EXAMPLE:
-    ///         \n FormatString("% world% %", "Hello", '!', 123); will produce the message: "Hello World! 123".
-    ///         \n (You can add a newline char to the format string, I can't here because of comment formatting.)\n
-    /// 
-    ///		@tparam Args : Any type'd arguments that you want to add into the std::string.
-    ///		@param pFormat : String that defines the format of the final output.
-    ///		@param args : Values to add into the string in sequential order.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    template<typename...Args>
-    void LogWarning([[maybe_unused]] const char* pFormat, [[maybe_unused]] const Args&...args)
-    {
-#ifdef _DEBUG
-        LoggerInternal::Logger::Get()->Warn(pFormat, args...);
-#endif
-    }
+//-----------------------------------------------------------------------------------------------------------------------------
+//		NOTES:
+//		
+///		@brief : Log a message, passing in any number of arguments to be combined into a single string.
+///		@param Category : Name of the category you want this log to be a part of. The "Who" or "Where" this log is coming from.
+///             \nNOTE: If you haven't defined the log in data, the log will only be displayed to the LogTarget. If you want
+///             to turn off the log or have it just write to a file, etc, you need to set that in the config file.
+//-----------------------------------------------------------------------------------------------------------------------------
+#define MCP_LOG(Category, ...) _LOG(Category, __VA_ARGS__) //Logger::Log(Category, __VA_ARGS__)
 
-    //-----------------------------------------------------------------------------------------------------------------------------
-    ///		@brief : Log an error that follows the format rules below.
-    ///         \n Log messages can also be found in the output log file in the Log folder in the game project.
-    /// 
-    ///         \n\n FORMAT RULES:
-    ///         \n Anytime you want to insert an argument, put a '%' character into the formatted string.
-    ///         \n Each argument following the format string will be added to the final string in order.
-    ///         \n\n EXAMPLE:
-    ///         \n FormatString("% world% %", "Hello", '!', 123); will produce the message: "Hello World! 123".
-    ///         \n (You can add a newline char to the format string, I can't here because of comment formatting.)\n
-    /// 
-    ///		@tparam Args : Any type'd arguments that you want to add into the std::string.
-    ///		@param pFormat : String that defines the format of the final output.
-    ///		@param args : Values to add into the string in sequential order.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    template<typename...Args>
-    void LogError([[maybe_unused]] const char* pFormat, [[maybe_unused]] const Args&...args)
-    {
-#ifdef _DEBUG
-        LoggerInternal::Logger::Get()->Error(pFormat, args...);
+//-----------------------------------------------------------------------------------------------------------------------------
+//		NOTES:
+//		
+///		@brief : Log a warning message, passing in any number of arguments to be combined into a single string.
+///		@param Category : Name of the category you want this log to be a part of. The "Who" or "Where" this log is coming from.
+//-----------------------------------------------------------------------------------------------------------------------------
+#define MCP_WARN(Category, ...) _WARN(Category, __VA_ARGS__) //Logger::VitalLog(Category, LogType::kWarning, __VA_ARGS__)
+
+//-----------------------------------------------------------------------------------------------------------------------------
+//		NOTES:
+//		
+///		@brief : Log an error message, passing in any number of arguments to be combined into a single string.
+///		@param Category : Name of the category you want this log to be a part of. The "Who" or "Where" this log is coming from.
+//-----------------------------------------------------------------------------------------------------------------------------
+#define MCP_ERROR(Category, ...) _ERROR(Category, __VA_ARGS__)//Logger::Error(Category, __VA_ARGS__)
+
+//-----------------------------------------------------------------------------------------------------------------------------
+//		NOTES:
+//		
+///		@brief : Log a critical message, passing in any number of arguments to be combined into a single string. NOTE, after
+///         posting the message, this will break execution!
+///     @param Category : Name of the category you want this log to be a part of. The "Who" or "Where" this log is coming from.
+//-----------------------------------------------------------------------------------------------------------------------------
+#define MCP_CRITICAL(Category, ...) _CRITICAL(Category, __VA_ARGS__) //Logger::Critical(Category, __VA_ARGS__)
+
+#else
+
+#define MCP_LOG(Category, ...)
+#define MCP_WARN(Category, ...)
+#define MCP_ERROR(Category, ...)
+#define MCP_CRITICAL(Category, ...)
+
 #endif
-    }
-}

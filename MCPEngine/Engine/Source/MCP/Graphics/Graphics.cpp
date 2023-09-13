@@ -32,7 +32,7 @@ namespace mcp
         // Initialize the Renderer with the Window class.
         if (!Renderer::Init())
         {
-            LogError("Failed to initialize GraphicsManager! Failed to initialize Renderer!");
+            MCP_ERROR("Renderer", "Failed to initialize GraphicsManager! Failed to initialize Renderer!");
             return false;
         }
 
@@ -76,7 +76,7 @@ namespace mcp
     {
         if (!Renderer::SetRenderTarget(m_pWindow))
         {
-            LogError("Failed to SetRenderTarget!");
+            MCP_ERROR("Renderer", "Failed to SetRenderTarget!");
             return false;
         }
 

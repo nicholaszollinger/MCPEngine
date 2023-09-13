@@ -29,7 +29,7 @@ namespace mcp
             const auto result = factoryFunctions.find(id);
             if (result == factoryFunctions.end())
             {
-                LogError("Failed create '%'! No matching ColliderTypeId was found!", pColliderTypeName);
+                MCP_ERROR("Collision", "Failed create '", pColliderTypeName, "'! No matching ColliderTypeId was found!");
                 return false;
             }
 

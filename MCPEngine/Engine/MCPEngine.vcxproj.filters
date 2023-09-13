@@ -87,9 +87,6 @@
     <ClInclude Include="Source\Platform\TinyXML2\tinyxml2.h">
       <Filter>Platform\TinyXML2</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Platform\Windows\WindowsConsoleWindow.h">
-      <Filter>Platform\Windows</Filter>
-    </ClInclude>
     <ClInclude Include="Source\MCP\Audio\AudioClip.h">
       <Filter>MCP\Audio</Filter>
     </ClInclude>
@@ -243,9 +240,6 @@
     <ClInclude Include="Source\MCP\Debug\Log.h">
       <Filter>MCP\Debug</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MCP\Debug\LogFontTypes.h">
-      <Filter>MCP\Debug</Filter>
-    </ClInclude>
     <ClInclude Include="Source\MCP\Scene\Object.h">
       <Filter>MCP\Scene</Filter>
     </ClInclude>
@@ -277,9 +271,6 @@
     </ClCompile>
     <ClCompile Include="Source\Platform\TinyXML2\tinyxml2.cpp">
       <Filter>Platform\TinyXML2</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Platform\Windows\WindowsConsoleWindow.cpp">
-      <Filter>Platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="Source\MCP\Audio\AudioClip.cpp">
       <Filter>MCP\Audio</Filter>
@@ -388,9 +379,6 @@
     </ClCompile>
     <ClCompile Include="Source\MCP\Core\Resource\Zip.cpp">
       <Filter>MCP\Core\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MCP\Debug\Log.cpp">
-      <Filter>MCP\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Source\MCP\Scene\Object.cpp">
       <Filter>MCP\Scene</Filter>

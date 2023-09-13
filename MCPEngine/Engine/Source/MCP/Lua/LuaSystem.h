@@ -111,7 +111,7 @@ namespace mcp
         if (!PushParams(paramCount, params...))
         {
             // Failed to call the function!
-            LogError("LUA: Failed to call lua function! Parameters were invalid!");
+            MCP_ERROR("Lua", "Failed to call lua function! Parameters were invalid!");
             PopStack(1);
             return;
         }
@@ -135,14 +135,14 @@ namespace mcp
         // If the table does not exist,
         if (!GetTable(tableName))
         {
-            LogError("LUA: Failed to get element in Lua table named '%'!", tableName);
+            MCP_ERROR("Lua", "Failed to get element in Lua table named ", tableName);
             return {};
         }
 
         // If the element does not exist.
         if (!GetElement(elementName))
         {
-            LogError("LUA: Failed to get element in Lua table named '%'!", tableName);
+            MCP_ERROR("Lua", "Failed to get element in Lua table named ", tableName);
             PopStack(1);
             return {};
         }
@@ -186,7 +186,7 @@ namespace mcp
         // TODO: Functions, UserData, std::string
         else
         {
-            LogError("LUA: Failed to get Lua element! Type was not a valid Lua (or currently supported) Type");
+            MCP_ERROR("Lua", "Failed to get Lua element! Type was not a valid Lua (or currently supported) Type");
             return {};
         }
     }
@@ -209,7 +209,7 @@ namespace mcp
         // Check if the table exists.
         if (!GetTable(tableName))
         {
-            LogError("LUA: Failed to set element in Lua table named '%'!", tableName);
+            MCP_ERROR("Lua", "Failed to set element in Lua table named ", tableName, "!");
             return;
         }
 
@@ -217,7 +217,7 @@ namespace mcp
         // Check to see if the element exists for that table.
         if (!GetElement(elementName))
         {
-            LogWarning("LUA: Failed to set element in Lua table named '%'! No element named '%' exists!", tableName, elementName);
+            MCP_WARN("Lua", "Failed to set element in Lua table named ", tableName, "! No element named ", elementName, " exists!");
             PopStack(2);
             return;
         }
@@ -259,7 +259,7 @@ namespace mcp
 
         else
         {
-            LogError("LUA: Failed to set Lua element! Type was not a valid Lua (or currently supported) Type");
+            MCP_ERROR("Lua", "Failed to set Lua element! Type was not a valid Lua (or currently supported) Type");
             return;
         }
 
@@ -309,7 +309,7 @@ namespace mcp
 
         else
         {
-            LogError("LUA: Failed to push Lua parameter! Type was not a valid Lua (or currently supported) Type");
+            MCP_ERROR("Lua", "Failed to push Lua parameter! Type was not a valid Lua (or currently supported) Type");
             return false;
         }
 
@@ -332,7 +332,7 @@ namespace mcp
     {
         if (!Push(std::forward<Param>(param)))
         {
-            LogError("LUA: Failed to push lua parameter!");
+            MCP_ERROR("Lua", "Failed to push lua parameter!");
 
             // Pop off each parameter that we have pushed.
             PopStack(paramCount);

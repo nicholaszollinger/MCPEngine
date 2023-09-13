@@ -57,7 +57,7 @@ namespace mcp
 
         if (!pOwner->AddComponent<TransformComponent>(x, y))
         {
-            LogError("Failed to add TransformComponent from data!");
+            MCP_ERROR("TransformComponent", "Failed to add TransformComponent from data!");
             return false;
         }
 
