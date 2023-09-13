@@ -1,6 +1,7 @@
 // Application.cpp
 #include "Application.h"
 
+#include <fstream>
 #include "BleachNew.h"
 #include "MCP/Debug/Log.h"
 #include "MCP/Audio/AudioManager.h"
@@ -103,7 +104,7 @@ namespace mcp
         }
 
         // Initialize the Window:
-        if (!GraphicsManager::Get()->GetWindow()->Init(props.pWindowName, props.defaultWindowWidth, props.defaultWindowHeight))
+        if (!GraphicsManager::Get()->GetWindow()->Init(props.windowName.c_str(), props.defaultWindowWidth, props.defaultWindowHeight))
         {
             MCP_ERROR("Application", "Failed to initialize Application! Failed to initialize the Window!");
             Close();
@@ -129,6 +130,12 @@ namespace mcp
         return true;
     }
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Initialize the MCPEngine and all of its dependencies.
+    ///		@param pGameDataFilepath : Path to the GameData that we are using to run the game.
+    //-----------------------------------------------------------------------------------------------------------------------------
     bool Application::Init(const char* pGameDataFilepath)
     {
         // Initialize Bleach Leak Detector:
@@ -160,14 +167,14 @@ namespace mcp
 
 #endif
 
+        // Load the ApplicationProperties from Data.
         ApplicationProperties props;
-        /*
         if (!LoadApplicationProperties(props, "Config/AppProps.config"))
         {
             MCP_CRITICAL("Application", "Failed to load ApplicationProperties!");
             Close();
             return false;
-        }*/
+        }
 
         // Create GlobalManagers and save a reference in processes.
         GlobalManagerFactory::Create<lua::LuaLayer>();
@@ -195,7 +202,7 @@ namespace mcp
         }
 
         // Initialize the Window:
-        if (!GraphicsManager::Get()->GetWindow()->Init(props.pWindowName, props.defaultWindowWidth, props.defaultWindowHeight))
+        if (!GraphicsManager::Get()->GetWindow()->Init(props.windowName.c_str(), props.defaultWindowWidth, props.defaultWindowHeight))
         {
             MCP_ERROR("Application", "Failed to initialize Application! Failed to initialize the Window!");
             Close();
@@ -250,8 +257,69 @@ namespace mcp
         }
     }
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //      This is very 'built for specific data'. I would like to extract certain functions when I get to making my parser interfaces.
+    //		
+    ///		@brief : 
+    ///		@param outProps : 
+    ///		@param pFilepath : 
+    ///		@returns : 
+    //-----------------------------------------------------------------------------------------------------------------------------
     bool Application::LoadApplicationProperties(ApplicationProperties& outProps, const char* pFilepath)
     {
+        std::ifstream inFile(pFilepath, std::ios::in);
+        if (!inFile.is_open())
+        {
+            MCP_ERROR("Application", "Failed to open AppProps.config at filepath: ", pFilepath);
+            return false;
+        }
+
+        // Lambda to check for a whitespace char.
+        const auto isWhiteSpace = [](const char val) -> bool
+        {
+           return val == ' '
+                || val == '\t'
+                || val == '\n'
+                || val == '\r'
+                || val == '\v'
+                || val == '\f';
+        };
+
+        // Lambda to remove all whitespace from the line.
+        // I can't use the c++20 version -> std::erase_if(line, isWhiteSpace);
+        // So I just grabbed the implementation from cppreference and put it in a lambda.
+        // https://en.cppreference.com/w/cpp/string/basic_string/erase2
+        auto eraseIf = [](std::string& str, const std::function<bool(const char)>& predicate) -> void
+        {
+            const auto it = std::remove_if(str.begin(), str.end(), predicate);
+            str.erase(it, str.end());
+        };
+
+        std::string line;
+
+        // Go to the first item.
+        while (std::getline(inFile, line))
+        {
+            if (line[0] != '#' && line[0] != ';' && !line.empty())
+                break;
+        }
+
+        // Get the Window Name.
+        auto endOfName = line.find_first_of('=');
+        outProps.windowName = line.substr(endOfName + 1, std::string::npos);
+
+        // Get the Width
+        std::getline(inFile, line);
+        endOfName = line.find_first_of('=');
+        auto val = line.substr(endOfName + 1, std::string::npos);
+        outProps.defaultWindowWidth = std::stoi(val);
+
+        // Get the Height
+        std::getline(inFile, line);
+        endOfName = line.find_first_of('=');
+        val = line.substr(endOfName + 1, std::string::npos);
+        outProps.defaultWindowHeight = std::stoi(val);
 
         return true;
     }

@@ -14,7 +14,7 @@ SimpleInstrumentationProfiler::SimpleInstrumentationProfiler(const char* label)
 
 SimpleInstrumentationProfiler::~SimpleInstrumentationProfiler()
 {
-    const double result = m_timer.GetTimer();
+    [[maybe_unused]] const double result = m_timer.GetTimer();
     
     // Log the time.
     _LOG("Profiler", "[", m_label, "] Result: " , result , "ms");

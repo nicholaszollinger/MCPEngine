@@ -59,7 +59,7 @@ bool Logger::LoadCategories(const char* filepath)
 
     while (std::getline(inFile, line))
     {
-        if (line[0] == '#' || line[0] == ';')
+        if (line[0] == '#' || line[0] == ';' || line.empty())
             continue;
 
         const auto isWhiteSpace = [](const char val) -> bool

@@ -42,7 +42,7 @@ namespace mcp::ComponentInternal
     //-----------------------------------------------------------------------------------------------------------------------------
     ComponentTypeId GenerateComponentId(const char* pComponentName)
     {
-        return GenerateId(pComponentName);
+        return HashString64(pComponentName);
     }
 #endif
 }

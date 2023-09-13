@@ -1,6 +1,7 @@
 #pragma once
 // Application.h
 
+#include <string>
 #include <vector>
 
 namespace mcp
@@ -12,7 +13,7 @@ namespace mcp
     struct ApplicationProperties
     {
         // Name to give the Application's Main Window.
-        const char* pWindowName  = nullptr;
+        std::string windowName;
 
         // Starting window width of the application. Setting either width or height to -1
         // will default to fullscreen.
