@@ -3,10 +3,7 @@
 #include "LuaDebug.h"
 
 #include <cassert>
-//#pragma warning(push)
-#pragma warning(disable : 4701)
-#include <lua.hpp>
-//#pragma warning(pop)
+#include "LuaSource.h"
 
 #include "MCP/Debug/Log.h"
 

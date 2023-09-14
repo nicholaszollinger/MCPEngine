@@ -4,6 +4,10 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4324)
+#pragma warning(disable : 4244)
+
 #define ldo_c
 #define LUA_CORE
 
@@ -994,4 +998,4 @@ int luaD_protectedparser (lua_State *L, ZIO *z, const char *name,
   return status;
 }
 
-
+#pragma warning(pop)

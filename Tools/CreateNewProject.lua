@@ -266,6 +266,7 @@ m.CreateBranch();
 -- VS Variables.
 local ObjDirectoryPath = "!$(SolutionDir)Build/Intermediate/$(ProjectName)/$(Configuration)/$(PlatformTarget)/";
 local UtilitySourcePath = "$(SolutionDir)MCPEngine/Utility/Source/";
+local LuaSourcePath = "$(SolutionDir)MCPEngine/Lua/Source/";
 local EngineSourcePath = "$(SolutionDir)MCPEngine/Engine/Source/";
 
 -- CREATE THE NEW SOLUTION
@@ -280,11 +281,13 @@ workspace(NewProjectName);
     filter "configurations:Debug"
         defines {"DEBUG"}
         symbols "On"
+        linkoptions {"/ignore:4099 /ignore:4098"}
 
     -- Solution-wide Release Configuration settings
     filter "configurations:Release"
         defines {"NDEBUG"}
         optimize "On"
+        linkoptions {"/ignore:4099 /LTCG"}
 
     -- Platform Setup.
     filter { "platforms:x64"}
@@ -292,19 +295,29 @@ workspace(NewProjectName);
         architecture "x64"
 
 -- ENGINE PROJECTS
-group "Engine"
+group "Engine/Dependencies"
     externalproject("Utility")
         location(m.engineRoot .. "Utility/")
         uuid("b61061c3-ac16-458d-9348-cd7a73565573")
-        kind "StaticLib"
-        language "C++"
+        kind("StaticLib")
+        language("C++")
 
+    externalproject("Lua")
+        location(m.engineRoot .. "Lua/")
+        uuid("10803e7e-c6a8-467b-85b2-1ab4b64955d6")
+        kind("StaticLib")
+        language("C++")
+        links {"Utility"}
+        dependson{"Utility"}
+
+group "Engine"
     externalproject("MCPEngine")
         location (m.engineRoot .. "Engine/")
         uuid("0a2bae05-3362-489b-902d-2b9015220220")
-        kind "StaticLib"
-        language "C++"
-        links {"Utility"}
+        kind("StaticLib")
+        language("C++")
+        links {"Utility", "Lua"}
+        dependson{"Lua", "Utility"}
 
 -- GAME PROJECT
 group "Game"
@@ -314,16 +327,18 @@ group "Game"
         language "C++"
         targetdir("$(SolutionDir)Build/Bin/$(PlatformTarget)/$(Configuration)/");
         objdir(ObjDirectoryPath);
-        links {"MCPEngine", "Utility"}
+        links {"Utility", "Lua", "MCPEngine"}
         cppdialect "C++17"
         warnings "Extra"
-        libdirs {"$(SolutionDir)Build/Lib/MCPEngine/$(PlatformTarget)/$(Configuration)/"}
+        libdirs {"$(SolutionDir)Build/Lib/Engine/MCPEngine/$(PlatformTarget)/$(Configuration)/"}
         includedirs 
         {
             UtilitySourcePath,
+            LuaSourcePath,
             EngineSourcePath,
         };
 
+        dependson{"MCPEngine", "Lua", "Utility"}
         dependenciesfile("MCPEngine.lib")
 
         -- System SDK version.

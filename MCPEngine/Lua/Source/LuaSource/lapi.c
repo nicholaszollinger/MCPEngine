@@ -4,6 +4,10 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4702)
+
 #define lapi_c
 #define LUA_CORE
 
@@ -1237,7 +1241,6 @@ LUA_API int lua_gc (lua_State *L, int what, ...) {
 ** miscellaneous functions
 */
 
-
 LUA_API int lua_error (lua_State *L) {
   TValue *errobj;
   lua_lock(L);
@@ -1251,7 +1254,6 @@ LUA_API int lua_error (lua_State *L) {
   /* code unreachable; will unlock when control actually leaves the kernel */
   return 0;  /* to avoid warnings */
 }
-
 
 LUA_API int lua_next (lua_State *L, int idx) {
   Table *t;
@@ -1463,4 +1465,4 @@ LUA_API void lua_upvaluejoin (lua_State *L, int fidx1, int n1,
   luaC_objbarrier(L, f1, *up1);
 }
 
-
+#pragma warning(pop)

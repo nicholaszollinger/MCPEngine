@@ -90,9 +90,9 @@
 
 #else
 
-#define MCP_LOG(Category, ...)
-#define MCP_WARN(Category, ...)
-#define MCP_ERROR(Category, ...)
-#define MCP_CRITICAL(Category, ...)
+#define MCP_LOG(Category, ...) void(0)
+#define MCP_WARN(Category, ...) void(0)
+#define MCP_ERROR(Category, ...) void(0)
+#define MCP_CRITICAL(Category, ...) void(0)
 
 #endif

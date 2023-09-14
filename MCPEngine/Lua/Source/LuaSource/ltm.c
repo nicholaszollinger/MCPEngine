@@ -4,6 +4,9 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4702)
+
 #define ltm_c
 #define LUA_CORE
 
@@ -269,3 +272,4 @@ void luaT_getvarargs (lua_State *L, CallInfo *ci, StkId where, int wanted) {
     setnilvalue(s2v(where + i));
 }
 
+#pragma warning(pop)

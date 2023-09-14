@@ -4,6 +4,9 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4244)
+
 #define ldebug_c
 #define LUA_CORE
 
@@ -916,3 +919,4 @@ int luaG_traceexec (lua_State *L, const Instruction *pc) {
   return 1;  /* keep 'trap' on */
 }
 
+#pragma warning(pop)

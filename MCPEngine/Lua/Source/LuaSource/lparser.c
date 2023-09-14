@@ -4,6 +4,10 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4310)
+#pragma warning(disable : 4244)
+
 #define lparser_c
 #define LUA_CORE
 
@@ -167,7 +171,6 @@ static void codename (LexState *ls, expdesc *e) {
   codestring(e, str_checkname(ls));
 }
 
-
 /*
 ** Register a new local variable in the active 'Proto' (for debug
 ** information).
@@ -259,7 +262,6 @@ static LocVar *localdebuginfo (FuncState *fs, int vidx) {
   }
 }
 
-
 /*
 ** Create an expression representing variable 'vidx'
 */
@@ -319,7 +321,6 @@ static void adjustlocalvars (LexState *ls, int nvars) {
     var->vd.pidx = registerlocalvar(ls, fs, var->vd.name);
   }
 }
-
 
 /*
 ** Close the scope for all variables up to level 'tolevel'.
@@ -1964,3 +1965,4 @@ LClosure *luaY_parser (lua_State *L, ZIO *z, Mbuffer *buff,
   return cl;  /* closure is on the stack, too */
 }
 
+#pragma warning(pop)

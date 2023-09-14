@@ -4,6 +4,10 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4310)
+#pragma warning(disable : 4244)
+
 #define lcode_c
 #define LUA_CORE
 
@@ -1830,3 +1834,5 @@ void luaK_finish (FuncState *fs) {
     }
   }
 }
+
+#pragma warning(pop)

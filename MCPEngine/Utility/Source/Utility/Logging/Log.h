@@ -21,13 +21,13 @@
 
 #else
 
-#define _INIT_LOGGER(LogOutputFile)
-#define _CLOSE_LOGGER()
-#define _LOG(Category, ...) 
-#define _WARN(Category, ...)
-#define _ERROR(Category, ...)
-#define _CRITICAL(Category, ...)
+#define _INIT_LOGGER(LogOutputFile) void(0)
+#define _CLOSE_LOGGER() void(0)
+#define _LOG(Category, ...) void(0)
+#define _WARN(Category, ...) void(0)
+#define _ERROR(Category, ...) void(0)
+#define _CRITICAL(Category, ...) void(0)
 
-#define _LOAD_LOG_CATEGORIES(CategoryDataFilepath)
+#define _LOAD_LOG_CATEGORIES(CategoryDataFilepath) void(0)
 
 #endif

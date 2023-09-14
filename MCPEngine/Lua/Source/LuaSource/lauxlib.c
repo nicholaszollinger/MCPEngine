@@ -4,6 +4,9 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4244)
+
 #define lauxlib_c
 #define LUA_LIB
 
@@ -1104,3 +1107,4 @@ LUALIB_API void luaL_checkversion_ (lua_State *L, lua_Number ver, size_t sz) {
                   (LUAI_UACNUMBER)ver, (LUAI_UACNUMBER)v);
 }
 
+#pragma warning(pop)

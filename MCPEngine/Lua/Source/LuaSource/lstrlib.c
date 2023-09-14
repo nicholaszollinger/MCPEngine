@@ -4,6 +4,10 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4310)
+#pragma warning(disable : 4244)
+
 #define lstrlib_c
 #define LUA_LIB
 
@@ -1872,3 +1876,4 @@ LUAMOD_API int luaopen_string (lua_State *L) {
   return 1;
 }
 
+#pragma warning(pop)

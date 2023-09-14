@@ -4,6 +4,10 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4701)
+#pragma warning(disable : 4702)
+
 #define lobject_c
 #define LUA_CORE
 
@@ -85,7 +89,6 @@ static lua_Number numarith (lua_State *L, int op, lua_Number v1,
   }
 }
 
-
 int luaO_rawarith (lua_State *L, int op, const TValue *p1, const TValue *p2,
                    TValue *res) {
   switch (op) {
@@ -121,7 +124,6 @@ int luaO_rawarith (lua_State *L, int op, const TValue *p1, const TValue *p2,
     }
   }
 }
-
 
 void luaO_arith (lua_State *L, int op, const TValue *p1, const TValue *p2,
                  StkId res) {
@@ -590,3 +592,4 @@ void luaO_chunkid (char *out, const char *source, size_t srclen) {
   }
 }
 
+#pragma warning (pop)

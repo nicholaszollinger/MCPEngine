@@ -4,6 +4,9 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4310)
+
 #define ltable_c
 #define LUA_CORE
 
@@ -978,3 +981,5 @@ Node *luaH_mainposition (const Table *t, const TValue *key) {
 int luaH_isdummy (const Table *t) { return isdummy(t); }
 
 #endif
+
+#pragma warning (pop)
