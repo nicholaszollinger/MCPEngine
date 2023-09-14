@@ -4,6 +4,9 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4702)
+
 #define loslib_c
 #define LUA_LIB
 
@@ -428,3 +431,4 @@ LUAMOD_API int luaopen_os (lua_State *L) {
   return 1;
 }
 
+#pragma warning(pop)

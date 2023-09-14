@@ -4,6 +4,9 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4244)
+
 #define lfunc_c
 #define LUA_CORE
 
@@ -292,3 +295,4 @@ const char *luaF_getlocalname (const Proto *f, int local_number, int pc) {
   return NULL;  /* not found */
 }
 
+#pragma warning(pop)

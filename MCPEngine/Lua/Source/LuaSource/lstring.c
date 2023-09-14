@@ -4,6 +4,10 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4310)
+#pragma warning(disable : 4244)
+
 #define lstring_c
 #define LUA_CORE
 
@@ -271,3 +275,4 @@ Udata *luaS_newudata (lua_State *L, size_t s, int nuvalue) {
   return u;
 }
 
+#pragma warning(pop)

@@ -1,9 +1,7 @@
 // LuaSystem.cpp
 
 #include "LuaSystem.h"
-
-#pragma warning(disable : 4701)
-#include <lua.hpp>
+#include "LuaSource.h"
 
 #include "MCP/Lua/LuaDebug.h"
 

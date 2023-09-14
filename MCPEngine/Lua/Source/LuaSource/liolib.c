@@ -3,6 +3,8 @@
 ** Standard I/O (and system) library
 ** See Copyright Notice in lua.h
 */
+#pragma warning(push)
+#pragma warning(disable : 4244)
 
 #define liolib_c
 #define LUA_LIB
@@ -826,3 +828,4 @@ LUAMOD_API int luaopen_io (lua_State *L) {
   return 1;
 }
 
+#pragma warning(pop)

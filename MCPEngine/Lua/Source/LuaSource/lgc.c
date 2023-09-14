@@ -4,6 +4,9 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4244)
+
 #define lgc_c
 #define LUA_CORE
 
@@ -1729,3 +1732,4 @@ void luaC_fullgc (lua_State *L, int isemergency) {
 /* }====================================================== */
 
 
+#pragma warning(pop)

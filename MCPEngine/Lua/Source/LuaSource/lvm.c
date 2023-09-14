@@ -4,6 +4,9 @@
 ** See Copyright Notice in lua.h
 */
 
+#pragma warning(push)
+#pragma warning(disable : 4701)
+
 #define lvm_c
 #define LUA_CORE
 
@@ -1838,3 +1841,5 @@ void luaV_execute (lua_State *L, CallInfo *ci) {
 }
 
 /* }================================================================== */
+
+#pragma warning(pop)

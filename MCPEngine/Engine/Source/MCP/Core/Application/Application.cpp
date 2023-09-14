@@ -143,7 +143,7 @@ namespace mcp
 
 #if MCP_LOGGING_ENABLED
         // Initialize the Logger
-        if (!Logger::Init("Log/NewLog.txt"))
+        if (!Logger::Init("Log/"))
         {
             Close();
             return false;
