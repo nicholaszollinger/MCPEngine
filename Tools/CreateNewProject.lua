@@ -38,6 +38,9 @@ m.DEBUG = true;
 --     description = "Where the new project will live.";
 -- }
 
+-----------------------------------------------------------------------------------
+-- Initialize the module variables.
+-----------------------------------------------------------------------------------
 function m.Initialize()
     m._tokens = {}
     -- m.projectName = m._defaultOrOption("projectName", m.GetDefaultProjectName());
@@ -50,13 +53,15 @@ function m.Initialize()
     --os.mkdir(m.solutionRoot);
 
     -- Make the Project folder structure.
-    os.mkdir(m.projectRoot);
+    -- os.mkdir(m.projectRoot);
     --os.mkdir(m.projectRoot .. "/Source/");
     --os.mkdir(m.projectRoot .. "/Assets/");
     -- TODO: Should I make the log folders as well?
 end
 
---- Creates an engine folder where the 
+-----------------------------------------------------------------------------------
+--- Checkout a new branch based on the NewProjectName
+-----------------------------------------------------------------------------------
 function m.CreateBranch()
     
     --os.chdir(m.solutionRoot);
@@ -75,7 +80,9 @@ function m.CreateBranch()
     --os.chdir(m.solutionRoot);
 end
 
+-----------------------------------------------------------------------------------
 --- TODO: Create the Default project files for a new MCP project.
+-----------------------------------------------------------------------------------
 function m.GenerateDefaultFiles()
     -- Create tokens used in the boilerplate code
     m.AddToken("PRJ_NAME", NewProjectName);
@@ -85,7 +92,7 @@ function m.GenerateDefaultFiles()
     local dirs = os.matchdirs("TemplateProjectContent/**");
     for _, match in pairs(dirs) do
         local newDirName = m._replaceTokens(match);
-        newDirName = string.gsub(newDirName, "TemplateProjectContent", m.projectRoot);
+        newDirName = string.gsub(newDirName, "TemplateProjectContent", m.solutionRoot);
         local success = os.mkdir(newDirName);
 
         if success then
@@ -96,6 +103,7 @@ function m.GenerateDefaultFiles()
 
     end
     
+    -- Translate and write all of the template files as well.
     local files = os.matchfiles("TemplateProjectContent/**.*");
 
     -- For each template file, we need to 
@@ -103,7 +111,7 @@ function m.GenerateDefaultFiles()
 
         -- Set the correct filename, with the updated path.
         local newFilename = m._replaceTokens(match);
-        newFilename = string.gsub(newFilename, "TemplateProjectContent", m.projectRoot);
+        newFilename = string.gsub(newFilename, "TemplateProjectContent", m.solutionRoot);
 
         -- Read the file and replace any tokens
         local fileData = m._readFile(match);
@@ -123,6 +131,7 @@ function m.GenerateDefaultFiles()
 
 end
 
+-----------------------------------------------------------------------------------
 --- Tokens are stand in string values that are found in the names of the boilerplate
 --- code. Example: 
     --- - Boilerplate file name: "@{PRJ_NAME}@App.h".
@@ -130,7 +139,8 @@ end
     --- - A replacement val could be "HelloWorld"
     --- - The final file name will be "HelloWorldApp.h"
 --- @param token string | "The text to be replaced."
---- @param replacement string | "The text to replace the token." 
+--- @param replacement string | "The text to replace the token."
+----------------------------------------------------------------------------------- 
 function m.AddToken(token, replacement)
 
     -- If we haven't made our table of tokens, return.
@@ -155,8 +165,10 @@ function m.AddToken(token, replacement)
     m._tokens[token] = replacement;
 end
 
+-----------------------------------------------------------------------------------
 -- Print out all of the tokens currently registered with the module.
 -- Used for debugging
+-----------------------------------------------------------------------------------
 function m.listTokens()
     if m._tokens ~= nil then
         for token, replacement in pairs(m._tokens) do
@@ -172,8 +184,10 @@ function m.listTokens()
     end
 end
 
+-----------------------------------------------------------------------------------
 -- Read an entire file into a string, and return the result.
 -- @param filename : "Name of the file to read."
+-----------------------------------------------------------------------------------
 function m._readFile(filename)
     local f = assert(io.open(filename, "rb"));
     local content = f:read("*all");
@@ -181,7 +195,9 @@ function m._readFile(filename)
     return content;
 end
 
+-----------------------------------------------------------------------------------
 -- Get the replacement part for the token.
+-----------------------------------------------------------------------------------
 function m._getTokenReplacement(token)
     local replacement = m._tokens[token] or nil;
 
@@ -199,8 +215,10 @@ function m._getTokenReplacement(token)
     end
 end
 
+-----------------------------------------------------------------------------------
 -- Replace all tokens and replace them in the string.
 -- @returns : "A string containing the replaced values."
+-----------------------------------------------------------------------------------
 function m._replaceTokens(string)
     -- Function to grab the token.
     local replacementFunc = function(token)
@@ -219,7 +237,9 @@ function m._replaceTokens(string)
     return result;
 end
 
+-----------------------------------------------------------------------------------
 --- Print out some debug information for this module.
+-----------------------------------------------------------------------------------
 function m.PrintDebug(...)
     if m.DEBUG == false then
         return;
@@ -229,15 +249,21 @@ function m.PrintDebug(...)
     print(...);
 end 
 
+-----------------------------------------------------------------------------------
 function m.PrintInfo(...)
     premake.info("[" .. ModuleName .. "] ");
     premake.info(...);
 end
+-----------------------------------------------------------------------------------
 
--- PROGRAM STARTS HERE
+-----------------------------------------------------------------------------------
+-- PROGRAM EXECUTION STARTS HERE
+-----------------------------------------------------------------------------------
+
 m.Initialize();
 m.CreateBranch();
 
+-- VS Variables.
 local ObjDirectoryPath = "!$(SolutionDir)Build/Intermediate/$(ProjectName)/$(Configuration)/$(PlatformTarget)/";
 local UtilitySourcePath = "$(SolutionDir)MCPEngine/Utility/Source/";
 local EngineSourcePath = "$(SolutionDir)MCPEngine/Engine/Source/";
