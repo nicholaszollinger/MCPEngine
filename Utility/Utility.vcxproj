@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{b61061c3-ac16-458d-9348-cd7a73565573}</ProjectGuid>
+    <RootNamespace>Utility</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)Build\Lib\Engine\$(ProjectName)\$(PlatformTarget)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Build/Intermediate/Engine/$(ProjectName)/$(Configuration)/$(PlatformTarget)/</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Build\Lib\Engine\$(ProjectName)\$(PlatformTarget)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Build/Intermediate/Engine/$(ProjectName)/$(Configuration)/$(PlatformTarget)/</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)Source\Utility\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)Source\Utility\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Utility\Logging\LogCategory.cpp" />
+    <ClCompile Include="Source\Utility\Logging\Logger.cpp" />
+    <ClCompile Include="Source\Utility\Logging\LogTarget.cpp" />
+    <ClCompile Include="Source\Utility\Logging\LogTargetConsoleWindow.cpp" />
+    <ClCompile Include="Source\Utility\Profiling\SimpleInstrumentationProfiler.cpp" />
+    <ClCompile Include="Source\utility\Random\RNG.cpp" />
+    <ClCompile Include="Source\Utility\String\FormatString.cpp" />
+    <ClCompile Include="Source\Utility\String\StringId.cpp" />
+    <ClCompile Include="Source\Utility\Thread\ThreadIdleEvent.cpp" />
+    <ClCompile Include="Source\utility\Time\FrameTimer.cpp" />
+    <ClCompile Include="Source\Utility\Time\HighPrecisionTimer.cpp" />
+    <ClCompile Include="Source\utility\Time\Time.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Utility\Generic\Bit.h" />
+    <ClInclude Include="Source\Utility\Generic\ConceptTypes.h" />
+    <ClInclude Include="Source\Utility\Generic\Hash.h" />
+    <ClInclude Include="Source\Utility\Logging\LogCategory.h" />
+    <ClInclude Include="Source\Utility\Logging\Logger.h" />
+    <ClInclude Include="Source\Utility\Logging\LogTargetConsoleWindow.h" />
+    <ClInclude Include="Source\Utility\Logging\Log.h" />
+    <ClInclude Include="Source\Utility\Logging\LogConfig.h" />
+    <ClInclude Include="Source\Utility\Logging\LogTarget.h" />
+    <ClInclude Include="Source\Utility\Logging\LogType.h" />
+    <ClInclude Include="Source\Utility\Math\FloatTester.h" />
+    <ClInclude Include="Source\Utility\Profiling\SimpleInstrumentationProfiler.h" />
+    <ClInclude Include="Source\utility\Random\RNG.h" />
+    <ClInclude Include="Source\Utility\String\FormatString.h" />
+    <ClInclude Include="Source\Utility\String\StringId.h" />
+    <ClInclude Include="Source\Utility\Thread\ThreadIdleEvent.h" />
+    <ClInclude Include="Source\Utility\Thread\WorkerThread.h" />
+    <ClInclude Include="Source\utility\Time\FrameTimer.h" />
+    <ClInclude Include="Source\Utility\Time\HighPrecisionTimer.h" />
+    <ClInclude Include="Source\utility\Time\Time.h" />
+    <ClInclude Include="Source\Utility\Types\Color.h" />
+    <ClInclude Include="Source\Utility\Types\Containers\UnorderedDenseArray.h" />
+    <ClInclude Include="Source\Utility\Types\EnumHelpers.h" />
+    <ClInclude Include="Source\Utility\Types\Rect.h" />
+    <ClInclude Include="Source\Utility\Types\Vector2.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
