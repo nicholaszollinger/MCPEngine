@@ -36,12 +36,6 @@
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -49,14 +43,6 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)Build\Lib\$(ProjectName)\$(PlatformTarget)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)Build\Intermediate\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)Build\Lib\$(ProjectName)\$(PlatformTarget)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)Build\Intermediate\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Build\Lib\Engine\$(ProjectName)\$(PlatformTarget)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Build\Intermediate\Engine\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
@@ -65,82 +51,6 @@
     <OutDir>$(SolutionDir)Build\Lib\Engine\$(ProjectName)\$(PlatformTarget)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Build\Intermediate\Engine\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Utility\Source\;$(ProjectDir)ExternalLib\SDL2\SDL\include;$(ProjectDir)ExternalLib\SDL2\SDL_image\include;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\include;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\include;$(ProjectDir)Source\;$(ProjectDir)ExternalLib\BleachLeakDetector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <PostBuildEvent>
-      <Command>copy "$(ProjectDir)ExternalLib\SDL2\SDL\lib\$(PlatformTarget)\SDL2.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\SDL2_Image.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libjpeg-9.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libpng16-16.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libtiff-5.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libwebp-7.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\zlib1.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" 
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\SDL2_ttf.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\libfreetype-6.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\zlib1.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\SDL2_mixer.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Copying SDL .dll's...</Message>
-    </PostBuildEvent>
-    <Lib>
-      <AdditionalDependencies>Utility.lib;SDL2.lib;SDL2main.lib;SDL2_Image.lib;SDL2_ttf.lib;SDL2_mixer.lib;zlibstat.lib;Lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006</AdditionalOptions>
-      <AdditionalLibraryDirectories>$(SolutionDir)Build\Lib\Utility\$(PlatformTarget)\$(Configuration)\;$(ProjectDir)ExternalLib\SDL2\SDL\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_image\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\zlib\contrib\vstudio\vc14\x64\ZlibStat$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Lib>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Utility\Source\;$(ProjectDir)ExternalLib\SDL2\SDL\include;$(ProjectDir)ExternalLib\SDL2\SDL_image\include;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\include;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\include;$(ProjectDir)Source\;$(ProjectDir)ExternalLib\BleachLeakDetector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <PostBuildEvent>
-      <Command>copy "$(ProjectDir)ExternalLib\SDL2\SDL\lib\$(PlatformTarget)\SDL2.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\SDL2_Image.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libjpeg-9.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libpng16-16.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libtiff-5.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libwebp-7.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\zlib1.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" 
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\SDL2_ttf.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\libfreetype-6.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\zlib1.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\SDL2_mixer.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"
-copy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Copying SDL .dll's...</Message>
-    </PostBuildEvent>
-    <Lib>
-      <AdditionalDependencies>Utility.lib;SDL2.lib;SDL2main.lib;SDL2_Image.lib;SDL2_ttf.lib;SDL2_mixer.lib;zlibstat.lib;Lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006</AdditionalOptions>
-      <AdditionalLibraryDirectories>$(SolutionDir)Build\Lib\Utility\$(PlatformTarget)\$(Configuration)\;$(ProjectDir)ExternalLib\SDL2\SDL\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_image\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\zlib\contrib\vstudio\vc14\x64\ZlibStat$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Lib>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
@@ -148,7 +58,7 @@ copy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0.
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)MCPEngine\Utility\Source\;$(ProjectDir)ExternalLib\SDL2\SDL\include;$(ProjectDir)ExternalLib\SDL2\SDL_image\include;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\include;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\include;$(ProjectDir)Source\;$(ProjectDir)ExternalLib\BleachLeakDetector\include;$(ProjectDir)ExternalLib\zlib\;$(SolutionDir)MCPEngine\Lua\Source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)MCPEngine\Dependencies\Utility\Source\;$(ProjectDir)ExternalLib\SDL2\SDL\include;$(ProjectDir)ExternalLib\SDL2\SDL_image\include;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\include;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\include;$(ProjectDir)Source\;$(ProjectDir)ExternalLib\BleachLeakDetector\include;$(ProjectDir)ExternalLib\zlib\;$(SolutionDir)MCPEngine\Dependencies\Lua\Source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -193,7 +103,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)MCPEngine\Utility\Source\;$(ProjectDir)ExternalLib\SDL2\SDL\include;$(ProjectDir)ExternalLib\SDL2\SDL_image\include;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\include;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\include;$(ProjectDir)Source\;$(ProjectDir)ExternalLib\BleachLeakDetector\include;$(ProjectDir)ExternalLib\zlib\;$(SolutionDir)MCPEngine\Lua\Source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)MCPEngine\Dependencies\Utility\Source\;$(ProjectDir)ExternalLib\SDL2\SDL\include;$(ProjectDir)ExternalLib\SDL2\SDL_image\include;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\include;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\include;$(ProjectDir)Source\;$(ProjectDir)ExternalLib\BleachLeakDetector\include;$(ProjectDir)ExternalLib\zlib\;$(SolutionDir)MCPEngine\Dependencies\Lua\Source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
