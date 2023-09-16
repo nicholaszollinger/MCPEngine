@@ -37,9 +37,6 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
-# Re-add my debug folder in my source.
-!Engine/Source/MCP/Debug/
-
 # Visual Studio 2015/2017 cache/options directory
 .vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot
@@ -404,3 +401,13 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Re-add any of my Engine materials that were cut out.
+!Engine/Source/**
+!Engine/ExternalLib/**
+!Engine/Config/**
+
+# Ensure that my other dependency projects are handled as well.
+!Dependencies/**
+!Lua/Source/**
+!Utility/Source/**

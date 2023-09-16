@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>D:\C++Libraries\zLib\zlib-1.2.13\contrib\vstudio\vc14\x64\ZlibDllDebug\zlibwapi.dll</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\C++Libraries\zLib\zlib-1.2.13\contrib\vstudio\vc14\x64\TestZlibDllDebug\testzlibdll.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles />
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>
