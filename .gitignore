@@ -411,3 +411,5 @@ FodyWeavers.xsd
 !Dependencies/**
 !Lua/Source/**
 !Utility/Source/**
+
+*.user

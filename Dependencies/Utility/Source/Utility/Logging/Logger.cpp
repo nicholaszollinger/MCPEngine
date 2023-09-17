@@ -2,6 +2,7 @@
 
 #include "Logger.h"
 
+#include <filesystem>
 #include <functional>
 
 //-----------------------------------------------------------------------------------------------------------------------------
@@ -15,6 +16,14 @@ bool Logger::Init(const char* logOutDirectoryPath)
     // Open a new log file.
     // TODO:
     //  - Make the logger settings part of a log config file.
+
+    // Create the dir if we don't have one already.
+    const std::filesystem::path logDirPath(logOutDirectoryPath);
+
+    // If this fails, it could be that the dir was already present.
+    // Opening the file will report if the directory doesn't exist altogether.
+    std::filesystem::create_directory(logDirPath);
+
     // Create the name for the Log file. The format will be Log-[Date][Time]
     const auto newFileName = CombineIntoString(logOutDirectoryPath, FormatCurrentTime("[%M-%D-%Y] %h-%m-%s%L"),".txt");
     s_outFile.open(newFileName.c_str());
