@@ -228,6 +228,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Core\Resource\ResourceManager.h" />
     <ClInclude Include="Source\MCP\Core\Resource\TextFile.h" />
     <ClInclude Include="Source\MCP\Core\Resource\Zip.h" />
+    <ClInclude Include="Source\MCP\Debug\Assert.h" />
     <ClInclude Include="Source\MCP\Debug\Log.h" />
     <ClInclude Include="Source\MCP\Graphics\Graphics.h" />
     <ClInclude Include="Source\MCP\Graphics\RenderData\BaseRenderData.h" />

@@ -114,6 +114,7 @@
     <ClCompile Include="Source\utility\Time\Time.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Utility\Debug\Assert.h" />
     <ClInclude Include="Source\Utility\Generic\Bit.h" />
     <ClInclude Include="Source\Utility\Generic\ConceptTypes.h" />
     <ClInclude Include="Source\Utility\Generic\Hash.h" />

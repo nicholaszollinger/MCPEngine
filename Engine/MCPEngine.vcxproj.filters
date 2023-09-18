@@ -243,6 +243,9 @@
     <ClInclude Include="Source\MCP\Scene\Object.h">
       <Filter>MCP\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MCP\Debug\Assert.h">
+      <Filter>MCP\Debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">

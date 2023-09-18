@@ -114,6 +114,9 @@
     <ClInclude Include="Source\Utility\Logging\Logger.h">
       <Filter>Logging</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Utility\Debug\Assert.h">
+      <Filter>Debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generic">
@@ -145,6 +148,9 @@
     </Filter>
     <Filter Include="Logging">
       <UniqueIdentifier>{a0902572-75b0-478d-9a6e-d6829a9ed94d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Debug">
+      <UniqueIdentifier>{23e16b71-14c5-4882-8e5c-f1df478067bd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
