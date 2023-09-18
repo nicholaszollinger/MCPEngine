@@ -49,8 +49,13 @@ namespace mcp
         const float width = pRect2DElement->FloatAttribute("width");
         const float height = pRect2DElement->FloatAttribute("height");
 
+        // IRenderable Data.
+        const auto* pRenderable = pRect2DElement->FirstChildElement("Renderable");
+        const RenderLayer layer = static_cast<RenderLayer>(pRenderable->IntAttribute("layer"));
+        const int zOrder = pRenderable->IntAttribute("zOrder");
+
         // Add the component
-        auto* pRect2DComponent = pOwner->AddComponent<Rect2DComponent>(width, height);
+        auto* pRect2DComponent = pOwner->AddComponent<Rect2DComponent>(width, height, layer, zOrder);
         if (!pRect2DComponent)
         {
             MCP_ERROR("Rect2DComponent", "Failed to add Rect2DComponent from data!");
@@ -58,7 +63,7 @@ namespace mcp
         }
 
         // RenderType
-        const auto* pRenderTypeElement = pRect2DElement->FirstChildElement("RenderType");
+        const auto* pRenderTypeElement = pRenderable->NextSiblingElement("RenderType");
         if (!pRenderTypeElement)
         {
             MCP_ERROR("Rect2DComponent", "Failed to add ImageComponent from Data! Couldn't find RenderType Attribute!");
