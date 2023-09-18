@@ -48,11 +48,11 @@ namespace mcp
         return true;
     }
 
-    void SceneManager::Update(const float deltaTime)
+    void SceneManager::Update(const float deltaTimeMs)
     {
         if (m_pActiveScene)
         {
-            m_pActiveScene->Update(deltaTime);
+            m_pActiveScene->Update(deltaTimeMs);
 
             // Only transition to the next scene once the update in the Active is completed.
             if (m_transitionQueued)
