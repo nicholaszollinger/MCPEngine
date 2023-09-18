@@ -35,6 +35,9 @@ bool Logger::Init(const char* logOutDirectoryPath)
 
     s_outFile << FormatCurrentTime("%M/%D/%Y : %h:%m %L") << "\n\n";
 
+    // Add the Assert category to our categories.
+    s_categories.emplace(HashString32("Assertion Failed!"), LogCategory("Assertion Failed!", LogOutput::kAll));
+
     return s_target.Init();
 }
 

@@ -1,9 +1,9 @@
 #pragma once
 // GlobalManager.h
 
+#include <BleachNew.h>
 #include <cassert>
 #include <type_traits>
-#include "BleachNew.h"
 #include "Process.h"
 
 namespace mcp
