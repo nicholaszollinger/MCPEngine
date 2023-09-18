@@ -15,7 +15,7 @@ namespace mcp
     public:
         IUpdateable();
         virtual ~IUpdateable() = default;
-        virtual void Update(const float deltaTime) = 0;
+        virtual void Update(const float deltaTimeMs) = 0;
 
         [[nodiscard]] IUpdateableId GetUpdateId() const { return m_updateableId; }
     };

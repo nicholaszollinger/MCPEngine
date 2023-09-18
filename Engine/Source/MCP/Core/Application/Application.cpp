@@ -122,7 +122,7 @@ namespace mcp
         // Load the GameData:
         if (!LoadGameData(pGameDataFilepath))
         {
-            MCP_ERROR("Application", "Failed to load the GameData at filepath: '%'", pGameDataFilepath);
+            MCP_ERROR("Application", "Failed to load the GameData at filepath: ", pGameDataFilepath);
             Close();
             return false;
         }
@@ -244,13 +244,13 @@ namespace mcp
 
         while (m_isRunning)
         {
-            const float deltaTime = static_cast<float>(timer.NewFrame());
+            const float deltaTimeMs = static_cast<float>(timer.NewFrame());
 
             m_isRunning = pWindow->ProcessEvents();
 
             if (m_isRunning)
             {
-                SceneManager::Get()->Update(deltaTime);
+                SceneManager::Get()->Update(deltaTimeMs);
                 SceneManager::Get()->Render();
                 GraphicsManager::Get()->Display();
             }
