@@ -246,6 +246,9 @@
     <ClInclude Include="Source\MCP\Debug\Assert.h">
       <Filter>MCP\Debug</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MCP\Components\EngineComponents.h">
+      <Filter>MCP\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
