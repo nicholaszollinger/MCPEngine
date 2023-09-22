@@ -206,6 +206,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Components\Component.h" />
     <ClInclude Include="Source\MCP\Components\ComponentFactory.h" />
     <ClInclude Include="Source\MCP\Components\ComponentId.h" />
+    <ClInclude Include="Source\MCP\Components\EngineComponents.h" />
     <ClInclude Include="Source\MCP\Components\ImageComponent.h" />
     <ClInclude Include="Source\MCP\Components\Rect2DComponent.h" />
     <ClInclude Include="Source\MCP\Components\ScriptComponent.h" />

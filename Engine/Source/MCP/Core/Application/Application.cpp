@@ -14,6 +14,7 @@
 #include "MCP/Core/Resource/ResourceManager.h"
 #include "utility/Time/FrameTimer.h"
 #include "Window/WindowBase.h"
+#include "MCP/Components/EngineComponents.h"
 
 #ifdef MCP_DATA_PARSER_TINYXML2
 #include "Platform/TinyXML2/tinyxml2.h"

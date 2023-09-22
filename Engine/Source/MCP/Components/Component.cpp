@@ -14,10 +14,8 @@ namespace mcp
         //
     }
 
-
     MessageManager* Component::GetMessageManager() const
     {
         return m_pOwner->GetScene()->GetMessageManager();
     }
-
 }
