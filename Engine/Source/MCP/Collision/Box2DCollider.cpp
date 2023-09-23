@@ -5,12 +5,6 @@
 #include "MCP/Debug/Log.h"
 #include "MCP/Components/ColliderComponent.h"
 
-#ifdef MCP_DATA_PARSER_TINYXML2
-    #include "Platform/TinyXML2/tinyxml2.h"
-#else
-    #error "ImageComponent does not have support a the currently defined Data Parser!"
-#endif
-
 namespace mcp
 {
     Box2DCollider::Box2DCollider(const char* name, const bool isEnabled, const Vec2 position, const float width, const float height)
@@ -39,26 +33,23 @@ namespace mcp
 
         return {worldPos.x, worldPos.y, m_width, m_height};
     }
-
-#ifdef MCP_DATA_PARSER_TINYXML2
-    bool Box2DCollider::AddFromData(const void* pFileData, ColliderComponent* pComponent)
+    
+    bool Box2DCollider::AddFromData(const XMLElement colliderData, ColliderComponent* pComponent)
     {
-        auto* pBox2DElement = static_cast<const tinyxml2::XMLElement*>(pFileData);
-
         // Name
-        const char* name = pBox2DElement->Attribute("name");
+        const char* name = colliderData.GetAttribute<const char*>("name");
 
         // CollisionEnabled
-        const bool isEnabled = pBox2DElement->BoolAttribute("collisionEnabled");
+        const bool isEnabled = colliderData.GetAttribute<bool>("collisionEnabled");
 
         // Position, Relative to the Transform component.
         Vec2 position;
-        position.x = pBox2DElement->FloatAttribute("x");
-        position.y = pBox2DElement->FloatAttribute("y");
+        position.x = colliderData.GetAttribute<float>("x");
+        position.y = colliderData.GetAttribute<float>("y");
 
         // Dimensions
-        const float width = pBox2DElement->FloatAttribute("width");
-        const float height = pBox2DElement->FloatAttribute("height");
+        const auto width = colliderData.GetAttribute<float>("width");
+        const auto height = colliderData.GetAttribute<float>("height");
 
         // Create the Collider
         auto* pCollider = BLEACH_NEW(Box2DCollider(name, isEnabled, position, width, height));
@@ -68,14 +59,6 @@ namespace mcp
 
         return true;
     }
-
-#else
-    bool Box2DCollider::AddNewFromData(const void*, ColliderComponent*)
-    {
-        LogError("Failed to add Box2DCollider from data! No implementation for the current parser!");
-        return false;
-    }
-#endif
 
 #if RENDER_COLLIDER_VISUALS
     void Box2DCollider::Render() const

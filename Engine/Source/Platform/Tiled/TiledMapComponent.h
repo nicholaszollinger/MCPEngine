@@ -46,7 +46,7 @@ namespace mcp
         virtual void Render() const override;
 
         //RectInt GetMapDimensions();
-        static bool AddFromData(const void* pFileData, Object* pOwner);
+        static bool AddFromData(const XMLElement component, Object* pOwner);
 
     private:
         void Load(const char* pMapPath, const char* pTileSetPath, const char* pTileSetImagePath);

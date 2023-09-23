@@ -2,14 +2,7 @@
 
 #include "TransformComponent.h"
 
-#include "MCP/Core/Config.h"
 #include "MCP/Scene/Object.h"
-
-#ifdef MCP_DATA_PARSER_TINYXML2
-    #include "Platform/TinyXML2/tinyxml2.h"
-#else
-    #error "TransformComponent does not have support a the currently defined Data Parser!"
-#endif
 
 namespace mcp
 {
@@ -46,14 +39,11 @@ namespace mcp
         m_position = position;
         m_onLocationUpdated.Broadcast(m_position);
     }
-
-#ifdef MCP_DATA_PARSER_TINYXML2
-    bool TransformComponent::AddFromData(const void* pFileData, Object* pOwner)
+    
+    bool TransformComponent::AddFromData(const XMLElement component, Object* pOwner)
     {
-        const auto* pTransformElement = static_cast<const tinyxml2::XMLElement*>(pFileData);
-
-        const float x = pTransformElement->FloatAttribute("x");
-        const float y = pTransformElement->FloatAttribute("y");
+        const auto x = component.GetAttribute<float>("x");
+        const auto y = component.GetAttribute<float>("y");
 
         if (!pOwner->AddComponent<TransformComponent>(x, y))
         {
@@ -63,5 +53,4 @@ namespace mcp
 
         return true;
     }
-#endif
 }

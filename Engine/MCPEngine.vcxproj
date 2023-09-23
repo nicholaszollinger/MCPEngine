@@ -165,6 +165,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Core\Event\MessageManager.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\AssetPackage.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\PackageManager.cpp" />
+    <ClCompile Include="Source\MCP\Core\Resource\Parsers\XMLParser.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\ResourceManager.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\TextFile.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\Zip.cpp" />
@@ -188,6 +189,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\Platform\Tiled\TiledMapComponent.cpp" />
     <ClCompile Include="Source\Platform\Tiled\TiledTileSet.cpp" />
     <ClCompile Include="Source\Platform\TinyXML2\tinyxml2.cpp" />
+    <ClCompile Include="Source\Platform\TinyXML2\TinyXML2Resource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExternalLib\BleachLeakDetector\include\BleachNew.h" />
@@ -225,6 +227,8 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Core\Process.h" />
     <ClInclude Include="Source\MCP\Core\Resource\AssetPackage.h" />
     <ClInclude Include="Source\MCP\Core\Resource\PackageManager.h" />
+    <ClInclude Include="Source\MCP\Core\Resource\Parser.h" />
+    <ClInclude Include="Source\MCP\Core\Resource\Parsers\XMLParser.h" />
     <ClInclude Include="Source\MCP\Core\Resource\Resource.h" />
     <ClInclude Include="Source\MCP\Core\Resource\ResourceManager.h" />
     <ClInclude Include="Source\MCP\Core\Resource\TextFile.h" />

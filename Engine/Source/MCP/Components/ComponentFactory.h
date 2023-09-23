@@ -4,6 +4,7 @@
 #include <cassert>
 #include <functional>
 #include <unordered_map>
+#include "MCP/Core/Resource/Parsers/XMLParser.h"
 #include "MCP/Debug/Log.h"
 #include "Utility/Generic/Hash.h"
 
@@ -15,11 +16,11 @@ namespace mcp
 
     class ComponentFactory
     {
-        using FactoryFunction = std::function<bool(const void*, Object*)>;
+        using FactoryFunction = std::function<bool(XMLElement, Object*)>;
         using FactoryFuncContainer = std::unordered_map<ComponentTypeId, FactoryFunction>;
 
     public:
-        static bool AddToObjectFromData(const char* pComponentName, const void* pData, Object* pOwner)
+        static bool AddToObjectFromData(const char* pComponentName, const XMLElement component, Object* pOwner)
         {
             const ComponentTypeId id = HashString32(pComponentName);
 
@@ -32,7 +33,7 @@ namespace mcp
                 return false;
             }
 
-            return result->second(pData, pOwner);
+            return result->second(component, pOwner);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -57,7 +58,7 @@ namespace mcp
                 assert(false && "Failed to register Component! This could mean that you have two components with the same name!"); // I don't know how to handle this error.
             }
 
-            factoryFunctions.emplace(id, [](const void* pData, class Object* pOwner) { return ComponentType::AddFromData(pData, pOwner); });
+            factoryFunctions.emplace(id, [](const XMLElement component, class Object* pOwner) { return ComponentType::AddFromData(component, pOwner); });
 
             return id;
         }

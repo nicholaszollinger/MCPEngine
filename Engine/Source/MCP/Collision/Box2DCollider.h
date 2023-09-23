@@ -20,7 +20,7 @@ namespace mcp
         void SetWidth(const float width) { m_width = width; }
         void SetHeight(const float height) { m_width = height; }
 
-        static bool AddFromData(const void* pFileData, class ColliderComponent* pComponent);
+        static bool AddFromData(const XMLElement colliderData, class ColliderComponent* pComponent);
 
         //--------------------------------------------------------------------
         //  Debug Rendering

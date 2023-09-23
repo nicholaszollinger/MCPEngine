@@ -62,7 +62,7 @@ namespace mcp
         [[nodiscard]] TransformComponent* GetTransformComponent() const { return m_pTransformComponent; }
         [[nodiscard]] Vec2 GetVelocity() const { return m_velocity; }
 
-        static bool AddFromData(const void* pFileData, Object* pOwner);
+        static bool AddFromData(const XMLElement component, Object* pOwner);
     private:
         void TestCollisionNow(const Vec2 newPosition);
         void UpdateEstimationRect();

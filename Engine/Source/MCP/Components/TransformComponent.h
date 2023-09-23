@@ -32,7 +32,7 @@ namespace mcp
         [[nodiscard]] Vec2 GetLocation() const { return m_position; }
             
     public:
-        static bool AddFromData(const void* pFileData, Object* pOwner);
+        static bool AddFromData(const XMLElement component, Object* pOwner);
 
     };
 }

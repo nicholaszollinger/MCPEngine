@@ -40,7 +40,7 @@ namespace mcp
         void SetColor(const Color color) { m_color = color; }
         void SetRenderType(const RenderType type) { m_renderType = type;}
 
-        static bool AddFromData(const void*, Object*) { return false; }
+        static bool AddFromData(const XMLElement, Object*) { return false; }
     };
     
 }

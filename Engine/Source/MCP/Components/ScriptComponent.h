@@ -18,7 +18,7 @@ namespace mcp
         virtual void Update(const float deltaTime) override = 0;
         virtual void OnLoad() = 0;
 
-        static bool AddFromData(const void*, Object*) { return false; }
+        static bool AddFromData(const XMLElement, Object*) { return false; }
     };
 }
     

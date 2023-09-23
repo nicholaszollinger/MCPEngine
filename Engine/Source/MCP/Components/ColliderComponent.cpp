@@ -6,12 +6,6 @@
 #include "TransformComponent.h"
 #include "MCP/Scene/Scene.h"
 
-#ifdef MCP_DATA_PARSER_TINYXML2
-#include "Platform/TinyXML2/tinyxml2.h"
-#else
-#error "ImageComponent does not have support a the currently defined Data Parser!"
-#endif
-
 namespace mcp
 {
     ColliderComponent::ColliderComponent(Object* pObject, const bool collisionEnabled, const bool isStatic)
@@ -305,19 +299,16 @@ namespace mcp
         result.SetPosition(result.GetPosition() + m_pTransformComponent->GetLocation());
         return result;
     }
-
-#ifdef MCP_DATA_PARSER_TINYXML2
-    bool ColliderComponent::AddFromData(const void* pFileData, Object* pOwner)
+    
+    bool ColliderComponent::AddFromData(const XMLElement component, Object* pOwner)
     {
-        auto* pColliderComponent = static_cast<const tinyxml2::XMLElement*>(pFileData);
-
         // CollisionEnabled
-        bool isEnabled = pColliderComponent->BoolAttribute("collisionEnabled");
+        bool isEnabled = component.GetAttribute<bool>("collisionEnabled", true);
 
         // IsStatic
-        bool isStatic = pColliderComponent->BoolAttribute("isStatic");
+        bool isStatic = component.GetAttribute<bool>("isStatic");
 
-        ColliderComponent* pNewComponent = pOwner->AddComponent<ColliderComponent>(isEnabled, isStatic);
+        auto* pNewComponent = pOwner->AddComponent<ColliderComponent>(isEnabled, isStatic);
         // Add the component to the Object
         if (!pNewComponent)
         {
@@ -326,29 +317,23 @@ namespace mcp
         }
 
         // Get each collider for this component.
-        auto* pCollider = pColliderComponent->FirstChildElement();
+        auto colliderElement = component.GetChildElement();
 
-        while (pCollider)
+        while (colliderElement.IsValid())
         {
             // Create the Collider from data, using a factory
-            if (!ColliderFactory::AddNewFromData(pCollider->Value(), pCollider, pNewComponent))
+            if (!ColliderFactory::AddNewFromData(colliderElement.GetName(), colliderElement, pNewComponent))
             {
                 MCP_ERROR("Collision", "Failed to add Collider to new ColliderComponent from data!");
                 return false;
             }
 
             // Get the next collider.
-            pCollider = pCollider->NextSiblingElement();
+            colliderElement = colliderElement.GetSiblingElement();
         }
 
         return true;
     }
-#else
-    bool ImageComponent::AddFromData(const void*, Object*)
-    {
-        return false;
-    }
-#endif
 
 #if RENDER_COLLIDER_VISUALS
     void ColliderComponent::Render() const
