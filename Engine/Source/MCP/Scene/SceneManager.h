@@ -26,7 +26,7 @@ namespace mcp
     public:
         // This should get the Default scene ready.
         bool LoadSceneData(const char* pSceneFilePath);
-        void Update(const float deltaTime);
+        void Update(const float deltaTimeMs);
         void Render() const;
         void QueueTransition(const SceneIdentifier& identifier); // Needs some kind of identifier to designate what scene to go to.
 
