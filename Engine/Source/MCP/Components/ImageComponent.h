@@ -34,6 +34,6 @@ namespace mcp
         void SetCrop(const RectInt& crop) { m_crop = crop; }
         void SetSize(const float width, const float height) { m_size = { width, height }; }
 
-        static bool AddFromData(const void* pFileData, Object* pOwner);
+        static bool AddFromData(const XMLElement component, Object* pOwner);
     };
 }

@@ -3,14 +3,13 @@
 #include "Scene.h"
 
 #include <algorithm>
-
 #include "IRenderable.h"
-#include "MCP/Scene/Object.h"
-#include "MCP/Core/Resource/PackageManager.h"
 #include "MCP/Components/ComponentFactory.h"
 #include "MCP/Components/TransformComponent.h"
+#include "MCP/Core/Resource/PackageManager.h"
+#include "MCP/Core/Resource/Parser.h"
 #include "MCP/Scene/IUpdateable.h"
-#include "Platform/TinyXML2/tinyxml2.h"
+#include "MCP/Scene/Object.h"
 
 namespace mcp
 {
@@ -39,68 +38,66 @@ namespace mcp
 
     bool Scene::Load(const char* pFilePath)
     {
-        tinyxml2::XMLDocument doc;
-        if (doc.LoadFile(pFilePath) != tinyxml2::XML_SUCCESS)
+        XMLParser parser;
+        if (!parser.LoadFile(pFilePath))
         {
-            MCP_ERROR("Scene", "Failed to load Scene! XML Error: ", tinyxml2::XMLDocument::ErrorIDToName(doc.ErrorID()));
+            MCP_ERROR("Scene", "Failed to load Scene!");
             return false;
         }
 
         // Check to see if we need to load any packages for this Scene
-        const auto* pPackageElement = doc.FirstChildElement(kPackageElementName);
-        if (pPackageElement)
+        const XMLElement packageElement = parser.GetElement(kPackageElementName);
+        if (packageElement.IsValid())
         {
             // Get the Package file path:
-            const char* pPackageFilePath = pPackageElement->Attribute("path");
+            const char* pPackageFilePath = packageElement.GetAttribute<const char*>("path");
             if (!pPackageFilePath)
             {
-                MCP_ERROR("Scene", "Failed to load scene! Couldn't find Package path in xml file!");
+                MCP_ERROR("Scene", "Failed to load scene! Couldn't find Package path attribute in xml file!");
                 return false;
             }
 
             // Load the package.
             if (!PackageManager::Get()->LoadPackage(pPackageFilePath))
             {
-                MCP_ERROR("Scene", "Failed to load scene! Couldn't load package defined in xml 'path' attribute");
+                MCP_ERROR("Scene", "Failed to load scene! Couldn't load package defined in xml 'path' attribute. Path: ", pPackageFilePath);
                 return false;
             }
         }
 
         // Get the Scene Element.
-        const auto* pSceneElement = doc.FirstChildElement(kSceneElementName);
-        if (!pSceneElement)
+        const XMLElement sceneElement = parser.GetElement(kSceneElementName);
+        if (!sceneElement.IsValid())
         {
             // Oh no the formatting of the xml document isn't standardized!
-            MCP_ERROR("Scene", "Failed to load scene! Couldn't find <%> Element!", kSceneElementName);
+            MCP_ERROR("Scene", "Failed to load scene! Couldn't find Scene Element!");
             return false;
         }
 
-        // Get the first Object element.
-        auto* pObjectElement = pSceneElement->FirstChildElement(kObjectElementName);
-
-        while (pObjectElement)
+        XMLElement objectElement = sceneElement.GetChildElement(kObjectElementName);
+        while(objectElement.IsValid())
         {
             // Create a new object and add it to the scene.
             auto* pObject = CreateObject();
 
             // Get the first Component of the object.
-            auto* pComponentElement = pObjectElement->FirstChildElement();
+            XMLElement componentElement = objectElement.GetChildElement();
 
-            while (pComponentElement)
+            while (componentElement.IsValid())
             {
                 // Add the Component to the new Object.
-                if (!ComponentFactory::AddToObjectFromData(pComponentElement->Value(), pComponentElement, pObject))
+                if (!ComponentFactory::AddToObjectFromData(componentElement.GetName(), componentElement, pObject))
                 {
                     ClearScene();
                     return false;
                 }
 
                 // Go to the next sibling to see if we have another component.
-                pComponentElement = pComponentElement->NextSiblingElement();
+                componentElement = componentElement.GetSiblingElement();
             }
 
             // Go to the next sibling to see if we have another gameObject.
-            pObjectElement = pObjectElement->NextSiblingElement(kObjectElementName);
+            objectElement = objectElement.GetSiblingElement(kObjectElementName);
         }
 
         // Everything succeeded!

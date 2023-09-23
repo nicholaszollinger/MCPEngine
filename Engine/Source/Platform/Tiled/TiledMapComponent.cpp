@@ -2,31 +2,27 @@
 
 #include "TiledMapComponent.h"
 
-#include <BleachNew.h>
 #include "MCP/Core/Resource/ResourceManager.h"
 #include "MCP/Scene/Scene.h"
-#include "Platform/TinyXML2/tinyxml2.h"
-
 #include "MCP/Components/TransformComponent.h"
 
-static std::string* GetPrefabPath(const tinyxml2::XMLElement* pProperty)
+static std::string* GetPrefabPath(const mcp::XMLElement element)
 {
     static constexpr const char* kPrefabsFolder = "Assets/Prefabs/";
     static std::string prefabPath;
     prefabPath = kPrefabsFolder;
-
-    const char* pPrefabPropName = pProperty->Attribute("name", "Prefab");
-    if (!pPrefabPropName)
+    
+    //const char* pPrefabPropName = element.GetAttribute<const char*>("name", success);
+    /*if (!success)
     {
         MCP_ERROR("TiledMapComponent", "Failed to get Prefab! No prefab property found!");
         return nullptr;
-    }
+    }*/
 
-    const char* pPrefab = pProperty->Attribute("value");
+    const char* pPrefab = element.GetAttribute<const char*>("value");
     prefabPath += pPrefab;
 
     return &prefabPath;
-
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
@@ -160,16 +156,18 @@ namespace mcp
     bool TiledMapComponent::LoadMapData(const char* pMapFilepath)
     {
         // Open the .tmx file.
-        tinyxml2::XMLDocument mapDoc;
-        if (mapDoc.LoadFile(pMapFilepath) != tinyxml2::XML_SUCCESS)
+        XMLParser parser;
+
+        if (!parser.LoadFile(pMapFilepath))
         {
-            MCP_ERROR("TiledMapComponent", "Failed to Load Map! XML Error: ", tinyxml2::XMLDocument::ErrorIDToName(mapDoc.ErrorID()));
+            MCP_ERROR("TiledMapComponent", "Failed to Load Map!");
             return false;
         }
 
-        const auto* pMapElement = mapDoc.FirstChildElement("map");
-        m_mapWidth = pMapElement->IntAttribute("width");
-        m_mapHeight = pMapElement->IntAttribute("height");
+        bool success = true;
+        const XMLElement mapElement = parser.GetElement("map");
+        m_mapWidth = mapElement.GetAttribute<int>("width", success);
+        m_mapHeight = mapElement.GetAttribute<int>("height", success);
         m_mapSize = static_cast<size_t>(m_mapWidth) * m_mapHeight;
 
         // Do I need this?
@@ -177,58 +175,58 @@ namespace mcp
         //const char* tileSetFilename = pTileSet->Attribute("source");
 
         // Load the tile layer data.
-        auto* pLayer = pMapElement->FirstChildElement("layer");
-        while(pLayer)
+        XMLElement layer = mapElement.GetChildElement("layer");
+        while(layer.IsValid())
         {
             // create the layer of tiles.
-            const auto* pData = pLayer->FirstChildElement("data");
-            if (!pData)
+            const XMLElement data = layer.GetChildElement("data");
+            if (!data.IsValid())
             {
                 MCP_ERROR("TiledMapComponent", "Failed to Load Tiled Texture! Failed to find layer data!");
                 return false;
             }
 
             // Load all of the text into our 'buffer'
-            auto* pLayerData = pData->GetText();
+            auto* pLayerData = data.GetText();
             GenerateLayerData(pLayerData);
 
-            pLayer = pLayer->NextSiblingElement("layer");
+            layer = layer.GetSiblingElement("layer");
         }
 
         // Map of prefabs that we are using to construct the scene.
-        std::vector<tinyxml2::XMLDocument*> loadedPrefabs;
+        std::vector<XMLParser> loadedPrefabs;
         loadedPrefabs.reserve(10);
         std::unordered_map<std::string, size_t> prefabIndexes;
 
         // Load the Object group data.
-        auto* pObjectGroup = pMapElement->FirstChildElement("objectgroup");
-        while(pObjectGroup)
+        XMLElement objectGroup = mapElement.GetChildElement("objectgroup");
+        while(objectGroup.IsValid())
         {
             // Get the first object:
-            const auto* pObjectElement = pObjectGroup->FirstChildElement("object");
+            XMLElement objectElement = objectGroup.GetChildElement("object");
 
-            while(pObjectElement)
+            while(objectElement.IsValid())
             {
                 // We need to get the correct prefab of the object.
                 //std::string prefabPath = kPrefabsFolder;
 
                 // Get the position and dimensions of the object.
-                const float x = pObjectElement->FloatAttribute("x");
-                const float y = pObjectElement->FloatAttribute("y");
+                const auto x = objectElement.GetAttribute<float>("x", success);
+                const auto y = objectElement.GetAttribute<float>("y", success);
                 float width = -1.f;
                 float height = -1.f;
 
-                const bool isPoint = pObjectElement->FirstChildElement("point");
+                const bool isPoint = objectElement.GetChildElement("point").IsValid();
                 // If we are not a 'point' we need to get the width and height too.
                 if (!isPoint)
                 {
-                    width = pObjectElement->FloatAttribute("width");
-                    height = pObjectElement->FloatAttribute("height");
+                    width = objectElement.GetAttribute<float>("width", success);
+                    height = objectElement.GetAttribute<float>("height", success);
                 }
 
                 // Get the prefab that we need to use to construct the object.
-                auto* pProperties = pObjectElement->FirstChildElement("properties");
-                if (!pProperties)
+                XMLElement properties = objectElement.GetChildElement("properties");
+                if (!properties.IsValid())
                 {
                     MCP_ERROR("TiledMapComponent", "Failed to create Object from Tiled data! Failed to find Properties for Object!");
                     // Return?
@@ -236,8 +234,8 @@ namespace mcp
 
                 // Technically, I could make another loop to get the properties that we need.
                 // But I only have one.
-                auto* pPrefabProp = pProperties->FirstChildElement("property");
-                auto* pPrefabPath = GetPrefabPath(pPrefabProp);
+                const XMLElement prefabProp = properties.GetChildElement("property");
+                auto* pPrefabPath = GetPrefabPath(prefabProp);
 
                 if (!pPrefabPath)
                 {
@@ -252,17 +250,17 @@ namespace mcp
                 {
                     // No copy or move constructor for the XMLDocument so I have to create a new one in the map,
                     // I can't even use emplace.
-                    loadedPrefabs.emplace_back(BLEACH_NEW(tinyxml2::XMLDocument));
+                    loadedPrefabs.emplace_back();
                     result = prefabIndexes.emplace(*pPrefabPath, loadedPrefabs.size() - 1).first;
 
                     // Load the prefab file.
-                    if (loadedPrefabs.back()->LoadFile((*pPrefabPath).c_str()) != tinyxml2::XML_SUCCESS)
+                    if (!loadedPrefabs.back().LoadFile((*pPrefabPath).c_str()))
                     {
-                        MCP_ERROR("TiledMapComponent", "Failed to Load Prefab! XML Error: ", tinyxml2::XMLDocument::ErrorIDToName(mapDoc.ErrorID()));
+                        MCP_ERROR("TiledMapComponent", "Failed to Load Prefab!");
 
-                        for (auto* pDoc : loadedPrefabs)
+                        for (auto& prefabParser : loadedPrefabs)
                         {
-                            BLEACH_DELETE(pDoc);
+                            prefabParser.CloseCurrentFile();
                         }
 
                         return false;
@@ -274,66 +272,66 @@ namespace mcp
                 auto* pObject = m_pOwner->GetScene()->CreateObject();
 
                 // Get the object header.
-                auto* pObjectPrefabElement = loadedPrefabs[result->second]->FirstChildElement("Object");
+                auto objectPrefabElement = loadedPrefabs[result->second].GetElement("Object");
 
                 // Get the first Component of the object.
-                auto* pComponentElement = pObjectPrefabElement->FirstChildElement();
+                auto componentElement = objectPrefabElement.GetChildElement();
 
                 // Hack:
                 std::string componentName;
                 static const std::string transformName = "TransformComponent";
                 static const std::string colliderName = "ColliderComponent";
 
-                while (pComponentElement)
+                while (componentElement.IsValid())
                 {
-                    componentName = pComponentElement->Value();
+                    componentName = componentElement.GetName();
                     // Fill out the prefab data before adding it to the object.
                     // String compare :(
                     if (componentName == transformName)
                     {
                         if (width < 0.f)
                         {
-                            pComponentElement->SetAttribute("x", x);
-                            pComponentElement->SetAttribute("y", y);
+                            componentElement.SetAttribute("x", x);
+                            componentElement.SetAttribute("y", y);
                         }
 
                         else
                         {
-                            pComponentElement->SetAttribute("x", (x + (width/2.f)));
-                            pComponentElement->SetAttribute("y", (y + (height/2.f)));
+                            componentElement.SetAttribute("x", (x + (width/2.f)));
+                            componentElement.SetAttribute("y", (y + (height/2.f)));
                         }
                     }
 
                     else if (width > 0.f && componentName == colliderName)
                     {
-                        auto* pBoxCollider = pComponentElement->FirstChildElement("Box2DCollider");
-                        pBoxCollider->SetAttribute("width", width);
-                        pBoxCollider->SetAttribute("height", height);
+                        XMLElement boxCollider = componentElement.GetChildElement("Box2DCollider");
+                        boxCollider.SetAttribute("width", width);
+                        boxCollider.SetAttribute("height", height);
                     }
 
                     // Add the Component to the new Object.
-                    if (!ComponentFactory::AddToObjectFromData(pComponentElement->Value(), pComponentElement, pObject))
+                    if (!ComponentFactory::AddToObjectFromData(componentElement.GetName(), componentElement, pObject))
                     {
                         delete pObject;
                         return false;
                     }
 
                     // Go to the next sibling to see if we have another component.
-                    pComponentElement = pComponentElement->NextSiblingElement();
+                    componentElement = componentElement.GetSiblingElement();
                 }
 
                 // Move to the next object
-                pObjectElement = pObjectElement->NextSiblingElement("object");
+                objectElement = objectElement.GetSiblingElement("object");
             }
 
             // Move to the next object group.
-            pObjectGroup = pObjectGroup->NextSiblingElement("objectgroup");
+            objectGroup = objectGroup.GetSiblingElement("objectgroup");
         }
 
         // Dismantle our prefabs.
-        for (auto* pDoc : loadedPrefabs)
+        for (auto& prefabParser : loadedPrefabs)
         {
-            BLEACH_DELETE(pDoc);
+            prefabParser.CloseCurrentFile();
         }
 
         return true;
@@ -356,48 +354,45 @@ namespace mcp
             }
         }
     }
-
-#ifdef MCP_DATA_PARSER_TINYXML2
-    bool TiledMapComponent::AddFromData(const void* pFileData, Object* pOwner)
+    
+    bool TiledMapComponent::AddFromData(const XMLElement component, Object* pOwner)
     {
-        auto* pTiledMapComponent = static_cast<const tinyxml2::XMLElement*>(pFileData);
-
         // Map File Path
-        const char* mapPath = pTiledMapComponent->Attribute("mapPath");
-        if (!mapPath)
+        const char* pMapPath = component.GetAttribute<const char*>("mapPath");
+        if (!pMapPath)
         {
             MCP_ERROR("TiledMapComponent","Failed to add TiledMapComponent from Data! Couldn't find mapPath Attribute!");
             return false;
         }
 
         // Tile Set File Path
-        const char* tileSetPath = pTiledMapComponent->Attribute("tileSetPath");
-        if (!tileSetPath)
+        const char* pTileSetPath = component.GetAttribute<const char*>("tileSetPath");
+        if (!pTileSetPath)
         {
             MCP_ERROR("TiledMapComponent","Failed to add TiledMapComponent from Data! Couldn't find tileSetPath Attribute!");
             return false;
         }
 
         // Image File path
-        const char* tileSetImagePath = pTiledMapComponent->Attribute("tileSetImagePath");
-        if (!tileSetImagePath)
+        const char* pTileSetImagePath = component.GetAttribute<const char*>("tileSetImagePath");
+        if (!pTileSetImagePath)
         {
             MCP_ERROR("TiledMapComponent", "Failed to add TiledMapComponent from Data! Couldn't find tileSetImagePath Attribute!");
             return false;
         }
 
         // Scale of the tiles
-        const auto* pScaleAttribute = pTiledMapComponent->FirstChildElement("Scale");
-        if (!pScaleAttribute)
+        const XMLElement scaleElement = component.GetChildElement("Scale");
+        if (!scaleElement.IsValid())
         {
             MCP_ERROR("TiledMapComponent","Failed to add TiledMapComponent from Data! Couldn't find Scale Element!");
             return false;
         }
 
-        const float scale = pScaleAttribute->FloatAttribute("scale");
+        const float scale = scaleElement.GetAttribute<float>("scale");
 
         // Add the Component to the object
-        if (!pOwner->AddComponent<TiledMapComponent>(mapPath, tileSetPath, tileSetImagePath, scale))
+        if (!pOwner->AddComponent<TiledMapComponent>(pMapPath, pTileSetPath, pTileSetImagePath, scale))
         {
             MCP_ERROR("TiledMapComponent","Failed to add TiledMapComponent from data!");
             return false;
@@ -405,13 +400,5 @@ namespace mcp
 
         return true;
     }
-
-#else
-    bool TiledMapComponent::AddFromData(const void*, Object*)
-    {
-        return false;
-    }
-#endif
-
 
 }

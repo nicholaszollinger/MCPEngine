@@ -19,10 +19,11 @@ namespace mcp
     public:
         Resource() = default;
         virtual ~Resource() = default;
-        //Resource(const Resource& right) = default;
-        //Resource& operator=(const Resource& right) = default;
-        //Resource(Resource&& right) = default;
-        //Resource& operator=(Resource&& right) = default;
+
+        Resource(const Resource& right) = default;
+        Resource& operator=(const Resource& right) = default;
+        Resource(Resource&& right) = default;
+        Resource& operator=(Resource&& right) = default;
 
     public:
         virtual void Load(const char* pFilePath, const char* pPackageName = nullptr, const bool isPersistent = false) = 0;
@@ -31,6 +32,11 @@ namespace mcp
         ///		@brief : Get the raw resource ptr.
         //-----------------------------------------------------------------------------------------------------------------------------
         [[nodiscard]] void* Get() const { return m_pResource; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        ///		@brief : Returns if the resource is loaded in memory.
+        //-----------------------------------------------------------------------------------------------------------------------------
+        [[nodiscard]] bool IsValid() const {return m_pResource != nullptr; }
 
     protected:
         //-----------------------------------------------------------------------------------------------------------------------------

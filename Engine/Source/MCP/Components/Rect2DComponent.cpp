@@ -5,12 +5,6 @@
 #include "MCP/Components/TransformComponent.h"
 #include "MCP/Scene/Object.h"
 
-#ifdef MCP_DATA_PARSER_TINYXML2
-    #include "Platform/TinyXML2/tinyxml2.h"
-#else
-    #error "Rect2DComponent does not have support a the currently defined Data Parser!"
-#endif
-
 namespace mcp
 {
     Rect2DComponent::Rect2DComponent(Object* pObject, const float width, const float height, const RenderLayer layer, const int zOrder)
@@ -41,16 +35,25 @@ namespace mcp
         }
     }
 
-    bool Rect2DComponent::AddFromData(const void* pFileData, Object* pOwner)
+    bool Rect2DComponent::AddFromData(const XMLElement component, Object* pOwner)
     {
-        auto* pRect2DElement = static_cast<const tinyxml2::XMLElement*>(pFileData);
-
         // Width and Height
-        const float width = pRect2DElement->FloatAttribute("width");
-        const float height = pRect2DElement->FloatAttribute("height");
+        const auto width = component.GetAttribute<float>("width");
+        const auto height = component.GetAttribute<float>("height");
+
+        // Get the Renderable info.
+        const XMLElement renderableElement = component.GetChildElement("Renderable");
+        if (!renderableElement.IsValid())
+        {
+            MCP_ERROR("Rect2DComponent", "Failed to add ImageComponent from Data! Couldn't find RenderType Element!");
+            return false;
+        }
+
+        const auto layer =static_cast<RenderLayer>(renderableElement.GetAttribute<int>("layer"));
+        const int zOrder = renderableElement.GetAttribute<int>("zOrder");
 
         // Add the component
-        auto* pRect2DComponent = pOwner->AddComponent<Rect2DComponent>(width, height);
+        auto* pRect2DComponent = pOwner->AddComponent<Rect2DComponent>(width, height, layer, zOrder);
         if (!pRect2DComponent)
         {
             MCP_ERROR("Rect2DComponent", "Failed to add Rect2DComponent from data!");
@@ -58,29 +61,29 @@ namespace mcp
         }
 
         // RenderType
-        const auto* pRenderTypeElement = pRect2DElement->FirstChildElement("RenderType");
-        if (!pRenderTypeElement)
+        const XMLElement renderTypeElement = component.GetChildElement("RenderType");
+        if (!renderTypeElement.IsValid())
         {
-            MCP_ERROR("Rect2DComponent", "Failed to add ImageComponent from Data! Couldn't find RenderType Attribute!");
+            MCP_ERROR("Rect2DComponent", "Failed to add ImageComponent from Data! Couldn't find RenderType Element!");
             return false;
         }
-
-        const char* pType = pRenderTypeElement->Attribute("type");
+        
+        const char* pType = renderTypeElement.GetAttribute<const char*>("type");
         const RenderType type = pType == std::string("Fill") ? RenderType::kFill : RenderType::kOutline;
         pRect2DComponent->SetRenderType(type);
 
         // Color
-        const auto* pColorElement = pRenderTypeElement->NextSiblingElement("Color");
-        if (!pColorElement)
+        const XMLElement colorElement = renderTypeElement.GetSiblingElement("Color");
+        if (!colorElement.IsValid())
         {
             MCP_ERROR("Rect2DComponent", "Failed to add ImageComponent from Data! Couldn't find Color Attribute!");
             return false;
         }
 
-        const auto r = static_cast<uint8_t>(pColorElement->IntAttribute("r"));
-        const auto g = static_cast<uint8_t>(pColorElement->IntAttribute("g"));
-        const auto b = static_cast<uint8_t>(pColorElement->IntAttribute("b"));
-        const auto alpha = static_cast<uint8_t>(pColorElement->IntAttribute("alpha"));
+        const auto r = colorElement.GetAttribute<uint8_t>("r");
+        const auto g = colorElement.GetAttribute<uint8_t>("g");
+        const auto b = colorElement.GetAttribute<uint8_t>("b");
+        const auto alpha = colorElement.GetAttribute<uint8_t>("alpha", 255);
         pRect2DComponent->SetColor(r,g,b,alpha);
 
         return true;

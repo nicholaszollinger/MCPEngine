@@ -4,6 +4,7 @@
 #include <cassert>
 #include <functional>
 #include "MCP/Debug/Log.h"
+#include "MCP/Core/Resource/Parser.h"
 #include "Utility/Generic/Hash.h"
 
 namespace mcp
@@ -16,11 +17,11 @@ namespace mcp
 
     class ColliderFactory
     {
-        using FactoryFunction = std::function<bool(const void*, mcp::ColliderComponent*)>;
+        using FactoryFunction = std::function<bool(const XMLElement, mcp::ColliderComponent*)>;
         using FactoryFuncContainer = std::unordered_map<ColliderTypeId, FactoryFunction>;
 
     public:
-        static bool AddNewFromData(const char* pColliderTypeName, const void* pData, mcp::ColliderComponent* pComponent)
+        static bool AddNewFromData(const char* pColliderTypeName, const XMLElement colliderData, mcp::ColliderComponent* pComponent)
         {
             const ColliderTypeId id = HashString32(pColliderTypeName);
 
@@ -34,7 +35,7 @@ namespace mcp
             }
 
             // Return the result of the create function for that type.
-            return result->second(pData, pComponent);
+            return result->second(colliderData, pComponent);
         }
         
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -61,7 +62,7 @@ namespace mcp
                 assert(false && "Failed to register Collider! This could mean that you have two colliders with the same name!"); 
             }
 
-            factoryFunctions.emplace(id, [](const void* pData, mcp::ColliderComponent* pComponent ){ return ColliderType::AddFromData(pData, pComponent); });
+            factoryFunctions.emplace(id, [](const XMLElement colliderData, mcp::ColliderComponent* pComponent ){ return ColliderType::AddFromData(colliderData, pComponent); });
 
             return id;
         }

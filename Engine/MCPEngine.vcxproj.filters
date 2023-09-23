@@ -61,6 +61,12 @@
     <Filter Include="MCP\Core\Application\Window">
       <UniqueIdentifier>{0df1724c-a207-4bd0-a69f-e36e0d854002}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MCP\UI">
+      <UniqueIdentifier>{c478d585-39ec-488f-b27c-0b523b6fc514}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Core\Resource\Parsers">
+      <UniqueIdentifier>{895701ad-cbd4-44d6-8812-da2ad44d2edb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Platform\SDL2\SDL2Window.h">
@@ -249,6 +255,12 @@
     <ClInclude Include="Source\MCP\Components\EngineComponents.h">
       <Filter>MCP\Components</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Resource\Parser.h">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Resource\Parsers\XMLParser.h">
+      <Filter>MCP\Core\Resource\Parsers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
@@ -388,6 +400,12 @@
     </ClCompile>
     <ClCompile Include="Source\MCP\Scene\Object.cpp">
       <Filter>MCP\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Platform\TinyXML2\TinyXML2Resource.cpp">
+      <Filter>Platform\TinyXML2</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Resource\Parsers\XMLParser.cpp">
+      <Filter>MCP\Core\Resource\Parsers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

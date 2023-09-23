@@ -7,12 +7,6 @@
 #include "MCP/Scene/Scene.h"
 #include "MCP/Graphics/Graphics.h"
 
-#ifdef MCP_DATA_PARSER_TINYXML2
-#include "Platform/TinyXML2/tinyxml2.h"
-#else
-#error "ImageComponent does not have support a the currently defined Data Parser!"
-#endif
-
 namespace mcp
 {
     ImageComponent::ImageComponent(Object* pObject, const RenderLayer layer, const int zOrder)
@@ -81,14 +75,12 @@ namespace mcp
 
         DrawTexture(renderData);
     }
-
-#ifdef MCP_DATA_PARSER_TINYXML2
-    bool ImageComponent::AddFromData(const void* pFileData, Object* pOwner)
+    
+    bool ImageComponent::AddFromData(const XMLElement component, Object* pOwner)
     {
-        auto* pImageComponentElement = static_cast<const tinyxml2::XMLElement*>(pFileData);
-
         // File Path
-        const char* pTextureFilePath = pImageComponentElement->Attribute("imagePath");
+        const char* pTextureFilePath = component.GetAttribute<const char*>("imagePath");
+
         if (!pTextureFilePath)
         {
             MCP_ERROR("ImageComponent","Failed to add ImageComponent from Data! Couldn't find imagePath Attribute!");
@@ -97,33 +89,35 @@ namespace mcp
 
         // Crop
         RectInt crop;
-        const auto* pCrop = pImageComponentElement->FirstChildElement("Crop");
-        if (!pCrop)
+        const XMLElement cropElement = component.GetChildElement("Crop");
+        if (!cropElement.IsValid())
         {
             MCP_ERROR("ImageComponent","Failed to add ImageComponent from Data! Couldn't find Crop Attribute!");
             return false;
         }
-
-        crop.SetPosition(pCrop->IntAttribute("x"), pCrop->IntAttribute("y"));
-        crop.width = pCrop->IntAttribute("w");
-        crop.height = pCrop->IntAttribute("h");
+        
+        crop.x = cropElement.GetAttribute<int>("x");
+        crop.y = cropElement.GetAttribute<int>("y");
+        crop.width = cropElement.GetAttribute<int>("w");
+        crop.height = cropElement.GetAttribute<int>("h");
 
         // Size
         Vec2 size;
-        const auto* pSize = pCrop->NextSiblingElement("Size");
-        if (!pSize)
+        const XMLElement sizeElement = cropElement.GetSiblingElement("Size");
+        if (!sizeElement.IsValid())
         {
             MCP_ERROR("ImageComponent","Failed to add ImageComponent from Data! Couldn't find Size Attribute!");
             return false;
         }
 
-        size.x = pSize->FloatAttribute("x");
-        size.y = pSize->FloatAttribute("y");
+        size.x = sizeElement.GetAttribute<float>("x");
+        size.y = sizeElement.GetAttribute<float>("y");
 
         // IRenderable Data.
-        const auto* pRenderable = pCrop->NextSiblingElement("Renderable");
-        const RenderLayer layer = static_cast<RenderLayer>(pRenderable->IntAttribute("layer"));
-        const int zOrder = pRenderable->IntAttribute("zOrder");
+        const XMLElement renderableElement = cropElement.GetSiblingElement("Renderable");
+        
+        const auto layer =static_cast<RenderLayer>(renderableElement.GetAttribute<int>("layer"));
+        const int zOrder = renderableElement.GetAttribute<int>("zOrder");
 
         // Add the component to the Object
         if (!pOwner->AddComponent<ImageComponent>(pTextureFilePath, crop, size, layer, zOrder))
@@ -134,12 +128,4 @@ namespace mcp
 
         return true;
     }
-
-#else
-    bool ImageComponent::AddFromData(const void*, Object*)
-    {
-        return false;
-    }
-#endif
-
 }
