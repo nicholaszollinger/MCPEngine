@@ -52,6 +52,11 @@ namespace mcp
         const auto layer =static_cast<RenderLayer>(renderableElement.GetAttribute<int>("layer"));
         const int zOrder = renderableElement.GetAttribute<int>("zOrder");
 
+        // IRenderable Data.
+        const auto* pRenderable = pRect2DElement->FirstChildElement("Renderable");
+        const RenderLayer layer = static_cast<RenderLayer>(pRenderable->IntAttribute("layer"));
+        const int zOrder = pRenderable->IntAttribute("zOrder");
+
         // Add the component
         auto* pRect2DComponent = pOwner->AddComponent<Rect2DComponent>(width, height, layer, zOrder);
         if (!pRect2DComponent)
