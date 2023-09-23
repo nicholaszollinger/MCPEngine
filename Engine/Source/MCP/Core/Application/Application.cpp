@@ -123,7 +123,7 @@ namespace mcp
         // Load the GameData:
         if (!LoadGameData(pGameDataFilepath))
         {
-            MCP_ERROR("Application", "Failed to load the GameData at filepath: '%'", pGameDataFilepath);
+            MCP_ERROR("Application", "Failed to load the GameData at filepath: ", pGameDataFilepath);
             Close();
             return false;
         }
