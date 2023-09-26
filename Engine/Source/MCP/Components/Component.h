@@ -2,6 +2,7 @@
 // Component.h
 
 #include "ComponentFactory.h"
+#include "MCP/Core/Event/Message.h"
 
 namespace mcp
 {
@@ -30,7 +31,7 @@ private:                                                                        
 public:                                                                                                                                                 \
     static mcp::ComponentTypeId GetStaticTypeId() { return kComponentTypeId; }                                                                          \
     virtual mcp::ComponentTypeId GetTypeId() const override { return kComponentTypeId; }                                                                \
-private:
+private:                                                                                                                                                \
 
     class Component
     {
@@ -79,5 +80,10 @@ private:
         [[nodiscard]] Object* GetOwner() const { return m_pOwner; }
         [[nodiscard]] MessageManager* GetMessageManager() const;
         [[nodiscard]] bool IsActive() const { return m_isActive; }
+
+    protected:
+        void SendMessage(const MessageId messageId);
+        void ListenForMessage(const MessageId messageId);
+        void StopListeningToMessage(const MessageId messageId) const;
     };
 }

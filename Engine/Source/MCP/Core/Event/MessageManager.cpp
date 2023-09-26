@@ -13,7 +13,7 @@ namespace mcp
             // TODO: Make sure the message.pSender is still valid? Should that matter?
 
             // If we have listeners for that message type, send the message to the receivers.
-            if (const auto result = m_messageReceivers.find(message.id); result != m_messageReceivers.end())
+            if (const auto result = m_messageListeners.find(message.id); result != m_messageListeners.end())
             {
                 for (auto* pComponent : result->second)
                 {
@@ -26,15 +26,15 @@ namespace mcp
         m_messageQueue.clear();
     }
 
-    void MessageManager::AddReceiver(Component* pReceiver, const MessageIdType id)
+    void MessageManager::AddListener(Component* pReceiver, const MessageId id)
     {
-        m_messageReceivers[id].emplace_back(pReceiver);
+        m_messageListeners[id].emplace_back(pReceiver);
     }
 
-    void MessageManager::RemoveReceiver(const Component* pReceiver, const MessageIdType id)
+    void MessageManager::RemoveListener(const Component* pReceiver, const MessageId id)
     {
         // Check to see if we have any receivers for that type.
-        if (const auto result = m_messageReceivers.find(id); result != m_messageReceivers.end())
+        if (const auto result = m_messageListeners.find(id); result != m_messageListeners.end())
         {
             // This is O(n) but I don't imagine these arrays will be huge. But who knows. Might have to
             // change later.
@@ -52,7 +52,7 @@ namespace mcp
         }
     }
 
-    void MessageManager::QueueMessage(Component* pSender, const MessageIdType id)
+    void MessageManager::QueueMessage(Component* pSender, const MessageId id)
     {
         m_messageQueue.emplace_back(id, pSender);
     }
