@@ -261,6 +261,15 @@
     <ClInclude Include="Source\MCP\Core\Resource\Parsers\XMLParser.h">
       <Filter>MCP\Core\Resource\Parsers</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Resource\Font.h">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Platform\SDL2\SDLText.h">
+      <Filter>Platform\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\TextComponent.h">
+      <Filter>MCP\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
@@ -406,6 +415,15 @@
     </ClCompile>
     <ClCompile Include="Source\MCP\Core\Resource\Parsers\XMLParser.cpp">
       <Filter>MCP\Core\Resource\Parsers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Resource\Font.cpp">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Platform\SDL2\SDLText.cpp">
+      <Filter>Platform\SDL2</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\TextComponent.cpp">
+      <Filter>MCP\Components</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

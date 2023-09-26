@@ -7,20 +7,15 @@
 #include "MCP/Audio/AudioManager.h"
 #include "MCP/Collision/ColliderFactory.h"
 #include "MCP/Components/ComponentFactory.h"
+#include "MCP/Components/EngineComponents.h"
+#include "MCP/Core/Resource/Parser.h"
 #include "MCP/Core/Event/KeyEvent.h"
 #include "MCP/Graphics/Graphics.h"
 #include "MCP/Lua/Lua.h"
 #include "MCP/Scene/SceneManager.h"
 #include "MCP/Core/Resource/ResourceManager.h"
-#include "utility/Time/FrameTimer.h"
+#include "Utility/Time/FrameTimer.h"
 #include "Window/WindowBase.h"
-#include "MCP/Components/EngineComponents.h"
-
-#ifdef MCP_DATA_PARSER_TINYXML2
-#include "Platform/TinyXML2/tinyxml2.h"
-#else
-#error "Application doesn't have support for selected Data Parser!'"
-#endif
 
 namespace mcp
 {
@@ -221,7 +216,7 @@ namespace mcp
         // Load the GameData:
         if (!LoadGameData(pGameDataFilepath))
         {
-            MCP_ERROR("Application", "Failed to load the GameData at filepath: '%'", pGameDataFilepath);
+            MCP_ERROR("Application", "Failed to load the GameData at filepath: ", pGameDataFilepath);
             Close();
             return false;
         }
@@ -334,30 +329,30 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     bool Application::LoadGameData(const char* pGameDataFilepath)
     {
-#ifdef MCP_DATA_PARSER_TINYXML2
-        tinyxml2::XMLDocument doc;
-        if (doc.LoadFile(pGameDataFilepath) != tinyxml2::XML_SUCCESS)
+        XMLParser parser;
+        
+        if (!parser.LoadFile(pGameDataFilepath))
         {
             MCP_ERROR("Application", "Failed to load game data from file: ", pGameDataFilepath);
             return false;
         }
 
         // Get the Scenes
-        const auto* pSceneList = doc.FirstChildElement("SceneList");
-        if (!pSceneList)
+        const XMLElement sceneList = parser.GetElement("SceneList");
+        if (!sceneList.IsValid())
         {
             MCP_ERROR("Application", "Failed to load game data! Couldn't find SceneList element!");
             return false;
         }
 
-        const auto* pDefaultScene = pSceneList->FirstChildElement("Default");
-        if (!pDefaultScene)
+        const XMLElement defaultScene = sceneList.GetChildElement("Default");
+        if (!defaultScene.IsValid())
         {
             MCP_ERROR("Application", "Failed to load game data! Couldn't find Default Scene element!");
             return false;
         }
 
-        const char* pDefaultSceneFilepath = pDefaultScene->Attribute("sceneDataPath");
+        const char* pDefaultSceneFilepath = defaultScene.GetAttribute<const char*>("sceneDataPath");
         if (!pDefaultSceneFilepath)
         {
             MCP_ERROR("Application", "Failed to load game data! Couldn't find Default Scene Path attribute!");
@@ -371,9 +366,6 @@ namespace mcp
         }
 
         return true;
-#else
-        return false;
-#endif
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------

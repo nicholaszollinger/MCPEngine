@@ -325,6 +325,17 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
+    ///		@brief : Returns true if there is currently an XML file loaded in data.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool XMLParser::HasFileLoaded() const
+    {
+        // Returns if the resource is valid (not freed)
+        return m_loadedFile.IsValid();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
     ///		@brief : Close the XML file, freeing the internal resource.\n NOTE: Any Elements that were associated with the xml file
     ///         are now invalid!
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -336,23 +347,10 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Get the first element from the root document that matches the pElementName
-    ///		@returns : Pointer to the element, or nullptr if no element of the given name was found.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    const XMLParser::Element* XMLParser::GetElement(const char* pElementName) const
-    {
-        MCP_CHECK_MSG(m_loadedFile.IsValid(), "Failed to get XML Element! No valid file loaded!");
-
-        return CAST_TO_FILE_TYPE(m_loadedFile.Get())->FirstChildElement(pElementName);
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
     ///		@brief : Get the first element from the root document that matches pElementName, or returns an invalid XMLElement if
     ///         no element of the given name was found. \n To check to see if the element is valid, use XMLElement.IsValid().
     //-----------------------------------------------------------------------------------------------------------------------------
-    XMLElement XMLParser::GetElement(const char* pElementName)
+    XMLElement XMLParser::GetElement(const char* pElementName) const
     {
         MCP_CHECK_MSG(m_loadedFile.IsValid(), "Failed to get XML Element! No valid file loaded!");
 
@@ -360,180 +358,5 @@ namespace mcp
         auto* pHandle = pOwner->FirstChildElement(pElementName);
 
         return XMLElement(pHandle);
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Get the first child element of pElement that matches pChildName. If no name is given, then this returns the
-    ///         first child element.
-    ///		@param pElement : Pointer to the element that would be the parent of the child.
-    ///		@param pChildName : Name of the element you are looking for.
-    ///		@returns : Pointer to the child element or nullptr if there were no children of pElement or no children matched the name.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    const XMLParser::Element* XMLParser::GetChildElement(const Element* pElement, const char* pChildName) const
-    {
-        MCP_CHECK(pElement);
-        MCP_CHECK_MSG(m_loadedFile.IsValid(), "Failed to get XML Element! No valid file loaded!");
-
-        return CAST_TO_CONST_ELEMENT_TYPE(pElement)->FirstChildElement(pChildName);
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Get the next sibling of pElement matching the name. If not name is give, then this returns the next sibling element.
-    ///		@param pElement : Pointer to the element we are looking from.
-    ///		@param pSiblingName : Name of the sibling we are looking for.
-    ///		@returns : Pointer to the sibling element or nullptr if there was no sibling or if there were no siblings with the given name.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    const XMLParser::Element* XMLParser::GetSiblingElement(const Element* pElement, const char* pSiblingName) const
-    {
-        MCP_CHECK(pElement);
-        MCP_CHECK_MSG(m_loadedFile.IsValid(), "Failed to get XML Element! No valid file loaded!");
-
-        return CAST_TO_CONST_ELEMENT_TYPE(pElement)->NextSiblingElement(pSiblingName);
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Get the name of the Element
-    //-----------------------------------------------------------------------------------------------------------------------------
-    const char* XMLParser::GetElementName(const Element* pElement) const
-    {
-        MCP_CHECK(pElement);
-        MCP_CHECK_MSG(m_loadedFile.IsValid(), "Failed to get XML Element! No valid file loaded!");
-
-        return CAST_TO_CONST_ELEMENT_TYPE(pElement)->Name();
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Try to get a bool attribute value from the Element named pAttributeName. If successful, this will write the
-    ///         attribute value to outVal. 
-    ///		@returns : False if there is no attribute name pAttributeName or if the conversion to bool is impossible.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    bool XMLParser::GetBoolAttribute(const Element* pElement, const char* pAttributeName, bool& outVal)
-    {
-        const auto* pXMLElement = CAST_TO_CONST_ELEMENT_TYPE(pElement);
-        const tinyxml2::XMLError errorCode = pXMLElement->QueryBoolAttribute(pAttributeName, &outVal);
-
-        if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
-        {
-            MCP_ERROR("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: ", pXMLElement->Name());
-            return false;
-        }
-
-        if (errorCode == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
-        {
-            MCP_ERROR("XML", "Failed to get attribute value! Cannot convert xml value to bool! Attribute name: '", pAttributeName, "' | Element: ", pXMLElement->Name());
-            return false;
-        }
-
-        return true;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Try to get a int64_t attribute value from the Element named pAttributeName. If successful, this will write the
-    ///         attribute value to outVal. 
-    ///		@returns : False if there is no attribute name pAttributeName or if the conversion to int64_t is impossible.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    bool XMLParser::GetIntAttribute(const Element* pElement, const char* pAttributeName, int64_t& outVal)
-    {
-        const auto* pXMLElement = CAST_TO_CONST_ELEMENT_TYPE(pElement);
-        const tinyxml2::XMLError errorCode = pXMLElement->QueryInt64Attribute(pAttributeName, &outVal);
-
-        if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
-        {
-            MCP_ERROR("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: ", pXMLElement->Name());
-            return false;
-        }
-
-        if (errorCode == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
-        {
-            MCP_ERROR("XML", "Failed to get attribute value! Cannot convert xml value to signed integer! Attribute name: '", pAttributeName, "' | Element: ", pXMLElement->Name());
-            return false;
-        }
-
-        return true;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Try to get a uint64_t attribute value from the Element named pAttributeName. If successful, this will write the
-    ///         attribute value to outVal. 
-    ///		@returns : False if there is no attribute name pAttributeName or if the conversion to uint64_t is impossible.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    bool XMLParser::GetUnsignedIntAttribute(const Element* pElement, const char* pAttributeName, uint64_t& outVal)
-    {
-        const auto* pXMLElement = CAST_TO_CONST_ELEMENT_TYPE(pElement);
-        const tinyxml2::XMLError errorCode = pXMLElement->QueryUnsigned64Attribute(pAttributeName, &outVal);
-
-        if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
-        {
-            MCP_ERROR("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: ", pXMLElement->Name());
-            return false;
-        }
-
-        if (errorCode == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
-        {
-            MCP_ERROR("XML", "Failed to get attribute value! Cannot convert xml value to unsigned integer! Attribute name: '", pAttributeName, "' | Element: ", pXMLElement->Name());
-            return false;
-        }
-
-        return true;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Try to get a double attribute value from the Element named pAttributeName. If successful, this will write the
-    ///         attribute value to outVal. 
-    ///		@returns : False if there is no attribute name pAttributeName or if the conversion to double is impossible.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    bool XMLParser::GetDoubleAttribute(const Element* pElement, const char* pAttributeName, double& outVal)
-    {
-        const auto* pXMLElement = CAST_TO_CONST_ELEMENT_TYPE(pElement);
-        const tinyxml2::XMLError errorCode = pXMLElement->QueryDoubleAttribute(pAttributeName, &outVal);
-
-        if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
-        {
-            MCP_ERROR("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: ", pXMLElement->Name());
-            return false;
-        }
-
-        if (errorCode == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
-        {
-            MCP_ERROR("XML", "Failed to get attribute value! Cannot convert xml value to floating point value! Attribute name: '", pAttributeName, "' | Element: ", pXMLElement->Name());
-            return false;
-        }
-
-        return true;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Try to get a string attribute value from the Element named pAttributeName. If successful, this will write the
-    ///         attribute value to outVal. 
-    ///		@returns : False if there is no attribute name pAttributeName.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    bool XMLParser::GetStringAttribute(const Element* pElement, const char* pAttributeName, const char*& outVal)
-    {
-        const auto* pXMLElement = CAST_TO_CONST_ELEMENT_TYPE(pElement);
-        const tinyxml2::XMLError errorCode = pXMLElement->QueryStringAttribute(pAttributeName, &outVal);
-
-        if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
-        {
-            MCP_ERROR("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: ", pXMLElement->Name());
-            return false;
-        }
-
-        return true;
     }
 }

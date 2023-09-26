@@ -7,9 +7,11 @@
 #include <SDL_image.h>
 #include <SDL_mixer.h>
 #include <SDL_render.h>
+#include <SDL_ttf.h>
 #pragma warning(pop)
 
 #include "MCP/Core/Application/Window/WindowBase.h"
+#include "Platform/SDL2/SDLHelpers.h"
 #include "MCP/Graphics/Graphics.h"
 
 namespace mcp
@@ -17,31 +19,6 @@ namespace mcp
     //--------------------------------------------------------------------------------------------------------
     //      SDL_TEXTURES
     //--------------------------------------------------------------------------------------------------------
-
-    SDL_Texture* CreateTextureFromSurface(SDL_Surface* pSurface, Vec2Int& sizeOut)
-    {
-        // Set the size of the Sprite based on the image's size.
-        sizeOut.x = pSurface->w;
-        sizeOut.y = pSurface->h;
-
-        // Get the renderer.
-        auto* pRenderer = GraphicsManager::Get()->GetRenderer();
-
-        // Create a SDL_Texture from the surface:
-        SDL_Texture* pTexture = SDL_CreateTextureFromSurface(static_cast<SDL_Renderer*>(pRenderer), pSurface);
-        if (!pTexture)
-        {
-            MCP_ERROR("SDL", "Failed to Create SDL_Texture from SDL_Surface! SDL_Error: ", SDL_GetError());
-            SDL_FreeSurface(pSurface);
-            return nullptr;
-        }
-
-        // Free the surface.
-        SDL_FreeSurface(pSurface);
-        SDL_SetTextureBlendMode(pTexture, SDL_BLENDMODE_BLEND);
-
-        return pTexture;
-    }
 
     template <>
     template <>
@@ -57,6 +34,16 @@ namespace mcp
 
         return CreateTextureFromSurface(pSurface, sizeOut);
     }
+
+    /*template <>
+    template <>
+    SDL_Texture* ResourceContainer<SDL_Texture>::LoadFromDiskImpl(const char* pFilePath, const TextRenderData& data)
+    {
+        SDL_Surface* pSurface = TTF_RenderUTF8_Blended_Wrapped();
+
+        return CreateTextureFromSurface(pSurface, )
+    }*/
+
 
     template <>
     template <>
@@ -155,9 +142,48 @@ namespace mcp
     }
 
     template <>
-    void ResourceContainer<Mix_Music>::FreeResourceImpl(Mix_Music* pMusic)
+    void ResourceContainer<Mix_Music>::FreeResourceImpl(Mix_Music* pFont)
     {
-        Mix_FreeMusic(pMusic);
+        Mix_FreeMusic(pFont);
     }
 
+    //--------------------------------------------------------------------------------------------------------
+    //      TTF_FONTS
+    //--------------------------------------------------------------------------------------------------------
+
+    template <>
+    template <>
+    _TTF_Font* ResourceContainer<_TTF_Font>::LoadFromDiskImpl(const char* pFilePath, int& fontSize)
+    {
+        auto* pFont = TTF_OpenFont(pFilePath, fontSize);
+
+        if (!pFont)
+        {
+            MCP_ERROR("SDL", "Failed to load TTF_Font from data! TTF_Error: ", TTF_GetError());
+            return nullptr;
+        }
+
+        return pFont;
+    }
+
+    template <>
+    template <>
+    _TTF_Font* ResourceContainer<_TTF_Font>::LoadFromRawDataImpl(char* pRawData, const int dataSize, int& fontSize)
+    {
+        SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
+        auto* pFont = TTF_OpenFontRW(pSdlData, 0, fontSize);
+        if (!pFont)
+        {
+            MCP_ERROR("SDL", "Failed to load TTF_Font from raw data! TTF_Error: ", TTF_GetError());
+            return nullptr;
+        }
+
+        return pFont;
+    }
+
+    template <>
+    void ResourceContainer<_TTF_Font>::FreeResourceImpl(TTF_Font* pFont)
+    {
+        TTF_CloseFont(pFont);
+    }
 }

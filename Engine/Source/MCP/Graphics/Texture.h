@@ -2,6 +2,7 @@
 // Texture.h
 
 #include "MCP/Core/Resource/Resource.h"
+#include "Utility/Types/Color.h"
 #include "Utility/Types/Vector2.h"
 
 // TODO: Need to figure out what I want to do as far as copying, copy-assignment, etc.
@@ -17,6 +18,7 @@ namespace mcp
         virtual ~Texture() override;
 
         virtual void Load(const char* pFilePath, const char* pPackageName = nullptr, const bool isPersistent = false) override;
+
         [[nodiscard]] const Vec2Int& GetBaseSize() const { return m_baseSize; }
         [[nodiscard]] Vec2 GetBaseSizeAsFloat() const { return { static_cast<float>(m_baseSize.x), static_cast<float>(m_baseSize.y) }; }
         

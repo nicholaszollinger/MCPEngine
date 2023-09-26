@@ -16,7 +16,7 @@ namespace mcp
 
         Texture m_texture;
         TransformComponent* m_pTransformComponent;
-        RectInt m_crop;
+        RectInt m_crop {};
         Vec2 m_anglePivot;
         Vec2 m_size;
         double m_renderAngle;

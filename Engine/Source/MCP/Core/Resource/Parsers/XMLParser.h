@@ -16,7 +16,6 @@ namespace mcp
         XMLElement(void* pHandle);
 
         // Get connected Elements
-        //const XMLElement* GetElement(const char* pElementName) const;
         XMLElement GetChildElement(const char* pChildName = nullptr) const;
         XMLElement GetSiblingElement(const char* pSiblingName = nullptr) const;
 
@@ -164,8 +163,6 @@ namespace mcp
         XMLFile m_loadedFile;
 
     public:
-        using Element = void;
-
         XMLParser() = default;
         ~XMLParser();
 
@@ -174,94 +171,6 @@ namespace mcp
         [[nodiscard]] bool HasFileLoaded() const;
         void CloseCurrentFile();
 
-        XMLElement GetElement(const char* pElementName);
-
-        // Get Elements
-        const Element* GetElement(const char* pElementName) const;
-        const Element* GetChildElement(const Element* pElement, const char* pChildName = nullptr) const;
-        const Element* GetSiblingElement(const Element* pElement, const char* pSiblingName = nullptr) const;
-
-        // Get Element Data
-        const char* GetElementName(const Element* pElement) const;
-        template<typename AttributeType> bool GetAttribute(const Element* pElement, const char* pAttributeName, AttributeType& outVal);
-
-    private:
-        // Attributes
-        static bool GetIntAttribute(const Element* pElement, const char* pAttributeName, int64_t& outVal);
-        static bool GetUnsignedIntAttribute(const Element* pElement, const char* pAttributeName, uint64_t& outVal);
-        static bool GetDoubleAttribute(const Element* pElement, const char* pAttributeName, double& outVal);
-        static bool GetBoolAttribute(const Element* pElement, const char* pAttributeName, bool& outVal);
-        static bool GetStringAttribute(const Element* pElement, const char* pAttributeName, const char*& outVal);
+        XMLElement GetElement(const char* pElementName) const;
     };
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Attempt to get an Attribute value from pElement.
-    ///		@tparam AttributeType : Type of Attribute you want to get; Attribute type must be a number type, bool or const char*.
-    ///		@param pElement : Element whose Attribute we want.
-    ///		@param pAttributeName : Name of the Attribute you are looking for.
-    ///		@param outVal : Value that will be written to.
-    ///		@returns : False if the Attribute does not exist or if the Attribute value cannot be converted to AttributeType.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    template <typename AttributeType>
-    bool XMLParser::GetAttribute(const Element* pElement, const char* pAttributeName, AttributeType& outVal)
-    {
-        static_assert(std::is_arithmetic_v<AttributeType> 
-            || std::is_same_v<AttributeType, bool> 
-            || std::is_same_v<AttributeType, const char*>
-            , "Attribute type must be a number type, bool or const char*");
-
-        MCP_CHECK(pElement);
-        MCP_CHECK_MSG(m_loadedFile.IsValid(), "Failed to get XML Element! No valid file loaded!");
-
-        if constexpr (std::is_same_v<AttributeType, bool>)
-        {
-            return GetBoolAttribute(pElement, pAttributeName, outVal);
-        }
-
-        else if constexpr (std::is_same_v<AttributeType, const char*>)
-        {
-            return GetStringAttribute(pElement, pAttributeName, outVal);
-        }
-
-        else if constexpr (std::is_integral_v<AttributeType>)
-        {
-            if constexpr (std::is_unsigned_v<AttributeType>)
-            {
-                int64_t dummyVal{};
-                if (!GetIntAttribute(pElement, pAttributeName, dummyVal))
-                    return false;
-
-                outVal = static_cast<AttributeType>(dummyVal);
-                return true;
-            }
-
-            else
-            {
-                uint64_t dummyVal{};
-                if (!GetUnsignedIntAttribute(pElement, pAttributeName, dummyVal))
-                    return false;
-
-                outVal = static_cast<AttributeType>(dummyVal);
-                return true;
-            }
-        }
-
-        else if constexpr (std::is_floating_point_v<AttributeType>)
-        {
-            double dummyVal{};
-            if (!GetDoubleAttribute(pElement, pAttributeName, dummyVal))
-                return false;
-
-            outVal = static_cast<AttributeType>(dummyVal);
-            return true;
-        }
-
-        // Shouldn't be able to get here
-        return false;
-    }
-
-
-
 }

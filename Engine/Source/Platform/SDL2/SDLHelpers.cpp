@@ -2,6 +2,8 @@
 
 #include "SDLHelpers.h"
 
+#include "MCP/Debug/Log.h"
+#include "MCP/Graphics/Graphics.h"
 #include "Utility/Types/Color.h"
 
 namespace mcp
@@ -132,5 +134,38 @@ namespace mcp
     SDL_FPoint Vec2ToSdlF(const Vec2& vec)
     {
         return { vec.x, vec.y };
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Creates a SDL_Texture* assert from a surface.
+    ///		@param pSurface : Surface we are using to generate the final texture.
+    ///		@param sizeOut : Size info about the surface.
+    ///		@returns : Nullptr if there was an error.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    SDL_Texture* CreateTextureFromSurface(SDL_Surface* pSurface, Vec2Int& sizeOut)
+    {
+        // Set the size of the Sprite based on the image's size.
+        sizeOut.x = pSurface->w;
+        sizeOut.y = pSurface->h;
+
+        // Get the renderer.
+        auto* pRenderer = GraphicsManager::Get()->GetRenderer();
+
+        // Create a SDL_Texture from the surface:
+        SDL_Texture* pTexture = SDL_CreateTextureFromSurface(static_cast<SDL_Renderer*>(pRenderer), pSurface);
+        if (!pTexture)
+        {
+            MCP_ERROR("SDL", "Failed to Create SDL_Texture from SDL_Surface! SDL_Error: ", SDL_GetError());
+            SDL_FreeSurface(pSurface);
+            return nullptr;
+        }
+
+        // Free the surface.
+        SDL_FreeSurface(pSurface);
+        SDL_SetTextureBlendMode(pTexture, SDL_BLENDMODE_BLEND);
+
+        return pTexture;
     }
 }

@@ -44,5 +44,4 @@ namespace mcp
     {
         ResourceManager::Get()->FreeResource<TextureAssetType>(m_loadData.pFilePath);
     }
-
 }

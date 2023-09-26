@@ -13,4 +13,5 @@
 #include "PrimitiveComponent.h"
 #include "Rect2DComponent.h"
 #include "ScriptComponent.h"
+#include "TextComponent.h"
 #include "TransformComponent.h"

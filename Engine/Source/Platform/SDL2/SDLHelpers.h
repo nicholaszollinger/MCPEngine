@@ -36,4 +36,6 @@ namespace mcp
 
     // RenderSettings:
     SDL_RendererFlip FlipToSdl(const mcp::RenderFlip2D& flip);
+
+    SDL_Texture* CreateTextureFromSurface(SDL_Surface* pSurface, Vec2Int& sizeOut);
 }
