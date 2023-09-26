@@ -8,15 +8,15 @@ namespace mcp
 {
     class MessageManager 
     {
-        using ReceiverArray = std::vector<Component*>;
+        using Listeners = std::vector<Component*>;
 
-        std::unordered_map<MessageIdType, ReceiverArray> m_messageReceivers;
+        std::unordered_map<MessageId, Listeners, StringIdHasher> m_messageListeners;
         std::vector<Message> m_messageQueue;
 
     public:
         void ProcessMessages();
-        void AddReceiver(Component* pReceiver, const MessageIdType id);
-        void RemoveReceiver(const Component* pReceiver, const MessageIdType id);
-        void QueueMessage(Component* pSender, const MessageIdType id);
+        void AddListener(Component* pReceiver, const MessageId id);
+        void RemoveListener(const Component* pReceiver, const MessageId id);
+        void QueueMessage(Component* pSender, const MessageId id);
     };
 }

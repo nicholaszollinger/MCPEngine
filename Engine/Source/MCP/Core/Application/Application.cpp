@@ -338,7 +338,7 @@ namespace mcp
         tinyxml2::XMLDocument doc;
         if (doc.LoadFile(pGameDataFilepath) != tinyxml2::XML_SUCCESS)
         {
-            MCP_ERROR("Application", "Failed to load game data from file '%'", pGameDataFilepath);
+            MCP_ERROR("Application", "Failed to load game data from file: ", pGameDataFilepath);
             return false;
         }
 

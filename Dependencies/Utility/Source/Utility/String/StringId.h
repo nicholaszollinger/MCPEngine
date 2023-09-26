@@ -1,23 +1,29 @@
 #pragma once
 // StringId.h
 
+#include <mutex>
 #include <string>
 #include <unordered_map>
 
 //-----------------------------------------------------------------------------------------------------------------------------
 //		NOTES:
-//      This is an interned string implementation. I did the simple thing and just had the string database be a static member
-//      on the class. That means that the database could get HUGE, and I would prefer to have a 'scope' or something (like
-//      GameObjectName StringIds) but this was the simple thing.
+//      This is an interned string implementation. The strings themselves are stored in a static container.
 //
-///		@brief : A StringId is a pointer to a std::string that lives in a static database. Comparing StringIds is trivial because
-///         we are just comparing the pointers.
+//      It would be cool if I could have a 'scope' to the StringIds. Instead of one unifying static container, it could have a
+//      pointer to a container. The only reason this would be nice is for dealing with Threads. I could setup a StringId scope
+//      to work on a single thread, for instance. Then we wouldn't have to lock. I am pretty sure I am going to have to make
+//      this thread safe.
+//
+///		@brief : A StringId is a pointer to a std::string that lives in a static container of this class. Construction is the only
+///         intensive process of this class, because we have to hash the string and find/add it to the container. So construct as
+///         little as possible. Comparing, Copying, Moving, are all trivial. It's just a pointer. 
 //-----------------------------------------------------------------------------------------------------------------------------
 class StringId
 {
     // Easiest
     inline static std::unordered_map<uint32_t, std::string> s_strings = std::unordered_map<uint32_t, std::string>(64);
     inline static std::string s_invalidStringId = "Invalid StringId";
+    inline static std::mutex s_stringMutex;
 
     std::string* m_pStrRef = &s_invalidStringId;
 
@@ -32,14 +38,20 @@ public:
     StringId& operator=(StringId&& right) noexcept;
     ~StringId() = default;
 
-    std::string GetStringCopy() const;
-    const std::string& GetString() const;
-    const std::string& operator*() const;
+    [[nodiscard]] std::string GetStringCopy() const;
+    [[nodiscard]] const std::string& GetStringRef() const;
+    [[nodiscard]] const std::string* GetConstPtr() const;
 
+    const std::string& operator*() const;
     constexpr bool operator==(const StringId& right) const { return m_pStrRef == right.m_pStrRef; }
     constexpr bool operator!=(const StringId& right) const { return !(*this == right); }
 
 private:
     static std::string* GetStringPtr(const char* str);
     static std::string* GetStringPtr(const std::string& str);
+};
+
+struct StringIdHasher
+{
+    uint64_t operator()(const StringId id) const;
 };

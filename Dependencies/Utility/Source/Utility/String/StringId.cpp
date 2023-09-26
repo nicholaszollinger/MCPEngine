@@ -32,12 +32,22 @@ StringId& StringId::operator=(StringId&& right) noexcept
     return *this;
 }
 
+//-----------------------------------------------------------------------------------------------------------------------------
+//		NOTES:
+//		
+///		@brief : Get a copy of the internal string. If you just want a reference, use GetStringRef(). \n NOT THREAD SAFE.
+//-----------------------------------------------------------------------------------------------------------------------------
 std::string StringId::GetStringCopy() const
 {
     return *m_pStrRef;
 }
 
-const std::string& StringId::GetString() const
+//-----------------------------------------------------------------------------------------------------------------------------
+//		NOTES:
+//		
+///		@brief : Get a const reference to the internal string. If you want a copy, use GetStringCopy(). \n NOT THREAD SAFE.
+//-----------------------------------------------------------------------------------------------------------------------------
+const std::string& StringId::GetStringRef() const
 {
     return *m_pStrRef;
 }
@@ -47,12 +57,19 @@ const std::string& StringId::operator*() const
     return *m_pStrRef;
 }
 
+const std::string* StringId::GetConstPtr() const
+{
+    return m_pStrRef;
+}
+
 std::string* StringId::GetStringPtr(const char* str)
 {
     const uint32_t hash = HashString32(str);
 
+    std::lock_guard lock(s_stringMutex);
+
     // If we don't have the string already, add it to our container.
-    if (s_strings.find(hash) != s_strings.end())
+    if (s_strings.find(hash) == s_strings.end())
     {
         s_strings[hash] = str;
     }
@@ -63,4 +80,11 @@ std::string* StringId::GetStringPtr(const char* str)
 std::string* StringId::GetStringPtr(const std::string& str)
 {
     return GetStringPtr(str.c_str());
+}
+
+uint64_t StringIdHasher::operator()(const StringId id) const
+{
+    static std::hash<const std::string*> hash;
+
+    return hash(id.GetConstPtr());
 }
