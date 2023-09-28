@@ -35,7 +35,7 @@ namespace mcp
         std::vector<ObjectId> m_queuedObjectsToDelete;               // Objects that will be deleted at the end of the update.
         CollisionSystem m_collisionSystem;
         MessageManager m_messageManager;
-        float m_accumulatedTime;
+        float m_accumulatedTime;                                    // Amount of time before we perform a fixed update.
         bool m_transitionQueued;                                    // Whether a scene transition has been queued or not.
 
     public:
@@ -69,5 +69,6 @@ namespace mcp
         void RenderLayer(const RenderableContainer& renderables) const;
         void DeleteQueuedObjects();
         void ClearScene();
+        void SetCollisionSettings(const QuadtreeBehaviorData& data);
     };
 }

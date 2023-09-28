@@ -14,7 +14,7 @@ namespace mcp
 #else
         : m_pRoot(BLEACH_NEW(QuadtreeCell(nullptr)))
 #endif
-        , m_maxTreeDepth(data.maxHeight)
+        , m_maxTreeDepth(data.maxDepth)
         , m_objectCountToTriggerDivide(data.maxObjectsInCell)
         , m_worldWidth(data.worldWidth)
         , m_worldHeight(data.worldHeight)
@@ -25,6 +25,21 @@ namespace mcp
     CollisionSystem::~CollisionSystem()
     {
         ClearTree();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Set the behavior settings for the collision system.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void CollisionSystem::SetQuadtreeBehaviorData(const QuadtreeBehaviorData& data)
+    {
+        m_worldWidth = data.worldWidth;
+        m_worldHeight = data.worldHeight;
+        m_objectCountToTriggerDivide = data.maxObjectsInCell;
+        m_maxTreeDepth = data.maxDepth;
+
+        m_pRoot->dimensions = { data.worldXPos, data.worldYPos, data.worldWidth, data.worldHeight};
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -205,7 +220,7 @@ namespace mcp
                 continue;
 
             // For each other collider component, we need to see if we collide.
-            for (auto* pComponent : pCell->m_colliderComponents)
+            for (auto& pComponent : pCell->m_colliderComponents)
             {
                 // Don't check against itself.
                 if (pComponent->m_pOwner == pColliderComponent->m_pOwner)
