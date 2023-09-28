@@ -6,8 +6,10 @@
 #include "IRenderable.h"
 #include "MCP/Components/ComponentFactory.h"
 #include "MCP/Components/TransformComponent.h"
+#include "MCP/Core/Application/Application.h"
 #include "MCP/Core/Resource/PackageManager.h"
 #include "MCP/Core/Resource/Parser.h"
+#include "MCP/Graphics/Graphics.h"
 #include "MCP/Scene/IUpdateable.h"
 #include "MCP/Scene/Object.h"
 
@@ -74,6 +76,24 @@ namespace mcp
             return false;
         }
 
+        // Get global settings for the Scene.
+        const XMLElement worldSettings = sceneElement.GetChildElement("WorldSettings");
+        MCP_CHECK(worldSettings.IsValid()); // This should be an assert.
+
+        // Collision Settings
+        XMLElement setting = worldSettings.GetChildElement("Collision");
+        MCP_CHECK(setting.IsValid());
+        QuadtreeBehaviorData data;
+        const auto windowDimensions = GraphicsManager::Get()->GetWindow()->GetDimensions();
+        data.worldWidth = setting.GetAttribute<float>("worldWidth", static_cast<float>(windowDimensions.width));
+        data.worldHeight = setting.GetAttribute<float>("worldHeight", static_cast<float>(windowDimensions.height));
+        data.worldXPos = setting.GetAttribute<float>("worldXPos", 0.f);
+        data.worldYPos = setting.GetAttribute<float>("worldYPos", 0.f);
+        data.maxDepth = setting.GetAttribute<unsigned>("maxDepth", 4);
+        data.maxObjectsInCell = setting.GetAttribute<unsigned>("maxObjectsInCell", 4);
+        SetCollisionSettings(data);
+
+        // Scene Objects
         XMLElement objectElement = sceneElement.GetChildElement(kObjectElementName);
         while(objectElement.IsValid())
         {
@@ -363,4 +383,10 @@ namespace mcp
 
         m_objects.clear();
     }
+
+    void Scene::SetCollisionSettings(const QuadtreeBehaviorData& data)
+    {
+        m_collisionSystem.SetQuadtreeBehaviorData(data);
+    }
+
 }

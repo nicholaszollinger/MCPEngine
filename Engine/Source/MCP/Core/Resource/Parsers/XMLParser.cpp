@@ -105,7 +105,7 @@ namespace mcp
 
         if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
         {
-            MCP_ERROR("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: ", pElement->Name());
+            MCP_WARN("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: '", pElement->Name(), "'. Defaulting to default value.");
         }
 
         if (errorCode == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
@@ -130,7 +130,7 @@ namespace mcp
 
         if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
         {
-            MCP_ERROR("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: ", pElement->Name());
+            MCP_WARN("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: '", pElement->Name(), "'. Defaulting to default value.");
         }
 
         if (errorCode == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
@@ -155,7 +155,7 @@ namespace mcp
 
         if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
         {
-            MCP_ERROR("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: ", pElement->Name());
+            MCP_WARN("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: '", pElement->Name(), "'. Defaulting to default value.");
         }
 
         if (errorCode == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
@@ -180,7 +180,7 @@ namespace mcp
 
         if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
         {
-            MCP_ERROR("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: ", pElement->Name());
+            MCP_WARN("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: '", pElement->Name(), "'. Defaulting to default value.");
         }
 
         if (errorCode == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
@@ -205,7 +205,7 @@ namespace mcp
 
         if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
         {
-            MCP_ERROR("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: ", pElement->Name());
+            MCP_WARN("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: '", pElement->Name(), "'. Defaulting to default value.");
         }
 
         return result;
