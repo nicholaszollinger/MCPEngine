@@ -338,6 +338,9 @@ namespace mcp
 #if RENDER_COLLIDER_VISUALS
     void ColliderComponent::Render() const
     {
+        if (!m_collisionEnabled)
+            return;
+
         for (auto& [colliderId, pCollider] : m_colliders)
         {
             pCollider->Render();

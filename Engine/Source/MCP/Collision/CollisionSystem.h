@@ -13,7 +13,7 @@
 
 #if DEBUG_RENDER_COLLISION_TREE
     #include "MCP/Scene/IRenderable.h"
-    #include "utility/Color.h"
+    #include "Utility/Types/Color.h"
 #endif
 #else
 #define DEBUG_RENDER_COLLISION_TREE 0
@@ -27,10 +27,12 @@ namespace mcp
 
     struct QuadtreeBehaviorData
     {
-        unsigned int maxHeight          = 0;
+        unsigned int maxDepth          = 0;
         unsigned int maxObjectsInCell   = 0;
         float worldWidth                = 0.f;
         float worldHeight               = 0.f;
+        float worldXPos                 = 0.f;
+        float worldYPos                 = 0.f;
     };
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -85,6 +87,8 @@ namespace mcp
         CollisionSystem(CollisionSystem&&) = delete;
         CollisionSystem& operator= (const CollisionSystem&) = delete;
         CollisionSystem& operator=(CollisionSystem&&) = delete;
+
+        void SetQuadtreeBehaviorData(const QuadtreeBehaviorData& data);
 
         // Collider Registration.
         void AddCollideable(ColliderComponent* pColliderComponent);
