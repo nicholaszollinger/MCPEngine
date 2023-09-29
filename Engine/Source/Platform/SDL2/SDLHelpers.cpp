@@ -2,6 +2,8 @@
 
 #include "SDLHelpers.h"
 
+#include <SDL_mouse.h>
+
 #include "MCP/Debug/Log.h"
 #include "MCP/Graphics/Graphics.h"
 #include "Utility/Types/Color.h"
@@ -98,6 +100,22 @@ namespace mcp
                 return SDL_SCANCODE_UNKNOWN;
         }
     }
+
+    MCPMouseButton ToMouseButton(const uint8_t buttonCode)
+    {
+        switch (buttonCode)
+        {
+            case SDL_BUTTON_LEFT: return MCPMouseButton::Left;
+            case SDL_BUTTON_RIGHT: return MCPMouseButton::Right;
+            case SDL_BUTTON_MIDDLE: return MCPMouseButton::Middle;
+
+            // Unsupported:
+            //case SDL_BUTTON_X1: return MCPMouseButton::Middle;
+            //case SDL_BUTTON_X2: return MCPMouseButton::Middle;
+            default: return MCPMouseButton::Invalid;
+        }
+    }
+
 
     SDL_Rect RectToSdl(const RectInt& rect)
     {

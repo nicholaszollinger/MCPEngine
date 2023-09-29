@@ -6,7 +6,7 @@
 
 namespace mcp
 {
-    struct KeyEvent;
+    class KeyEvent;
     class Scene;
     class IProcess;
 

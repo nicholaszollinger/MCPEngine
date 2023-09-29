@@ -42,6 +42,7 @@ enum class MCPKey : int
 
 enum class MCPMouseButton : int
 {
+    Invalid,
     Left,
     Middle,
     Right,

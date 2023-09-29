@@ -7,6 +7,8 @@
 #include "MCP/Components/ComponentFactory.h"
 #include "MCP/Components/TransformComponent.h"
 #include "MCP/Core/Application/Application.h"
+#include "MCP/Core/Event/ApplicationEvent.h"
+#include "MCP/Core/Event/Event.h"
 #include "MCP/Core/Resource/PackageManager.h"
 #include "MCP/Core/Resource/Parser.h"
 #include "MCP/Graphics/Graphics.h"
@@ -16,12 +18,14 @@
 namespace mcp
 {
     Scene::Scene()
-        : m_updateables(50)  // These are all magic numbers. I need a better solution for the containers.
-        , m_fixedUpdateables(50)
-        , m_worldRenderables(10)
-        , m_objectRenderables(100)
-        , m_debugOverlayRenderables(100)
-        , m_collisionSystem(QuadtreeBehaviorData{ 4, 4, 1600.f, 900.f })
+        //: m_updateables(50)  // These are all magic numbers. I need a better solution for the containers.
+        //, m_fixedUpdateables(50)
+        //, m_worldRenderables(10)
+        //, m_objectRenderables(100)
+        //, m_debugOverlayRenderables(100)
+        //, m_collisionSystem(QuadtreeBehaviorData{ 4, 4, 1600.f, 900.f })
+        : m_pWorldLayer(nullptr)
+        , m_pUILayer(nullptr)
         , m_accumulatedTime(0.f)
         , m_transitionQueued(false)
     {
@@ -33,13 +37,11 @@ namespace mcp
         ClearScene();
     }
 
-    bool Scene::Init()
-    {
-        return true;
-    }
-
     bool Scene::Load(const char* pFilePath)
     {
+        m_pWorldLayer = BLEACH_NEW(WorldLayer(this));
+        m_pUILayer = BLEACH_NEW(UILayer(this));
+
         XMLParser parser;
         if (!parser.LoadFile(pFilePath))
         {
@@ -120,7 +122,14 @@ namespace mcp
             objectElement = objectElement.GetSiblingElement(kObjectElementName);
         }
 
-        // Everything succeeded!
+        // Initialize the Scene.
+        return Init();
+    }
+
+    bool Scene::Init()
+    {
+        MCP_ADD_MEMBER_FUNC_EVENT_LISTENER(ApplicationEvent, OnEvent);
+
         return true;
     }
 
@@ -132,20 +141,22 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     bool Scene::OnSceneLoad()
     {
-        for (auto& [id, pObject] : m_objects)
-        {
-            if (!pObject->PostLoadInit())
-            {
-                // Log an error, but don't 
-                MCP_ERROR("Scene", "Object failed to successfully initialize!");
-                return false;
-            }
-        }
+        //for (auto& [id, pObject] : m_objects)
+        //{
+        //    if (!pObject->PostLoadInit())
+        //    {
+        //        // Log an error, but don't 
+        //        MCP_ERROR("Scene", "Object failed to successfully initialize!");
+        //        return false;
+        //    }
+        //}
+
+        return m_pWorldLayer->OnSceneLoad();
 
         // Create our collision grid.
         //m_collisionSystem.CalculateGrid();
 
-        return true;
+        //return true;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -156,9 +167,12 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Scene::Update(const float deltaTime)
     {
-        m_messageManager.ProcessMessages();
+        //m_messageManager.ProcessMessages();
 
-        const auto& updateableArray = m_updateables.GetArray();
+        // Update the world.
+        m_pWorldLayer->Update(deltaTime);
+
+        /*const auto& updateableArray = m_updateables.GetArray();
 
         for (auto* pUpdateable : updateableArray)
         {
@@ -166,7 +180,7 @@ namespace mcp
 
             if (m_transitionQueued)
                 break;
-        }
+        }*/
 
         // If enough time has passed, perform a fixed update.
         m_accumulatedTime += deltaTime;
@@ -174,22 +188,24 @@ namespace mcp
         {
             m_accumulatedTime -= kFixedUpdateTimeSeconds;
 
-            const auto& fixedUpdateables = m_fixedUpdateables.GetArray();
+            m_pWorldLayer->FixedUpdate(kFixedUpdateTimeSeconds);
 
-            for (auto* pUpdateable : fixedUpdateables)
-            {
-                pUpdateable->Update(kFixedUpdateTimeSeconds);
+            //const auto& fixedUpdateables = m_fixedUpdateables.GetArray();
 
-                // Can this happen for physics objects?
-                if (m_transitionQueued)
-                    break;
-            }
+            //for (auto* pUpdateable : fixedUpdateables)
+            //{
+            //    pUpdateable->Update(kFixedUpdateTimeSeconds);
+
+            //    // Can this happen for physics objects?
+            //    if (m_transitionQueued)
+            //        break;
+            //}
         }
 
-        DeleteQueuedObjects();
+        //DeleteQueuedObjects();
 
-        // Run Collisions, after all of the updates have gone through.
-        m_collisionSystem.RunCollisions();
+        //// Run Collisions, after all of the updates have gone through.
+        //m_collisionSystem.RunCollisions();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -199,13 +215,15 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Scene::Render() const
     {
-        RenderLayer(m_worldRenderables);
-        RenderLayer(m_objectRenderables);
-        RenderLayer(m_debugOverlayRenderables);
+        m_pWorldLayer->Render();
 
-#if DEBUG_RENDER_COLLISION_TREE
-        m_collisionSystem.Render();
-#endif
+        /*RenderLayer(m_worldRenderables);
+        RenderLayer(m_objectRenderables);
+        RenderLayer(m_debugOverlayRenderables);*/
+
+//#if DEBUG_RENDER_COLLISION_TREE
+//        m_collisionSystem.Render();
+//#endif
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -215,10 +233,12 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     Object* Scene::CreateObject()
     {
-        auto* pNewObject = BLEACH_NEW(Object(this));
+        /*auto* pNewObject = BLEACH_NEW(Object(this));
         m_objects.emplace(pNewObject->GetId(), pNewObject);
 
-        return pNewObject;
+        return pNewObject;*/
+
+        return m_pWorldLayer->CreateObject();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -227,16 +247,18 @@ namespace mcp
     ///		@brief : Queues an Object for destruction. The object will be deleted after the update loop has finished.
     ///		@param id : Id of the Object you want to destroy.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void Scene::DestroyObject(const ObjectId id)
+    void Scene::DestroyObject(const UpdateableId id)
     {
-        const auto result = m_objects.find(id);
+        /*const auto result = m_objects.find(id);
         if (result == m_objects.end())
         {
             MCP_WARN("Scene", "Failed to Destroy Object! Object Id was invalid.");
             return;
         }
 
-        m_queuedObjectsToDelete.emplace_back(result->first);
+        m_queuedObjectsToDelete.emplace_back(result->first);*/
+
+        m_pWorldLayer->DestroyObject(id);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -245,14 +267,16 @@ namespace mcp
     ///		@brief : Checks to see if the ObjectId points to a valid Object or not.
     ///		@returns : True if there is an Object with that Id in the scene.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool Scene::IsValidId(const ObjectId id)
+    bool Scene::IsValidId(const UpdateableId id)
     {
-        if (const auto result = m_objects.find(id); result == m_objects.end())
+        /*if (const auto result = m_objects.find(id); result == m_objects.end())
         {
             return false;
         }
 
-        return true;
+        return true;*/
+
+        return m_pWorldLayer->IsValidId(id);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -263,7 +287,8 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Scene::AddRenderable(IRenderable* pRenderable)
     {
-        switch(pRenderable->GetRenderLayer())
+        m_pWorldLayer->AddRenderable(pRenderable);
+        /*switch(pRenderable->GetRenderLayer())
         {
             case RenderLayer::kWorld:
             {
@@ -282,12 +307,14 @@ namespace mcp
                 m_debugOverlayRenderables.Add(pRenderable->GetRenderId(), pRenderable);
                 break;
             }
-        }
+        }*/
     }
 
     void Scene::RemoveRenderable(const IRenderable* pRenderable)
     {
-        switch(pRenderable->GetRenderLayer())
+        m_pWorldLayer->RemoveRenderable(pRenderable);
+
+        /*switch(pRenderable->GetRenderLayer())
         {
             case RenderLayer::kWorld:
             {
@@ -306,17 +333,21 @@ namespace mcp
                 m_debugOverlayRenderables.Remove(pRenderable->GetRenderId());
                 break;
             }
-        }
+        }*/
     }
 
-    void Scene::AddUpdateable(const ObjectId id, IUpdateable* pUpdateable)
+    void Scene::AddUpdateable([[maybe_unused]] const UpdateableId id, IUpdateable* pUpdateable)
     {
-        m_updateables.Add(id, pUpdateable);
+        m_pWorldLayer->AddUpdateable(pUpdateable);
+        //m_updateables.Add(id, pUpdateable);
     }
 
-    void Scene::RemoveUpdateable(const ObjectId id)
+    void Scene::RemoveUpdateable(const UpdateableId id)
     {
-        m_updateables.Remove(id);
+        // AAHAAHAHAHAHAAAA
+        MCP_WARN("Scene","Updateables are not removed correctly right now.");
+        //m_pWorldLayer->RemoveUpdateable()
+        //m_updateables.Remove(id);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -326,7 +357,8 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Scene::AddPhysicsUpdateable(IUpdateable* pUpdateable)
     {
-        m_fixedUpdateables.Add(pUpdateable->GetUpdateId(), pUpdateable);
+        m_pWorldLayer->AddPhysicsUpdateable(pUpdateable);
+        //m_fixedUpdateables.Add(pUpdateable->GetUpdateId(), pUpdateable);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -337,33 +369,33 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Scene::RemovePhysicsUpdateable(const IUpdateable* pUpdateable)
     {
-        m_fixedUpdateables.Remove(pUpdateable->GetUpdateId());
+        m_pWorldLayer->RemovePhysicsUpdateable(pUpdateable);
+        //m_fixedUpdateables.Remove(pUpdateable->GetUpdateId());
     }
 
     void Scene::RenderLayer(const RenderableContainer& renderables) const
     {
-        static std::vector<IRenderable*> renderableArray;
+        //static std::vector<IRenderable*> renderableArray;
 
-        // Copy of the array :(
-        renderableArray = renderables.GetArray();
+        //// Copy of the array :(
+        //renderableArray = renderables.GetArray();
 
-        // Sort the array based on the zOrder.
-        std::sort(renderableArray.begin(), renderableArray.end(), [](const IRenderable* pLeft, const IRenderable* pRight)
-        {
-            return pLeft->GetZOrder() > pRight->GetZOrder();
-        });
+        //// Sort the array based on the zOrder.
+        //std::sort(renderableArray.begin(), renderableArray.end(), [](const IRenderable* pLeft, const IRenderable* pRight)
+        //{
+        //    return pLeft->GetZOrder() > pRight->GetZOrder();
+        //});
 
-        // Render each renderable. Virtual call :(
-        for (const auto* pRenderable : renderableArray)
-        {
-            pRenderable->Render();
-        }
+        //// Render each renderable. Virtual call :(
+        //for (const auto* pRenderable : renderableArray)
+        //{
+        //    pRenderable->Render();
+        //}
     }
-
 
     void Scene::DeleteQueuedObjects()
     {
-        for (const auto ObjectId : m_queuedObjectsToDelete)
+        /*for (const auto ObjectId : m_queuedObjectsToDelete)
         {
             auto result = m_objects.find(ObjectId);
 
@@ -371,22 +403,48 @@ namespace mcp
             m_objects.erase(result);
         }
 
-        m_queuedObjectsToDelete.clear();
+        m_queuedObjectsToDelete.clear();*/
     }
 
     void Scene::ClearScene()
     {
-        for (const auto&[id, pObject] : m_objects)
+        /*for (const auto&[id, pObject] : m_objects)
         {
             BLEACH_DELETE(pObject);
         }
 
-        m_objects.clear();
+        m_objects.clear();*/
+
+        BLEACH_DELETE(m_pUILayer);
+        BLEACH_DELETE(m_pWorldLayer);
     }
 
     void Scene::SetCollisionSettings(const QuadtreeBehaviorData& data)
     {
-        m_collisionSystem.SetQuadtreeBehaviorData(data);
+        m_pWorldLayer->SetCollisionSettings(data);
+        //m_collisionSystem.SetQuadtreeBehaviorData(data);
     }
+
+    CollisionSystem* Scene::GetCollisionSystem()
+    {
+        return m_pWorldLayer->GetCollisionSystem();
+    }
+
+    MessageManager* Scene::GetMessageManager()
+    {
+        return m_pWorldLayer->GetMessageManager();
+    }
+
+    void Scene::OnEvent(const ApplicationEvent& event) const
+    {
+        // For each layer in reverse, send the event. If the event is handled, then return.
+        m_pUILayer->OnEvent(event);
+
+        if (event.IsHandled())
+            return;
+
+        m_pWorldLayer->OnEvent(event);
+    }
+
 
 }

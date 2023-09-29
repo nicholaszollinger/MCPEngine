@@ -181,7 +181,9 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Scene\IUpdateable.cpp" />
     <ClCompile Include="Source\MCP\Scene\Object.cpp" />
     <ClCompile Include="Source\MCP\Scene\Scene.cpp" />
+    <ClCompile Include="Source\MCP\Scene\SceneLayer.cpp" />
     <ClCompile Include="Source\MCP\Scene\SceneManager.cpp" />
+    <ClCompile Include="Source\MCP\Scene\WorldLayer.cpp" />
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp" />
     <ClCompile Include="Source\Platform\SDL2\SDLAudio.cpp" />
     <ClCompile Include="Source\Platform\SDL2\SDLRenderer.cpp" />
@@ -221,6 +223,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Core\Application\Application.h" />
     <ClInclude Include="Source\MCP\Core\Application\Window\WindowBase.h" />
     <ClInclude Include="Source\MCP\Core\Config.h" />
+    <ClInclude Include="Source\MCP\Core\Event\ApplicationEvent.h" />
     <ClInclude Include="Source\MCP\Core\Event\Event.h" />
     <ClInclude Include="Source\MCP\Core\Event\KeyEvent.h" />
     <ClInclude Include="Source\MCP\Core\Event\Message.h" />
@@ -250,9 +253,11 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Lua\LuaSystem.h" />
     <ClInclude Include="Source\MCP\Scene\IRenderable.h" />
     <ClInclude Include="Source\MCP\Scene\IUpdateable.h" />
+    <ClInclude Include="Source\MCP\Scene\SceneLayer.h" />
     <ClInclude Include="Source\MCP\Scene\Object.h" />
     <ClInclude Include="Source\MCP\Scene\Scene.h" />
     <ClInclude Include="Source\MCP\Scene\SceneManager.h" />
+    <ClInclude Include="Source\MCP\Scene\WorldLayer.h" />
     <ClInclude Include="Source\Platform\SDL2\SDL2Window.h" />
     <ClInclude Include="Source\Platform\SDL2\SDLAudio.h" />
     <ClInclude Include="Source\Platform\SDL2\SDLRenderer.h" />

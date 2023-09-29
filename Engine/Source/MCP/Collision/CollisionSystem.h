@@ -45,7 +45,8 @@ namespace mcp
         : public IRenderable
 #endif
     {
-        friend class Scene;
+        friend class Scene;         // TODO: Figure out what I want to be doing for this.
+        friend class WorldLayer;
         using ColliderId = Collider*;
         using Cell = std::unordered_set<size_t>;
 

@@ -34,13 +34,13 @@ namespace mcp
 
     #define MCP_DEFINE_EVENT_TYPE(type)                                             \
         static EventType GetStaticType() { return EventType::type; }                \
-        virtual EventType GetEventType() const override { return GetStaticType(); }
-
+        virtual EventType GetEventType() const override { return GetStaticType(); } \
+        virtual const char* GetName() const override { return #type; }
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //      Events are required to have a single virtual function, but I still view the construct as a
-    ///     container of data. Getting it's underlying type is generally the only thing we are concerned about.
+    //      container of data. Getting it's underlying type is generally the only thing we are concerned about.
     //
     ///		@brief : EventType base struct. Structs that inherit from this should use the macro 'MCP_DEFINE_EVENT_TYPE' to have the
     ///             structure set up correctly. Simply pass one of the EventType from the enumeration and the EventType is ready to go.
@@ -48,6 +48,10 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     struct Event
     {
+    private:
+        bool m_isHandled = false;
+
+    public:
         Event() = default;
         Event(const Event& right) = default;
         Event(Event&& right) = default;
@@ -55,9 +59,22 @@ namespace mcp
         Event& operator=(Event&& right) = default;
         virtual ~Event() = default;
 
-        [[nodiscard]] virtual EventType GetEventType() const = 0;
+        //-----------------------------------------------------------------------------------------------------------------------------
+        //		NOTES:
+        //		
+        ///		@brief : By setting this event as Handled, the Event will not be processed by other listeners.
+        //-----------------------------------------------------------------------------------------------------------------------------
+        void SetEventHandled() { m_isHandled = true; }
 
-        // TODO: virtual Debug ToString function.
+        //-----------------------------------------------------------------------------------------------------------------------------
+        //		NOTES:
+        //		
+        ///		@brief : If an event is 'handled' it means a listener has marked it as complete.
+        ///		@returns : True if the event has been handled.
+        //-----------------------------------------------------------------------------------------------------------------------------
+        [[nodiscard]] bool IsHandled() const { return m_isHandled; }
+        [[nodiscard]] virtual EventType GetEventType() const = 0;
+        [[nodiscard]] virtual const char* GetName() const = 0;
     };
 
     //-----------------------------------------------------------------------------------------------------------------------------

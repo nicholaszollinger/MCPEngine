@@ -270,6 +270,15 @@
     <ClInclude Include="Source\MCP\Components\TextComponent.h">
       <Filter>MCP\Components</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Event\ApplicationEvent.h">
+      <Filter>MCP\Core\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\SceneLayer.h">
+      <Filter>MCP\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\WorldLayer.h">
+      <Filter>MCP\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
@@ -424,6 +433,12 @@
     </ClCompile>
     <ClCompile Include="Source\MCP\Components\TextComponent.cpp">
       <Filter>MCP\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\SceneLayer.cpp">
+      <Filter>MCP\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\WorldLayer.cpp">
+      <Filter>MCP\Scene</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

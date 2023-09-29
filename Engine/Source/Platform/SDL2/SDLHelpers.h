@@ -21,6 +21,7 @@ namespace mcp
 {
     // Keys
     MCPKey KeyToSDL(const SDL_Scancode scanCode);
+    MCPMouseButton ToMouseButton(const uint8_t buttonCode);
     SDL_Scancode KeyToMCP(const MCPKey key);
 
     // Vec2:

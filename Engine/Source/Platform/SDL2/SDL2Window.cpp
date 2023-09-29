@@ -9,8 +9,9 @@
 #pragma warning(pop)
 
 #include "SDLHelpers.h"
+#include "MCP/Core/Event/ApplicationEvent.h"
+#include "MCP/Core/Event/Event.h"
 #include "MCP/Debug/Log.h"
-#include "MCP/Core/Event/KeyEvent.h"
 #include "MCP/Graphics/Graphics.h"
 
 namespace mcp
@@ -88,6 +89,8 @@ namespace mcp
     {
         SDL_Event sdlEvent;
 
+        auto dispatchFunc = EventDispatcher::InvokeNow<ApplicationEvent>;
+
         while (SDL_PollEvent(&sdlEvent) != 0)
         {
             switch(sdlEvent.type)
@@ -96,45 +99,75 @@ namespace mcp
 
                 // TODO: Define what to do for Window-based events.
 
-            case SDL_KEYDOWN:
-            {
-                 KeyEvent keyEvent;
-                 keyEvent.keycode = KeyToSDL(sdlEvent.key.keysym.scancode);
-                 keyEvent.ctrl = sdlEvent.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL);
-                 keyEvent.shift = sdlEvent.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT);
-                 keyEvent.alt = sdlEvent.key.keysym.mod & (KMOD_LALT | KMOD_RALT);
+                case SDL_KEYDOWN:
+                {
+                    const MCPKey keycode = KeyToSDL(sdlEvent.key.keysym.scancode);
+                    const bool ctrl = sdlEvent.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL);
+                    const bool shift = sdlEvent.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT);
+                    const bool alt = sdlEvent.key.keysym.mod & (KMOD_LALT | KMOD_RALT);
+                    ButtonState state;
+                    if (sdlEvent.key.repeat != 0)
+                        state = ButtonState::kHeld;
 
-                 if (sdlEvent.key.repeat != 0)
-                 {
-                     keyEvent.state = KeyState::kHeld;
-                 }
+                    else
+                        state = ButtonState::kPressed;
+                    
+                    KeyEvent keyEvent(keycode, state, ctrl, alt, shift);
 
-                 else
-                 {
-                     keyEvent.state = KeyState::kPressed;
-                 }
+                    // Dispatch the event.
+                    dispatchFunc(keyEvent);
 
-                 // Dispatch the event.
-                 EventDispatcher::InvokeNow(keyEvent);
+                    break;
+                }
 
-                 break;
-            }
+                case SDL_KEYUP:
+                {
+                    const MCPKey keycode = KeyToSDL(sdlEvent.key.keysym.scancode);
+                    const bool ctrl = sdlEvent.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL);
+                    const bool shift = sdlEvent.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT);
+                    const bool alt = sdlEvent.key.keysym.mod & (KMOD_LALT | KMOD_RALT);
+                    const ButtonState state = ButtonState::kReleased;
 
-            case SDL_KEYUP:
-            {
-                KeyEvent keyEvent;
-                keyEvent.keycode = KeyToSDL(sdlEvent.key.keysym.scancode);
-                keyEvent.ctrl = sdlEvent.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL);
-                keyEvent.shift = sdlEvent.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT);
-                keyEvent.alt = sdlEvent.key.keysym.mod & (KMOD_LALT | KMOD_RALT);
-                keyEvent.state = KeyState::kReleased;
+                    KeyEvent keyEvent(keycode, state, ctrl, alt, shift);
+                    // Dispatch the event.
+                    dispatchFunc(keyEvent);
+                    break;
+                }
 
-                // Dispatch the event.
-                EventDispatcher::InvokeNow(keyEvent);
-                break;
-            }
+                case SDL_MOUSEMOTION:
+                {
+                    const auto x = sdlEvent.motion.x;
+                    const auto y = sdlEvent.motion.y;
 
-            default: break;
+                    MouseMoveEvent mouseMoveEvent(x, y);
+                    dispatchFunc(mouseMoveEvent);
+                    break;
+                }
+
+                case SDL_MOUSEBUTTONDOWN:
+                case SDL_MOUSEBUTTONUP:
+                {
+                    const ButtonState state = sdlEvent.button.type == SDL_MOUSEBUTTONDOWN ? ButtonState::kPressed : ButtonState::kReleased;
+                    const auto x = sdlEvent.button.x;
+                    const auto y = sdlEvent.button.y;
+                    const auto button = ToMouseButton(sdlEvent.button.button);
+                    const int clicks = sdlEvent.button.clicks;
+                    MouseButtonEvent buttonEvent(button, state, clicks, x, y);
+                    dispatchFunc(buttonEvent);
+                    break;
+                }
+
+                case SDL_MOUSEWHEEL:
+                {
+                    MouseScrolledEvent scrolledEvent(sdlEvent.wheel.x, sdlEvent.wheel.y);
+                    dispatchFunc(scrolledEvent);
+                    break;
+                }
+
+                // TODO: Window Events.
+                // TODO: Controller Events.
+
+                default: break;
             }
         }
 

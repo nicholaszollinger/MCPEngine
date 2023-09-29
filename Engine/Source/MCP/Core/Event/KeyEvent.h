@@ -6,27 +6,27 @@
 
 namespace mcp
 {
-    enum class KeyState
-    {
-        kInvalid    = 0,
-        kPressed    = MCP_BIT(0),
-        kHeld       = MCP_BIT(1),
-        kReleased   = MCP_BIT(2),
-    };
+    //enum class ButtonState
+    //{
+    //    kInvalid    = 0,
+    //    kPressed    = MCP_BIT(0),
+    //    kHeld       = MCP_BIT(1),
+    //    kReleased   = MCP_BIT(2),
+    //};
 
-    struct KeyEvent final : public Event
-    {
-        MCPKey keycode  = MCPKey::kInvalid;
-        KeyState state  = KeyState::kPressed;
-        bool ctrl       = false;
-        bool alt        = false;
-        bool shift      = false;
+    //struct KeyEvent final : public Event
+    //{
+    //    MCPKey keycode  = MCPKey::kInvalid;
+    //    ButtonState state  = ButtonState::kPressed;
+    //    bool ctrl       = false;
+    //    bool alt        = false;
+    //    bool shift      = false;
 
-        KeyEvent() = default;
-        virtual ~KeyEvent() override = default;
+    //    KeyEvent() = default;
+    //    virtual ~KeyEvent() override = default;
 
-        MCP_DEFINE_EVENT_TYPE(kKey)
+    //    MCP_DEFINE_EVENT_TYPE(kKey)
 
-        // TODO: Define debug ostream overload.
-    };
+    //    // TODO: Define debug ostream overload.
+    //};
 }
