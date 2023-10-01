@@ -42,18 +42,18 @@ namespace mcp
     ///		@brief : Log a message using the MCP Logging system. Unlike the logging system in the engine, LuaLogs are
     ///             restricted to a single string.
     ///
-    ///             \n LUA PARAMS: const char* Message
+    ///             \n LUA PARAMS: const char* ScriptName, const char* Message, 
     ///             \n NO RETURN
     //-----------------------------------------------------------------------------------------------------------------------------
     int LuaLog(lua_State* pState)
     {
-        [[maybe_unused]] const char* msg = lua_tostring(pState, -1);
+        const char* scriptName = lua_tostring(pState, -1);
+        const char* msg = lua_tostring(pState, -2);
 
-        // TODO: This log category needs to be changed to know what the lua script is. I need to add another param.
-        MCP_LOG("Script", msg);
+        MCP_LOG(scriptName, msg);
 
         // Pop the parameter.
-        lua_pop(pState, 1);
+        lua_pop(pState, 2);
 
         return 0;
     }
@@ -64,18 +64,18 @@ namespace mcp
     ///		@brief : Log a Warning message using the MCP Logging system. Unlike the logging system in the engine, LuaLogs are
     ///             restricted to a single string. 
     ///
-    ///             \n LUA PARAMS: const char* Message
+    ///             \n LUA PARAMS: const char* ScriptName, const char* Message, 
     ///             \n NO RETURN
     //-----------------------------------------------------------------------------------------------------------------------------
     int LuaLogWarning(lua_State* pState)
     {
-        [[maybe_unused]] const char* msg = lua_tostring(pState, -1);
-
-        // TODO: I need to be able to add the script name to this warning message.
-        MCP_WARN("Script", msg);
+        const char* scriptName = lua_tostring(pState, -1);
+        const char* msg = lua_tostring(pState, -2);
+        
+        MCP_WARN(scriptName, msg);
 
         // Pop the parameter.
-        lua_pop(pState, 1);
+        lua_pop(pState, 2);
 
         return 0;
     }
@@ -86,18 +86,18 @@ namespace mcp
     ///		@brief : Log an Error message using the MCP Logging system. Unlike the logging system in the engine, LuaLogs are
     ///             restricted to a single string. 
     ///
-    ///             \n LUA PARAMS: const char* Message
+    ///             \n LUA PARAMS: const char* ScriptName, const char* Message, 
     ///             \n NO RETURN
     //-----------------------------------------------------------------------------------------------------------------------------
     int LuaLogError(lua_State* pState)
     {
-        [[maybe_unused]] const char* msg = lua_tostring(pState, -1);
-
-        // TODO: I need to be able to add the script name to this warning message.
-        MCP_ERROR("Script", msg);
+        const char* scriptName = lua_tostring(pState, -1);
+        const char* msg = lua_tostring(pState, -2);
+        
+        MCP_ERROR(scriptName, msg);
 
         // Pop the parameter.
-        lua_pop(pState, 1);
+        lua_pop(pState, 2);
 
         return 0;
     }

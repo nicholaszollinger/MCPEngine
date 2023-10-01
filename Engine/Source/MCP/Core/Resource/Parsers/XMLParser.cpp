@@ -94,19 +94,14 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Try to get a boolean attribute named pAttributeName from the element. If an error occurs, a error message will be
-    ///         posted to the logs, and the defaultVal will be returned as the result.
+    ///		@brief : Try to get a boolean attribute named pAttributeName from the element. If the attribute is not found, it will return
+    ///             the default value with NO message. If the attribute cannot be converted to the type, it will post an error.
     //-----------------------------------------------------------------------------------------------------------------------------
     bool XMLElement::GetBoolAttribute(const char* pAttributeName, const bool defaultVal) const
     {
         const auto* pElement = CAST_TO_CONST_ELEMENT_TYPE(m_pHandle);
         bool result = defaultVal;
         const tinyxml2::XMLError errorCode = pElement->QueryBoolAttribute(pAttributeName, &result);
-
-        if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
-        {
-            MCP_WARN("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: '", pElement->Name(), "'. Defaulting to default value.");
-        }
 
         if (errorCode == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
         {
@@ -119,19 +114,14 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Try to get a int64_t attribute named pAttributeName from the element. If an error occurs, a error message will be
-    ///         posted to the logs, and the defaultVal will be returned as the result.
+    ///		@brief : Try to get a int64_t attribute named pAttributeName from the element. If the attribute is not found, it will return
+    ///             the default value with NO message. If the attribute cannot be converted to the type, it will post an error.
     //-----------------------------------------------------------------------------------------------------------------------------
     int64_t XMLElement::GetIntAttribute(const char* pAttributeName, const int64_t defaultVal) const
     {
         const auto* pElement = CAST_TO_CONST_ELEMENT_TYPE(m_pHandle);
         int64_t result = defaultVal;
         const tinyxml2::XMLError errorCode = pElement->QueryInt64Attribute(pAttributeName, &result);
-
-        if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
-        {
-            MCP_WARN("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: '", pElement->Name(), "'. Defaulting to default value.");
-        }
 
         if (errorCode == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
         {
@@ -144,19 +134,14 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Try to get a uint64_t attribute named pAttributeName from the element. If an error occurs, a error message will be
-    ///         posted to the logs, and the defaultVal will be returned as the result.
+    ///		@brief : Try to get a uint64_t attribute named pAttributeName from the element. If the attribute is not found, it will return
+    ///             the default value with NO message. If the attribute cannot be converted to the type, it will post an error.
     //-----------------------------------------------------------------------------------------------------------------------------
     uint64_t XMLElement::GetUnsignedIntAttribute(const char* pAttributeName, const uint64_t defaultVal) const
     {
         const auto* pElement = CAST_TO_CONST_ELEMENT_TYPE(m_pHandle);
         uint64_t result = defaultVal;
         const tinyxml2::XMLError errorCode = pElement->QueryUnsigned64Attribute(pAttributeName, &result);
-
-        if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
-        {
-            MCP_WARN("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: '", pElement->Name(), "'. Defaulting to default value.");
-        }
 
         if (errorCode == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
         {
@@ -169,19 +154,14 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Try to get a double attribute named pAttributeName from the element. If an error occurs, a error message will be
-    ///         posted to the logs, and the defaultVal will be returned as the result.
+    ///		@brief : Try to get a double attribute named pAttributeName from the element. If the attribute is not found, it will return
+    ///             the default value with NO message. If the attribute cannot be converted to the type, it will post an error.
     //-----------------------------------------------------------------------------------------------------------------------------
     double XMLElement::GetDoubleAttribute(const char* pAttributeName, const double defaultVal) const
     {
         const auto* pElement = CAST_TO_CONST_ELEMENT_TYPE(m_pHandle);
         double result = defaultVal;
         const tinyxml2::XMLError errorCode = pElement->QueryDoubleAttribute(pAttributeName, &result);
-
-        if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
-        {
-            MCP_WARN("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: '", pElement->Name(), "'. Defaulting to default value.");
-        }
 
         if (errorCode == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
         {
@@ -194,19 +174,13 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Try to get a c-string attribute named pAttributeName from the element. If an error occurs, a error message will be
-    ///         posted to the logs, and the defaultVal will be returned as the result.
+    ///		@brief : Try to get a c-string attribute named pAttributeName from the element. If the attribute is not found, it will return
+    ///             the default value with NO message.
     //-----------------------------------------------------------------------------------------------------------------------------
     const char* XMLElement::GetStringAttribute(const char* pAttributeName, const char* defaultVal) const
     {
         const auto* pElement = CAST_TO_CONST_ELEMENT_TYPE(m_pHandle);
-        const char* result = defaultVal;
-        const tinyxml2::XMLError errorCode = pElement->QueryStringAttribute(pAttributeName, &result);
-
-        if (errorCode == tinyxml2::XML_NO_ATTRIBUTE)
-        {
-            MCP_WARN("XML", "Failed to find Attribute named: '", pAttributeName, "' of Element: '", pElement->Name(), "'. Defaulting to default value.");
-        }
+        const char* result = pElement->Attribute(pAttributeName, defaultVal);
 
         return result;
     }

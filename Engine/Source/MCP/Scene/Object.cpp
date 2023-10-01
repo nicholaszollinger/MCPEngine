@@ -26,7 +26,6 @@ namespace mcp
         }
     }
 
-
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
@@ -47,7 +46,6 @@ namespace mcp
         return true;
     }
 
-
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //
@@ -61,7 +59,7 @@ namespace mcp
 
         // Queue the deletion.
         m_isQueuedForDeletion = true;
-        m_pScene->DestroyObject(m_objectId);
+        GetWorld()->DestroyObject(m_objectId);
 
         // Signal to the components that we are being destroyed.
         for (auto* pComponent : m_components)
@@ -86,5 +84,10 @@ namespace mcp
         {
             pComponent->SetIsActive(isActive);
         }*/
+    }
+
+    WorldLayer* Object::GetWorld() const
+    {
+        return m_pScene->GetWorldLayer();
     }
 }

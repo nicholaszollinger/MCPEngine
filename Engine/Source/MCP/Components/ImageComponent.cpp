@@ -33,17 +33,17 @@ namespace mcp
 
     ImageComponent::~ImageComponent()
     {
-        auto* pScene = m_pOwner->GetScene();
-        assert(pScene);
-        pScene->RemoveRenderable(this);
+        auto* pWorld = m_pOwner->GetWorld();
+        assert(pWorld);
+        pWorld->RemoveRenderable(this);
     }
 
     bool ImageComponent::Init()
     {
         // Add this component to the list of renderables in the scene.
-        auto* pScene = m_pOwner->GetScene();
-        assert(pScene);
-        pScene->AddRenderable(this);
+        auto* pWorld = m_pOwner->GetWorld();
+        assert(pWorld);
+        pWorld->AddRenderable(this);
 
         m_pTransformComponent = m_pOwner->GetComponent<TransformComponent>();
         if (!m_pTransformComponent)

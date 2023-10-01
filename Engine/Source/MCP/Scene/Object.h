@@ -12,6 +12,7 @@
 namespace mcp
 {
     class Scene;
+    class WorldLayer;
 
     using ObjectId = uint32_t;
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -121,5 +122,6 @@ namespace mcp
         [[nodiscard]] ObjectId GetId() const { return m_objectId; }
         [[nodiscard]] bool IsActive() const { return m_isActive; }
         [[nodiscard]] Scene* GetScene() const { return m_pScene; }
+        [[nodiscard]] WorldLayer* GetWorld() const;
     };
 }

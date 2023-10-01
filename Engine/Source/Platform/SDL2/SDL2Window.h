@@ -8,7 +8,8 @@ struct SDL_Renderer;
 
 namespace mcp
 {
-    struct Event;
+    class ApplicationEvent;
+    class Event;
 
     class SDL2Window
     {
@@ -24,6 +25,7 @@ namespace mcp
 
         bool ProcessEvents();
 
+        void PostApplicationEvent(ApplicationEvent& event);
         void Close() const;
 
         [[nodiscard]] const RectInt& GetDimensions() const { return m_dimensions; }

@@ -26,7 +26,7 @@ namespace mcp
     ColliderComponent::~ColliderComponent()
     {
 #if RENDER_COLLIDER_VISUALS
-        m_pOwner->GetScene()->RemoveRenderable(this);
+        m_pOwner->GetWorld()->RemoveRenderable(this);
 #endif
 
         // If we were listening to the transform updated events, unregister.
@@ -37,7 +37,7 @@ namespace mcp
         m_pSystem->RemoveCollideable(this);
 
         // Remove ourselves from the physics update.
-        m_pOwner->GetScene()->RemovePhysicsUpdateable(this);
+        m_pOwner->GetWorld()->RemovePhysicsUpdateable(this);
 
         // Delete all of our colliders
         for (auto&[ colliderId, pCollider] : m_colliders)
@@ -50,8 +50,8 @@ namespace mcp
     bool ColliderComponent::Init()
     {
         // Add this component to the list of renderables in the scene.
-        auto* pScene = m_pOwner->GetScene();
-        assert(pScene);
+        auto* pWorld = m_pOwner->GetWorld();
+        assert(pWorld);
 
         m_pTransformComponent = m_pOwner->GetComponent<TransformComponent>();
         if (!m_pTransformComponent)
@@ -64,12 +64,12 @@ namespace mcp
         UpdateEstimationRect();
 
         // Need to register with the collision system.
-        m_pSystem = pScene->GetCollisionSystem();
+        m_pSystem = pWorld->GetCollisionSystem();
 
-        pScene->AddPhysicsUpdateable(this);
+        pWorld->AddPhysicsUpdateable(this);
 
 #if RENDER_COLLIDER_VISUALS
-        pScene->AddRenderable(this);
+        pWorld->AddRenderable(this);
 #endif
 
         return true;

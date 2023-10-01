@@ -10,34 +10,37 @@ namespace mcp
 {
     class WorldLayer final : public SceneLayer
     {
-        std::unordered_map<UpdateableId, Object*> m_objects;             // Container of all of the Object's in the scene.
-        std::vector<UpdateableId> m_queuedObjectsToDelete;               // Objects that will be deleted at the end of the update.
+        static constexpr const char* kObjectElementName = "Object";
+
+        std::unordered_map<ObjectId, Object*> m_objects;             // Container of all of the Object's in the scene.
+        std::vector<ObjectId> m_queuedObjectsToDelete;               // Objects that will be deleted at the end of the update.
         CollisionSystem m_collisionSystem;
         MessageManager m_messageManager;
+        // InputComponent* m_pInput; // Only 1 active input receiver is active at a time.
 
     public:
         WorldLayer(Scene* pScene);
         virtual ~WorldLayer() override; 
 
+        virtual bool LoadLayer(const XMLElement layer) override;
         virtual void Update(const float deltaTimeMs) override;
         virtual void FixedUpdate(const float fixedUpdateTimeS) override;
         virtual void Render() override;
-        virtual void OnEvent(const ApplicationEvent& event) override;
+        virtual void OnEvent(ApplicationEvent& event) override;
         virtual bool OnSceneLoad() override;
 
-        // Object Management
+        // Object Interface
         Object* CreateObject();
         void DestroyObject(const ObjectId id);
-        [[nodiscard]] bool IsValidId(const ObjectId id);
+        bool IsValidId(const ObjectId id);
 
         // World Systems
         [[nodiscard]] MessageManager* GetMessageManager() { return &m_messageManager;}
-
-        void SetCollisionSettings(const QuadtreeBehaviorData& data);
         [[nodiscard]] CollisionSystem* GetCollisionSystem() { return &m_collisionSystem;}
 
     private:
+        void SetCollisionSettings(const QuadtreeBehaviorData& data);
         void DeleteQueuedObjects();
-        void DestroyWorld();
+        virtual void DestroyLayer() override;
     };
 }

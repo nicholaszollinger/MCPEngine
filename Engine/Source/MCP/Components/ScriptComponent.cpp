@@ -15,17 +15,17 @@ namespace mcp
 
     ScriptComponent::~ScriptComponent()
     {
-        auto* pScene = m_pOwner->GetScene();
-        assert(pScene);
-        pScene->RemoveUpdateable(m_updateableId);
+        auto* pWorld = m_pOwner->GetWorld();
+        assert(pWorld);
+        pWorld->RemoveUpdateable(this);
     }
 
     bool ScriptComponent::Init()
     {
         // Add this component to the list of updateables in the scene.
-        auto* pScene = m_pOwner->GetScene();
-        assert(pScene);
-        pScene->AddUpdateable(m_updateableId, this);
+        auto* pWorld = m_pOwner->GetWorld();
+        assert(pWorld);
+        pWorld->AddUpdateable(this);
 
         return true;
     }

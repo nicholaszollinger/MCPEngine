@@ -11,6 +11,7 @@ namespace mcp
     struct TextureRenderData final : public BaseRenderData
     {
         void* pTexture = nullptr;
+        Color tint = {255,255,255, 255};   // Tint color including alpha value.
     };
 
     class GraphicsManager final : public IProcess

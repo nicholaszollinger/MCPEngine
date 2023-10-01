@@ -5,6 +5,8 @@
 
 namespace mcp
 {
+    class ApplicationEvent;
+
     class WindowBase
     {
     public:
@@ -21,6 +23,7 @@ namespace mcp
 
         bool Init(const char* pWindowName, const int width, const int height);
         bool ProcessEvents();
+        void PostApplicationEvent(ApplicationEvent& event);
         void Close();
 
         const RectInt& GetDimensions();

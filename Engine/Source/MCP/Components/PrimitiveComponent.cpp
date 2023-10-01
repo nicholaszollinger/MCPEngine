@@ -20,17 +20,17 @@ namespace mcp
     PrimitiveComponent::~PrimitiveComponent()
     {
         // Remove the renderable from the scene.
-        auto* pScene = m_pOwner->GetScene();
-        assert(pScene);
-        pScene->RemoveRenderable(this);
+        auto* pWorld = m_pOwner->GetWorld();
+        assert(pWorld);
+        pWorld->RemoveRenderable(this);
     }
     
     bool PrimitiveComponent::Init()
     {
         // Add the renderable to the scene.
-        auto* pScene = m_pOwner->GetScene();
-        assert(pScene);
-        pScene->AddRenderable(this);
+        auto* pWorld = m_pOwner->GetWorld();
+        assert(pWorld);
+        pWorld->AddRenderable(this);
 
         // TransformComponent is required.
         m_pTransformComponent = m_pOwner->GetComponent<mcp::TransformComponent>();

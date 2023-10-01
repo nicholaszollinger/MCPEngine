@@ -1,46 +1,32 @@
 #pragma once
 // ApplicationEvent.h
 
+#include "Event.h"
+#include "MCP/Debug/Assert.h"
 #include "MCP/Input/InputCodes.h"
-#include "Utility/Generic/Hash.h"
 #include "Utility/Types/Vector2.h"
 
 namespace mcp
 {
-    using EventId = uint32_t;
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Wrapper of the Event class to designate events coming from the Application. These things like Input events, Window events,
+    ///         Quit events, etc.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    class ApplicationEvent : public Event {};
 
-    #define MCP_DEFINE_APPLICATION_EVENT_TYPE(type)                             \
-    private:                                                                    \
-        static inline const mcp::EventId kEventId = HashString32(#type);        \
-    public:                                                                     \
-        static mcp::EventId GetStaticId() { return kEventId; }                  \
-        virtual mcp::EventId GetEventId() const override { return kEventId; }   \
-        virtual const char* GetName() const override { return #type; }          \
-    private:
-
-    class ApplicationEvent
+    class ApplicationQuitEvent final : public ApplicationEvent
     {
-        bool m_isHandled = false;
+        MCP_DEFINE_EVENT_ID(ApplicationQuitEvent)
 
     public:
-        ApplicationEvent() = default;
-        virtual ~ApplicationEvent() = default;
-        /*
-        ApplicationEvent(const ApplicationEvent&) = default;
-        ApplicationEvent(ApplicationEvent&&) = default;
-        ApplicationEvent& operator=(const ApplicationEvent&) = default;
-        ApplicationEvent& operator=(ApplicationEvent&&) = default;
-        ~ApplicationEvent() = default;
-        */
-
-        [[nodiscard]] virtual const char* GetName() const = 0;
-        [[nodiscard]] virtual EventId GetEventId() const = 0;
-        [[nodiscard]] bool IsHandled() const { return m_isHandled; }
+        ApplicationQuitEvent() = default;
     };
 
     class WindowResizeEvent final : public ApplicationEvent
     {
-        MCP_DEFINE_APPLICATION_EVENT_TYPE(WindowResizeEvent)
+        MCP_DEFINE_EVENT_ID(WindowResizeEvent)
 
         unsigned int m_width;
         unsigned int m_height;
@@ -58,7 +44,7 @@ namespace mcp
 
     class WindowCloseEvent final : public ApplicationEvent
     {
-        MCP_DEFINE_APPLICATION_EVENT_TYPE(WindowResizeEvent)
+        MCP_DEFINE_EVENT_ID(WindowResizeEvent)
     public:
         WindowCloseEvent() = default;
     };
@@ -73,7 +59,7 @@ namespace mcp
 
     class KeyEvent final : public ApplicationEvent
     {
-        MCP_DEFINE_APPLICATION_EVENT_TYPE(KeyEvent)
+        MCP_DEFINE_EVENT_ID(KeyEvent)
 
         MCPKey m_keycode  = MCPKey::kInvalid;
         ButtonState m_state  = ButtonState::kPressed;
@@ -100,15 +86,15 @@ namespace mcp
 
     class MouseButtonEvent final : public ApplicationEvent
     {
-        MCP_DEFINE_APPLICATION_EVENT_TYPE(MouseButtonEvent)
+        MCP_DEFINE_EVENT_ID(MouseButtonEvent)
 
-        Vec2Int m_windowPosition;
+        Vec2 m_windowPosition;
         int m_clicks;
         MCPMouseButton m_button;
         ButtonState m_state  = ButtonState::kInvalid;
 
     public:
-        MouseButtonEvent(const MCPMouseButton button, const ButtonState state, const int clicks, const int x, const int y)
+        MouseButtonEvent(const MCPMouseButton button, const ButtonState state, const int clicks, const float x, const float y)
             : m_windowPosition(x, y)
             , m_clicks(clicks)
             , m_button(button)
@@ -120,27 +106,27 @@ namespace mcp
         [[nodiscard]] MCPMouseButton Button() const { return m_button; }
         [[nodiscard]] ButtonState State() const { return m_state; }
         [[nodiscard]] int NumClicks() const { return m_clicks; }
-        [[nodiscard]] Vec2Int GetWindowPosition() const { return m_windowPosition; }
+        [[nodiscard]] Vec2 GetWindowPosition() const { return m_windowPosition; }
     };
 
     class MouseMoveEvent final : public ApplicationEvent
     {
-        MCP_DEFINE_APPLICATION_EVENT_TYPE(MouseMoveEvent)
+        MCP_DEFINE_EVENT_ID(MouseMoveEvent)
 
-        Vec2Int m_windowPosition;
+        Vec2 m_windowPosition;
     public:
-        MouseMoveEvent(const int xPos, const int yPos)
+        MouseMoveEvent(const float xPos, const float yPos)
             : m_windowPosition(xPos, yPos)
         {
             //
         }
 
-        [[nodiscard]] Vec2Int GetWindowPosition() const { return m_windowPosition; }
+        [[nodiscard]] Vec2 GetWindowPosition() const { return m_windowPosition; }
     };
 
     class MouseScrolledEvent final : public ApplicationEvent
     {
-        MCP_DEFINE_APPLICATION_EVENT_TYPE(MouseScrolledEvent)
+        MCP_DEFINE_EVENT_ID(MouseScrolledEvent)
 
         Vec2Int m_deltaPos;
     public:

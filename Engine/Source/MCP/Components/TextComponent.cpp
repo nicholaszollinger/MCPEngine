@@ -28,13 +28,13 @@ namespace mcp
 
     TextComponent::~TextComponent()
     {
-        m_pOwner->GetScene()->RemoveRenderable(this);
+        m_pOwner->GetWorld()->RemoveRenderable(this);
         FreeTexture();
     }
 
     bool TextComponent::Init()
     {
-        m_pOwner->GetScene()->AddRenderable(this);
+        m_pOwner->GetWorld()->AddRenderable(this);
         m_pTransform = m_pOwner->GetComponent<TransformComponent>();
         MCP_CHECK(m_pTransform);
 

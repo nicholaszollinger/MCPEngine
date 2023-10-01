@@ -89,7 +89,7 @@ namespace mcp
     {
         SDL_Event sdlEvent;
 
-        auto dispatchFunc = EventDispatcher::InvokeNow<ApplicationEvent>;
+        auto dispatchFunc = GlobalEventDispatcher::InvokeNow<ApplicationEvent>;
 
         while (SDL_PollEvent(&sdlEvent) != 0)
         {
@@ -136,8 +136,8 @@ namespace mcp
 
                 case SDL_MOUSEMOTION:
                 {
-                    const auto x = sdlEvent.motion.x;
-                    const auto y = sdlEvent.motion.y;
+                    const auto x = static_cast<float>(sdlEvent.motion.x);
+                    const auto y = static_cast<float>(sdlEvent.motion.y);
 
                     MouseMoveEvent mouseMoveEvent(x, y);
                     dispatchFunc(mouseMoveEvent);
@@ -148,8 +148,8 @@ namespace mcp
                 case SDL_MOUSEBUTTONUP:
                 {
                     const ButtonState state = sdlEvent.button.type == SDL_MOUSEBUTTONDOWN ? ButtonState::kPressed : ButtonState::kReleased;
-                    const auto x = sdlEvent.button.x;
-                    const auto y = sdlEvent.button.y;
+                    const auto x = static_cast<float>(sdlEvent.button.x);
+                    const auto y = static_cast<float>(sdlEvent.button.y);
                     const auto button = ToMouseButton(sdlEvent.button.button);
                     const int clicks = sdlEvent.button.clicks;
                     MouseButtonEvent buttonEvent(button, state, clicks, x, y);
@@ -172,6 +172,19 @@ namespace mcp
         }
 
         return true;
+    }
+
+    void SDL2Window::PostApplicationEvent(ApplicationEvent& event)
+    {
+        const auto eventId = event.GetEventId();
+
+        if (eventId == ApplicationQuitEvent::GetStaticId())
+        {
+            SDL_Event quit;
+            quit.type = SDL_QUIT;
+            SDL_PushEvent(&quit);
+            event.SetHandled();
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------

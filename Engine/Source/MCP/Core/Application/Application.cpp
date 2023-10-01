@@ -8,6 +8,7 @@
 #include "MCP/Collision/ColliderFactory.h"
 #include "MCP/Components/ComponentFactory.h"
 #include "MCP/Components/EngineComponents.h"
+#include "MCP/Core/Event/ApplicationEvent.h"
 #include "MCP/Core/Resource/Parser.h"
 #include "MCP/Core/Event/KeyEvent.h"
 #include "MCP/Graphics/Graphics.h"
@@ -251,6 +252,9 @@ namespace mcp
                 GraphicsManager::Get()->Display();
             }
         }
+
+        // Safely close the Application.
+        Close();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -370,11 +374,27 @@ namespace mcp
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
+    //		
+    ///		@brief : Quit the Application.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Application::Quit()
+    {
+        // I need to post an event to the Window, so that systems safely close.
+        ApplicationQuitEvent event;
+        GraphicsManager::Get()->GetWindow()->PostApplicationEvent(event);
+    }
+
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
     //
     ///		@brief : Closes the Engine, shutting down all systems.
     //-----------------------------------------------------------------------------------------------------------------------------
     void Application::Close() const
     {
+        if (m_isRunning)
+            return;
+
         MCP_LOG("Application", "Closing MCPEngine...");
 
         // Close the processes in reverse order.

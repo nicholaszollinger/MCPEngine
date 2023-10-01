@@ -101,6 +101,10 @@ struct Vector2
 
     // Operators
 
+    // Disable the 'unreachable code' warning.
+#pragma warning (push)
+#pragma warning (disable : 4702)
+
     bool operator==(const Vector2& right) const
     {
         if constexpr (std::is_floating_point_v<Type>)
@@ -111,6 +115,8 @@ struct Vector2
 
         return x == right.x && y == right.y;
     }
+
+#pragma warning (pop)
 
     Vector2 operator+(const Vector2<Type>& right) const
     {

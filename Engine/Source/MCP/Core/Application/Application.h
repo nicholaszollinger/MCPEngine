@@ -48,11 +48,12 @@ namespace mcp
         bool Init(const ApplicationProperties& props, const char* pGameDataFilepath);
         bool Init(const char* pGameDataFilepath);
         void Run();
-        void Close() const;
+        void Quit();
 
     private:
         bool LoadApplicationProperties(ApplicationProperties& outProps, const char* pFilepath);
         bool LoadGameData(const char* pGameDataFilepath);
+        void Close() const;
     };
 
 

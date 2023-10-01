@@ -15,3 +15,10 @@
 #include "ScriptComponent.h"
 #include "TextComponent.h"
 #include "TransformComponent.h"
+
+// UI
+#include "MCP/UI/ButtonWidget.h"
+#include "MCP/UI/CanvasWidget.h"
+#include "MCP/UI/ImageWidget.h"
+#include "MCP/UI/TextWidget.h"
+#include "MCP/UI/Widget.h"

@@ -59,7 +59,7 @@ namespace mcp
     TiledMapComponent::~TiledMapComponent()
     {
         // Remove the renderable from the scene.
-        m_pOwner->GetScene()->RemoveRenderable(this);
+        m_pOwner->GetWorld()->RemoveRenderable(this);
     }
 
     void TiledMapComponent::Load(const char* pMapPath, const char* pTileSetPath, const char* pTileSetImagePath)
@@ -82,9 +82,9 @@ namespace mcp
     bool TiledMapComponent::Init()
     {
         // Add this component to the list of renderables in the scene.
-        auto* pScene = m_pOwner->GetScene();
-        assert(pScene);
-        pScene->AddRenderable(this);
+        auto* pWorld = m_pOwner->GetWorld();
+        assert(pWorld);
+        pWorld->AddRenderable(this);
 
         m_pTransformComponent = m_pOwner->GetComponent<TransformComponent>();
         if (!m_pTransformComponent)
@@ -269,7 +269,7 @@ namespace mcp
 
                 // Create the object
                 // Create a new object and add it to the scene.
-                auto* pObject = m_pOwner->GetScene()->CreateObject();
+                auto* pObject = m_pOwner->GetWorld()->CreateObject();
 
                 // Get the object header.
                 auto objectPrefabElement = loadedPrefabs[result->second].GetElement("Object");

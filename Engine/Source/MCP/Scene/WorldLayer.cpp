@@ -2,6 +2,7 @@
 
 #include "WorldLayer.h"
 
+#include "MCP/Graphics/Graphics.h"
 #include "MCP/Scene/Scene.h"
 
 namespace mcp
@@ -15,7 +16,59 @@ namespace mcp
 
     WorldLayer::~WorldLayer()
     {
-        DestroyWorld();
+        DestroyLayer();
+    }
+
+    bool WorldLayer::LoadLayer(const XMLElement layer)
+    {
+        // Get global settings for the Scene.
+        const XMLElement worldSettings = layer.GetChildElement("Settings");
+        MCP_CHECK(worldSettings.IsValid()); // This should be an assert.
+
+        // Collision Settings
+        XMLElement setting = worldSettings.GetChildElement("Collision");
+        MCP_CHECK(setting.IsValid());
+        QuadtreeBehaviorData data;
+        const auto windowDimensions = GraphicsManager::Get()->GetWindow()->GetDimensions();
+        data.worldWidth = setting.GetAttribute<float>("worldWidth", static_cast<float>(windowDimensions.width));
+        data.worldHeight = setting.GetAttribute<float>("worldHeight", static_cast<float>(windowDimensions.height));
+        data.worldXPos = setting.GetAttribute<float>("worldXPos", 0.f);
+        data.worldYPos = setting.GetAttribute<float>("worldYPos", 0.f);
+        data.maxDepth = setting.GetAttribute<unsigned>("maxDepth", 4);
+        data.maxObjectsInCell = setting.GetAttribute<unsigned>("maxObjectsInCell", 4);
+        SetCollisionSettings(data);
+
+        // Scene Objects
+        XMLElement objectElement = layer.GetChildElement(kObjectElementName);
+        while(objectElement.IsValid())
+        {
+            // Create a new object and add it to the scene.
+            auto* pObject = CreateObject();
+
+            // Get the first Component of the object.
+            XMLElement componentElement = objectElement.GetChildElement();
+
+            while (componentElement.IsValid())
+            {
+                // Add the Component to the new Object.
+                if (!ComponentFactory::AddToObjectFromData(componentElement.GetName(), componentElement, pObject))
+                {
+                    //CloseScene();
+
+                    // Should I be returning false here??? Do I completely tank the execution if an object can't be
+                    // properly loaded?
+                    return false;
+                }
+
+                // Go to the next sibling to see if we have another component.
+                componentElement = componentElement.GetSiblingElement();
+            }
+
+            // Go to the next sibling to see if we have another gameObject.
+            objectElement = objectElement.GetSiblingElement(kObjectElementName);
+        }
+
+        return true;
     }
 
     bool WorldLayer::OnSceneLoad()
@@ -24,7 +77,7 @@ namespace mcp
         {
             if (!pObject->PostLoadInit())
             {
-                // Log an error, but don't 
+                // Should I return false here and stop execution entirely based on an Object failing to initialize???
                 MCP_ERROR("WorldLayer", "Object failed to successfully initialize!");
                 return false;
             }
@@ -65,7 +118,7 @@ namespace mcp
                 break;
         }
 
-        DeleteQueuedObjects();
+        //DeleteQueuedObjects();
     }
 
     void WorldLayer::Render()
@@ -99,7 +152,13 @@ namespace mcp
         return pNewObject;
     }
 
-    void WorldLayer::DestroyObject(const UpdateableId id)
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief :  Queues an Object for destruction. The object will be deleted after the update loop has finished.
+    ///		@param id : Id of the Object you want to destroy.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void WorldLayer::DestroyObject(const ObjectId id)
     {
         const auto result = m_objects.find(id);
         if (result == m_objects.end())
@@ -111,7 +170,13 @@ namespace mcp
         m_queuedObjectsToDelete.emplace_back(result->first);
     }
 
-    bool WorldLayer::IsValidId(const UpdateableId id)
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Checks to see if the ObjectId points to a valid Object or not.
+    ///		@param id : Id of the Object you want to destroy.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool WorldLayer::IsValidId(const ObjectId id)
     {
         if (const auto result = m_objects.find(id); result == m_objects.end())
         {
@@ -121,6 +186,11 @@ namespace mcp
         return true;
     }
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Deletes every object that has been queued for destruction.
+    //-----------------------------------------------------------------------------------------------------------------------------
     void WorldLayer::DeleteQueuedObjects()
     {
         for (const auto objectId : m_queuedObjectsToDelete)
@@ -134,7 +204,12 @@ namespace mcp
         m_queuedObjectsToDelete.clear();
     }
 
-    void WorldLayer::DestroyWorld()
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Safely destroys the layer.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void WorldLayer::DestroyLayer()
     {
         for (const auto&[id, pObject] : m_objects)
         {
@@ -144,12 +219,17 @@ namespace mcp
         m_objects.clear();
     }
 
-    void WorldLayer::OnEvent([[maybe_unused]] const ApplicationEvent& event)
+    void WorldLayer::OnEvent([[maybe_unused]] ApplicationEvent& event)
     {
         // TODO: This needs to be called by the Scene, and the Scene needs to register for the application events.
 
     }
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Set tuning data for the Collision System.
+    //-----------------------------------------------------------------------------------------------------------------------------
     void WorldLayer::SetCollisionSettings(const QuadtreeBehaviorData& data)
     {
         m_collisionSystem.SetQuadtreeBehaviorData(data);

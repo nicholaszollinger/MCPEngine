@@ -67,6 +67,9 @@
     <Filter Include="MCP\Core\Resource\Parsers">
       <UniqueIdentifier>{895701ad-cbd4-44d6-8812-da2ad44d2edb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MCP\Scene\Layers">
+      <UniqueIdentifier>{6dadaeb4-36cc-4dbd-b0b6-42a9803dd7ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Platform\SDL2\SDL2Window.h">
@@ -273,11 +276,35 @@
     <ClInclude Include="Source\MCP\Core\Event\ApplicationEvent.h">
       <Filter>MCP\Core\Event</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MCP\Scene\SceneLayer.h">
-      <Filter>MCP\Scene</Filter>
+    <ClInclude Include="Source\MCP\UI\Widget.h">
+      <Filter>MCP\UI</Filter>
     </ClInclude>
     <ClInclude Include="Source\MCP\Scene\WorldLayer.h">
+      <Filter>MCP\Scene\Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\SceneLayer.h">
+      <Filter>MCP\Scene\Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\UILayer.h">
+      <Filter>MCP\Scene\Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\ButtonWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\CanvasWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\ImageWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\WidgetFactory.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\Entity.h">
       <Filter>MCP\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\TextWidget.h">
+      <Filter>MCP\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -434,11 +461,29 @@
     <ClCompile Include="Source\MCP\Components\TextComponent.cpp">
       <Filter>MCP\Components</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MCP\Scene\SceneLayer.cpp">
-      <Filter>MCP\Scene</Filter>
+    <ClCompile Include="Source\MCP\UI\Widget.cpp">
+      <Filter>MCP\UI</Filter>
     </ClCompile>
     <ClCompile Include="Source\MCP\Scene\WorldLayer.cpp">
-      <Filter>MCP\Scene</Filter>
+      <Filter>MCP\Scene\Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\SceneLayer.cpp">
+      <Filter>MCP\Scene\Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\UILayer.cpp">
+      <Filter>MCP\Scene\Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\ButtonWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\CanvasWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\ImageWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\TextWidget.cpp">
+      <Filter>MCP\UI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
