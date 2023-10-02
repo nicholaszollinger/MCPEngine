@@ -33,6 +33,9 @@ namespace mcp
         void SetTexture(const Texture& texture) { m_texture = texture; }
         void SetCrop(const RectInt& crop) { m_crop = crop; }
         void SetSize(const float width, const float height) { m_size = { width, height }; }
+        virtual void SetIsActive(const bool isActive) override;
+
+        [[nodiscard]] RectInt GetCrop() const { return m_crop; }
 
         static bool AddFromData(const XMLElement component, Object* pOwner);
     };

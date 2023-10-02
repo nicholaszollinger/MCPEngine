@@ -34,6 +34,11 @@ namespace mcp
         m_onLocationUpdated.Broadcast(m_position);
     }
 
+    void TransformComponent::AddToLocationNoUpdate(const Vec2 deltaPosition)
+    {
+        m_position += deltaPosition;
+    }
+
     void TransformComponent::SetLocation(const Vec2 position)
     {
         m_position = position;

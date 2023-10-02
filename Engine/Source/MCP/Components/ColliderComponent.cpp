@@ -169,7 +169,7 @@ namespace mcp
             if (isEnabled)
             {
                 m_pSystem->AddCollideable(this);
-                m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
+                //m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
             }
             
             // Otherwise, we to remove this component from the collision tree and start listening
@@ -177,7 +177,7 @@ namespace mcp
             else
             {
                 m_pSystem->RemoveCollideable(this);
-                m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
+                //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
             }
         }
 

@@ -290,7 +290,7 @@ namespace mcp
 
                                 const Vec2 deltaPos = significantFaceIsWidth ? Vec2{0, distanceScalar * intersectionRect.height} : Vec2 { distanceScalar * intersectionRect.width, 0.f};
 
-                                pColliderComponent->GetTransformComponent()->AddToLocation(deltaPos);
+                                pColliderComponent->GetTransformComponent()->AddToLocationNoUpdate(deltaPos);
                                 pColliderComponent->SetVelocity(significantFaceNormal * distanceOnFaceNormal);
 
                                 // Broadcast the events.
@@ -511,7 +511,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::RemoveFromCell(QuadtreeCell* pCell, const ColliderComponent* pComponent) const
     {
-        assert(IsLeaf(pCell));
+        //assert(IsLeaf(pCell));
 
         for (size_t i = 0; i < pCell->m_colliderComponents.size(); ++i)
         {

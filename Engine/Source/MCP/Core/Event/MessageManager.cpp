@@ -7,8 +7,14 @@ namespace mcp
 {
     void MessageManager::ProcessMessages()
     {
+        // I make a copy of the queue so that if other messages are spawned as a result of a message, those
+        // will be handled on the next call to ProcessMessages().
+        //  - I don't know if I should be handling them immediately or not.
+        const auto queue = m_messageQueue;
+        m_messageQueue.clear();
+
         // Go through the queue and dispatch the events.
-        for (auto& message : m_messageQueue)
+        for (auto& message : queue)
         {
             // TODO: Make sure the message.pSender is still valid? Should that matter?
 
@@ -21,9 +27,6 @@ namespace mcp
                 }
             }
         }
-
-        // Clear out the queue.
-        m_messageQueue.clear();
     }
 
     void MessageManager::AddListener(Component* pReceiver, const MessageId id)
