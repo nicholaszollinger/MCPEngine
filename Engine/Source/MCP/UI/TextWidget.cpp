@@ -24,7 +24,8 @@ namespace mcp
 
     TextWidget::~TextWidget()
     {
-        m_pUILayer->RemoveRenderable(this);
+        if (m_isActive)
+            m_pUILayer->RemoveRenderable(this);
 
         // Free the text texture.
         FreeTexture();
@@ -68,6 +69,24 @@ namespace mcp
         data.crop = m_crop;
 
         DrawTexture(data);
+    }
+
+    void TextWidget::SetActive(const bool isActive)
+    {
+        if (isActive != m_isActive)
+        {
+            if (isActive)
+            {
+                m_pUILayer->AddRenderable(this);
+            }
+
+            else
+            {
+                m_pUILayer->RemoveRenderable(this);
+            }
+
+            m_isActive = isActive;
+        }
     }
 
     void TextWidget::SetFont(const Font& font)
@@ -154,4 +173,16 @@ namespace mcp
         m_crop.width = textureSize.x;
         m_crop.height = textureSize.y;
     }
+
+    void TextWidget::OnParentActiveChanged(const bool parentActiveState)
+    {
+        // If we are being set active, add the renderable
+        if (parentActiveState)
+            m_pUILayer->AddRenderable(this);
+        
+        // And vice versa.
+        else
+            m_pUILayer->RemoveRenderable(this);
+    }
+
 }

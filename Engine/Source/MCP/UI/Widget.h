@@ -71,7 +71,7 @@ namespace mcp
         virtual void SetPositionOffset(const float x, const float y);
         void SetAnchor(const float x, const float y);
         void SetZOffset(const unsigned int zOffset);
-        void SetActive(const bool isActive) { m_isActive = isActive; }
+        virtual void SetActive(const bool isActive);
         void SetUILayer(UILayer* pUILayer) { m_pUILayer = pUILayer; }
 
         // Getters
@@ -79,7 +79,7 @@ namespace mcp
         [[nodiscard]] unsigned int GetZOrder() const;
         [[nodiscard]] bool HasChildren() const { return !m_children.empty(); }
         [[nodiscard]] bool IsInteractable() const { return m_isInteractable; }
-        [[nodiscard]] bool IsActive() const { return m_isActive; }
+        [[nodiscard]] bool IsActive() const;
         [[nodiscard]] virtual WidgetTypeId GetTypeId() const = 0;
 
     protected:
@@ -89,6 +89,8 @@ namespace mcp
         ///		@brief : Virtual function to override how this Widget handles Application Events. The default behavior is to do nothing.
         //-----------------------------------------------------------------------------------------------------------------------------
         virtual void HandleEvent([[maybe_unused]] ApplicationEvent& event) {}
+        virtual void OnParentActiveChanged(const bool parentActiveState) {}
+
         [[nodiscard]] bool PointIntersectsRect(const Vec2 screenPos) const;
     };
 }

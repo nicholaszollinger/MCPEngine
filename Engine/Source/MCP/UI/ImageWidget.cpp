@@ -44,6 +44,35 @@ namespace mcp
         DrawTexture(renderData);
     }
 
+    void ImageWidget::SetActive(const bool isActive)
+    {
+        if (isActive != m_isActive)
+        {
+            if (isActive)
+            {
+                m_pUILayer->AddRenderable(this);
+            }
+
+            else
+            {
+                m_pUILayer->RemoveRenderable(this);
+            }
+
+            m_isActive = isActive;
+        }
+    }
+
+    void ImageWidget::OnParentActiveChanged(const bool parentActiveState)
+    {
+        // If we are being set active, add the renderable
+        if (parentActiveState)
+            m_pUILayer->AddRenderable(this);
+
+        // And vice versa.
+        else
+            m_pUILayer->RemoveRenderable(this);
+    }
+
     ImageWidget* ImageWidget::AddFromData(const XMLElement element)
     {
         const char* pFilepath = element.GetAttribute<const char*>("path");

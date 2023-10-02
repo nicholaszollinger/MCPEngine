@@ -30,7 +30,11 @@ namespace mcp
 
         virtual bool Init() override;
         virtual void Render() const override;
+        virtual void SetActive(const bool isActive) override;
 
         static ImageWidget* AddFromData(const XMLElement element);
+
+    private:
+        virtual void OnParentActiveChanged(const bool parentActiveState) override;
     };
 }

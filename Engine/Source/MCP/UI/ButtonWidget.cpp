@@ -13,6 +13,7 @@ namespace mcp
 
     void ButtonWidget::HandleEvent(ApplicationEvent& event)
     {
+        // If I or the parent is not active, don't handle the event.
         if (!m_isActive)
             return;
 

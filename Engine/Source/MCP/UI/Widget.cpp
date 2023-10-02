@@ -130,16 +130,20 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Widget::OnEvent(ApplicationEvent& event)
     {
+        // If we are not active, then don't even consult the children and return.
+        // - If a parent is not active, the children are not active.
+        if (!m_isActive)
+            return;
+
         // If we have children, we need to check to see if they should handle the event
         // 'Move down the tree'
-        if (HasChildren())
+        for (auto* pChild : m_children)
         {
-            for (auto* pChild : m_children)
-            {
-                pChild->OnEvent(event);
-                if (event.IsHandled())
-                    return;
-            }
+            pChild->OnEvent(event);
+
+            // If the child handled the event, we are done.
+            if (event.IsHandled())
+                return;
         }
 
         // If the event was not handled by any of our children and we are interactable,
@@ -241,5 +245,36 @@ namespace mcp
         rect.y -= rect.height / 2.f;
 
         return rect.Intersects(screenPos);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //      This tells the children of the active state change of the Parent Widget, so they can respond without
+    //      changing their active state necessarily.
+    //		
+    ///		@brief : Sets the Widget active or not.
+    ///		@param isActive : 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::SetActive(const bool isActive)
+    {
+        m_isActive = isActive;
+
+        for (auto* pChild : m_children)
+        {
+            pChild->OnParentActiveChanged(m_isActive);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Returns if the Widget is active or not. If a parent Widget is inactive, then this will return inactive.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool Widget::IsActive() const
+    {
+        if (m_pParent && !m_pParent->IsActive())
+            return false;
+
+        return m_isActive;
     }
 }
