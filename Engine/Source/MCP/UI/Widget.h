@@ -89,7 +89,7 @@ namespace mcp
         ///		@brief : Virtual function to override how this Widget handles Application Events. The default behavior is to do nothing.
         //-----------------------------------------------------------------------------------------------------------------------------
         virtual void HandleEvent([[maybe_unused]] ApplicationEvent& event) {}
-        virtual void OnParentActiveChanged(const bool parentActiveState) {}
+        virtual void OnParentActiveChanged([[maybe_unused]] const bool parentActiveState) {}
 
         [[nodiscard]] bool PointIntersectsRect(const Vec2 screenPos) const;
     };
