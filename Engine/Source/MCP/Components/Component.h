@@ -74,7 +74,7 @@ private:                                                                        
         //-----------------------------------------------------------------------------------------------------------------------------
         virtual void OnDestroy() {}
 
-        void SetIsActive(const bool isActive) { m_isActive = isActive; }
+        virtual void SetIsActive(const bool isActive) { m_isActive = isActive; }
 
         [[nodiscard]] virtual ComponentTypeId GetTypeId() const = 0;
         [[nodiscard]] Object* GetOwner() const { return m_pOwner; }

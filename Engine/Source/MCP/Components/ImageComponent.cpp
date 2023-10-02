@@ -33,16 +33,19 @@ namespace mcp
 
     ImageComponent::~ImageComponent()
     {
-        auto* pScene = m_pOwner->GetScene();
-        assert(pScene);
-        pScene->RemoveRenderable(this);
+        if (m_isActive)
+        {
+            auto* pScene = m_pOwner->GetScene();
+            MCP_CHECK(pScene);
+            pScene->RemoveRenderable(this);
+        }
     }
 
     bool ImageComponent::Init()
     {
         // Add this component to the list of renderables in the scene.
         auto* pScene = m_pOwner->GetScene();
-        assert(pScene);
+        MCP_CHECK(pScene);
         pScene->AddRenderable(this);
 
         m_pTransformComponent = m_pOwner->GetComponent<TransformComponent>();
@@ -53,6 +56,26 @@ namespace mcp
         }
 
         return true;
+    }
+
+    void ImageComponent::SetIsActive(const bool isActive)
+    {
+        if (isActive == m_isActive)
+            return;
+
+        // If we are being set to active:
+        if (isActive)
+        {
+            m_pOwner->GetScene()->AddRenderable(this);
+        }
+
+        // If we are being set to inactive.
+        else
+        {
+            m_pOwner->GetScene()->RemoveRenderable(this);
+        }
+
+        m_isActive = isActive;
     }
 
     void ImageComponent::Render() const

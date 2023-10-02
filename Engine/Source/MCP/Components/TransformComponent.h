@@ -29,6 +29,7 @@ namespace mcp
         void SetLocation(const Vec2 position);
         void AddToLocation(const Vec2 deltaPosition);
         void AddToLocation(const float deltaX, const float deltaY);
+        void AddToLocationNoUpdate(const Vec2 deltaPosition);
         [[nodiscard]] Vec2 GetLocation() const { return m_position; }
             
     public:

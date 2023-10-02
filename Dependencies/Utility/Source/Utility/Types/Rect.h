@@ -137,6 +137,11 @@ struct Rect
             && outer.y < y
             && outer.y + outer.height > y + height;
     }
+
+    std::string ToString() const
+    {
+        return CombineIntoString("(", x, ", " , y, ", ", width, ", ", height, ")");
+    }
 };
 
 using RectF = Rect<float>;

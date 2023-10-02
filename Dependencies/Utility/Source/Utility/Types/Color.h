@@ -27,4 +27,20 @@ struct Color
     {
         //
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Colors are equal if their r, g, b values are equal. We don't care about the alpha.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    constexpr bool operator==(const Color& other) const
+    {
+        return r == other.r && g == other.g && b == other.b;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Colors are not equal if their r, g, b values are not equal. We don't care about the alpha.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    constexpr bool operator!=(const Color& other) const
+    {
+        return !(*this == other);
+    }
 };
