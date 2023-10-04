@@ -139,7 +139,7 @@ struct Vector2
         return result;
     }
 
-    Vector2 operator-() const
+    constexpr Vector2 operator-() const
     {
         Vector2 result;
         result.x = -x;
@@ -221,8 +221,13 @@ struct Vector2
     // Common Values.
     static constexpr Vector2 ZeroVector() { return Vector2(0,0); }
     static constexpr Vector2 UpVector() { return Vector2(0, static_cast<Type>(1)); }
+    static constexpr Vector2 DownVector() { return Vector2(0, static_cast<Type>(-1)); }
     static constexpr Vector2 RightVector() { return Vector2(static_cast<Type>(1), 0); }
+    static constexpr Vector2 LeftVector() { return Vector2(static_cast<Type>(-1), 0); }
 };
+
+using Vec2 = Vector2<float>;
+using Vec2Int = Vector2<int>;
 
 template<typename Type, typename ScalarType>
 Vector2<Type> operator*(const float scalar, const Vector2<Type>& vec)
@@ -244,6 +249,3 @@ float GetDistance(const Vector2<Type>& left, const Vector2<Type>& right)
 {
     return std::sqrt(GetSquaredDistance(left, right));
 }
-
-using Vec2 = Vector2<float>;
-using Vec2Int = Vector2<int>;
