@@ -63,7 +63,8 @@ namespace mcp
 #if RENDER_COLLIDER_VISUALS
     void Box2DCollider::Render() const
     {
-        DrawRect(GetEstimateRectWorld(), kColliderDebugColor);
+        if (CollisionIsEnabled())
+            DrawRect(GetEstimateRectWorld(), kColliderDebugColor);
     }
 #endif
 

@@ -239,11 +239,19 @@ namespace mcp
                 //      NOTE: I am assuming *only* Box2DColliders which are *axis aligned*.
                 for (auto& [name, pCollider] : pColliderComponent->m_colliders)
                 {
+                    // I shouldn't have to do this, I should be able to just grab the active colliders.
+                    if (!pCollider->CollisionIsEnabled())
+                            continue;
+
                     const RectF myEstimateRect = pCollider->GetEstimateRectWorld();
 
                     // For each active collider in pComponent
                     for (auto& [otherName, pOtherCollider] : pComponent->m_colliders)
                     {
+                        // I shouldn't have to do this, I should be able to just grab the active colliders.
+                        if (!pOtherCollider->CollisionIsEnabled())
+                            continue;
+
                         const RectF otherEstimateRect = pOtherCollider->GetEstimateRectWorld();
 
                         // Get the responses for each collider.
@@ -290,7 +298,7 @@ namespace mcp
 
                                 const Vec2 deltaPos = significantFaceIsWidth ? Vec2{0, distanceScalar * intersectionRect.height} : Vec2 { distanceScalar * intersectionRect.width, 0.f};
 
-                                pColliderComponent->GetTransformComponent()->AddToLocation(deltaPos);
+                                pColliderComponent->GetTransformComponent()->AddToLocationNoUpdate(deltaPos);
                                 pColliderComponent->SetVelocity(significantFaceNormal * distanceOnFaceNormal);
 
                                 // Broadcast the events.
@@ -511,7 +519,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::RemoveFromCell(QuadtreeCell* pCell, const ColliderComponent* pComponent) const
     {
-        assert(IsLeaf(pCell));
+        //assert(IsLeaf(pCell));
 
         for (size_t i = 0; i < pCell->m_colliderComponents.size(); ++i)
         {

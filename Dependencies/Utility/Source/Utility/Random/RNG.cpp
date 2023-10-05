@@ -60,33 +60,9 @@ uint64_t RandomNumberGenerator::Rand()
 //
 ///		@brief : Returns random result of either true or false.
 //-----------------------------------------------------------------------------------------------------------------------------
-bool RandomNumberGenerator::FlipACoin()
+bool RandomNumberGenerator::RandBool()
 {
     return Rand() % 2;
-}
-
-//-----------------------------------------------------------------------------------------------------------------------------
-//		NOTES:
-//
-///		@brief : Returns and int value in the range [min, max].
-//-----------------------------------------------------------------------------------------------------------------------------
-int RandomNumberGenerator::RandRange(const int min, const int max)
-{
-    const int range = max - min;
-    return min + static_cast<int>((Rand() % (range + 1)));
-}
-
-//-----------------------------------------------------------------------------------------------------------------------------
-//		NOTES:
-//
-///		@brief : Returns a float value in the range [min, max].
-//-----------------------------------------------------------------------------------------------------------------------------
-float RandomNumberGenerator::RandRange(const float min, const float max)
-{
-    const float range = max - min;
-    const float roll = NormalizedRand();
-    
-    return min + roll * range;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
