@@ -43,4 +43,7 @@ struct Color
     {
         return !(*this == other);
     }
+
+    static constexpr Color White() { return {255,255,255,255}; }
+    static constexpr Color Black() { return {0,0,0,255}; }
 };

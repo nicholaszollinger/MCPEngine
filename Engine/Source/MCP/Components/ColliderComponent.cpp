@@ -30,8 +30,8 @@ namespace mcp
 #endif
 
         // If we were listening to the transform updated events, unregister.
-        if (!m_isStatic && m_collisionEnabled)
-            m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
+        //if (!m_isStatic && m_collisionEnabled)
+        //    m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
 
         // Remove ourselves from the collision system.
         m_pSystem->RemoveCollideable(this);
@@ -80,7 +80,7 @@ namespace mcp
         // If we are an active, enabled collider, then we need to listen to the transform updates.
         if (!m_isStatic && m_collisionEnabled)
         {
-            m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
+            //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
         }
 
         // Add ourselves to the CollisionSystem
@@ -133,13 +133,13 @@ namespace mcp
             // If we are becoming static, then we need to stop listening to the transform updates.
             if (isStatic)
             {
-                m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
+                //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
             }
 
             // Otherwise, we are becoming active and need to start listening.
             else
             {
-                m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
+                //m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
             }
         }
 
@@ -187,6 +187,19 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
+    ///		@brief : If the Collider's data has changed like its size or enabled status, this will update the estimation rect. 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void ColliderComponent::ColliderCollisionChanged(const Collider::ColliderNameId id)
+    {
+        // If we don't have a collider with that id or the state is not changing, return.
+        MCP_CHECK(m_colliders.find(id)->second);
+
+        UpdateEstimationRect();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
     ///		@brief : This function is used for when a static collider (one that does not move) is teleported in some way to a
     ///         a new location.
     ///		@param newPosition : The new position of the component.
@@ -195,6 +208,21 @@ namespace mcp
     {
         m_lastLocation = newPosition;
         m_pSystem->CheckCollision(this);
+    }
+
+    void ColliderComponent::SetColliderEnabled(const Collider::ColliderNameId id, const bool isEnabled)
+    {
+        const auto result = m_colliders.find(id);
+
+        // If we don't have a collider with that id or the state is not changing, return.
+        if (result == m_colliders.end() || result->second->CollisionIsEnabled() == isEnabled)
+            return;
+
+        auto* pCollider = result->second;
+        pCollider->SetCollisionEnabled(isEnabled);
+
+        // Update the estimation rect.
+        UpdateEstimationRect();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -232,6 +260,7 @@ namespace mcp
     {
         //const Vec2 location = m_pTransformComponent->GetLocation();
         m_myRelativeEstimationRect = {0.f, 0.f, 0.f, 0.f};
+        m_activeColliderCount = 0;
 
         if(m_colliders.empty())
         {
@@ -245,6 +274,7 @@ namespace mcp
             auto& [id, pComponent] = *m_colliders.begin();
             if (pComponent->CollisionIsEnabled())
             {
+                ++m_activeColliderCount;
                 m_myRelativeEstimationRect = pComponent->GetEstimateRectRelative();
             }
 
@@ -256,6 +286,7 @@ namespace mcp
             if (!pCollider->CollisionIsEnabled())
                 continue;
 
+            ++m_activeColliderCount;
             const RectF colliderEstimation = pCollider->GetEstimateRectRelative();
 
             // If the left corner is to the left of our rect, increase our width by the difference and
@@ -340,6 +371,9 @@ namespace mcp
     {
         if (!m_collisionEnabled)
             return;
+
+        // I need to adjust the rect for rendering.
+        //DrawRect(GetEstimationRect(), Color::White());
 
         for (auto& [colliderId, pCollider] : m_colliders)
         {

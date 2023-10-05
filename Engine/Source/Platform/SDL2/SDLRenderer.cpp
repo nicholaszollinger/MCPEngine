@@ -180,10 +180,23 @@ void SdlRenderer::DrawTexture(const mcp::TextureRenderData& context)
     const SDL_Rect crop = mcp::RectToSdl(context.crop);
     const SDL_FRect dst = mcp::RectToSdlF(context.destinationRect);
     const SDL_FPoint center = mcp::Vec2ToSdlF(context.anglePivot);
+    auto* pSdlTexture = static_cast<SDL_Texture*>(context.pTexture);
+
+    // Set the new tint color
+    if (SDL_SetTextureColorMod(pSdlTexture, context.tint.r, context.tint.g, context.tint.b) != 0)
+    {
+        MCP_ERROR("SDL", "Failed to set SDL_Texture Color! SDL_Error: ", SDL_GetError());
+    }
+
+    // Set the new alpha value.
+    if (SDL_SetTextureAlphaMod(pSdlTexture, context.tint.alpha) != 0)
+    {
+        MCP_ERROR("SDL", "Failed to set SDL Alpha Alpha! SDL_Error: ", SDL_GetError());
+    }
 
     if (SDL_RenderCopyExF(
         s_pRenderer
-        , static_cast<SDL_Texture*>(context.pTexture)
+        , pSdlTexture
         , &crop
         , &dst
         , context.angle

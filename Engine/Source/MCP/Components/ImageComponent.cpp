@@ -13,18 +13,21 @@ namespace mcp
         : Component(pObject)
         , IRenderable(layer, zOrder)
         , m_pTransformComponent(nullptr)
+        , m_crop()
+        , m_tint(Color::White())
         , m_renderAngle(0.0)
         , m_flip(RenderFlip2D::kNone)
     {
         m_size = m_texture.GetBaseSizeAsFloat();
     }
 
-    ImageComponent::ImageComponent(Object* pObject, const char* pTextureFilepath, const RectInt& crop, const Vec2 size, const RenderLayer layer, const int zOrder)
+    ImageComponent::ImageComponent(Object* pObject, const char* pTextureFilepath, const RectInt& crop, const Vec2 size, const Color color, const RenderLayer layer, const int zOrder)
         : Component(pObject)
         , IRenderable(layer, zOrder)
         , m_pTransformComponent(nullptr)
         , m_crop(crop)
         , m_size(size)
+        , m_tint(color)
         , m_renderAngle(0.0)
         , m_flip(RenderFlip2D::kNone)
     {
@@ -92,11 +95,32 @@ namespace mcp
         renderData.pTexture = m_texture.Get();
         renderData.angle = m_renderAngle;
         renderData.crop = m_crop;
+        renderData.tint = m_tint;
         renderData.anglePivot = m_anglePivot;
         renderData.destinationRect = destinationRect;
         renderData.flip = m_flip;
 
         DrawTexture(renderData);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Sets the color and alpha value of the tint of the texture.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void ImageComponent::SetTint(const Color color)
+    {
+        m_tint = color;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Sets the alpha of the texture.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void ImageComponent::SetAlpha(const uint8_t alpha)
+    {
+        m_tint.alpha = alpha;
     }
     
     bool ImageComponent::AddFromData(const XMLElement component, Object* pOwner)
@@ -136,6 +160,16 @@ namespace mcp
         size.x = sizeElement.GetAttribute<float>("x");
         size.y = sizeElement.GetAttribute<float>("y");
 
+        Color color = Color::White();
+        const XMLElement tintElement = cropElement.GetSiblingElement("Color");
+        if (tintElement.IsValid())
+        {
+            color.r = tintElement.GetAttribute<uint8_t>("r");
+            color.g = tintElement.GetAttribute<uint8_t>("g");
+            color.b = tintElement.GetAttribute<uint8_t>("b");
+            color.alpha = tintElement.GetAttribute<uint8_t>("alpha");
+        }
+
         // IRenderable Data.
         const XMLElement renderableElement = cropElement.GetSiblingElement("Renderable");
         
@@ -143,7 +177,7 @@ namespace mcp
         const int zOrder = renderableElement.GetAttribute<int>("zOrder");
 
         // Add the component to the Object
-        if (!pOwner->AddComponent<ImageComponent>(pTextureFilePath, crop, size, layer, zOrder))
+        if (!pOwner->AddComponent<ImageComponent>(pTextureFilePath, crop, size, color, layer, zOrder))
         {
             MCP_ERROR("ImageComponent","Failed to add ImageComponent from data!");
             return false;

@@ -116,10 +116,10 @@ private:
         Vec2 m_relativePosition;                    // Offset from the Transform component.
         CollisionSystem* m_pSystem;                 // Reference to the collision system. NOT CURRENTLY USED.
         ColliderComponent* m_pOwner;                // The Collider Component that owns this collider.
+        ColliderNameId m_colliderName;                          // NameId to identify this collider.
 
     private:
         std::unordered_set<Collider*> m_overlappingColliders;   // The colliders that are currently overlapping this collider.
-        ColliderNameId m_colliderName;                          // NameId to identify this collider.
         CollisionProfile m_profile;                             // Defines how this Collider interacts with other collision channels.
         bool m_isEnabled;
 
