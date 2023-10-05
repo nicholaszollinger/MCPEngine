@@ -38,26 +38,51 @@ namespace mcp
         data.maxObjectsInCell = setting.GetAttribute<unsigned>("maxObjectsInCell", 4);
         SetCollisionSettings(data);
 
-        // Scene Objects
-        XMLElement objectElement = layer.GetChildElement(kObjectElementName);
-        while(objectElement.IsValid())
+        // Elements:
+        XMLElement element = layer.GetChildElement(kObjectElementName);
+        while(element.IsValid())
+        {
+            if (HashString32(element.GetName()) == kSceneLayerAssetId)
+            {
+                LoadSceneDataAsset(element);
+            }
+
+            else
+            {
+                LoadObject(element);   
+            }
+
+            element = element.GetSiblingElement();
+        }
+
+        return true;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Loads an object and all of its components. If loading a component fails, this will queue the object for destruction
+    ///         and return.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void WorldLayer::LoadObject(XMLElement element)
+    {
+        while(element.IsValid())
         {
             // Create a new object and add it to the scene.
             auto* pObject = CreateObject();
 
             // Get the first Component of the object.
-            XMLElement componentElement = objectElement.GetChildElement();
+            XMLElement componentElement = element.GetChildElement();
 
             while (componentElement.IsValid())
             {
                 // Add the Component to the new Object.
                 if (!ComponentFactory::AddToObjectFromData(componentElement.GetName(), componentElement, pObject))
                 {
-                    //CloseScene();
-
-                    // Should I be returning false here??? Do I completely tank the execution if an object can't be
-                    // properly loaded?
-                    return false;
+                    MCP_ERROR("WorldLayer", "Failed to load object!");
+                    // Delete the created object
+                    pObject->Destroy();
+                    return;
                 }
 
                 // Go to the next sibling to see if we have another component.
@@ -65,10 +90,37 @@ namespace mcp
             }
 
             // Go to the next sibling to see if we have another gameObject.
-            objectElement = objectElement.GetSiblingElement(kObjectElementName);
+            element = element.GetSiblingElement(kObjectElementName);
+        }
+    }
+
+    void WorldLayer::LoadSceneDataAsset(const XMLElement sceneDataAsset)
+    {
+        const char* pPath = sceneDataAsset.GetAttribute<const char*>("path");
+        MCP_CHECK_MSG(pPath, "Failed to load SceneDataAsset on the UI Layer! No path was found!");
+
+        XMLParser parser;
+        if (!parser.LoadFile(pPath))
+        {
+            MCP_ERROR("UILayer", "Failed to load SceneDataAsset at path: ", pPath);
+            return;
         }
 
-        return true;
+        XMLElement assetElement = parser.GetElement();
+        while(assetElement.IsValid())
+        {
+            if (HashString32(assetElement.GetName()) == kSceneLayerAssetId)
+            {
+                LoadSceneDataAsset(assetElement);
+            }
+
+            else
+            {
+                LoadObject(assetElement);   
+            }
+
+            assetElement = assetElement.GetSiblingElement();
+        }
     }
 
     bool WorldLayer::OnSceneLoad()

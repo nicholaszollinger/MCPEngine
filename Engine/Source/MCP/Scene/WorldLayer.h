@@ -39,8 +39,10 @@ namespace mcp
         [[nodiscard]] CollisionSystem* GetCollisionSystem() { return &m_collisionSystem;}
 
     private:
+        virtual void LoadSceneDataAsset(const XMLElement sceneDataAsset) override;
+        virtual void DestroyLayer() override;
+        void LoadObject(XMLElement element);
         void SetCollisionSettings(const QuadtreeBehaviorData& data);
         void DeleteQueuedObjects();
-        virtual void DestroyLayer() override;
     };
 }

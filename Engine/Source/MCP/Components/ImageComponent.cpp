@@ -66,13 +66,13 @@ namespace mcp
         // If we are being set to active:
         if (isActive)
         {
-            m_pOwner->GetScene()->AddRenderable(this);
+            m_pOwner->GetWorld()->AddRenderable(this);
         }
 
         // If we are being set to inactive.
         else
         {
-            m_pOwner->GetScene()->RemoveRenderable(this);
+            m_pOwner->GetWorld()->RemoveRenderable(this);
         }
 
         m_isActive = isActive;

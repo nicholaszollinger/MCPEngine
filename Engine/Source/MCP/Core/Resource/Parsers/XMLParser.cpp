@@ -322,7 +322,8 @@ namespace mcp
     //		NOTES:
     //		
     ///		@brief : Get the first element from the root document that matches pElementName, or returns an invalid XMLElement if
-    ///         no element of the given name was found. \n To check to see if the element is valid, use XMLElement.IsValid().
+    ///         no element of the given name was found. If pElementName is nullptr, it will find the first child element.
+    ///         \n To check to see if the element is valid, use XMLElement.IsValid().
     //-----------------------------------------------------------------------------------------------------------------------------
     XMLElement XMLParser::GetElement(const char* pElementName) const
     {

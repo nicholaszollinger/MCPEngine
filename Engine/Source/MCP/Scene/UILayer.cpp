@@ -30,33 +30,66 @@ namespace mcp
         m_widgets.push_back(pWidget);
     }
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Load the UILayer
+    //-----------------------------------------------------------------------------------------------------------------------------
     bool UILayer::LoadLayer(const XMLElement layer)
     {
-        // UI Objects
-        XMLElement rootWidgetElement = layer.GetChildElement("Widget");
-        while (rootWidgetElement.IsValid())
+        XMLElement element = layer.GetChildElement();
+
+        while(element.IsValid())
         {
-            // Create a new widget in the context of this layer.
-                // I need to add layer context somehow.
-            const char* widgetTypename = rootWidgetElement.GetAttribute<const char*>("type");
+            if (HashString32(element.GetName()) == kSceneLayerAssetId)
+            {
+                LoadSceneDataAsset(element);
+            }
 
-            auto* pWidget = WidgetFactory::CreateWidgetFromData(widgetTypename, rootWidgetElement);
-            pWidget->SetUILayer(this);
-            pWidget->Init();
+            else
+            {
+                LoadWidget(element);   
+            }
 
-            // Recursively load each child widget.
-            LoadChildWidget(pWidget, rootWidgetElement);
-
-            // Add the parent widget to the UILayer.
-            AddWidget(pWidget);
-
-            // Get the next root Widget element.
-            rootWidgetElement = rootWidgetElement.GetSiblingElement("Widget");
+            element = element.GetSiblingElement();
         }
 
         return true;
     }
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Load a widget and all of its children from data.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void UILayer::LoadWidget(XMLElement rootElement)
+    {
+        while (rootElement.IsValid())
+        {
+            // Create a new widget in the context of this layer.
+                // I need to add layer context somehow.
+            const char* widgetTypename = rootElement.GetAttribute<const char*>("type");
+
+            auto* pWidget = WidgetFactory::CreateWidgetFromData(widgetTypename, rootElement);
+            pWidget->SetUILayer(this);
+            pWidget->Init();
+
+            // Recursively load each child widget.
+            LoadChildWidget(pWidget, rootElement);
+
+            // Add the parent widget to the UILayer.
+            AddWidget(pWidget);
+
+            // Get the next root Widget element.
+            rootElement = rootElement.GetSiblingElement("Widget");
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Recursively loads the children of a parent Widget.
+    //-----------------------------------------------------------------------------------------------------------------------------
     void UILayer::LoadChildWidget(Widget* pParent, XMLElement parentElement)
     {
         XMLElement childWidgetElement = parentElement.GetChildElement("Widget");
@@ -73,6 +106,35 @@ namespace mcp
 
             // Get the next child.
             childWidgetElement = childWidgetElement.GetSiblingElement("Widget");
+        }
+    }
+
+    void UILayer::LoadSceneDataAsset(const XMLElement sceneDataAsset)
+    {
+        const char* pPath = sceneDataAsset.GetAttribute<const char*>("path");
+        MCP_CHECK_MSG(pPath, "Failed to load SceneDataAsset on the UI Layer! No path was found!");
+
+        XMLParser parser;
+        if (!parser.LoadFile(pPath))
+        {
+            MCP_ERROR("UILayer", "Failed to load SceneDataAsset at path: ", pPath);
+            return;
+        }
+
+        XMLElement assetElement = parser.GetElement();
+        while(assetElement.IsValid())
+        {
+            if (HashString32(assetElement.GetName()) == kSceneLayerAssetId)
+            {
+                LoadSceneDataAsset(assetElement);
+            }
+
+            else
+            {
+                LoadWidget(assetElement);   
+            }
+
+            assetElement = assetElement.GetSiblingElement();
         }
     }
 

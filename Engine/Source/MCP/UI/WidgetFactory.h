@@ -12,7 +12,6 @@ namespace mcp
     class Widget;
     using WidgetTypeId = uint64_t;
 
-
     class WidgetFactory
     {
         using FactoryFunction = std::function<Widget*(XMLElement)>;

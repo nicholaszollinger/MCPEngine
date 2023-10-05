@@ -171,6 +171,6 @@ namespace mcp
         [[nodiscard]] bool HasFileLoaded() const;
         void CloseCurrentFile();
 
-        XMLElement GetElement(const char* pElementName) const;
+        XMLElement GetElement(const char* pElementName = nullptr) const;
     };
 }

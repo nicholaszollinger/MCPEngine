@@ -27,8 +27,10 @@ namespace mcp
         void DeleteWidget(Widget* pWidget);
 
     private:
+        virtual void LoadSceneDataAsset(const XMLElement sceneDataAsset) override;
+        virtual void DestroyLayer() override;
+        void LoadWidget(XMLElement rootElement);
         void LoadChildWidget(Widget* pParent, XMLElement parentElement);
         void DeleteQueuedWidgets();
-        virtual void DestroyLayer() override;
     };
 }

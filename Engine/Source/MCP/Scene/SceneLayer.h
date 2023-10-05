@@ -20,6 +20,8 @@ namespace mcp
     class SceneLayer
     {
     protected:
+        static constexpr uint32_t kSceneLayerAssetId = HashString32("SceneLayerAsset");
+
         UnorderedDenseArray<UpdateableId, IUpdateable*> m_updateables;          // Anything that is updating on this layer.
         UnorderedDenseArray<UpdateableId, IUpdateable*> m_fixedUpdateables;     // Any physics based updateables that need to be updated in a fixed time.
         UnorderedDenseArray<RenderableId, IRenderable*> m_renderables;          // Anything that we need to render on this layer.
@@ -54,6 +56,7 @@ namespace mcp
         void RemovePhysicsUpdateable(const IUpdateable* pUpdateable);
 
     protected:
+        virtual void LoadSceneDataAsset(const XMLElement sceneDataAsset) = 0;
         virtual void DestroyLayer() = 0;
     };
 }
