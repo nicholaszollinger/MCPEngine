@@ -67,6 +67,9 @@
     <Filter Include="MCP\Core\Resource\Parsers">
       <UniqueIdentifier>{895701ad-cbd4-44d6-8812-da2ad44d2edb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MCP\Animation">
+      <UniqueIdentifier>{215529a1-6a32-483a-acc2-095f3b720993}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Platform\SDL2\SDL2Window.h">

@@ -239,11 +239,19 @@ namespace mcp
                 //      NOTE: I am assuming *only* Box2DColliders which are *axis aligned*.
                 for (auto& [name, pCollider] : pColliderComponent->m_colliders)
                 {
+                    // I shouldn't have to do this, I should be able to just grab the active colliders.
+                    if (!pCollider->CollisionIsEnabled())
+                            continue;
+
                     const RectF myEstimateRect = pCollider->GetEstimateRectWorld();
 
                     // For each active collider in pComponent
                     for (auto& [otherName, pOtherCollider] : pComponent->m_colliders)
                     {
+                        // I shouldn't have to do this, I should be able to just grab the active colliders.
+                        if (!pOtherCollider->CollisionIsEnabled())
+                            continue;
+
                         const RectF otherEstimateRect = pOtherCollider->GetEstimateRectWorld();
 
                         // Get the responses for each collider.

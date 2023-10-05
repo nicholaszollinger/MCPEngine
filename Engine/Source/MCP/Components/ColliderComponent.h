@@ -51,10 +51,12 @@ namespace mcp
         // Collider Component Behavior
         void SetIsStatic(const bool isStatic);
         void SetCollisionEnabled(const bool isEnabled);
+        void ColliderCollisionChanged(const Collider::ColliderNameId id);
 
         // Collider access
         template<typename ColliderType> ColliderType* GetCollider(const char* pColliderName);
         void AddCollider(Collider* pCollider);
+        void SetColliderEnabled(const Collider::ColliderNameId id, const bool isEnabled);
         void RemoveCollider(const char* pColliderName);
 
         void SetVelocity(const Vec2& velocity) { m_velocity = velocity; }

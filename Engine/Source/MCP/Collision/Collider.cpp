@@ -30,6 +30,9 @@ namespace mcp
             return;
 
         m_isEnabled = isEnabled;
+
+        // Notify the Owner that we have changed.
+        m_pOwner->ColliderCollisionChanged(m_colliderName);
     }
 
     Vec2 Collider::GetWorldCenter() const
