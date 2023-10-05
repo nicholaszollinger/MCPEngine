@@ -69,6 +69,7 @@
     </Filter>
     <Filter Include="MCP\Scene\Layers">
       <UniqueIdentifier>{6dadaeb4-36cc-4dbd-b0b6-42a9803dd7ea}</UniqueIdentifier>
+    </Filter>
     <Filter Include="MCP\Animation">
       <UniqueIdentifier>{215529a1-6a32-483a-acc2-095f3b720993}</UniqueIdentifier>
     </Filter>
