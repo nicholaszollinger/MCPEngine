@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include "LuaSource.h"
+#include "MCP/Debug/Assert.h"
 
 #include "MCP/Debug/Log.h"
 
@@ -20,7 +21,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void AssertIsLuaType([[maybe_unused]] lua_State* pState, [[maybe_unused]] const int luaType, [[maybe_unused]] const int stackIndex)
     {
-        assert(lua_type(pState, stackIndex) == luaType);
+        MCP_CHECK(lua_type(pState, stackIndex) == luaType);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -47,8 +48,8 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     int LuaLog(lua_State* pState)
     {
-        const char* scriptName = lua_tostring(pState, -1);
-        const char* msg = lua_tostring(pState, -2);
+        [[maybe_unused]] const char* scriptName = lua_tostring(pState, -1);
+        [[maybe_unused]] const char* msg = lua_tostring(pState, -2);
 
         MCP_LOG(scriptName, msg);
 
@@ -69,8 +70,8 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     int LuaLogWarning(lua_State* pState)
     {
-        const char* scriptName = lua_tostring(pState, -1);
-        const char* msg = lua_tostring(pState, -2);
+        [[maybe_unused]] const char* scriptName = lua_tostring(pState, -1);
+        [[maybe_unused]] const char* msg = lua_tostring(pState, -2);
         
         MCP_WARN(scriptName, msg);
 
@@ -91,8 +92,8 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     int LuaLogError(lua_State* pState)
     {
-        const char* scriptName = lua_tostring(pState, -1);
-        const char* msg = lua_tostring(pState, -2);
+        [[maybe_unused]] const char* scriptName = lua_tostring(pState, -1);
+        [[maybe_unused]] const char* msg = lua_tostring(pState, -2);
         
         MCP_ERROR(scriptName, msg);
 

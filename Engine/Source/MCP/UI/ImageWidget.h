@@ -30,11 +30,14 @@ namespace mcp
 
         virtual bool Init() override;
         virtual void Render() const override;
-        virtual void SetActive(const bool isActive) override;
+        void SetTint(const Color tint) { m_tint = tint; }
+
+        [[nodiscard]] Color GetTint() const { return m_tint; }
 
         static ImageWidget* AddFromData(const XMLElement element);
-
+        static void RegisterLuaFunctions(lua_State* pState);
     private:
-        virtual void OnParentActiveChanged(const bool parentActiveState) override;
+        virtual void OnEnable() override;
+        virtual void OnDisable() override;
     };
 }

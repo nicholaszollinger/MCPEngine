@@ -19,7 +19,7 @@ static std::string* GetPrefabPath(const mcp::XMLElement element)
         return nullptr;
     }*/
 
-    const char* pPrefab = element.GetAttribute<const char*>("value");
+    const char* pPrefab = element.GetAttributeValue<const char*>("value");
     prefabPath += pPrefab;
 
     return &prefabPath;
@@ -166,8 +166,8 @@ namespace mcp
 
         bool success = true;
         const XMLElement mapElement = parser.GetElement("map");
-        m_mapWidth = mapElement.GetAttribute<int>("width", success);
-        m_mapHeight = mapElement.GetAttribute<int>("height", success);
+        m_mapWidth = mapElement.GetAttributeValue<int>("width", success);
+        m_mapHeight = mapElement.GetAttributeValue<int>("height", success);
         m_mapSize = static_cast<size_t>(m_mapWidth) * m_mapHeight;
 
         // Do I need this?
@@ -211,8 +211,8 @@ namespace mcp
                 //std::string prefabPath = kPrefabsFolder;
 
                 // Get the position and dimensions of the object.
-                const auto x = objectElement.GetAttribute<float>("x", success);
-                const auto y = objectElement.GetAttribute<float>("y", success);
+                const auto x = objectElement.GetAttributeValue<float>("x", success);
+                const auto y = objectElement.GetAttributeValue<float>("y", success);
                 float width = -1.f;
                 float height = -1.f;
 
@@ -220,8 +220,8 @@ namespace mcp
                 // If we are not a 'point' we need to get the width and height too.
                 if (!isPoint)
                 {
-                    width = objectElement.GetAttribute<float>("width", success);
-                    height = objectElement.GetAttribute<float>("height", success);
+                    width = objectElement.GetAttributeValue<float>("width", success);
+                    height = objectElement.GetAttributeValue<float>("height", success);
                 }
 
                 // Get the prefab that we need to use to construct the object.
@@ -358,7 +358,7 @@ namespace mcp
     bool TiledMapComponent::AddFromData(const XMLElement component, Object* pOwner)
     {
         // Map File Path
-        const char* pMapPath = component.GetAttribute<const char*>("mapPath");
+        const char* pMapPath = component.GetAttributeValue<const char*>("mapPath");
         if (!pMapPath)
         {
             MCP_ERROR("TiledMapComponent","Failed to add TiledMapComponent from Data! Couldn't find mapPath Attribute!");
@@ -366,7 +366,7 @@ namespace mcp
         }
 
         // Tile Set File Path
-        const char* pTileSetPath = component.GetAttribute<const char*>("tileSetPath");
+        const char* pTileSetPath = component.GetAttributeValue<const char*>("tileSetPath");
         if (!pTileSetPath)
         {
             MCP_ERROR("TiledMapComponent","Failed to add TiledMapComponent from Data! Couldn't find tileSetPath Attribute!");
@@ -374,7 +374,7 @@ namespace mcp
         }
 
         // Image File path
-        const char* pTileSetImagePath = component.GetAttribute<const char*>("tileSetImagePath");
+        const char* pTileSetImagePath = component.GetAttributeValue<const char*>("tileSetImagePath");
         if (!pTileSetImagePath)
         {
             MCP_ERROR("TiledMapComponent", "Failed to add TiledMapComponent from Data! Couldn't find tileSetImagePath Attribute!");
@@ -389,7 +389,7 @@ namespace mcp
             return false;
         }
 
-        const float scale = scaleElement.GetAttribute<float>("scale");
+        const float scale = scaleElement.GetAttributeValue<float>("scale");
 
         // Add the Component to the object
         if (!pOwner->AddComponent<TiledMapComponent>(pMapPath, pTileSetPath, pTileSetImagePath, scale))

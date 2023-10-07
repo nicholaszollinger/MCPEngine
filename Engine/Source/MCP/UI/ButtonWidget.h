@@ -2,7 +2,7 @@
 // ButtonWidget.h
 
 #include "Widget.h"
-#include "MCP/Scene/IRenderable.h"
+#include "MCP/Lua/LuaSystem.h"
 
 namespace mcp
 {
@@ -15,46 +15,52 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     class ButtonWidget : public Widget
     {
-        //MCP_DEFINE_WIDGET(ButtonWidget)
+        MCP_DEFINE_WIDGET(ButtonWidget)
     private:
+        LuaResourcePtr m_pOnExecuteScript;  
+        LuaResourcePtr m_pHighlightBehaviorScript;
+        LuaResourcePtr m_pPressReleaseBehaviorScript;
         bool m_isPressed = false;
         bool m_isHovered = false;
 
     public:
-        ButtonWidget(const WidgetConstructionData& data);
-        //static bool AddFromData([[maybe_unused]] const XMLElement element) { return false; }
+        ButtonWidget(const WidgetConstructionData& data, LuaResourcePtr&& onExecuteScript, LuaResourcePtr&& highlightBehaviorScript, LuaResourcePtr&& pressReleaseBehaviorScript);
+        virtual bool PostLoadInit() override;
+
+        static ButtonWidget* AddFromData( const XMLElement element);
 
     protected:
         //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Called when the button is executed.
         //-----------------------------------------------------------------------------------------------------------------------------
-        virtual void OnExecute() {}
+        virtual void OnExecute();
 
         //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Called when the button is released; this happens only if the button was pressed.
         //-----------------------------------------------------------------------------------------------------------------------------
-        virtual void OnRelease() {}
+        virtual void OnRelease();
 
         //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Called when the button is pressed. This is not executing the button! This is for any functionality you want
         ///             to do when a button is pressed.
         //-----------------------------------------------------------------------------------------------------------------------------
-        virtual void OnPress() {}
+        virtual void OnPress();
 
         //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Called when the button has input focus.
         //-----------------------------------------------------------------------------------------------------------------------------
-        virtual void OnHoverEnter() {}
+        virtual void OnHoverEnter();
 
         //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Called when the button leaves input focus.
         //-----------------------------------------------------------------------------------------------------------------------------
-        virtual void OnHoverExit() {}
+        virtual void OnHoverExit();
 
     private:
         virtual void HandleEvent(ApplicationEvent& event) override;
         void HandleMouseButtonPress(MouseButtonEvent& event);
         void HandleMouseMotion(MouseMoveEvent& event);
+        virtual void OnDisable() override;
         // TODO: Handle keyboard and controller input. 
     };
 }

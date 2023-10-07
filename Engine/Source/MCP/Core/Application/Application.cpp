@@ -13,6 +13,7 @@
 #include "MCP/Core/Event/KeyEvent.h"
 #include "MCP/Graphics/Graphics.h"
 #include "MCP/Lua/Lua.h"
+#include "LuaSource.h"
 #include "MCP/Scene/SceneManager.h"
 #include "MCP/Core/Resource/ResourceManager.h"
 #include "Utility/Time/FrameTimer.h"
@@ -82,11 +83,11 @@ namespace mcp
         GlobalManagerFactory::Create<ResourceManager>();
         GlobalManagerFactory::Create<SceneManager>();
         
+        m_processes.emplace_back(lua::LuaLayer::Get());
         m_processes.emplace_back(GraphicsManager::Get());
         m_processes.emplace_back(AudioManager::Get());
         m_processes.emplace_back(ResourceManager::Get());
         m_processes.emplace_back(SceneManager::Get());
-        m_processes.emplace_back(lua::LuaLayer::Get());
 
         // Initialize each process.
         for (auto* pProcess : m_processes)
@@ -180,11 +181,11 @@ namespace mcp
         GlobalManagerFactory::Create<ResourceManager>();
         GlobalManagerFactory::Create<SceneManager>();
         
+        m_processes.emplace_back(lua::LuaLayer::Get());
         m_processes.emplace_back(GraphicsManager::Get());
         m_processes.emplace_back(AudioManager::Get());
         m_processes.emplace_back(ResourceManager::Get());
         m_processes.emplace_back(SceneManager::Get());
-        m_processes.emplace_back(lua::LuaLayer::Get());
 
         // Initialize each process.
         for (auto* pProcess : m_processes)
@@ -356,7 +357,7 @@ namespace mcp
             return false;
         }
 
-        const char* pDefaultSceneFilepath = defaultScene.GetAttribute<const char*>("sceneDataPath");
+        const char* pDefaultSceneFilepath = defaultScene.GetAttributeValue<const char*>("sceneDataPath");
         if (!pDefaultSceneFilepath)
         {
             MCP_ERROR("Application", "Failed to load game data! Couldn't find Default Scene Path attribute!");
@@ -415,5 +416,17 @@ namespace mcp
 #endif
 
         BLEACH_DUMP_AND_DESTROY_LEAK_DETECTOR();
+    }
+
+    static int QuitGame([[maybe_unused]] lua_State* pState)
+    {
+        Application::Get()->Quit();
+        return 0;
+    }
+
+    void Application::RegisterLuaFunctions(lua_State* pState)
+    {
+        lua_pushcfunction(pState, &QuitGame);
+        lua_setglobal(pState, "QuitGame");
     }
 }

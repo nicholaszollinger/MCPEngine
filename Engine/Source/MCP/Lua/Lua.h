@@ -7,6 +7,8 @@ namespace mcp::lua
 {
     // Load Lua Scripts
     bool LoadScript(const char* pFilepath);
+    LuaResourcePtr LoadScriptInstance(const char* pScriptFilepath);
+    LuaResourcePtr LoadScriptInstance(const char* pScriptFilepath, const char* pScriptDataPath);
 
     // Get Global Variables
     std::optional<bool> GetBoolean(const char* varName);
@@ -31,6 +33,9 @@ namespace mcp::lua
     // Calling Functions
     template<typename...Args>
     void CallFunction(const char* pFunctionName, Args&&...args);
+
+    template<typename...Args>
+    void CallMemberFunction(const LuaResourcePtr resource, const char* pMemberFunctionName, Args&&...args);
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -133,5 +138,20 @@ namespace mcp::lua
     void CallFunction(const char* pFunctionName, Args&&...args)
     {
         LuaLayer::Get()->GetSystem().CallFunction(pFunctionName, args...);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Call a member function of a loaded lua Object.
+    ///		@tparam Args : Parameter types required for the function.
+    ///		@param resource : Pointer to the resource that we are using.
+    ///		@param pMemberFunctionName : Name of the member function
+    ///		@param args : Parameter value passed into the function.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template <typename... Args>
+    void CallMemberFunction(const LuaResourcePtr resource, const char* pMemberFunctionName, Args&&... args)
+    {
+        LuaLayer::Get()->GetSystem().CallMemberFunction(resource, pMemberFunctionName, args...);
     }
 }

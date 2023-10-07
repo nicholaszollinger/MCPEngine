@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+struct lua_State;
 namespace mcp
 {
     class KeyEvent;
@@ -50,10 +51,12 @@ namespace mcp
         void Run();
         void Quit();
 
+        static void RegisterLuaFunctions(lua_State* pState); 
     private:
         bool LoadApplicationProperties(ApplicationProperties& outProps, const char* pFilepath);
         bool LoadGameData(const char* pGameDataFilepath);
         void Close() const;
+
     };
 
 

@@ -47,8 +47,8 @@ namespace mcp
     
     bool TransformComponent::AddFromData(const XMLElement component, Object* pOwner)
     {
-        const auto x = component.GetAttribute<float>("x");
-        const auto y = component.GetAttribute<float>("y");
+        const auto x = component.GetAttributeValue<float>("x");
+        const auto y = component.GetAttributeValue<float>("y");
 
         if (!pOwner->AddComponent<TransformComponent>(x, y))
         {

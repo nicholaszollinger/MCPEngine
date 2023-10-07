@@ -73,6 +73,9 @@
     <Filter Include="MCP\Animation">
       <UniqueIdentifier>{215529a1-6a32-483a-acc2-095f3b720993}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MCP\Core\Resource\Parsers\XML">
+      <UniqueIdentifier>{e9d447cf-eb7f-4f33-ab4a-becedb95ed4e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Platform\SDL2\SDL2Window.h">
@@ -309,6 +312,12 @@
     <ClInclude Include="Source\MCP\UI\TextWidget.h">
       <Filter>MCP\UI</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Resource\Parsers\XML\XMLAttribute.h">
+      <Filter>MCP\Core\Resource\Parsers\XML</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Lua\LuaResource.h">
+      <Filter>MCP\Lua</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
@@ -487,6 +496,12 @@
     </ClCompile>
     <ClCompile Include="Source\MCP\UI\TextWidget.cpp">
       <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Resource\Parsers\XML\XMLAttribute.cpp">
+      <Filter>MCP\Core\Resource\Parsers\XML</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Lua\LuaResource.cpp">
+      <Filter>MCP\Lua</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

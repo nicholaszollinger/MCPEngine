@@ -34,6 +34,31 @@ namespace mcp::lua
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
+    //		
+    ///		@brief : Load a lua script and return a pointer to the resource.
+    ///		@param pScriptFilepath : Path to the script on disk.
+    ///		@returns : LuaResourcePtr to the loaded script. If an error occurred when loading, the ptr will be invalid. 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    LuaResourcePtr LoadScriptInstance(const char* pScriptFilepath)
+    {
+        return LuaLayer::Get()->GetSystem().LoadScriptInstance(pScriptFilepath);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Load a lua script and return a pointer to the resource.
+    ///		@param pScriptFilepath : Path to the script
+    ///		@param pScriptDataPath : Path to a lua file that returns the data needed for that script.
+    ///		@returns : LuaResourcePtr to the loaded script. If an error occurred when loading, the ptr will be invalid. 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    LuaResourcePtr LoadScriptInstance(const char* pScriptFilepath, const char* pScriptDataPath)
+    {
+        return LuaLayer::Get()->GetSystem().LoadScriptInstance(pScriptFilepath, pScriptDataPath);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
     //      Consider making this a std::nullopt type to handle cases where we couldn't find the global.
     //		
     ///		@brief : Get a global boolean value among loaded lua scripts.

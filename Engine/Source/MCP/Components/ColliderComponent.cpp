@@ -189,9 +189,9 @@ namespace mcp
     //		
     ///		@brief : If the Collider's data has changed like its size or enabled status, this will update the estimation rect. 
     //-----------------------------------------------------------------------------------------------------------------------------
-    void ColliderComponent::ColliderCollisionChanged(const Collider::ColliderNameId id)
+    void ColliderComponent::ColliderCollisionChanged([[maybe_unused]] const Collider::ColliderNameId id)
     {
-        // If we don't have a collider with that id or the state is not changing, return.
+        // Assert that we have the collider id.
         MCP_CHECK(m_colliders.find(id)->second);
 
         UpdateEstimationRect();
@@ -334,10 +334,10 @@ namespace mcp
     bool ColliderComponent::AddFromData(const XMLElement component, Object* pOwner)
     {
         // CollisionEnabled
-        bool isEnabled = component.GetAttribute<bool>("collisionEnabled", true);
+        bool isEnabled = component.GetAttributeValue<bool>("collisionEnabled", true);
 
         // IsStatic
-        bool isStatic = component.GetAttribute<bool>("isStatic");
+        bool isStatic = component.GetAttributeValue<bool>("isStatic");
 
         auto* pNewComponent = pOwner->AddComponent<ColliderComponent>(isEnabled, isStatic);
         // Add the component to the Object

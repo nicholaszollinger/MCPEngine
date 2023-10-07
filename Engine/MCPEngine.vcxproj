@@ -168,6 +168,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Core\Resource\Font.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\PackageManager.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\Parsers\XMLParser.cpp" />
+    <ClCompile Include="Source\MCP\Core\Resource\Parsers\XML\XMLAttribute.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\ResourceManager.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\TextFile.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\Zip.cpp" />
@@ -176,6 +177,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Input\Input.cpp" />
     <ClCompile Include="Source\MCP\Lua\Lua.cpp" />
     <ClCompile Include="Source\MCP\Lua\LuaDebug.cpp" />
+    <ClCompile Include="Source\MCP\Lua\LuaResource.cpp" />
     <ClCompile Include="Source\MCP\Lua\LuaSystem.cpp" />
     <ClCompile Include="Source\MCP\Scene\IRenderable.cpp" />
     <ClCompile Include="Source\MCP\Scene\IUpdateable.cpp" />
@@ -243,6 +245,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Core\Resource\PackageManager.h" />
     <ClInclude Include="Source\MCP\Core\Resource\Parser.h" />
     <ClInclude Include="Source\MCP\Core\Resource\Parsers\XMLParser.h" />
+    <ClInclude Include="Source\MCP\Core\Resource\Parsers\XML\XMLAttribute.h" />
     <ClInclude Include="Source\MCP\Core\Resource\Resource.h" />
     <ClInclude Include="Source\MCP\Core\Resource\ResourceManager.h" />
     <ClInclude Include="Source\MCP\Core\Resource\TextFile.h" />
@@ -256,6 +259,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Input\InputCodes.h" />
     <ClInclude Include="Source\MCP\Lua\Lua.h" />
     <ClInclude Include="Source\MCP\Lua\LuaDebug.h" />
+    <ClInclude Include="Source\MCP\Lua\LuaResource.h" />
     <ClInclude Include="Source\MCP\Lua\LuaSystem.h" />
     <ClInclude Include="Source\MCP\Scene\Entity.h" />
     <ClInclude Include="Source\MCP\Scene\IRenderable.h" />

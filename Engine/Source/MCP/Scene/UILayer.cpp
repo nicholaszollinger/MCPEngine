@@ -57,6 +57,24 @@ namespace mcp
         return true;
     }
 
+    bool UILayer::OnSceneLoad()
+    {
+        for (auto* pWidget : m_widgets)
+        {
+            // Initialize all of our children,
+            pWidget->ForAllChildren([](Widget* pWidget)
+            {
+                pWidget->PostLoadInit();
+            });
+
+            // Initialize the parent.
+            pWidget->PostLoadInit();
+        }
+
+        return true;
+    }
+
+
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
@@ -68,7 +86,7 @@ namespace mcp
         {
             // Create a new widget in the context of this layer.
                 // I need to add layer context somehow.
-            const char* widgetTypename = rootElement.GetAttribute<const char*>("type");
+            const char* widgetTypename = rootElement.GetAttributeValue<const char*>("type");
 
             auto* pWidget = WidgetFactory::CreateWidgetFromData(widgetTypename, rootElement);
             pWidget->SetUILayer(this);
@@ -95,12 +113,12 @@ namespace mcp
         XMLElement childWidgetElement = parentElement.GetChildElement("Widget");
         while(childWidgetElement.IsValid())
         {
-            const char* widgetTypename = childWidgetElement.GetAttribute<const char*>("type");
+            const char* widgetTypename = childWidgetElement.GetAttributeValue<const char*>("type");
 
             Widget* pChild = WidgetFactory::CreateWidgetFromData(widgetTypename, childWidgetElement);
-            pChild->SetParent(pParent);
             pChild->SetUILayer(this);
             pChild->Init();
+            pChild->SetParent(pParent);
             // Recursively get the Children of this child.
             LoadChildWidget(pChild, childWidgetElement);
 
@@ -111,7 +129,7 @@ namespace mcp
 
     void UILayer::LoadSceneDataAsset(const XMLElement sceneDataAsset)
     {
-        const char* pPath = sceneDataAsset.GetAttribute<const char*>("path");
+        const char* pPath = sceneDataAsset.GetAttributeValue<const char*>("path");
         MCP_CHECK_MSG(pPath, "Failed to load SceneDataAsset on the UI Layer! No path was found!");
 
         XMLParser parser;
@@ -208,6 +226,14 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void UILayer::FocusWidget(Widget* pWidget)
     {
+        // If we are trying to set an inactive widget as focused, return.
+        if (pWidget && !pWidget->IsActive())
+        {
+            MCP_WARN("UILayer", "Failed to focus Widget. Tried to set an inactive widget as focused. Make sure to set it to active before focusing.");
+            return;
+        }
+
+        //MCP_LOG("UILayer", "Setting FocusedWidget: ", *pWidget->GetTag());
         m_pFocusedWidget = pWidget;
     }
 

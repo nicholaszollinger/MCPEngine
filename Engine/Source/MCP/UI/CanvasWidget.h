@@ -13,5 +13,7 @@ namespace mcp
     public:
         CanvasWidget(const WidgetConstructionData& data);
         static CanvasWidget* AddFromData(const XMLElement element);
+
+        static void RegisterLuaFunctions(lua_State* pState);
     };
 }

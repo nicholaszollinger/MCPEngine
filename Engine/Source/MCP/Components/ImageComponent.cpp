@@ -123,7 +123,7 @@ namespace mcp
     bool ImageComponent::AddFromData(const XMLElement component, Object* pOwner)
     {
         // File Path
-        const char* pTextureFilePath = component.GetAttribute<const char*>("imagePath");
+        const char* pTextureFilePath = component.GetAttributeValue<const char*>("imagePath");
 
         if (!pTextureFilePath)
         {
@@ -140,10 +140,10 @@ namespace mcp
             return false;
         }
         
-        crop.x = cropElement.GetAttribute<int>("x");
-        crop.y = cropElement.GetAttribute<int>("y");
-        crop.width = cropElement.GetAttribute<int>("w");
-        crop.height = cropElement.GetAttribute<int>("h");
+        crop.x = cropElement.GetAttributeValue<int>("x");
+        crop.y = cropElement.GetAttributeValue<int>("y");
+        crop.width = cropElement.GetAttributeValue<int>("w");
+        crop.height = cropElement.GetAttributeValue<int>("h");
 
         // Size
         Vec2 size;
@@ -154,24 +154,24 @@ namespace mcp
             return false;
         }
 
-        size.x = sizeElement.GetAttribute<float>("x");
-        size.y = sizeElement.GetAttribute<float>("y");
+        size.x = sizeElement.GetAttributeValue<float>("x");
+        size.y = sizeElement.GetAttributeValue<float>("y");
 
         Color color = Color::White();
         const XMLElement tintElement = cropElement.GetSiblingElement("Color");
         if (tintElement.IsValid())
         {
-            color.r = tintElement.GetAttribute<uint8_t>("r");
-            color.g = tintElement.GetAttribute<uint8_t>("g");
-            color.b = tintElement.GetAttribute<uint8_t>("b");
-            color.alpha = tintElement.GetAttribute<uint8_t>("alpha");
+            color.r = tintElement.GetAttributeValue<uint8_t>("r");
+            color.g = tintElement.GetAttributeValue<uint8_t>("g");
+            color.b = tintElement.GetAttributeValue<uint8_t>("b");
+            color.alpha = tintElement.GetAttributeValue<uint8_t>("alpha");
         }
 
         // IRenderable Data.
         const XMLElement renderableElement = cropElement.GetSiblingElement("Renderable");
         
-        const auto layer =static_cast<RenderLayer>(renderableElement.GetAttribute<int>("layer"));
-        const int zOrder = renderableElement.GetAttribute<int>("zOrder");
+        const auto layer =static_cast<RenderLayer>(renderableElement.GetAttributeValue<int>("layer"));
+        const int zOrder = renderableElement.GetAttributeValue<int>("zOrder");
 
         // Add the component to the Object
         if (!pOwner->AddComponent<ImageComponent>(pTextureFilePath, crop, size, color, layer, zOrder))

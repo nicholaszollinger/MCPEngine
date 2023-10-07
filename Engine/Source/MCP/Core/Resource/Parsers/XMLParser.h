@@ -3,11 +3,11 @@
 
 #include <type_traits>
 #include "../Resource.h"
-#include "MCP/Debug/Assert.h"
-#include "MCP/Debug/Log.h"
+#include "XML/XMLAttribute.h"
 
 namespace mcp
 {
+    // TODO: Move this to its own file.
     class XMLElement
     {
         void* m_pHandle = nullptr;
@@ -23,7 +23,10 @@ namespace mcp
         template<typename AttributeType> void SetAttribute(const char* pAttributeName, const AttributeType val);
 
         // Get Element Data
-        template<typename AttributeType> AttributeType GetAttribute(const char* pAttributeName, const AttributeType defaultVal = {}) const;
+        template<typename AttributeType> AttributeType GetAttributeValue(const char* pAttributeName, const AttributeType defaultVal = {}) const;
+        XMLAttribute GetFirstAttribute() const;
+        XMLAttribute GetAttribute(const char* pAttributeName) const;
+
         [[nodiscard]] const char* GetText() const;
         [[nodiscard]] const char* GetName() const;
         [[nodiscard]] bool IsValid() const;
@@ -45,7 +48,6 @@ namespace mcp
 
 #pragma warning (push)
 #pragma warning (disable : 4702)
-
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
@@ -106,7 +108,7 @@ namespace mcp
     ///		@returns : Value of the attribute, or the default value in the event of an error.
     //-----------------------------------------------------------------------------------------------------------------------------
     template <typename AttributeType>
-    AttributeType XMLElement::GetAttribute(const char* pAttributeName, const AttributeType defaultVal) const
+    AttributeType XMLElement::GetAttributeValue(const char* pAttributeName, const AttributeType defaultVal) const
     {
         static_assert(std::is_arithmetic_v<AttributeType> 
             || std::is_same_v<AttributeType, bool> 

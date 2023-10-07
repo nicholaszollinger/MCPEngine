@@ -87,34 +87,34 @@ namespace mcp
     bool TextComponent::AddFromData(const XMLElement element, Object* pObject)
     {
         TextComponentData data;
-        const char* pText = element.GetAttribute<const char*>("text");
-        data.width = element.GetAttribute<int>("width");
-        data.height = element.GetAttribute<int>("height");
+        const char* pText = element.GetAttributeValue<const char*>("text");
+        data.width = element.GetAttributeValue<int>("width");
+        data.height = element.GetAttributeValue<int>("height");
 
         XMLElement child = element.GetChildElement("Font");
         MCP_CHECK(child.IsValid());
 
-        data.pFontFilepath = child.GetAttribute<const char*>("path");
-        data.fontSize = child.GetAttribute<int>("size");
+        data.pFontFilepath = child.GetAttributeValue<const char*>("path");
+        data.fontSize = child.GetAttributeValue<int>("size");
 
         child = child.GetSiblingElement("ForegroundColor");
         MCP_CHECK(child.IsValid());
-        data.foreground.r = child.GetAttribute<uint8_t>("r");
-        data.foreground.g = child.GetAttribute<uint8_t>("g");
-        data.foreground.b = child.GetAttribute<uint8_t>("b");
-        data.foreground.alpha = child.GetAttribute<uint8_t>("alpha");
+        data.foreground.r = child.GetAttributeValue<uint8_t>("r");
+        data.foreground.g = child.GetAttributeValue<uint8_t>("g");
+        data.foreground.b = child.GetAttributeValue<uint8_t>("b");
+        data.foreground.alpha = child.GetAttributeValue<uint8_t>("alpha");
 
         child = child.GetSiblingElement("BackgroundColor");
         MCP_CHECK(child.IsValid());
-        data.background.r = child.GetAttribute<uint8_t>("r");
-        data.background.g = child.GetAttribute<uint8_t>("g");
-        data.background.b = child.GetAttribute<uint8_t>("b");
-        data.background.alpha = child.GetAttribute<uint8_t>("alpha");
+        data.background.r = child.GetAttributeValue<uint8_t>("r");
+        data.background.g = child.GetAttributeValue<uint8_t>("g");
+        data.background.b = child.GetAttributeValue<uint8_t>("b");
+        data.background.alpha = child.GetAttributeValue<uint8_t>("alpha");
 
         child = child.GetSiblingElement("Renderable");
         MCP_CHECK(child.IsValid());
-        const auto layer = static_cast<RenderLayer>(child.GetAttribute<int>("layer"));
-        const int zOrder = child.GetAttribute<int>("zOrder");
+        const auto layer = static_cast<RenderLayer>(child.GetAttributeValue<int>("layer"));
+        const int zOrder = child.GetAttributeValue<int>("zOrder");
 
         if (!pObject->AddComponent<TextComponent>(pText, data, layer, zOrder))
         {

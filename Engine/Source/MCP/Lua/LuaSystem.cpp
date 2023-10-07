@@ -2,8 +2,12 @@
 
 #include "LuaSystem.h"
 #include "LuaSource.h"
+#include "MCP/Core/Application/Application.h"
 
 #include "MCP/Lua/LuaDebug.h"
+#include "MCP/UI/CanvasWidget.h"
+#include "MCP/UI/ImageWidget.h"
+#include "MCP/UI/Widget.h"
 
 namespace mcp
 {
@@ -22,7 +26,11 @@ namespace mcp
         // Register Debug functions.
         RegisterDebugFunctions(m_pState);
 
-        // TODO potentially: Open any necessary/default/general/utility LuaScript files.
+        // Register each of the types' lua capabilities to the state.
+        Application::RegisterLuaFunctions(m_pState);
+        Widget::RegisterLuaFunctions(m_pState);
+        ImageWidget::RegisterLuaFunctions(m_pState);
+        CanvasWidget::RegisterLuaFunctions(m_pState);
 
         return true;
     }
@@ -62,7 +70,80 @@ namespace mcp
             return false;
         }
 
+
         return true;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //      In the future, I may want to setup a table registry over using the default one.
+    //		
+    ///		@brief : Load a lua script and return a reference to the object.
+    ///		@param pFilepath : File path to the script.
+    ///		@returns : A integer value that serves as our reference key. If we failed to get the instance, it returns LuaSystem::kInvalidRef.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    LuaResourcePtr LuaSystem::LoadScriptInstance(const char* pFilepath) const
+    {
+        if (luaL_dofile(m_pState, pFilepath) != 0)
+        {
+            MCP_ERROR("Lua", "Failed to load Lua Script! Filepath: ", pFilepath);
+            return LuaResourcePtr();
+        }
+
+        const auto result = luaL_ref(m_pState, LUA_REGISTRYINDEX);
+        if (result == LUA_REFNIL)
+        {
+            MCP_ERROR("Lua", "Failed to get reference to Loaded Script Instance! Are you returning the instance at the end of the script So that we can get a reference to it?");
+            return LuaResourcePtr();
+        }
+
+        return LuaResourcePtr(m_pState, result);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Loads a lua script as well as a construction data file, and calls "SetData" on the script passing in the
+    ///         table of data taken from the construction data file.
+    ///		@param pFilepath : Filepath to the Script resource.
+    ///		@param pConstructionDataFilepath : Filepath to the Construction data resource.
+    ///		@returns : Resource id associated with the script instance.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    LuaResourcePtr LuaSystem::LoadScriptInstance(const char* pFilepath, const char* pConstructionDataFilepath) const
+    {
+        LuaResourcePtr script = LoadScriptInstance(pFilepath);
+        if (!script.IsValid())
+        {
+            return script;
+        }
+
+        // If we have some construction data, we need to load that.
+        if (pConstructionDataFilepath)
+        {
+            LuaResourcePtr constructionData = LoadScriptInstance(pConstructionDataFilepath);
+            if (!constructionData.IsValid())
+            {
+                MCP_ERROR("Lua", "Failed to load construction data for Script! ConstructionData path: ", pConstructionDataFilepath);
+                return script;
+            }
+
+            // Set the data for the construction script.
+            CallMemberFunction(script, "SetData", constructionData);
+
+            // Here the constructionData resource is cleaned up automatically.
+        }
+
+        return script;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Frees the Object reference in memory.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void LuaSystem::FreeScriptInstance(const LuaResourceId ref) const
+    {
+        luaL_unref(m_pState, LUA_REGISTRYINDEX, ref);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -158,7 +239,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Returns the top element of the stack as a boolean value.
+    ///		@brief : Returns the top element of the stack as an integer value.
     //-----------------------------------------------------------------------------------------------------------------------------
     int64_t LuaSystem::GetInteger() const
     {
@@ -426,6 +507,36 @@ namespace mcp
     {
         lua_pushboolean(m_pState, val);
     }
+
+    void LuaSystem::PushUserData(void* val) const
+    {
+        lua_pushlightuserdata(m_pState, val);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Push a lua resource onto the stack.
+    ///		@returns : False if the resource id did not return a table.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool LuaSystem::PushResource(const LuaResourcePtr resource) const
+    {
+        MCP_CHECK(resource.IsValid());
+
+        [[maybe_unused]] const int type = lua_rawgeti(m_pState, LUA_REGISTRYINDEX, resource.GetId());
+
+//#if _DEBUG // Do I always want to check this?
+        if (type != LUA_TTABLE)
+        {
+            MCP_ERROR("Lua", "Failed to get Lua Object from ref! Did not return a table.");
+            PopStack(1);
+            return false;
+        }
+//#endif
+        return true;
+    }
+
+
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:

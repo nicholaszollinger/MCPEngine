@@ -2,26 +2,34 @@
 
 #include "Widget.h"
 
+#include "LuaSource.h"
 #include "MCP/Core/Event/ApplicationEvent.h"
 #include "MCP/Debug/Assert.h"
 #include "MCP/Debug/Log.h"
 #include "MCP/Graphics/Graphics.h"
+#include "MCP/Lua/Lua.h"
 #include "MCP/Scene/Scene.h"
 
 namespace mcp
 {
     Widget::Widget(const WidgetConstructionData& data)
         : m_pUILayer(nullptr)
+        , m_tag(data.tag)
         , m_pParent(nullptr)
+        , m_enableBehaviorScript(data.enableBehaviorScript)
         , m_offset(data.rect.GetPosition())
         , m_anchor(data.anchor)
         , m_width(data.rect.width)
         , m_height(data.rect.height)
         , m_zOffset(0)
         , m_isInteractable(data.isInteractable)
-        , m_isActive(true)
+        , m_isActive(data.startEnabled)
     {
         SetZOffset(data.zOffset);
+
+        // HACK. I need to have an early step dedicated to initializing the 'this' pointer in Script behavior.
+        if (m_enableBehaviorScript.IsValid())
+            lua::CallMemberFunction(m_enableBehaviorScript, "Init", this);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -53,6 +61,7 @@ namespace mcp
     {
         m_children.push_back(pChild);
         pChild->m_pParent = this;
+        pChild->OnParentActiveChanged(IsActive());
     }
 
     void Widget::RemoveChild(Widget* pChild)
@@ -70,7 +79,6 @@ namespace mcp
         MCP_WARN("Widget", "Tried to remove a child that doesn't not exist on the parent!");
     }
 
-
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
@@ -80,14 +88,14 @@ namespace mcp
     void Widget::DestroyWidget()
     {
         // If we are the root, we do nothing.
-        if (!m_pParent)
-            return;
-
-        // Set each child's parent to be this Widget's parent, and add the child to that parent's children.
-        for (auto* pChild : m_children)
+        if (m_pParent)
         {
-            pChild->SetParent(m_pParent);
-            m_pParent->AddChild(pChild);
+            // Set each child's parent to be this Widget's parent, and add the child to that parent's children.
+            for (auto* pChild : m_children)
+            {
+                pChild->SetParent(m_pParent);
+                m_pParent->AddChild(pChild);
+            }
         }
 
         // Now that we are outside of the tree, queue this Widget for deletion.
@@ -111,6 +119,21 @@ namespace mcp
         // Now that all of the children have been queued for deletion,
         // Queue ourselves for deletion.
         m_pUILayer->DeleteWidget(this);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Recursively perform a task that takes in a Widget* on every child of this Widget.
+    ///		@param task : Function to perform.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::ForAllChildren(const std::function<void(Widget* pWidget)>& task) const
+    {
+        for (auto* pChild : m_children)
+        {
+            pChild->ForAllChildren(task);
+            task(pChild);
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -257,11 +280,57 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Widget::SetActive(const bool isActive)
     {
+        if (isActive == m_isActive)
+            return;
+
         m_isActive = isActive;
+        if (m_isActive)
+        {
+            OnEnable();
+            if (m_enableBehaviorScript.IsValid())
+                lua::CallMemberFunction(m_enableBehaviorScript, "OnEnable");
+        }
+
+        else
+        {
+            OnDisable();
+            if (m_enableBehaviorScript.IsValid())
+                lua::CallMemberFunction(m_enableBehaviorScript, "OnDisable");
+        }
 
         for (auto* pChild : m_children)
         {
             pChild->OnParentActiveChanged(m_isActive);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Respond to our parent widget's active state changing, and let all of our children know as well recursively.
+    ///		@param parentActiveState : New state of the parent.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::OnParentActiveChanged(const bool parentActiveState)
+    {
+        // If we are supposed to be active,
+        if (m_isActive)
+        {
+            if (parentActiveState)
+            {
+                OnEnable();
+                if (m_enableBehaviorScript.IsValid())
+                    lua::CallMemberFunction(m_enableBehaviorScript, "OnEnable");
+            }
+
+            else
+            {
+                OnDisable();
+                if (m_enableBehaviorScript.IsValid())
+                    lua::CallMemberFunction(m_enableBehaviorScript, "OnDisable");
+            }
+        }
+
+        for (auto* pChild : m_children)
+        {
+            pChild->OnParentActiveChanged(parentActiveState);
         }
     }
 
@@ -276,5 +345,106 @@ namespace mcp
             return false;
 
         return m_isActive;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Gets the basic construction data from a widget element-The dimensions, anchor, tag, etc.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    WidgetConstructionData Widget::GetWidgetConstructionData(const XMLElement widgetElement)
+    {
+        // Get the Widget information:
+        WidgetConstructionData data;
+        data.isInteractable = widgetElement.GetAttributeValue<bool>("isInteractable", false);
+        data.zOffset = widgetElement.GetAttributeValue<int>("zOffset", 1);
+        data.startEnabled = widgetElement.GetAttributeValue<bool>("startEnabled", true);
+
+        // Tag. Optional element.
+        const char* pTag = widgetElement.GetAttributeValue<const char*>("tag", nullptr);
+        if (pTag)
+                data.tag = StringId(pTag);
+
+        // Rect. This must be present for Widgets to work properly.
+        auto childElement = widgetElement.GetChildElement("Rect");
+        MCP_CHECK_MSG(childElement.IsValid(), "Failed to load WidgetConstructionData! No 'Rect' element was found!");
+
+        data.rect.x = childElement.GetAttributeValue<float>("x");
+        data.rect.y = childElement.GetAttributeValue<float>("y");
+        data.rect.width = childElement.GetAttributeValue<float>("width");
+        data.rect.height = childElement.GetAttributeValue<float>("height");
+        data.anchor.x = childElement.GetAttributeValue<float>("anchorX", 0.5f);
+        data.anchor.y = childElement.GetAttributeValue<float>("anchorY", 0.5f);
+
+        // Optional Enable Behavior Script
+        childElement = widgetElement.GetChildElement("EnableBehavior");
+        if (childElement.IsValid())
+        {
+            const char* pScriptPath = childElement.GetAttributeValue<const char*>("scriptPath");
+            const char* pScriptDataPath = childElement.GetAttributeValue<const char*>("scriptData");
+            data.enableBehaviorScript = lua::LoadScriptInstance(pScriptPath, pScriptDataPath);
+        }
+        
+        return data;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Sets the given widget active or not.
+    ///
+    ///     \n LUA PARAMS: Widget* pWidget, const bool isActive
+    ///     \n RETURNS: VOID
+    //-----------------------------------------------------------------------------------------------------------------------------
+    static int SetWidgetActive(lua_State* pState)
+    {
+
+        // Get the Widget and bool parameters off the stack.
+        auto* pWidget = static_cast<Widget*>(lua_touserdata(pState, -2));
+        MCP_CHECK(pWidget);
+        const bool isActive = lua_toboolean(pState, -1);
+
+        // Pop the two parameters
+        lua_pop(pState, 2);
+
+        //MCP_LOG("Lua", "Setting ", *pWidget->GetTag(), " to ", isActive);
+        // Set the active state of the Widget.
+        pWidget->SetActive(isActive);
+
+        return 0;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Sets the given widget as the focused Widget in the Scene.
+    ///
+    ///     \n LUA PARAMS: Widget* pWidget
+    ///     \n RETURNS: VOID
+    //-----------------------------------------------------------------------------------------------------------------------------
+    static int FocusWidget(lua_State* pState)
+    {
+        //MCP_LOG("Lua", "Calling FocusWidget() from lua...");
+
+        // Get the Widget and bool parameters off the stack.
+        auto* pWidget = static_cast<Widget*>(lua_touserdata(pState, -1));
+        MCP_CHECK(pWidget);
+
+        // Pop the param
+        lua_pop(pState, 1);
+
+        // Focus this widget.
+        pWidget->Focus();
+
+        return 0;
+    }
+
+    void Widget::RegisterLuaFunctions(lua_State* pState)
+    {
+        lua_pushcfunction(pState, &SetWidgetActive);
+        lua_setglobal(pState, "SetWidgetActive");
+
+        lua_pushcfunction(pState, &FocusWidget);
+        lua_setglobal(pState, "FocusWidget");
     }
 }

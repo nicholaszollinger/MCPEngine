@@ -38,7 +38,6 @@ namespace mcp
 
         virtual bool Init() override;
         virtual void Render() const override;
-        virtual void SetActive(const bool isActive) override;
 
         void SetText(const char* pText);
         void SetFont(const Font& font);
@@ -48,6 +47,7 @@ namespace mcp
     private:
         void FreeTexture();
         void RegenerateTextTexture();
-        virtual void OnParentActiveChanged(const bool parentActiveState) override;
+        void OnEnable() override;
+        void OnDisable() override;
     };
 }

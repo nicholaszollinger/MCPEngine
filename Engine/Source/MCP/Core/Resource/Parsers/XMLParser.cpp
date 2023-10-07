@@ -94,12 +94,37 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
+    ///		@brief : Get the first attribute of this Element. Use this function if you don't know the type of element beforehand.
+    ///		@returns : XMLAttribute class, which could be valid or not.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    XMLAttribute XMLElement::GetFirstAttribute() const
+    {
+        MCP_CHECK_MSG(IsValid(), "Failed to get XMLElement name! XMLElement not connected to valid file!");
+        return XMLAttribute(CAST_TO_CONST_ELEMENT_TYPE(m_pHandle)->FirstAttribute());
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Find an XMLAttribute that matches the name 'pAttributeName'. Note: this can result in an invalid XMLAttribute,
+    ///         so be sure to check if it IsValid() before using the result!
+    //-----------------------------------------------------------------------------------------------------------------------------
+    XMLAttribute XMLElement::GetAttribute(const char* pAttributeName) const
+    {
+        MCP_CHECK_MSG(IsValid(), "Failed to get XMLElement name! XMLElement not connected to valid file!");
+        return XMLAttribute(CAST_TO_CONST_ELEMENT_TYPE(m_pHandle)->FindAttribute(pAttributeName));
+    }
+    
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
     ///		@brief : Try to get a boolean attribute named pAttributeName from the element. If the attribute is not found, it will return
     ///             the default value with NO message. If the attribute cannot be converted to the type, it will post an error.
     //-----------------------------------------------------------------------------------------------------------------------------
     bool XMLElement::GetBoolAttribute(const char* pAttributeName, const bool defaultVal) const
     {
         const auto* pElement = CAST_TO_CONST_ELEMENT_TYPE(m_pHandle);
+
         bool result = defaultVal;
         const tinyxml2::XMLError errorCode = pElement->QueryBoolAttribute(pAttributeName, &result);
 

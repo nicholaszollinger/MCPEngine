@@ -45,7 +45,7 @@ namespace mcp
         if (packageElement.IsValid())
         {
             // Get the Package file path:
-            const char* pPackageFilePath = packageElement.GetAttribute<const char*>("path");
+            const char* pPackageFilePath = packageElement.GetAttributeValue<const char*>("path");
             if (!pPackageFilePath)
             {
                 MCP_ERROR("Scene", "Failed to load scene! Couldn't find Package path attribute in xml file!");

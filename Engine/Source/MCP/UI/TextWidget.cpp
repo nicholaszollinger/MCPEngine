@@ -24,7 +24,7 @@ namespace mcp
 
     TextWidget::~TextWidget()
     {
-        if (m_isActive)
+        if (IsActive())
             m_pUILayer->RemoveRenderable(this);
 
         // Free the text texture.
@@ -33,7 +33,8 @@ namespace mcp
 
     bool TextWidget::Init()
     {
-        m_pUILayer->AddRenderable(this);
+        if (IsActive())
+            m_pUILayer->AddRenderable(this);
 
         // Load the font.
         m_font.Load(m_textData.pFontFilepath, m_textData.fontSize);
@@ -71,22 +72,24 @@ namespace mcp
         DrawTexture(data);
     }
 
-    void TextWidget::SetActive(const bool isActive)
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : When this is enabled, we register as a renderable.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void TextWidget::OnEnable()
     {
-        if (isActive != m_isActive)
-        {
-            if (isActive)
-            {
-                m_pUILayer->AddRenderable(this);
-            }
+        m_pUILayer->AddRenderable(this);
+    }
 
-            else
-            {
-                m_pUILayer->RemoveRenderable(this);
-            }
-
-            m_isActive = isActive;
-        }
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : When this is disabled, we unregister from rendering. 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void TextWidget::OnDisable()
+    {
+        m_pUILayer->RemoveRenderable(this);
     }
 
     void TextWidget::SetFont(const Font& font)
@@ -104,43 +107,32 @@ namespace mcp
     TextWidget* TextWidget::AddFromData(const XMLElement element)
     {
         // Get the basic Widget Data
-        WidgetConstructionData data;
-        RectF rect;
-        rect.x = element.GetAttribute<float>("x");
-        rect.y = element.GetAttribute<float>("y");
-        rect.width = element.GetAttribute<float>("width");
-        rect.height = element.GetAttribute<float>("height");
-
-        data.rect = rect;
-        data.anchor.x = element.GetAttribute<float>("anchorX", 0.5f);
-        data.anchor.y = element.GetAttribute<float>("anchorY", 0.5f);
-        data.isInteractable = false;
-        data.zOffset = element.GetAttribute<int>("zOffset", 1);
+        const auto data = GetWidgetConstructionData(element);
 
         // Get the TextData
         TextData textData;
-        const char* pText = element.GetAttribute<const char*>("text");
+        const char* pText = element.GetAttributeValue<const char*>("text");
 
         // Font
         XMLElement child = element.GetChildElement("Font");
         MCP_CHECK(child.IsValid());
-        textData.pFontFilepath = child.GetAttribute<const char*>("path");
-        textData.fontSize = child.GetAttribute<int>("size");
+        textData.pFontFilepath = child.GetAttributeValue<const char*>("path");
+        textData.fontSize = child.GetAttributeValue<int>("size");
 
         // Colors
         child = child.GetSiblingElement("ForegroundColor");
         MCP_CHECK(child.IsValid());
-        textData.foreground.r = child.GetAttribute<uint8_t>("r");
-        textData.foreground.g = child.GetAttribute<uint8_t>("g");
-        textData.foreground.b = child.GetAttribute<uint8_t>("b");
-        textData.foreground.alpha = child.GetAttribute<uint8_t>("alpha");
+        textData.foreground.r = child.GetAttributeValue<uint8_t>("r");
+        textData.foreground.g = child.GetAttributeValue<uint8_t>("g");
+        textData.foreground.b = child.GetAttributeValue<uint8_t>("b");
+        textData.foreground.alpha = child.GetAttributeValue<uint8_t>("alpha");
 
         child = child.GetSiblingElement("BackgroundColor");
         MCP_CHECK(child.IsValid());
-        textData.background.r = child.GetAttribute<uint8_t>("r");
-        textData.background.g = child.GetAttribute<uint8_t>("g");
-        textData.background.b = child.GetAttribute<uint8_t>("b");
-        textData.background.alpha = child.GetAttribute<uint8_t>("alpha");
+        textData.background.r = child.GetAttributeValue<uint8_t>("r");
+        textData.background.g = child.GetAttributeValue<uint8_t>("g");
+        textData.background.b = child.GetAttributeValue<uint8_t>("b");
+        textData.background.alpha = child.GetAttributeValue<uint8_t>("alpha");
 
         return BLEACH_NEW(TextWidget(data, pText, textData));
     }
@@ -173,16 +165,4 @@ namespace mcp
         m_crop.width = textureSize.x;
         m_crop.height = textureSize.y;
     }
-
-    void TextWidget::OnParentActiveChanged(const bool parentActiveState)
-    {
-        // If we are being set active, add the renderable
-        if (parentActiveState)
-            m_pUILayer->AddRenderable(this);
-        
-        // And vice versa.
-        else
-            m_pUILayer->RemoveRenderable(this);
-    }
-
 }

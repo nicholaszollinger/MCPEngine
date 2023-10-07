@@ -38,8 +38,8 @@ namespace mcp
     bool Rect2DComponent::AddFromData(const XMLElement component, Object* pOwner)
     {
         // Width and Height
-        const auto width = component.GetAttribute<float>("width");
-        const auto height = component.GetAttribute<float>("height");
+        const auto width = component.GetAttributeValue<float>("width");
+        const auto height = component.GetAttributeValue<float>("height");
 
         // Get the Renderable info.
         const XMLElement renderableElement = component.GetChildElement("Renderable");
@@ -50,8 +50,8 @@ namespace mcp
         }
 
         // IRenderable Data.
-        const auto layer =static_cast<RenderLayer>(renderableElement.GetAttribute<int>("layer"));
-        const int zOrder = renderableElement.GetAttribute<int>("zOrder");
+        const auto layer =static_cast<RenderLayer>(renderableElement.GetAttributeValue<int>("layer"));
+        const int zOrder = renderableElement.GetAttributeValue<int>("zOrder");
 
         // Add the component
         auto* pRect2DComponent = pOwner->AddComponent<Rect2DComponent>(width, height, layer, zOrder);
@@ -69,7 +69,7 @@ namespace mcp
             return false;
         }
         
-        const char* pType = renderTypeElement.GetAttribute<const char*>("type");
+        const char* pType = renderTypeElement.GetAttributeValue<const char*>("type");
         const RenderType type = pType == std::string("Fill") ? RenderType::kFill : RenderType::kOutline;
         pRect2DComponent->SetRenderType(type);
 
@@ -81,10 +81,10 @@ namespace mcp
             return false;
         }
 
-        const auto r = colorElement.GetAttribute<uint8_t>("r");
-        const auto g = colorElement.GetAttribute<uint8_t>("g");
-        const auto b = colorElement.GetAttribute<uint8_t>("b");
-        const auto alpha = colorElement.GetAttribute<uint8_t>("alpha", 255);
+        const auto r = colorElement.GetAttributeValue<uint8_t>("r");
+        const auto g = colorElement.GetAttributeValue<uint8_t>("g");
+        const auto b = colorElement.GetAttributeValue<uint8_t>("b");
+        const auto alpha = colorElement.GetAttributeValue<uint8_t>("alpha", 255);
         pRect2DComponent->SetColor(r,g,b,alpha);
 
         return true;

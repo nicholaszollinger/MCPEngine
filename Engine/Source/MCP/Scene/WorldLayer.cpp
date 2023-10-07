@@ -30,12 +30,12 @@ namespace mcp
         MCP_CHECK(setting.IsValid());
         QuadtreeBehaviorData data;
         const auto windowDimensions = GraphicsManager::Get()->GetWindow()->GetDimensions();
-        data.worldWidth = setting.GetAttribute<float>("worldWidth", static_cast<float>(windowDimensions.width));
-        data.worldHeight = setting.GetAttribute<float>("worldHeight", static_cast<float>(windowDimensions.height));
-        data.worldXPos = setting.GetAttribute<float>("worldXPos", 0.f);
-        data.worldYPos = setting.GetAttribute<float>("worldYPos", 0.f);
-        data.maxDepth = setting.GetAttribute<unsigned>("maxDepth", 4);
-        data.maxObjectsInCell = setting.GetAttribute<unsigned>("maxObjectsInCell", 4);
+        data.worldWidth = setting.GetAttributeValue<float>("worldWidth", static_cast<float>(windowDimensions.width));
+        data.worldHeight = setting.GetAttributeValue<float>("worldHeight", static_cast<float>(windowDimensions.height));
+        data.worldXPos = setting.GetAttributeValue<float>("worldXPos", 0.f);
+        data.worldYPos = setting.GetAttributeValue<float>("worldYPos", 0.f);
+        data.maxDepth = setting.GetAttributeValue<unsigned>("maxDepth", 4);
+        data.maxObjectsInCell = setting.GetAttributeValue<unsigned>("maxObjectsInCell", 4);
         SetCollisionSettings(data);
 
         // Elements:
@@ -96,7 +96,7 @@ namespace mcp
 
     void WorldLayer::LoadSceneDataAsset(const XMLElement sceneDataAsset)
     {
-        const char* pPath = sceneDataAsset.GetAttribute<const char*>("path");
+        const char* pPath = sceneDataAsset.GetAttributeValue<const char*>("path");
         MCP_CHECK_MSG(pPath, "Failed to load SceneDataAsset on the UI Layer! No path was found!");
 
         XMLParser parser;

@@ -1,6 +1,8 @@
 // CanvasWidget.cpp
 
 #include "CanvasWidget.h"
+#include "LuaSource.h"
+#include "MCP/Scene/UILayer.h"
 
 namespace mcp
 {
@@ -12,19 +14,91 @@ namespace mcp
 
     CanvasWidget* CanvasWidget::AddFromData(const XMLElement element)
     {
-        RectF rect;
-        rect.x = element.GetAttribute<float>("x");
-        rect.y = element.GetAttribute<float>("y");
-        rect.width = element.GetAttribute<float>("width");
-        rect.height = element.GetAttribute<float>("height");
-
-        WidgetConstructionData data;
-        data.rect = rect;
-        data.anchor.x = element.GetAttribute<float>("anchorX", 0.5f);
-        data.anchor.y = element.GetAttribute<float>("anchorY", 0.5f);
-        data.isInteractable = false;
-        data.zOffset = element.GetAttribute<int>("zOffset", 1);
+        const auto data = GetWidgetConstructionData(element);
 
         return BLEACH_NEW(CanvasWidget(data));
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Attempts to find a child CanvasWidget.
+    ///
+    ///     \n LUA PARAMS: Widget* pWidget, const char* ChildWidgetTag
+    ///     \n RETURNS: userData pointer to the found Canvas Widget, or nullptr in the case of a fail.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    static int GetChildCanvasWidgetByTag(lua_State* pState)
+    {
+        //MCP_LOG("Lua", "Calling GetChildCanvasWidgetByTag() from lua...");
+
+        // Get the Widget and string parameters off the stack.
+        auto* pWidget = static_cast<Widget*>(lua_touserdata(pState, -2));
+        MCP_CHECK(pWidget);
+        const auto* pTag = lua_tostring(pState, -1);
+        MCP_CHECK(pTag);
+
+        // Pop the two parameters
+        lua_pop(pState, 2);
+
+        // Try to find the result.
+        auto* pResult = pWidget->FindChildByTag<CanvasWidget>(pTag);
+
+        // If valid, return a the data as a pointer.
+        if (pResult)
+            lua_pushlightuserdata(pState, pResult);
+        // Otherwise, return nil.
+        else
+            lua_pushnil(pState);
+
+        return 1;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Attempts to find a CanvasWidget in the UILayer.
+    ///
+    ///     \n LUA PARAMS: Widget* pWidget, const char* WidgetTag
+    ///     \n RETURNS: userData pointer to the found Canvas Widget, or nullptr in the case of a fail.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    static int GetCanvasWidgetByTag(lua_State* pState)
+    {
+        //MCP_LOG("Lua", "Calling GetChildCanvasWidgetByTag() from lua...");
+
+        // Get the Widget and string parameters off the stack.
+        auto* pWidget = static_cast<Widget*>(lua_touserdata(pState, -2));
+        MCP_CHECK(pWidget);
+        const auto* pTag = lua_tostring(pState, -1);
+        MCP_CHECK(pTag);
+
+        // Pop the two parameters
+        lua_pop(pState, 2);
+
+        // Try to find the result in the UILayer.
+        auto* pResult = pWidget->GetLayer()->GetWidgetByTag<CanvasWidget>(pTag);
+
+        // If valid, return a the data as a pointer.
+        if (pResult)
+            lua_pushlightuserdata(pState, pResult);
+        // Otherwise, return nil.
+        else
+            lua_pushnil(pState);
+
+        return 1;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Register lua functions specific to the Canvas Widget.
+    ///		@param pState : 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void CanvasWidget::RegisterLuaFunctions(lua_State* pState)
+    {
+        lua_pushcfunction(pState, &GetChildCanvasWidgetByTag);
+        lua_setglobal(pState, "GetChildCanvasWidgetByTag");
+
+        lua_pushcfunction(pState, &GetCanvasWidgetByTag);
+        lua_setglobal(pState, "GetCanvasWidget");
     }
 }

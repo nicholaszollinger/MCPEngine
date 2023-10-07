@@ -2,18 +2,19 @@
 // LuaSystem.h
 
 #include <optional>
+
+#include "LuaResource.h"
 #include "MCP/Debug/Log.h"
 
 #ifdef _DEBUG
     #define DEBUG_LUA 1
 #endif
 
-struct lua_State;
-
 namespace mcp
 {
     class LuaSystem
     {
+        //std::unordered_map<uint64_t, LuaResourcePtr> m_resources;
         lua_State* m_pState = nullptr;
 
     public:
@@ -23,6 +24,9 @@ namespace mcp
 
         // Load Lua Scripts
         bool LoadScript(const char* pFilepath) const;
+        LuaResourcePtr LoadScriptInstance(const char* pFilepath) const;
+        LuaResourcePtr LoadScriptInstance(const char* pFilepath, const char* pConstructionDataFilepath) const;
+        void FreeScriptInstance(const LuaResourceId ref) const;
 
         // Get Global Variables
         std::optional<bool> GetBoolean(const char* varName) const;
@@ -48,6 +52,9 @@ namespace mcp
         template<typename...Args>
         void CallFunction(const char* pFunctionName, Args&&...params) const;
 
+        template<typename...Args>
+        void CallMemberFunction(const LuaResourcePtr resource, const char* pMemberFunctionName,  Args&&...params) const;
+
     private:
         // Lua Function Call Helpers
         void CallFunctionImpl(const int paramCount) const;
@@ -56,6 +63,8 @@ namespace mcp
         void PushFloat(const double val) const;
         void PushString(const char* val) const;
         void PushBool(const bool val) const;
+        void PushUserData(void* val) const;
+        bool PushResource(const LuaResourcePtr resource) const;
         [[nodiscard]] bool PushParams([[maybe_unused]] const int& paramCount) const { return true; }
         template<typename Param, typename...Args> bool PushParams(int& paramCount, Param&& param, Args&&...otherParams) const;
         template<typename Type> bool Push(Type&& val) const;
@@ -88,6 +97,9 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     // LUA SYSTEM TEMPLATE DEFINITIONS
     //-----------------------------------------------------------------------------------------------------------------------------
+    // Disable the 'unreachable code' warning.
+#pragma warning (push)
+#pragma warning (disable : 4702)
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -118,6 +130,56 @@ namespace mcp
 
         // Call the function.
         CallFunctionImpl(paramCount);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Call a member function of an object.
+    ///		@tparam Args : 
+    ///		@param pMemberFunctionName : 
+    ///		@param resource : 
+    ///		@param params : 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template <typename... Args>
+    void LuaSystem::CallMemberFunction(const LuaResourcePtr resource, const char* pMemberFunctionName,  Args&&... params) const
+    {
+        if (!resource.IsValid())
+        {
+            MCP_ERROR("Lua", "Failed to call member function. Ref was invalid.");
+            return;
+        }
+
+        // Push the object onto the stack.
+        if (!PushResource(resource))
+        {
+            MCP_ERROR("Lua", "Failed to call member function: ", pMemberFunctionName, "! Failed to get object with ref.");
+            return;
+        }
+
+        // Get the Member function
+        if (!GetElement(pMemberFunctionName))
+        {
+            MCP_ERROR("Lua", "Failed to find member function named: ", pMemberFunctionName);
+            // Pop the object off the stack
+            PopStack(1);
+            return;
+        }
+
+        int paramCount = 0;
+        if (!PushParams(paramCount, params...))
+        {
+            MCP_ERROR("Lua", "Failed to call lua function! Parameters were invalid!");
+            // Pop the function and the table off the stack.
+            PopStack(2);
+            return;
+        }
+
+        // Call the Member function
+        CallFunctionImpl(paramCount);
+
+        // Remove the Object from the stack.
+        PopStack(1);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -183,7 +245,15 @@ namespace mcp
             return output;
         }
 
+        // TODO: LuaResource
+        /*else if constexpr (std::is_same_v<Type, LuaResourcePtr>)
+        {
+            PushResource(val);
+        }*/
+
         // TODO: Functions, UserData, std::string
+
+
         else
         {
             MCP_ERROR("Lua", "Failed to get Lua element! Type was not a valid Lua (or currently supported) Type");
@@ -255,6 +325,13 @@ namespace mcp
             PushFloat(val);
         }
 
+        // Tables/LuaClasses
+        else if constexpr (std::is_same_v<LuaResourcePtr&, Type>)
+        {
+            if (!PushResource(val))
+                return;
+        }
+
         // TODO: Functions, UserData, std::string
 
         else
@@ -266,7 +343,6 @@ namespace mcp
         // Set the Element.
         SetElement();
     }
-
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -281,14 +357,21 @@ namespace mcp
         using BaseType = std::remove_cv_t<Type>;
         using NonRefType = std::remove_reference_t<BaseType>;
 
+        // LuaResourcePtr
+        if constexpr (std::is_same_v<LuaResourcePtr&, Type>)
+        {
+            if (!PushResource(val))
+                return false;
+        }
+
         // Boolean
-        if constexpr (std::is_same_v<NonRefType, bool>)
+        else if constexpr (std::is_same_v<NonRefType, bool>)
         {
             PushBool(val);
         }
 
         // CString
-        if constexpr (std::is_trivially_assignable_v<const char*&, Type>)
+        else if constexpr (std::is_trivially_assignable_v<const char*&, Type>)
         {
             PushString(val);
         }
@@ -306,6 +389,10 @@ namespace mcp
         }
 
         // TODO: Functions, UserData, std::strings
+        else if constexpr (std::is_pointer_v<NonRefType>)
+        {
+            PushUserData(val);
+        }
 
         else
         {
@@ -346,4 +433,6 @@ namespace mcp
         // Recurse until all of the params are pushed.
         return PushParams(paramCount, otherParams...);
     }
+
+#pragma warning (pop)
 }
