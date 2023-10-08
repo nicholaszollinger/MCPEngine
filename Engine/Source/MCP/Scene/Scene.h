@@ -12,13 +12,15 @@ namespace mcp
 {
     class Scene
     {
-
     private:
         using RenderableContainer = UnorderedDenseArray<RenderableId, IRenderable*>;
 
         static constexpr const char* kPackageElementName = "Package";
         static constexpr const char* kSceneElementName = "Scene";
+        static constexpr const char* kSceneAssetName = "SceneAsset";
         static constexpr const char* kObjectElementName = "Object";
+        static constexpr uint32_t kSceneAssetNameHash = HashString32(kSceneAssetName);
+        static constexpr uint32_t kObjectNameHash = HashString32(kObjectElementName);
         static constexpr float kFixedUpdateTimeSeconds = 1.f / 60.f;
         //static constexpr size_t kRenderLayerSize = static_cast<size_t>(RenderLayer::kRenderCount);
 
@@ -66,6 +68,8 @@ namespace mcp
         [[nodiscard]] CollisionSystem* GetCollisionSystem() { return &m_collisionSystem;}
 
     private:
+        void LoadSceneAsset(const XMLElement sceneAsset);
+        void LoadWorldObject(const XMLElement object);
         void RenderLayer(const RenderableContainer& renderables) const;
         void DeleteQueuedObjects();
         void ClearScene();

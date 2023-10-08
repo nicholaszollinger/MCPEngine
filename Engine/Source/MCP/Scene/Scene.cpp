@@ -93,31 +93,21 @@ namespace mcp
         data.maxObjectsInCell = setting.GetAttribute<unsigned>("maxObjectsInCell", 4);
         SetCollisionSettings(data);
 
-        // Scene Objects
-        XMLElement objectElement = sceneElement.GetChildElement(kObjectElementName);
-        while(objectElement.IsValid())
+        // Load Objects or SceneAssets (XML containers of objects)
+        XMLElement childElement = worldSettings.GetSiblingElement();
+        while(childElement.IsValid())
         {
-            // Create a new object and add it to the scene.
-            auto* pObject = CreateObject();
-
-            // Get the first Component of the object.
-            XMLElement componentElement = objectElement.GetChildElement();
-
-            while (componentElement.IsValid())
+            if (HashString32(childElement.GetName()) == kSceneAssetNameHash)
             {
-                // Add the Component to the new Object.
-                if (!ComponentFactory::AddToObjectFromData(componentElement.GetName(), componentElement, pObject))
-                {
-                    ClearScene();
-                    return false;
-                }
-
-                // Go to the next sibling to see if we have another component.
-                componentElement = componentElement.GetSiblingElement();
+                LoadSceneAsset(childElement);
             }
 
-            // Go to the next sibling to see if we have another gameObject.
-            objectElement = objectElement.GetSiblingElement(kObjectElementName);
+            else
+            {
+                LoadWorldObject(childElement);
+            }
+
+            childElement = childElement.GetSiblingElement();
         }
 
         // Everything succeeded!
@@ -388,5 +378,66 @@ namespace mcp
     {
         m_collisionSystem.SetQuadtreeBehaviorData(data);
     }
+
+    void Scene::LoadSceneAsset(const XMLElement sceneAsset)
+    {
+        const auto* pPath = sceneAsset.GetAttribute<const char*>("path");
+        MCP_CHECK(pPath);
+
+        XMLParser sceneAssetParser;
+        if (!sceneAssetParser.LoadFile(pPath))
+        {
+            MCP_ERROR("Scene", "Failed to load scene asset file! Path: ", pPath);
+            return;
+        }
+
+        auto element = sceneAssetParser.GetElement(nullptr);
+
+        while (element.IsValid())
+        {
+            if (HashString32(element.GetName()) == kSceneAssetNameHash)
+            {
+                LoadSceneAsset(element);
+            }
+
+            else
+            {
+                LoadWorldObject(element);
+            }
+
+            element = element.GetSiblingElement();
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Loads an object and all of its components.
+    ///		@param object : 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Scene::LoadWorldObject(const XMLElement object)
+    {
+        MCP_CHECK(HashString32(object.GetName()) == kObjectNameHash);
+
+        // Create a new object and add it to the scene.
+        auto* pObject = CreateObject();
+
+        // Get the first Component of the object.
+        XMLElement componentElement = object.GetChildElement();
+
+        while (componentElement.IsValid())
+        {
+            // Add the Component to the new Object.
+            if (!ComponentFactory::AddToObjectFromData(componentElement.GetName(), componentElement, pObject))
+            {
+                ClearScene();
+                return;
+            }
+
+            // Go to the next sibling to see if we have another component.
+            componentElement = componentElement.GetSiblingElement();
+        }
+    }
+
 
 }
