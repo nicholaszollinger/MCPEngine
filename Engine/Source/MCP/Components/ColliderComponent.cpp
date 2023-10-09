@@ -26,7 +26,8 @@ namespace mcp
     ColliderComponent::~ColliderComponent()
     {
 #if RENDER_COLLIDER_VISUALS
-        m_pOwner->GetScene()->RemoveRenderable(this);
+        if (m_collisionEnabled)
+            m_pOwner->GetScene()->RemoveRenderable(this);
 #endif
 
         // If we were listening to the transform updated events, unregister.
@@ -34,10 +35,12 @@ namespace mcp
         //    m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
 
         // Remove ourselves from the collision system.
-        m_pSystem->RemoveCollideable(this);
+        if (m_collisionEnabled)
+            m_pSystem->RemoveCollideable(this);
 
         // Remove ourselves from the physics update.
-        m_pOwner->GetScene()->RemovePhysicsUpdateable(this);
+        if (!m_isStatic)
+            m_pOwner->GetScene()->RemovePhysicsUpdateable(this);
 
         // Delete all of our colliders
         for (auto&[ colliderId, pCollider] : m_colliders)
@@ -66,10 +69,12 @@ namespace mcp
         // Need to register with the collision system.
         m_pSystem = pScene->GetCollisionSystem();
 
-        pScene->AddPhysicsUpdateable(this);
+        if (!m_isStatic)
+            pScene->AddPhysicsUpdateable(this);
 
 #if RENDER_COLLIDER_VISUALS
-        pScene->AddRenderable(this);
+        if (m_collisionEnabled)
+            pScene->AddRenderable(this);
 #endif
 
         return true;
@@ -78,13 +83,14 @@ namespace mcp
     bool ColliderComponent::PostLoadInit()
     {
         // If we are an active, enabled collider, then we need to listen to the transform updates.
-        if (!m_isStatic && m_collisionEnabled)
-        {
-            //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
-        }
+        //if (!m_isStatic && m_collisionEnabled)
+        //{
+        //    //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
+        //}
 
         // Add ourselves to the CollisionSystem
-        m_pSystem->AddCollideable(this);
+        if (m_collisionEnabled)
+            m_pSystem->AddCollideable(this);
 
         return true;
     }
@@ -130,17 +136,20 @@ namespace mcp
         // If collision is enabled, we need to update our transform listening.
         if (m_collisionEnabled)
         {
-            // If we are becoming static, then we need to stop listening to the transform updates.
-            if (isStatic)
-            {
-                //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
-            }
+            // If we were enabled, then we need to update our status in the Collision system.
+            m_pSystem->SetCollideableStatic(this, isStatic);
+
+            //// If we are becoming static, then we need to stop listening to the transform updates.
+            //if (isStatic)
+            //{
+            //    //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
+            //}
 
             // Otherwise, we are becoming active and need to start listening.
-            else
-            {
-                //m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
-            }
+            //else
+            //{
+            //    //m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
+            //}
         }
 
         m_isStatic = isStatic;
@@ -161,25 +170,26 @@ namespace mcp
 
         // If we aren't a static collider, then we need to update if we
         // are listening to the Transform's updates.
-        if (!m_isStatic)
-        {
+        //if (!m_isStatic)
+        //{
             // If we are enabling the collision, then we need to
             //  - Add this Component to the collision grid.
             //  - Stop listening to Transform updates. Our collision will be updated by being active.
-            if (isEnabled)
-            {
-                m_pSystem->AddCollideable(this);
-                //m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
-            }
-            
-            // Otherwise, we to remove this component from the collision tree and start listening
-            // to transform updates.
-            else
-            {
-                m_pSystem->RemoveCollideable(this);
-                //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
-            }
+        if (isEnabled)
+        {
+            m_pSystem->AddCollideable(this);
+            //m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
         }
+        
+        // Otherwise, we to remove this component from the collision tree and start listening
+        // to transform updates.
+        else
+        {
+            //MCP_LOG("Collision", "Removing Collideable...");
+            m_pSystem->RemoveCollideable(this);
+            //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
+        }
+        //}
 
         m_collisionEnabled = isEnabled;
     }

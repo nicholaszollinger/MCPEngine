@@ -4,6 +4,7 @@
 #include "Box2DCollider.h"
 #include "Collider.h"
 #include "MCP/Components/ColliderComponent.h"
+#include "MCP/Scene/Object.h"
 
 namespace mcp
 {
@@ -65,12 +66,12 @@ namespace mcp
         if (!pColliderComponent->m_pCell)
             pColliderComponent->m_pCell = m_pRoot;
 
-        // TODO: Insert this into a list of colliders if this collider component was active.
+        // If we are an active collider, add it to our list of active colliders.
         if (!pColliderComponent->m_isStatic)
             m_activeColliders.emplace_back(pColliderComponent);
 
         // This is to ensure that I have completed the 'registration'.
-        assert(pColliderComponent->m_pCell);
+        MCP_CHECK(pColliderComponent->m_pCell);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -78,24 +79,34 @@ namespace mcp
     //		
     ///		@brief : Remove a ColliderComponent from the tree.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void CollisionSystem::RemoveCollideable(const ColliderComponent* pColliderComponent)
+    void CollisionSystem::RemoveCollideable(ColliderComponent* pColliderComponent)
     {
         auto* pCell = static_cast<QuadtreeCell*> (pColliderComponent->m_pCell);
-        assert(pCell);
+        MCP_CHECK(pCell);
 
         const RectF rect = pColliderComponent->GetEstimationRect();
-        std::vector<QuadtreeCell*> cells;
+        //std::vector<QuadtreeCell*> cells;
 
         if (!rect.IsInside(pCell->dimensions))
         {
             pCell = FindParentThatEncapsulatesRect(pCell, rect);
         }
 
-        FindCellsForRect(pCell, rect, cells);
-        for(auto* pCellToRemoveFrom : cells)
+        for(auto* pCellToRemoveFrom : pColliderComponent->m_cells)
         {
-            RemoveFromCell(pCellToRemoveFrom, pColliderComponent);
+            RemoveFromCell(static_cast<QuadtreeCell*>(pCellToRemoveFrom), pColliderComponent);
         }
+
+        // Clear out the cells that we were in.
+        pColliderComponent->m_cells.clear();
+
+        pColliderComponent->m_pCell = pCell;
+
+
+        // If we are static, we are done.
+        if (pColliderComponent->m_isStatic)
+            return;
+
 
         // If the collider was an active one, remove it from our active colliders.
         // O(n) but until it is an issue, I am not going to worry about it. But this is a pain point.
@@ -103,6 +114,7 @@ namespace mcp
         {
             if (m_activeColliders[i]->m_pOwner == pColliderComponent->m_pOwner)
             {
+                //MCP_LOG("Collision", "Removing Active Collider");
                 std::swap(m_activeColliders[i], m_activeColliders.back());
                 m_activeColliders.pop_back();
                 break;
@@ -172,34 +184,105 @@ namespace mcp
     {
         auto* pCell = static_cast<QuadtreeCell*> (pColliderComponent->m_pCell);
 
-        assert(pCell);
-        assert(pColliderComponent->m_collisionEnabled); // We shouldn't be in the tree if our collision is disabled.
+        MCP_CHECK(pCell);
+        MCP_CHECK(pColliderComponent->m_collisionEnabled); // We shouldn't be in the tree if our collision is disabled.
 
         // See if we are still in the same cell.
-        const RectF rect = pColliderComponent->GetEstimationRect();
+        RectF rect = pColliderComponent->GetEstimationRect();
 
-        // If we aren't, then find the cell that encapsulates the cell.
-        if (!rect.IsInside(pCell->dimensions))
-        {
-            pCell = FindLowestCellThatEncapsulatesRect(pCell, rect);
-        }
+        pCell = FindLowestCellThatEncapsulatesRect(pCell, rect);
+        //// If we aren't, then find the cell that encapsulates the cell.
+        //if (!rect.IsInside(pCell->dimensions))
+        //{
+        //    
+        //}
 
         // Find all of the cells that this collider component is in, using our reference point.
-        std::vector<QuadtreeCell*> cells;
-        FindCellsForRect(pCell, rect, cells);
+        //std::vector<QuadtreeCell*> cells;
+        //FindCellsForRect(pCell, rect, cells);
 
         // Run the collision.
-        RunCollisionForColliderComponent(cells, pColliderComponent);
+        RunCollisionForColliderComponent(pColliderComponent->m_cells, pColliderComponent);
 
         // I am going to do what is easy and remove the collider from each cell it was in and reinsert
         // to update the membership.
-        for (auto* pOldCell : cells)
+        for (auto* pOldCell : pColliderComponent->m_cells)
         {
-            RemoveFromCell(pOldCell, pColliderComponent);
+            RemoveFromCell(static_cast<QuadtreeCell*>(pOldCell), pColliderComponent);
         }
 
-        // Try inserting again, from our reference point.
-        TryInsert(pCell, rect, pColliderComponent);
+        // Get the new cells that this collider should be in,
+        rect = pColliderComponent->GetEstimationRect();
+        pCell = FindLowestCellThatEncapsulatesRect(pCell, rect);
+        pColliderComponent->m_pCell = pCell;
+        /*if (!rect.IsInside(pCell->dimensions))
+        {
+            
+        }*/
+
+        //cells.clear();
+        pColliderComponent->m_cells.clear();
+        FindCellsForRect(pCell, rect, pColliderComponent->m_cells);
+
+        for (auto* pNewCell : pColliderComponent->m_cells)
+        {
+            static_cast<QuadtreeCell*>(pNewCell)->m_colliderComponents.emplace_back(pColliderComponent);
+        }
+
+        //// Try inserting again, from our reference point.
+        //TryInsert(pCell, rect, pColliderComponent);
+
+
+        // See if we are still in the same cell.
+
+        //auto* pNewEncapsulatingCell = FindLowestCellThatEncapsulatesRect(pCell, rect);
+
+        //// If we aren't, we need to update our membership.
+        //if (pNewEncapsulatingCell != pCell)
+        //{
+        //    std::vector<QuadtreeCell*> newCells;
+        //    FindCellsForRect(pNewEncapsulatingCell, rect, newCells);
+
+        //    // For each old cell,
+        //    for(size_t i = 0; i < cells.size();)
+        //    {
+        //        const size_t oldSize = cells.size();
+        //        for (size_t ii = 0; ii < newCells.size();)
+        //        {
+        //            // If the cells exists in both arrays, then we don't need to update the membership.
+        //            if (cells[i] == newCells[ii])
+        //            {
+        //                std::swap(cells[i], cells.back());
+        //                cells.pop_back();
+
+        //                std::swap(newCells[ii], newCells.back());
+        //                newCells.pop_back();
+        //                continue;
+        //            }
+
+        //            ++ii;
+        //        }
+
+        //        if (oldSize == cells.size())
+        //            ++i;
+        //    }
+
+        //    // Remove the old cells
+        //    for (auto* pOldCell : cells)
+        //    {
+        //        RemoveFromCell(pOldCell, pColliderComponent);
+        //    }
+
+        //    // Add to the new cells.
+        //    for (auto* pNewCell : newCells)
+        //    {
+        //        TryInsert(pNewCell, rect, pColliderComponent);
+        //    }
+
+        //    pColliderComponent->m_pCell = pNewEncapsulatingCell;
+        //}
+
+        
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -209,12 +292,13 @@ namespace mcp
     ///		@param cells : Cells that the Collider Component is in.
     ///		@param pColliderComponent : Component we are testing.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void CollisionSystem::RunCollisionForColliderComponent(const std::vector<QuadtreeCell*>& cells, ColliderComponent* pColliderComponent)
+    void CollisionSystem::RunCollisionForColliderComponent(const std::vector<void*>& cells, ColliderComponent* pColliderComponent)
     {
         const RectF& estimationRect = pColliderComponent->GetEstimationRect();
 
-        for (auto* pCell : cells)
+        for (auto* pVoid : cells)
         {
+            auto* pCell = static_cast<QuadtreeCell*>(pVoid);
             // If we have 1 or less components in this cell, then continue.
             if (pCell->m_colliderComponents.size() <= 1)
                 continue;
@@ -228,7 +312,7 @@ namespace mcp
 
                 // Make sure this component is still valid for collision. Collisions may result in objects being destroyed,
                 // colliders may be turned off, etc.
-                if (!pComponent->m_collisionEnabled)
+                if (pComponent->m_pOwner->IsQueuedForDeletion())
                     continue;
 
                 // If the bounding boxes of the ColliderComponents don't intersect, then we can leave.
@@ -407,7 +491,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::CalculateGrid()
     {
-        assert(m_pRoot);
+        MCP_CHECK(m_pRoot);
         
         //SubDivide(m_pRoot,m_activeColliders, 0);
     }
@@ -439,6 +523,9 @@ namespace mcp
         if (IsLeaf(pCell))
         {
             pCell->m_colliderComponents.emplace_back(pColliderComponent);
+
+            // GET RID IF THIS DOESN'T WORK.
+            pColliderComponent->m_cells.emplace_back(pCell);
         }
 
         // If we aren't a leaf, then we need to try and insert into one of our children.
@@ -519,17 +606,19 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::RemoveFromCell(QuadtreeCell* pCell, const ColliderComponent* pComponent) const
     {
-        //assert(IsLeaf(pCell));
-
+        //MCP_CHECK(IsLeaf(pCell));
         for (size_t i = 0; i < pCell->m_colliderComponents.size(); ++i)
         {
             if (pCell->m_colliderComponents[i]->m_pOwner == pComponent->m_pOwner)
             {
+                //MCP_LOG("Collision", "Removing Component from cell");
                 std::swap(pCell->m_colliderComponents[i], pCell->m_colliderComponents.back());
                 pCell->m_colliderComponents.pop_back();
                 break;
             }
         }
+
+        //MCP_LOG("Collision", "pCell ColliderCount: ", pCell->m_colliderComponents.size());
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -615,7 +704,7 @@ namespace mcp
     ///		@param rect : 
     ///		@param outCells : 
     //-----------------------------------------------------------------------------------------------------------------------------
-    void CollisionSystem::FindCellsForRect(QuadtreeCell* pCell, const RectF& rect, std::vector<QuadtreeCell*>& outCells)
+    void CollisionSystem::FindCellsForRect(QuadtreeCell* pCell, const RectF& rect, std::vector<void*>& outCells)
     {
         // If we don't intersect with this cell, then return.
         if (!rect.Intersects(pCell->dimensions))
@@ -626,7 +715,7 @@ namespace mcp
         // If we intersect and this leaf
         if (IsLeaf(pCell))
         {
-            outCells.push_back(pCell);
+            outCells.emplace_back(pCell);
         }
 
         // If we intersect but this isn't a leaf, then we need to find the leaf that
@@ -700,6 +789,8 @@ namespace mcp
 
     void CollisionSystem::RenderEachCell(const QuadtreeCell* pCell) const
     {
+        static constexpr Color kBaseColor = Color{255, 0, 0,0};
+
         // If it isn't a leaf, then we want to continue going down.
         if (!IsLeaf(pCell))
         {
@@ -707,10 +798,21 @@ namespace mcp
             RenderEachCell(pCell->children[1]);
             RenderEachCell(pCell->children[2]);
             RenderEachCell(pCell->children[3]);
+        }
 
-            for (const auto* pChild : pCell->children)
+        else
+        {
+            if (pCell->m_colliderComponents.empty())
             {
-                DrawRect(pChild->dimensions, kTreeDebugColor);
+                DrawFillRect(pCell->dimensions, kBaseColor);
+            }
+
+            else
+            {
+                const auto alpha = std::clamp(static_cast<int>(pCell->m_colliderComponents.size()) * 10, 25, 180);
+                Color color = kBaseColor;
+                color.alpha = static_cast<uint8_t>(alpha);
+                DrawFillRect(pCell->dimensions, color);
             }
         }
     }

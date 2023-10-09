@@ -146,6 +146,8 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Scene::Update(const float deltaTime)
     {
+        // Run Collisions
+        m_collisionSystem.RunCollisions();
         m_messageManager.ProcessMessages();
 
         const auto& updateableArray = m_updateables.GetArray();
@@ -176,10 +178,9 @@ namespace mcp
             }
         }
 
+        // Clear out any updateables that need to be removed.
+        RemoveQueuedUpdateables();
         DeleteQueuedObjects();
-
-        // Run Collisions, after all of the updates have gone through.
-        m_collisionSystem.RunCollisions();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -299,14 +300,14 @@ namespace mcp
         }
     }
 
-    void Scene::AddUpdateable(const ObjectId id, IUpdateable* pUpdateable)
+    void Scene::AddUpdateable(const IUpdateableId id, IUpdateable* pUpdateable)
     {
         m_updateables.Add(id, pUpdateable);
     }
 
-    void Scene::RemoveUpdateable(const ObjectId id)
+    void Scene::RemoveUpdateable(const IUpdateableId id)
     {
-        m_updateables.Remove(id);
+        m_updateablesToRemove.emplace_back(id);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -362,6 +363,16 @@ namespace mcp
         }
 
         m_queuedObjectsToDelete.clear();
+    }
+
+    void Scene::RemoveQueuedUpdateables()
+    {
+        for (const auto updateableId : m_updateablesToRemove)
+        {
+            m_updateables.Remove(updateableId);
+        }
+
+        m_updateablesToRemove.clear();
     }
 
     void Scene::ClearScene()

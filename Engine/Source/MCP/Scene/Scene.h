@@ -34,7 +34,8 @@ namespace mcp
         RenderableContainer m_debugOverlayRenderables;
 
         std::unordered_map<ObjectId, Object*> m_objects;            // Container of all of the Object's in the scene.
-        std::vector<ObjectId> m_queuedObjectsToDelete;               // Objects that will be deleted at the end of the update.
+        std::vector<IUpdateableId> m_updateablesToRemove;           // Updateables that we need to remove after the update finishes.
+        std::vector<ObjectId> m_queuedObjectsToDelete;              // Objects that will be deleted at the end of the update.
         CollisionSystem m_collisionSystem;
         MessageManager m_messageManager;
         float m_accumulatedTime;                                    // Amount of time before we perform a fixed update.
@@ -72,6 +73,7 @@ namespace mcp
         void LoadWorldObject(const XMLElement object);
         void RenderLayer(const RenderableContainer& renderables) const;
         void DeleteQueuedObjects();
+        void RemoveQueuedUpdateables();
         void ClearScene();
         void SetCollisionSettings(const QuadtreeBehaviorData& data);
     };

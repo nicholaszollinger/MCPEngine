@@ -92,7 +92,7 @@ namespace mcp
 
         // Collider Registration.
         void AddCollideable(ColliderComponent* pColliderComponent);
-        void RemoveCollideable(const ColliderComponent* pColliderComponent);
+        void RemoveCollideable(ColliderComponent* pColliderComponent);
         void SetCollideableStatic(ColliderComponent* pColliderComponent, const bool bIsStatic);
 
         // Collision
@@ -112,12 +112,14 @@ namespace mcp
 
     private:
         // Collision
-        void RunCollisionForColliderComponent(const std::vector<QuadtreeCell*>& cells, ColliderComponent* pColliderComponent);
+        //void RunCollisionForColliderComponent(const std::vector<QuadtreeCell*>& cells, ColliderComponent* pColliderComponent);
+        void RunCollisionForColliderComponent(const std::vector<void*>& cells, ColliderComponent* pColliderComponent);
         void UpdateOverlappingColliders();
 
         // Quadtree
         static bool IsLeaf(const QuadtreeCell* cell) { return cell->children[0] == nullptr; }
-        static void FindCellsForRect(QuadtreeCell* pCell, const RectF& rect, std::vector<QuadtreeCell*>& outCells);
+        //static void FindCellsForRect(QuadtreeCell* pCell, const RectF& rect, std::vector<QuadtreeCell*>& outCells);
+        static void FindCellsForRect(QuadtreeCell* pCell, const RectF& rect, std::vector<void*>& outCells);
         void TryInsert(QuadtreeCell* pCell, const RectF& rect, ColliderComponent* pColliderComponent);
         void TrySubdivide(QuadtreeCell* pCell);
         void RemoveFromCell(QuadtreeCell* pCell, const ColliderComponent* pComponent) const;
