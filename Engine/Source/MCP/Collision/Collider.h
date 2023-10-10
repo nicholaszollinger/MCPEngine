@@ -144,6 +144,7 @@ private:
         [[nodiscard]] virtual ColliderNameId GetNameId() const { return m_colliderName; }
         [[nodiscard]] Vec2 GetWorldCenter() const;
         [[nodiscard]] bool CollisionIsEnabled() const { return m_isEnabled; }
+        [[nodiscard]] ColliderComponent* GetOwner() const { return m_pOwner; }
 
         //--------------------------------------------------------------------
         //  Collision Profile Interface

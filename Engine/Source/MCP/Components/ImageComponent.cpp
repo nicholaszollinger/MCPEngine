@@ -18,15 +18,15 @@ namespace mcp
         , m_renderAngle(0.0)
         , m_flip(RenderFlip2D::kNone)
     {
-        m_size = m_texture.GetBaseSizeAsFloat();
+        //
     }
 
-    ImageComponent::ImageComponent(Object* pObject, const char* pTextureFilepath, const RectInt& crop, const Vec2 size, const Color color, const RenderLayer layer, const int zOrder)
+    ImageComponent::ImageComponent(Object* pObject, const char* pTextureFilepath, const RectInt& crop, const Vec2 scale, const Color color, const RenderLayer layer, const int zOrder)
         : Component(pObject)
         , IRenderable(layer, zOrder)
         , m_pTransformComponent(nullptr)
         , m_crop(crop)
-        , m_size(size)
+        , m_scale(scale)
         , m_tint(color)
         , m_renderAngle(0.0)
         , m_flip(RenderFlip2D::kNone)
@@ -86,10 +86,15 @@ namespace mcp
         assert(m_pTransformComponent && "Failed to Render ImageComponent! TransformComponent was nullptr!");
 
         const Vec2 location = m_pTransformComponent->GetLocation();
-        const float renderXPos = location.x - m_size.x / 2.f;
-        const float renderYPos = location.y - m_size.y / 2.f;
-
-        const RectF destinationRect {renderXPos, renderYPos, m_size.x, m_size.y};
+        const float renderXPos = location.x - static_cast<float>(m_crop.width) / 2.f;
+        const float renderYPos = location.y - static_cast<float>(m_crop.height) / 2.f;
+        const RectF destinationRect
+        {
+            renderXPos
+            , renderYPos
+            , m_scale.x * static_cast<float>(m_crop.width)
+            , m_scale.y * static_cast<float>(m_crop.height)
+        };
 
         TextureRenderData renderData;
         renderData.pTexture = m_texture.Get();
@@ -148,17 +153,14 @@ namespace mcp
         crop.width = cropElement.GetAttribute<int>("w");
         crop.height = cropElement.GetAttribute<int>("h");
 
-        // Size
-        Vec2 size;
-        const XMLElement sizeElement = cropElement.GetSiblingElement("Size");
-        if (!sizeElement.IsValid())
+        // Scale
+        Vec2 scale = {1.f, 1.f};
+        const XMLElement scaleElement = cropElement.GetSiblingElement("Scale");
+        if (scaleElement.IsValid())
         {
-            MCP_ERROR("ImageComponent","Failed to add ImageComponent from Data! Couldn't find Size Attribute!");
-            return false;
+            scale.x = scaleElement.GetAttribute<float>("x");
+            scale.y = scaleElement.GetAttribute<float>("y");
         }
-
-        size.x = sizeElement.GetAttribute<float>("x");
-        size.y = sizeElement.GetAttribute<float>("y");
 
         Color color = Color::White();
         const XMLElement tintElement = cropElement.GetSiblingElement("Color");
@@ -177,7 +179,7 @@ namespace mcp
         const int zOrder = renderableElement.GetAttribute<int>("zOrder");
 
         // Add the component to the Object
-        if (!pOwner->AddComponent<ImageComponent>(pTextureFilePath, crop, size, color, layer, zOrder))
+        if (!pOwner->AddComponent<ImageComponent>(pTextureFilePath, crop, scale, color, layer, zOrder))
         {
             MCP_ERROR("ImageComponent","Failed to add ImageComponent from data!");
             return false;
