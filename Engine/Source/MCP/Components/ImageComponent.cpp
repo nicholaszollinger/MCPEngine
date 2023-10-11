@@ -85,15 +85,18 @@ namespace mcp
     {
         assert(m_pTransformComponent && "Failed to Render ImageComponent! TransformComponent was nullptr!");
 
+        const float width = m_scale.x * static_cast<float>(m_crop.width);
+        const float height = m_scale.y * static_cast<float>(m_crop.height);
+
         const Vec2 location = m_pTransformComponent->GetLocation();
-        const float renderXPos = location.x - static_cast<float>(m_crop.width) / 2.f;
-        const float renderYPos = location.y - static_cast<float>(m_crop.height) / 2.f;
+        const float renderXPos = location.x - (width / 2.f);
+        const float renderYPos = location.y - (height / 2.f);
         const RectF destinationRect
         {
             renderXPos
             , renderYPos
-            , m_scale.x * static_cast<float>(m_crop.width)
-            , m_scale.y * static_cast<float>(m_crop.height)
+            , width
+            , height
         };
 
         TextureRenderData renderData;
