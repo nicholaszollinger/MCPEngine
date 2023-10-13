@@ -94,6 +94,7 @@ namespace mcp
         void AddCollideable(ColliderComponent* pColliderComponent);
         void RemoveCollideable(ColliderComponent* pColliderComponent);
         void SetCollideableStatic(ColliderComponent* pColliderComponent, const bool bIsStatic);
+        void RemoveOverlappingCollider(Collider* pCollider);
 
         // Collision
         void RunCollisions();

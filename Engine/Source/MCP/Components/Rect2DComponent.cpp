@@ -4,6 +4,7 @@
 #include "MCP/Graphics/Graphics.h"
 #include "MCP/Components/TransformComponent.h"
 #include "MCP/Scene/Object.h"
+#include "MCP/Scene/Scene.h"
 
 namespace mcp
 {

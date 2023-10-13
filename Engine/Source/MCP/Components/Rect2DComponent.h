@@ -21,7 +21,6 @@ namespace mcp
         void SetWidth(const float width) { m_width = width; }
         void SetHeight(const float height) { m_height = height; }
         void SetDimensions(const float width, const float height) { m_width = width; m_height = height; }
-
         static bool AddFromData(const XMLElement component, Object* pOwner);
     };
 }

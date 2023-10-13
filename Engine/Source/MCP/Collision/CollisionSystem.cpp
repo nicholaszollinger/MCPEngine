@@ -99,9 +99,7 @@ namespace mcp
 
         // Clear out the cells that we were in.
         pColliderComponent->m_cells.clear();
-
         pColliderComponent->m_pCell = pCell;
-
 
         // If we are static, we are done.
         if (pColliderComponent->m_isStatic)
@@ -187,19 +185,9 @@ namespace mcp
         MCP_CHECK(pCell);
         MCP_CHECK(pColliderComponent->m_collisionEnabled); // We shouldn't be in the tree if our collision is disabled.
 
-        // See if we are still in the same cell.
+        // Re-find the lowest parent cell that holds this rect.
         RectF rect = pColliderComponent->GetEstimationRect();
-
         pCell = FindLowestCellThatEncapsulatesRect(pCell, rect);
-        //// If we aren't, then find the cell that encapsulates the cell.
-        //if (!rect.IsInside(pCell->dimensions))
-        //{
-        //    
-        //}
-
-        // Find all of the cells that this collider component is in, using our reference point.
-        //std::vector<QuadtreeCell*> cells;
-        //FindCellsForRect(pCell, rect, cells);
 
         // Run the collision.
         RunCollisionForColliderComponent(pColliderComponent->m_cells, pColliderComponent);
@@ -215,12 +203,9 @@ namespace mcp
         rect = pColliderComponent->GetEstimationRect();
         pCell = FindLowestCellThatEncapsulatesRect(pCell, rect);
         pColliderComponent->m_pCell = pCell;
-        /*if (!rect.IsInside(pCell->dimensions))
-        {
-            
-        }*/
 
-        //cells.clear();
+
+        // Find all of the leaf cells that we should be in.
         pColliderComponent->m_cells.clear();
         FindCellsForRect(pCell, rect, pColliderComponent->m_cells);
 
@@ -228,60 +213,6 @@ namespace mcp
         {
             static_cast<QuadtreeCell*>(pNewCell)->m_colliderComponents.emplace_back(pColliderComponent);
         }
-
-        //// Try inserting again, from our reference point.
-        //TryInsert(pCell, rect, pColliderComponent);
-
-
-        // See if we are still in the same cell.
-
-        //auto* pNewEncapsulatingCell = FindLowestCellThatEncapsulatesRect(pCell, rect);
-
-        //// If we aren't, we need to update our membership.
-        //if (pNewEncapsulatingCell != pCell)
-        //{
-        //    std::vector<QuadtreeCell*> newCells;
-        //    FindCellsForRect(pNewEncapsulatingCell, rect, newCells);
-
-        //    // For each old cell,
-        //    for(size_t i = 0; i < cells.size();)
-        //    {
-        //        const size_t oldSize = cells.size();
-        //        for (size_t ii = 0; ii < newCells.size();)
-        //        {
-        //            // If the cells exists in both arrays, then we don't need to update the membership.
-        //            if (cells[i] == newCells[ii])
-        //            {
-        //                std::swap(cells[i], cells.back());
-        //                cells.pop_back();
-
-        //                std::swap(newCells[ii], newCells.back());
-        //                newCells.pop_back();
-        //                continue;
-        //            }
-
-        //            ++ii;
-        //        }
-
-        //        if (oldSize == cells.size())
-        //            ++i;
-        //    }
-
-        //    // Remove the old cells
-        //    for (auto* pOldCell : cells)
-        //    {
-        //        RemoveFromCell(pOldCell, pColliderComponent);
-        //    }
-
-        //    // Add to the new cells.
-        //    for (auto* pNewCell : newCells)
-        //    {
-        //        TryInsert(pNewCell, rect, pColliderComponent);
-        //    }
-
-        //    pColliderComponent->m_pCell = pNewEncapsulatingCell;
-        //}
-
         
     }
 
@@ -467,6 +398,10 @@ namespace mcp
                     continue;
                 }
 
+                // If we are still intersecting, send a OnOverlapUpdate event to both parties.
+                pCollider->m_onOverlapUpdate.Broadcast((*iterator), (*iterator)->m_pOwner->GetOwner());
+                (*iterator)->m_onOverlapUpdate.Broadcast(pCollider, pCollider->m_pOwner->GetOwner());
+
                 ++iterator;
             }
 
@@ -482,6 +417,28 @@ namespace mcp
             ++i;
         }
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //      HACK.
+    //		
+    ///		@brief : Remove a collider from overlapping updates.
+    ///		@param pCollider : 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void CollisionSystem::RemoveOverlappingCollider(Collider* pCollider)
+    {
+        for (size_t i = 0; i < m_overlappedCollidersToUpdate.size(); ++i)
+        {
+            if (m_overlappedCollidersToUpdate[i] == pCollider)
+            {
+                //MCP_LOG("Collision", "Removing Overlapping Collider...");
+                std::swap(m_overlappedCollidersToUpdate[i], m_overlappedCollidersToUpdate.back());
+                m_overlappedCollidersToUpdate.pop_back();
+                break;
+            }
+        }
+    }
+
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:

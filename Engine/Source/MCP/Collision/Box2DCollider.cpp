@@ -15,6 +15,12 @@ namespace mcp
         //Log("Box: (%,%) w: % | h: %", position.x, position.y, width, height);
     }
 
+    Box2DCollider::Box2DCollider(const char* name, const bool isEnabled, const RectF rect)
+        : Box2DCollider(name, isEnabled, {rect.x, rect.y}, rect.width, rect.height)
+    {
+        //        
+    }
+
     RectF Box2DCollider::GetEstimateRectRelative() const
     {
         // Place our point at the top left of the rect.

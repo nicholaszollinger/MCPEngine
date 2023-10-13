@@ -20,9 +20,12 @@ namespace mcp
     PrimitiveComponent::~PrimitiveComponent()
     {
         // Remove the renderable from the scene.
-        auto* pScene = m_pOwner->GetScene();
-        assert(pScene);
-        pScene->RemoveRenderable(this);
+        if (m_isActive)
+        {
+            auto* pScene = m_pOwner->GetScene();
+            assert(pScene);
+            pScene->RemoveRenderable(this);
+        }
     }
     
     bool PrimitiveComponent::Init()
@@ -38,4 +41,25 @@ namespace mcp
 
         return true;
     }
+
+    void PrimitiveComponent::SetIsActive(const bool isActive)
+    {
+        if (isActive == m_isActive)
+            return;
+
+        // If we are being set to active:
+        if (isActive)
+        {
+            m_pOwner->GetScene()->AddRenderable(this);
+        }
+
+        // If we are being set to inactive.
+        else
+        {
+            m_pOwner->GetScene()->RemoveRenderable(this);
+        }
+
+        m_isActive = isActive;
+    }
+
 }

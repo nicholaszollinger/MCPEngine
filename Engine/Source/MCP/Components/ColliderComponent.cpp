@@ -16,6 +16,7 @@ namespace mcp
         , m_pSystem(nullptr)
         , m_pCell(nullptr)
         , m_pTransformComponent(nullptr)
+        , m_myRelativeEstimationRect{}
         , m_activeColliderCount(0)
         , m_isStatic(isStatic)
         , m_collisionEnabled(collisionEnabled)
@@ -177,6 +178,11 @@ namespace mcp
             //  - Stop listening to Transform updates. Our collision will be updated by being active.
         if (isEnabled)
         {
+#if RENDER_COLLIDER_VISUALS
+            m_pOwner->GetScene()->AddRenderable(this);
+#endif
+
+
             m_pSystem->AddCollideable(this);
             //m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
         }
@@ -185,6 +191,10 @@ namespace mcp
         // to transform updates.
         else
         {
+#if RENDER_COLLIDER_VISUALS
+            m_pOwner->GetScene()->RemoveRenderable(this);
+#endif
+
             //MCP_LOG("Collision", "Removing Collideable...");
             m_pSystem->RemoveCollideable(this);
             //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
@@ -253,11 +263,48 @@ namespace mcp
         // Add the collider to our container and set their owner.
         m_colliders.emplace(nameId, pCollider);
         pCollider->SetOwner(this);
+        pCollider->SetSystem(m_pSystem);
 
         // If we are adding an active collider, then we need to recalculate our estimation.
         if (pCollider->CollisionIsEnabled())
             UpdateEstimationRect();
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Remove a collider from the component, destroying it.
+    ///		@param pColliderName : 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void ColliderComponent::RemoveCollider(const char* pColliderName)
+    {
+        const Collider::ColliderNameId nameId = HashString32(pColliderName);
+        const auto result = m_colliders.find(nameId);
+        if (result == m_colliders.end())
+        {
+            MCP_WARN("Collision", "Tried to remove a Collider named '", pColliderName, "' that doesn't exist on the ColliderComponent");
+            return;
+        }
+
+        // If the collider's collision was enabled,
+        const bool wasEnabled = result->second->CollisionIsEnabled();
+        if (wasEnabled && result->second->IsOverlapping())
+        {
+            m_pSystem->RemoveOverlappingCollider(result->second);   
+        }
+
+        // Delete the collider.
+        BLEACH_DELETE(result->second);
+        result->second = nullptr;
+
+        // Remove the collider:
+        m_colliders.erase(result);
+
+        // If it was enabled, then we need to update our estimation rect.
+        if (wasEnabled)
+            UpdateEstimationRect();
+    }
+
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -303,7 +350,7 @@ namespace mcp
             // move our point over to to match the left most distance.
             if (colliderEstimation.x < m_myRelativeEstimationRect.x)
             {
-                m_myRelativeEstimationRect.width += colliderEstimation.x - m_myRelativeEstimationRect.x;
+                m_myRelativeEstimationRect.width += m_myRelativeEstimationRect.x - colliderEstimation.x;
                 m_myRelativeEstimationRect.x = colliderEstimation.x;
             }
             
@@ -324,7 +371,7 @@ namespace mcp
             // If the bottom of the collider is lower than our bottom, increase our height by the difference.
             if (colliderEstimation.y + colliderEstimation.height > m_myRelativeEstimationRect.y + m_myRelativeEstimationRect.height)
             {
-                m_myRelativeEstimationRect.height += colliderEstimation.y + colliderEstimation.height - m_myRelativeEstimationRect.y + m_myRelativeEstimationRect.height;
+                m_myRelativeEstimationRect.height += (colliderEstimation.y + colliderEstimation.height) - (m_myRelativeEstimationRect.y + m_myRelativeEstimationRect.height);
             }
         }
     }
