@@ -2,6 +2,7 @@
 
 #include "TextWidget.h"
 
+#include "LuaSource.h"
 #include "MCP/Graphics/Graphics.h"
 #include "MCP/Scene/UILayer.h"
 
@@ -52,7 +53,7 @@ namespace mcp
         MCP_CHECK(m_pTexture);
 
         // Get the rect we are going to be in.
-        auto rect = GetScreenRect();
+        auto rect = GetRect();
 
         // Set the rect position to the top left corner of the text rect.
         //  TODO: This adjustment could be the 'justify' adjustment for the text. The alignment. But I don't know how to adjust each line.
@@ -77,8 +78,9 @@ namespace mcp
     //		
     ///		@brief : When this is enabled, we register as a renderable.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void TextWidget::OnEnable()
+    void TextWidget::OnActive()
     {
+        m_isVisible = true;
         m_pUILayer->AddRenderable(this);
     }
 
@@ -87,10 +89,18 @@ namespace mcp
     //		
     ///		@brief : When this is disabled, we unregister from rendering. 
     //-----------------------------------------------------------------------------------------------------------------------------
-    void TextWidget::OnDisable()
+    void TextWidget::OnInactive()
     {
+        m_isVisible = false;
         m_pUILayer->RemoveRenderable(this);
     }
+
+    void TextWidget::OnParentSet()
+    {
+        // When we set the parent, we need to update our zOrder to match the widget zOffset.
+        SetZOrder(GetZOffset());
+    }
+
 
     void TextWidget::SetFont(const Font& font)
     {
@@ -102,6 +112,26 @@ namespace mcp
     {
         m_text = pText;
         RegenerateTextTexture();
+    }
+
+    float TextWidget::GetRectWidth() const
+    {
+        if (m_sizedToContent)
+        {
+            return GetScale().x * static_cast<float>(m_crop.width);
+        }
+
+        return GetScale().x * m_width;
+    }
+
+    float TextWidget::GetRectHeight() const
+    {
+        if (m_sizedToContent)
+        {
+            return GetScale().y * static_cast<float>(m_crop.height);
+        }
+
+        return GetScale().y * m_height;
     }
 
     TextWidget* TextWidget::AddFromData(const XMLElement element)
@@ -165,4 +195,87 @@ namespace mcp
         m_crop.width = textureSize.x;
         m_crop.height = textureSize.y;
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Attempts to find a child TextWidget.
+    ///
+    ///     \n LUA PARAMS: Widget* pWidget
+    ///     \n RETURNS: userData pointer to the found Text Widget, or nullptr in the case of a fail.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    static int GetFirstChildTextWidget(lua_State* pState)
+    {
+        // Get the Widget
+        auto* pWidget = static_cast<Widget*>(lua_touserdata(pState, -1));
+        MCP_CHECK(pWidget);
+
+        lua_pop(pState, 1);
+
+        // Try to find the result.
+        auto* pResult = pWidget->FindFirstChildOfType<TextWidget>();
+
+        // If valid, return a the data as a pointer.
+        if (pResult)
+            lua_pushlightuserdata(pState, pResult);
+        // Otherwise, return nil.
+        else
+            lua_pushnil(pState);
+
+        return 1;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Sets the text of a TextWidget
+    ///
+    ///     \n LUA PARAMS: TextWidget* pWidget, const char* pText
+    ///     \n RETURNS: VOID
+    //-----------------------------------------------------------------------------------------------------------------------------
+    static int SetWidgetText(lua_State* pState)
+    {
+        // Get the Widget
+        auto* pWidget = static_cast<TextWidget*>(lua_touserdata(pState, -2));
+        MCP_CHECK(pWidget);
+
+        auto* pText = lua_tostring(pState, -1);
+
+        // Pop the parameters.
+        lua_pop(pState, 2);
+
+        pWidget->SetText(pText);
+
+        return 0;
+    }
+
+    void TextWidget::RegisterLuaFunctions(lua_State* pState)
+    {
+        static constexpr luaL_Reg kFuncs[]
+        {
+             {"GetFirstChildTextWidget", &GetFirstChildTextWidget}
+            ,{nullptr, nullptr}
+        };
+
+        static constexpr luaL_Reg kTextFuncs[]
+        {
+             {"SetText", &SetWidgetText}
+            ,{nullptr, nullptr}
+        };
+
+        // Set the Widget Functions
+        lua_getglobal(pState, "Widget");
+        MCP_CHECK(lua_type(pState, -1) == LUA_TTABLE);
+        luaL_setfuncs(pState, kFuncs, 0);
+        // Pop the table off the stack.
+        lua_pop(pState, 1);
+
+        // Set the Text Widget Functions
+        lua_getglobal(pState, "TextWidget");
+        MCP_CHECK(lua_type(pState, -1) == LUA_TTABLE);
+        luaL_setfuncs(pState, kTextFuncs, 0);
+        // Pop the table off the stack.
+        lua_pop(pState, 1);
+    }
+
 }

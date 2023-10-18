@@ -56,6 +56,9 @@ public:
     //-----------------------------------------------------------------------------------------------------------------------------
     void Add(const KeyType& key, const ValueType& value)
     {
+        if (const auto result = m_keyToIndexMap.find(key); result != m_keyToIndexMap.end())
+            return;
+
         const size_t newIndex = m_array.size();
         m_keyToIndexMap[key] = newIndex;
         m_indexToKeyMap[newIndex] = key;
@@ -84,6 +87,7 @@ public:
         m_indexToKeyMap[indexOfValueToRemove] = swappedKey;         // Set the Key at the removed index to the be the Key we swapped.
 
         // Erase the removed data.
+        m_indexToKeyMap.erase(indexOfBack);
         m_keyToIndexMap.erase(key);
         m_array.pop_back();
     }

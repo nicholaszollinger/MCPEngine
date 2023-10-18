@@ -18,6 +18,15 @@ namespace mcp
 
 namespace mcp
 {
+    TextureData::TextureData(void* pTexture, const int width, const int height)
+        : pTexture(pTexture)
+        , width(width)
+        , height(height)
+    {
+        //
+    }
+
+
     Texture::~Texture()
     {
         if (m_pResource)
@@ -37,11 +46,34 @@ namespace mcp
         m_loadData.isPersistent = isPersistent;
         m_loadData.pPackageName = pPackageName;
 
-        m_pResource = ResourceManager::Get()->Load<TextureAssetType>(m_loadData, m_baseSize);
+        m_pResource = ResourceManager::Get()->Load<TextureData>(m_loadData);
     }
 
     void Texture::Free()
     {
-        ResourceManager::Get()->FreeResource<TextureAssetType>(m_loadData.pFilePath);
+        ResourceManager::Get()->FreeResource<TextureData>(m_loadData.pFilePath);
+    }
+
+    void* Texture::Get() const
+    {
+        return static_cast<TextureData*>(m_pResource)->pTexture;
+    }
+
+    Vec2Int Texture::GetTextureSize() const
+    {
+        if (!m_pResource)
+        {
+            MCP_WARN("Texutre", "Attempting to get size of invalid texture resource.");
+            return {};
+        }
+
+        auto* pTextureData = static_cast<TextureData*>(m_pResource);
+        return {pTextureData->width, pTextureData->height};
+    }
+
+    Vec2 Texture::GetTextureSizeAsVec2() const
+    {
+        const auto vec = GetTextureSize();
+        return {static_cast<float>(vec.x), static_cast<float>(vec.y)};
     }
 }

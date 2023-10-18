@@ -59,6 +59,17 @@ namespace mcp::lua
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
+    //		
+    ///		@brief : Create an empty table and return a resource ptr.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    LuaResourcePtr CreateTable()
+    {
+        return LuaLayer::Get()->GetSystem().CreateTable();
+    }
+
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
     //      Consider making this a std::nullopt type to handle cases where we couldn't find the global.
     //		
     ///		@brief : Get a global boolean value among loaded lua scripts.

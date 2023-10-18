@@ -28,9 +28,9 @@ namespace mcp
     private:
         RectInt m_crop;
         TextData m_textData;   // Data about the Text styling
-        void* m_pTexture;           // The texture.
-        std::string m_text;         // Text that will be rendered.
-        Font m_font;                // The font resource that we are using.
+        void* m_pTexture;      // The texture.
+        std::string m_text;    // Text that will be rendered.
+        Font m_font;           // The font resource that we are using.
 
     public:
         TextWidget(const WidgetConstructionData& data, const char* pText, const TextData&);
@@ -42,12 +42,17 @@ namespace mcp
         void SetText(const char* pText);
         void SetFont(const Font& font);
 
+        [[nodiscard]] virtual float GetRectWidth() const override;
+        [[nodiscard]] virtual float GetRectHeight() const override;
+
         static TextWidget* AddFromData(const XMLElement element);
+        static void RegisterLuaFunctions(lua_State* pState);
 
     private:
         void FreeTexture();
         void RegenerateTextTexture();
-        void OnEnable() override;
-        void OnDisable() override;
+        virtual void OnActive() override;
+        virtual void OnInactive() override;
+        virtual void OnParentSet() override;
     };
 }

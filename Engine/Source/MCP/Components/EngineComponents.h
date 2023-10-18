@@ -19,6 +19,11 @@
 // UI
 #include "MCP/UI/ButtonWidget.h"
 #include "MCP/UI/CanvasWidget.h"
+#include "MCP/UI/HorizontalLayoutWidget.h"
 #include "MCP/UI/ImageWidget.h"
+#include "MCP/UI/SelectionWidget.h"
+#include "MCP/UI/SliderWidget.h"
 #include "MCP/UI/TextWidget.h"
+#include "MCP/UI/ToggleWidget.h"
+#include "MCP/UI/VerticalLayoutWidget.h"
 #include "MCP/UI/Widget.h"

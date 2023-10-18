@@ -10,6 +10,10 @@ namespace mcp::lua
     LuaResourcePtr LoadScriptInstance(const char* pScriptFilepath);
     LuaResourcePtr LoadScriptInstance(const char* pScriptFilepath, const char* pScriptDataPath);
 
+    // Creating a Table
+    LuaResourcePtr CreateTable();
+
+
     // Get Global Variables
     std::optional<bool> GetBoolean(const char* varName);
     std::optional<int64_t> GetInteger(const char* varName);
@@ -19,6 +23,8 @@ namespace mcp::lua
     // Accessing Tables
     template <typename ElementType> std::optional<ElementType> GetElementInTable(const char* tableName, const char* elementName);
     template<typename Type> void SetElementInTable(const char* tableName, const char* elementName, Type&& val);
+
+    template<typename ElementType> void SetElementInTable(LuaResourcePtr&& tableResource, const char* elementName, ElementType&& val);
 
     // Get Global Helpers
     template<typename IntegralType> std::optional<IntegralType> GetIntegerAs(const char* varName);
@@ -88,6 +94,21 @@ namespace mcp::lua
     void SetElementInTable(const char* tableName, const char* elementName, Type&& val)
     {
         LuaLayer::Get()->GetSystem().SetElementInTable<Type>(tableName, elementName, std::forward<Type>(val));
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Set an element in a table resource.
+    ///		@tparam ElementType : Type of value we are going to set an element to.
+    ///		@param tableResource : Resource that we are editing. 
+    ///		@param elementName : Name of the element you want to set.
+    ///		@param val : Value you want to set it to.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template<typename ElementType>
+    void SetElementInTable(const LuaResourcePtr& tableResource, const char* elementName, ElementType&& val)
+    {
+        LuaLayer::Get()->GetSystem().SetElementInTable<ElementType>(tableResource, elementName, std::forward<ElementType>(val));
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------

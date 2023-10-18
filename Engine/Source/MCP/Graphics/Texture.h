@@ -9,18 +9,27 @@
 
 namespace mcp
 {
+    struct TextureData
+    {
+        TextureData(void* pTexture, const int width, const int height);
+
+        void* pTexture = nullptr;   // Pointer to the actual texture resource.
+        int width = 0;              // Base image width
+        int height = 0;             // Base image height
+    };
+
     class Texture final : public Resource
     {
-        Vec2Int m_baseSize;
-
     public:
         Texture() = default;
         virtual ~Texture() override;
 
         virtual void Load(const char* pFilePath, const char* pPackageName = nullptr, const bool isPersistent = false) override;
 
-        [[nodiscard]] const Vec2Int& GetBaseSize() const { return m_baseSize; }
-        [[nodiscard]] Vec2 GetBaseSizeAsFloat() const { return { static_cast<float>(m_baseSize.x), static_cast<float>(m_baseSize.y) }; }
+        [[nodiscard]] virtual void* Get() const override;
+        [[nodiscard]] Vec2Int GetTextureSize() const;
+        [[nodiscard]] Vec2 GetTextureSizeAsVec2() const;
+
         
     protected:
         virtual void Free() override;

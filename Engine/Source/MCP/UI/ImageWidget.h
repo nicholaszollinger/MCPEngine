@@ -33,11 +33,14 @@ namespace mcp
         void SetTint(const Color tint) { m_tint = tint; }
 
         [[nodiscard]] Color GetTint() const { return m_tint; }
+        virtual float GetRectWidth() const override;
+        virtual float GetRectHeight() const override;
 
         static ImageWidget* AddFromData(const XMLElement element);
         static void RegisterLuaFunctions(lua_State* pState);
     private:
-        virtual void OnEnable() override;
-        virtual void OnDisable() override;
+        virtual void OnActive() override;
+        virtual void OnInactive() override;
+        virtual void OnParentSet() override;
     };
 }

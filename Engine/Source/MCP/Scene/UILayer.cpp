@@ -5,6 +5,14 @@
 #include "MCP/Core/Event/ApplicationEvent.h"
 #include "MCP/Scene/Scene.h"
 
+#include "MCP/UI/Widget.h"
+#include "MCP/UI/CanvasWidget.h"
+#include "MCP/UI/ImageWidget.h"
+#include "MCP/UI/SelectionWidget.h"
+#include "MCP/UI/SliderWidget.h"
+#include "MCP/UI/TextWidget.h"
+#include "MCP/UI/ToggleWidget.h"
+
 namespace mcp
 {
     UILayer::UILayer(Scene* pScene)
@@ -54,6 +62,8 @@ namespace mcp
             element = element.GetSiblingElement();
         }
 
+        //DumpUITree();
+
         return true;
     }
 
@@ -73,7 +83,6 @@ namespace mcp
 
         return true;
     }
-
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -240,6 +249,35 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
+    ///		@brief : Creates a new Widget from data. This function does NOT add the returned widget to the array of 'root' widgets.
+    ///             if you want to add it afterwards, call AddWidget(). This function assumes that we are loading a single widget and
+    ///             its children from data; it will NOT check for sibling widgets.
+    ///		@param root : Root element for the widget we are loading.
+    ///		@returns : Nullptr if there was an error, otherwise, the new Widget.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    Widget* UILayer::CreateWidgetFromData(const XMLElement root)
+    {
+        if (!root.IsValid())
+        {
+            MCP_ERROR("UILayer", "Failed to Add Widget from data! Root element was invalid!");
+            return nullptr;
+        }
+
+        const char* widgetTypename = root.GetAttributeValue<const char*>("type");
+
+        auto* pWidget = WidgetFactory::CreateWidgetFromData(widgetTypename, root);
+        pWidget->SetUILayer(this);
+        pWidget->Init();
+
+        // Recursively load each child widget.
+        LoadChildWidget(pWidget, root);
+
+        return pWidget;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
     ///		@brief : Queue the deletion of a Widget. NOTE: This should only be called by Widgets themselves so that they can properly
     ///         handle their relationships to other Widgets!
     ///		@param pWidget : Widget that is going to be deleted.
@@ -279,5 +317,77 @@ namespace mcp
 
         DeleteQueuedWidgets();
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Debug function to visualize the UI tree
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void UILayer::DumpUITree()
+    {
+        for (auto* pWidget : m_widgets)
+        {
+            PrintWidgetType(pWidget, 0);
+        }
+    }
+
+    void UILayer::PrintWidgetType(Widget* pWidget, int tabCount)
+    {
+        std::string line = "";
+        for (int i = 0; i < tabCount; ++i)
+        {
+            line += '\t';
+        }
+
+        const auto id = pWidget->GetTypeId();
+
+        if (id == CanvasWidget::GetStaticTypeId())
+        {
+            MCP_LOG("UILayer", line, "CanvasWidget: ", *pWidget->GetTag());
+        }
+
+        else if (id == ImageWidget::GetStaticTypeId())
+        {
+            MCP_LOG("UILayer", line, "ImageWidget");
+        }
+
+        else if (id == ButtonWidget::GetStaticTypeId())
+        {
+            MCP_LOG("UILayer", line, "ButtonWidget");
+        }
+
+        else if (id == ToggleWidget::GetStaticTypeId())
+        {
+            MCP_LOG("UILayer", line, "ToggleWidget");
+        }
+
+        else if (id == SliderWidget::GetStaticTypeId())
+        {
+            MCP_LOG("UILayer", line, "SliderWidget");
+        }
+
+        else if (id == TextWidget::GetStaticTypeId())
+        {
+            MCP_LOG("UILayer", line, "TextWidget");
+        }
+
+        else if (id == SelectionWidget::GetStaticTypeId())
+        {
+            MCP_LOG("UILayer", line, "SelectionWidget");
+        }
+
+        else
+        {
+            MCP_LOG("UILayer", line, "Uknown Widget");
+        }
+
+        if (pWidget->HasChildren())
+        {
+            ++tabCount;
+            pWidget->ForAllChildren([this, tabCount](Widget* pWidget){ this->PrintWidgetType(pWidget, tabCount); });
+        }
+    }
+
+    
 
 }

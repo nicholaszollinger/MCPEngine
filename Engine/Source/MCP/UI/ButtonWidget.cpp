@@ -31,10 +31,6 @@ namespace mcp
 
     void ButtonWidget::HandleEvent(ApplicationEvent& event)
     {
-        // If I or the parent is not active, don't handle the event.
-        if (!IsActive())
-            return;
-
         const auto eventId = event.GetEventId();
 
         // Mouse Button Press
@@ -55,22 +51,24 @@ namespace mcp
     void ButtonWidget::HandleMouseButtonPress(MouseButtonEvent& event)
     {
         // If the button action happened within our Rect,
-        if (PointIntersectsRect(event.GetWindowPosition()))
+        const auto clickPosition = event.GetWindowPosition();
+        Vec2 relativeClickPosition {};
+        if (GetPointRelativeToRect(clickPosition, relativeClickPosition))
         {
             switch (event.State())
             {
                 case ButtonState::kPressed:
                 {
                     m_isPressed = true;
-                    OnPress();
+                    OnPress(relativeClickPosition);
                     break;
                 }
 
                 case ButtonState::kReleased:
                 {
                     m_isPressed = false;
-                    OnRelease();
-                    OnExecute();
+                    OnRelease(relativeClickPosition);
+                    OnExecute(relativeClickPosition);
                     
                     break;
                 }
@@ -87,7 +85,7 @@ namespace mcp
         else if (m_isPressed && event.State() == ButtonState::kReleased)
         {
             m_isPressed = false;
-            OnRelease();
+            OnRelease(relativeClickPosition);
 
             // Set the event as handled.
             event.SetHandled();
@@ -126,7 +124,7 @@ namespace mcp
         }
     }
 
-    void ButtonWidget::OnDisable()
+    void ButtonWidget::OnInactive()
     {
         // If we were hovered, we need to return to the original state by 'un-hovering'
         if (m_isHovered)
@@ -135,20 +133,20 @@ namespace mcp
         m_isHovered = false;
     }
 
-    void ButtonWidget::OnExecute()
+    void ButtonWidget::OnExecute([[maybe_unused]] const Vec2 relativeClickPosition)
     {
         // MCP_LOG("ButtonWidget", "Calling OnPress");
         MCP_CHECK(m_pOnExecuteScript.IsValid());
         lua::CallMemberFunction(m_pOnExecuteScript, "OnExecute");
     }
 
-    void ButtonWidget::OnPress()
+    void ButtonWidget::OnPress([[maybe_unused]] const Vec2 relativeClickPosition)
     {
         if (m_pPressReleaseBehaviorScript.IsValid())
             lua::CallMemberFunction(m_pPressReleaseBehaviorScript, "OnPress");
     }
 
-    void ButtonWidget::OnRelease()
+    void ButtonWidget::OnRelease([[maybe_unused]] const Vec2 relativeClickPosition)
     {
         if (m_pPressReleaseBehaviorScript.IsValid())
             lua::CallMemberFunction(m_pPressReleaseBehaviorScript, "OnRelease");

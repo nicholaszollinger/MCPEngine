@@ -14,7 +14,7 @@ namespace mcp
         , m_crop{}
     {
         m_texture.Load(pImageFilePath);
-        const auto imageSize = m_texture.GetBaseSize();
+        const auto imageSize = m_texture.GetTextureSize();
         m_crop = RectInt{0,0, imageSize.x, imageSize.y};
     }
 
@@ -34,7 +34,15 @@ namespace mcp
 
     void ImageWidget::Render() const
     {
-        auto rect = GetScreenRect();
+        auto rect = GetRect();
+
+        // If we are using the image size to determine our rect:
+        /*if (m_scaleToContent)
+        {
+            rect.width = m_scale.x * static_cast<float>(m_crop.width);
+            rect.height = m_scale.y * static_cast<float>(m_crop.height);
+        }*/
+        
         rect.x -= rect.width / 2.f;
         rect.y -= rect.height / 2.f;
 
@@ -43,10 +51,31 @@ namespace mcp
         renderData.angle = m_renderAngle;
         renderData.crop = m_crop;
         renderData.tint = m_tint;
+        renderData.anglePivot = m_anglePivot;
         renderData.destinationRect = rect;
         renderData.flip = m_flip;
 
         DrawTexture(renderData);
+    }
+
+    float ImageWidget::GetRectWidth() const
+    {
+        if (m_sizedToContent)
+        {
+            return GetScale().x * m_texture.GetTextureSizeAsVec2().x;
+        }
+
+        return GetScale().x * m_width;
+    }
+
+    float ImageWidget::GetRectHeight() const
+    {
+        if (m_sizedToContent)
+        {
+            return GetScale().y * m_texture.GetTextureSizeAsVec2().y;
+        }
+
+        return GetScale().y * m_height;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -54,9 +83,9 @@ namespace mcp
     //		
     ///		@brief : When enabled, we are rendered.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void ImageWidget::OnEnable()
+    void ImageWidget::OnActive()
     {
-        //MCP_LOG("UI", "Enabling Image Widget: ", *m_tag);
+        m_isVisible = true;
         m_pUILayer->AddRenderable(this);
     }
 
@@ -65,10 +94,15 @@ namespace mcp
     //		
     ///		@brief : When disabled, we are not rendered.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void ImageWidget::OnDisable()
+    void ImageWidget::OnInactive()
     {
-        //MCP_LOG("UI", "Disabling Image Widget: ", *m_tag);
+        m_isVisible = false;
         m_pUILayer->RemoveRenderable(this);
+    }
+
+    void ImageWidget::OnParentSet()
+    {
+        SetZOrder(GetZOffset());
     }
 
     ImageWidget* ImageWidget::AddFromData(const XMLElement element)
@@ -123,7 +157,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     static int GetFirstChildImageWidget(lua_State* pState)
     {
-        //MCP_LOG("Lua", "Calling GetChildCanvasWidgetByTag() from lua...");
+        //MCP_LOG("Lua", "Calling GetChildCanvasWidget() from lua...");
 
         // Get the Widget and string parameters off the stack.
         auto* pWidget = static_cast<Widget*>(lua_touserdata(pState, -1));
@@ -201,15 +235,22 @@ namespace mcp
 
     void ImageWidget::RegisterLuaFunctions(lua_State* pState)
     {
-        lua_pushcfunction(pState, &GetChildImageWidgetByTag);
-        // It would be cool to be able to set a global table 'ImageWidget' of functions.
-        lua_setglobal(pState, "GetChildCanvasWidgetByTag");
+        static constexpr luaL_Reg kFuncs[]
+        {
+            {"SetTint", &SetImageWidgetTint}
+             ,{"GetChildImageWidgetByTag", &GetChildImageWidgetByTag}
+             ,{"GetFirstChildImageWidget", &GetFirstChildImageWidget}
+            ,{nullptr, nullptr}
+        };
 
-        lua_pushcfunction(pState, &GetFirstChildImageWidget);
-        lua_setglobal(pState, "GetChildImageWidget");
+        lua_getglobal(pState, "Widget");
+        MCP_CHECK(lua_type(pState, -1) == LUA_TTABLE);
 
-        lua_pushcfunction(pState , &SetImageWidgetTint);
-        lua_setglobal(pState, "SetTint");
+        // Set its functions
+        luaL_setfuncs(pState, kFuncs, 0);
+
+        // Pop the table off the stack.
+        lua_pop(pState, 1);
     }
 
 }

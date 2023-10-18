@@ -27,6 +27,7 @@ namespace mcp
         WidgetType* GetWidgetByTag(const StringId tag);
 
         void AddWidget(Widget* pWidget);
+        Widget* CreateWidgetFromData(const XMLElement root);
         void FocusWidget(Widget* pWidget);
         void DeleteWidget(Widget* pWidget);
 
@@ -36,6 +37,9 @@ namespace mcp
         void LoadWidget(XMLElement rootElement);
         void LoadChildWidget(Widget* pParent, XMLElement parentElement);
         void DeleteQueuedWidgets();
+
+        void DumpUITree();
+        void PrintWidgetType(Widget* pWidget, int tabCount);
     };
 
     //-----------------------------------------------------------------------------------------------------------------------------

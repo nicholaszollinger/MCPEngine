@@ -205,7 +205,9 @@ namespace mcp
     const char* XMLElement::GetStringAttribute(const char* pAttributeName, const char* defaultVal) const
     {
         const auto* pElement = CAST_TO_CONST_ELEMENT_TYPE(m_pHandle);
-        const char* result = pElement->Attribute(pAttributeName, defaultVal);
+        const char* result = pElement->Attribute(pAttributeName);
+        if (!result)
+            return defaultVal;
 
         return result;
     }

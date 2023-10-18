@@ -189,8 +189,13 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Scene\WorldLayer.cpp" />
     <ClCompile Include="Source\MCP\UI\ButtonWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\CanvasWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\HorizontalLayoutWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\ImageWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\SelectionWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\SliderWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\TextWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\ToggleWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\VerticalLayoutWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\Widget.cpp" />
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp" />
     <ClCompile Include="Source\Platform\SDL2\SDLAudio.cpp" />
@@ -272,8 +277,13 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Scene\WorldLayer.h" />
     <ClInclude Include="Source\MCP\UI\ButtonWidget.h" />
     <ClInclude Include="Source\MCP\UI\CanvasWidget.h" />
+    <ClInclude Include="Source\MCP\UI\HorizontalLayoutWidget.h" />
+    <ClInclude Include="Source\MCP\UI\SelectionWidget.h" />
+    <ClInclude Include="Source\MCP\UI\SliderWidget.h" />
     <ClInclude Include="Source\MCP\UI\TextWidget.h" />
     <ClInclude Include="Source\MCP\UI\ImageWidget.h" />
+    <ClInclude Include="Source\MCP\UI\ToggleWidget.h" />
+    <ClInclude Include="Source\MCP\UI\VerticalLayoutWidget.h" />
     <ClInclude Include="Source\MCP\UI\Widget.h" />
     <ClInclude Include="Source\MCP\UI\WidgetFactory.h" />
     <ClInclude Include="Source\Platform\SDL2\SDL2Window.h" />

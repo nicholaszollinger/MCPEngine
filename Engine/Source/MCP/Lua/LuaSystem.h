@@ -26,6 +26,7 @@ namespace mcp
         bool LoadScript(const char* pFilepath) const;
         LuaResourcePtr LoadScriptInstance(const char* pFilepath) const;
         LuaResourcePtr LoadScriptInstance(const char* pFilepath, const char* pConstructionDataFilepath) const;
+        [[nodiscard]] LuaResourcePtr CreateTable() const;
         void FreeScriptInstance(const LuaResourceId ref) const;
 
         // Get Global Variables
@@ -47,6 +48,9 @@ namespace mcp
 
         template<typename Type>
         void SetElementInTable(const char* tableName, const char* elementName, Type&& val) const;
+
+        template<typename Type>
+        void SetElementInTable(const LuaResourcePtr& tableResource, const char* elementName, Type&& val);
         
         // Calling Functions
         template<typename...Args>
@@ -177,6 +181,9 @@ namespace mcp
 
         // Call the Member function
         CallFunctionImpl(paramCount);
+
+        /*MCP_LOG("Lua", "Member function called: ", pMemberFunctionName);
+        DumpStack();*/
 
         // Remove the Object from the stack.
         PopStack(1);
@@ -341,6 +348,35 @@ namespace mcp
         }
 
         // Set the Element.
+        SetElement();
+    }
+
+    template <typename Type>
+    void LuaSystem::SetElementInTable(const LuaResourcePtr& tableResource, const char* elementName, Type&& val)
+    {
+        using BaseType = std::remove_cv_t<Type>;
+        using NonRefType = std::remove_reference_t<BaseType>;
+
+        if (!tableResource.IsValid())
+        {
+            MCP_ERROR("Lua", "Failed to SetElement in table! Ref was invalid.");
+            return;
+        }
+
+        // Push the object onto the stack.
+        if (!PushResource(tableResource))
+        {
+            MCP_ERROR("Lua", "Failed to SetElement in table! Failed to push tableResource!");
+            return;
+        }
+
+        // Push the name of the element onto the stack.
+        PushString(elementName);
+
+        // Push the value
+        Push(std::forward<Type>(val));
+
+        // Set the Element, popping the table off the stack.
         SetElement();
     }
 

@@ -16,10 +16,13 @@ namespace mcp
     class ButtonWidget : public Widget
     {
         MCP_DEFINE_WIDGET(ButtonWidget)
-    private:
+
+    protected:
         LuaResourcePtr m_pOnExecuteScript;  
         LuaResourcePtr m_pHighlightBehaviorScript;
         LuaResourcePtr m_pPressReleaseBehaviorScript;
+
+    private:
         bool m_isPressed = false;
         bool m_isHovered = false;
 
@@ -33,18 +36,18 @@ namespace mcp
         //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Called when the button is executed.
         //-----------------------------------------------------------------------------------------------------------------------------
-        virtual void OnExecute();
+        virtual void OnExecute([[maybe_unused]] const Vec2 relativeClickPosition);
 
         //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Called when the button is released; this happens only if the button was pressed.
         //-----------------------------------------------------------------------------------------------------------------------------
-        virtual void OnRelease();
+        virtual void OnRelease([[maybe_unused]] const Vec2 relativeClickPosition);
 
         //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Called when the button is pressed. This is not executing the button! This is for any functionality you want
         ///             to do when a button is pressed.
         //-----------------------------------------------------------------------------------------------------------------------------
-        virtual void OnPress();
+        virtual void OnPress([[maybe_unused]] const Vec2 relativeClickPosition);
 
         //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Called when the button has input focus.
@@ -60,7 +63,7 @@ namespace mcp
         virtual void HandleEvent(ApplicationEvent& event) override;
         void HandleMouseButtonPress(MouseButtonEvent& event);
         void HandleMouseMotion(MouseMoveEvent& event);
-        virtual void OnDisable() override;
+        virtual void OnInactive() override;
         // TODO: Handle keyboard and controller input. 
     };
 }

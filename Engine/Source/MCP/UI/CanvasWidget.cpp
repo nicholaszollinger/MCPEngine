@@ -95,10 +95,20 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void CanvasWidget::RegisterLuaFunctions(lua_State* pState)
     {
-        lua_pushcfunction(pState, &GetChildCanvasWidgetByTag);
-        lua_setglobal(pState, "GetChildCanvasWidgetByTag");
+        static constexpr luaL_Reg kFuncs[]
+        {
+             {"GetChildCanvasWidgetByTag", &GetChildCanvasWidgetByTag}
+             ,{"GetCanvasWidget", &GetCanvasWidgetByTag}
+            ,{nullptr, nullptr}
+        };
 
-        lua_pushcfunction(pState, &GetCanvasWidgetByTag);
-        lua_setglobal(pState, "GetCanvasWidget");
+        lua_getglobal(pState, "Widget");
+        MCP_CHECK(lua_type(pState, -1) == LUA_TTABLE);
+
+        // Set its functions
+        luaL_setfuncs(pState, kFuncs, 0);
+
+        // Pop the table off the stack.
+        lua_pop(pState, 1);
     }
 }

@@ -7,10 +7,39 @@
 #include "MCP/Lua/LuaDebug.h"
 #include "MCP/UI/CanvasWidget.h"
 #include "MCP/UI/ImageWidget.h"
+#include "MCP/UI/TextWidget.h"
 #include "MCP/UI/Widget.h"
 
 namespace mcp
 {
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //      https://stackoverflow.com/questions/4125971/setting-the-global-lua-path-variable-from-c-c
+    //		
+    ///		@brief : Adds a package search function to the package.path for this lua state.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    static void AddSearchPath(lua_State* pState, const char* path)
+    {
+        // Get the Package path variable.
+        lua_getglobal(pState, "package");
+        lua_getfield(pState, -1, "path");             // get field "path" from table at top of stack (-1)
+        std::string currentPath = lua_tostring(pState, -1);    // grab path string from top of stack
+
+        // Add the path.
+        currentPath.append(";");                               
+        currentPath.append(path);
+
+        // Get rid of the string on the stack we just pushed.
+        lua_pop(pState, 1);
+
+        // Set the updated path.
+        lua_pushstring(pState, currentPath.c_str());
+        lua_setfield(pState, -2, "path");
+
+        // Pop the package path off the stack.
+        lua_pop(pState, 1);
+    }
+
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
@@ -23,14 +52,22 @@ namespace mcp
         m_pState = luaL_newstate();
         luaL_openlibs(m_pState);
 
+        // Add the Engine scripts path to the package search path.
+        AddSearchPath(m_pState, "..\\MCPEngine\\?.lua");
+
+        // Sets the initial require for each of our modules.
+        luaL_dofile(m_pState, "../MCPEngine/Engine/Scripts/Core/MCP.lua");
+
+#if _DEBUG
         // Register Debug functions.
         RegisterDebugFunctions(m_pState);
-
+#endif
         // Register each of the types' lua capabilities to the state.
         Application::RegisterLuaFunctions(m_pState);
         Widget::RegisterLuaFunctions(m_pState);
         ImageWidget::RegisterLuaFunctions(m_pState);
         CanvasWidget::RegisterLuaFunctions(m_pState);
+        TextWidget::RegisterLuaFunctions(m_pState);
 
         return true;
     }
@@ -66,6 +103,7 @@ namespace mcp
     {
         if (luaL_dofile(m_pState, pFilepath) != 0)
         {
+            lua_pop(m_pState, 1); // Pop the error message off the stack.
             MCP_ERROR("Lua", "Failed to load Lua Script! Filepath: ", pFilepath);
             return false;
         }
@@ -86,6 +124,7 @@ namespace mcp
     {
         if (luaL_dofile(m_pState, pFilepath) != 0)
         {
+            lua_pop(m_pState, 1); // Pop the error message off the stack.
             MCP_ERROR("Lua", "Failed to load Lua Script! Filepath: ", pFilepath);
             return LuaResourcePtr();
         }
@@ -145,6 +184,26 @@ namespace mcp
     {
         luaL_unref(m_pState, LUA_REGISTRYINDEX, ref);
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Create a new table and return a reference to it.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    LuaResourcePtr LuaSystem::CreateTable() const
+    {
+        lua_newtable(m_pState);
+
+        const auto result = luaL_ref(m_pState, LUA_REGISTRYINDEX);
+        if (result == LUA_REFNIL)
+        {
+            MCP_ERROR("Lua", "Failed to get reference to Loaded Script Instance! Are you returning the instance at the end of the script So that we can get a reference to it?");
+            return LuaResourcePtr();
+        }
+
+        return LuaResourcePtr(m_pState, result);
+    }
+
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:

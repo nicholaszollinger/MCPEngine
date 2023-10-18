@@ -32,11 +32,13 @@ namespace mcp
     {
         RectF rect {};                           // Position of the rect is the offset from the parent, or the actual screen position if the parent is nullptr.
         Vec2 anchor = {0.5f, 0.5f};         // How the Widget is anchored to it's parent. Default is to anchor to the center.
+        Vec2 scale = {1.f, 1.f};            // Scale of the Widget.
         StringId tag = {};                       // Optional tag to give the Widget.
         LuaResourcePtr enableBehaviorScript;     // Optional script that defines extra behavior for enabling and disabling this widget.
-        unsigned int zOffset = 1;                // z-Axis difference from the parent.
-        bool isInteractable;                     // Whether this Widget is interactable or not.
+        int zOffset = 1;                         // z-Axis difference from the parent.
+        bool isInteractable = false;             // Whether this Widget is interactable or not.
         bool startEnabled = true;                // Whether this Widget is active when loaded.
+        bool sizedToContent = false;             // Whether the Widget's dimensions is based on the size of its content.
     };
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -55,12 +57,15 @@ namespace mcp
         const StringId m_tag;               // Optional tag to be able to find this specific widget.
         Widget* m_pParent;                  // Parent of this widget. If the parent is nullptr, then it is the Root.
         LuaResourcePtr m_enableBehaviorScript;  // Optional Script that defines behavior when this script is enabled or disabled.
-        Vec2 m_offset;                      // Offset from the anchor position 
+        Vec2 m_localPos;                      // Offset from the anchor position 
         Vec2 m_anchor;                      // Determines the position of Widget based on the Parent's position. An anchor can have values from [0, 1]
+        Vec2 m_scale;                       // Scale of the two axes.
         float m_width;                      // Width of the Widget.
         float m_height;                     // Height of the Widget.
-        unsigned int m_zOffset;             // The z-Depth of this widget
-        bool m_isInteractable;
+        int m_zOffset;                      // The z-Depth of this widget
+        bool m_isInteractable;              // Whether this Widget able to be interacted with or not. Ex: Can I hit this button?
+        bool m_isVisible;                   // Whether this Widget is being rendered or not.
+        bool m_sizedToContent;              // Whether the size of this widget is based on its content and its children.
 
     private:
         bool m_isActive;     // Whether this widget is active or not. Use IsActive() to properly check to if you are active or not.
@@ -96,18 +101,29 @@ namespace mcp
         void OnEvent(ApplicationEvent& event);
 
         // Setters
-        virtual void SetPositionOffset(const float x, const float y);
+        virtual void SetLocalPosition(const float x, const float y);
         void SetAnchor(const float x, const float y);
-        void SetZOffset(const unsigned int zOffset);
+        void SetZOffset(const int zOffset);
         void SetActive(const bool isActive);
+        void SetInteractable(const bool isInteractable);
         void SetUILayer(UILayer* pUILayer) { m_pUILayer = pUILayer; }
+        void SetWidth(const float width) { m_width = width; }
+        void SetHeight(const float height) { m_height = height; }
+        void SetScale(const float xScale, const float yScale);
+        void SetScale(const float uniformScale);
 
         // Getters
+        [[nodiscard]] virtual float GetRectWidth() const;
+        [[nodiscard]] virtual float GetRectHeight() const;
+        [[nodiscard]] Vec2 GetLocalPos() const { return m_localPos; }
+        [[nodiscard]] Vec2 GetPos() const;
+        [[nodiscard]] Vec2 GetScale() const;
         [[nodiscard]] StringId GetTag() const { return m_tag; }
-        [[nodiscard]] RectF GetScreenRect() const;
-        [[nodiscard]] unsigned int GetZOrder() const;
+        [[nodiscard]] RectF GetRect() const;
+        [[nodiscard]] int GetZOffset() const;
         [[nodiscard]] bool HasChildren() const { return !m_children.empty(); }
-        [[nodiscard]] bool IsInteractable() const { return m_isInteractable; }
+        [[nodiscard]] bool IsInteractable() const;
+        [[nodiscard]] bool IsVisible() const;
         [[nodiscard]] bool IsActive() const;
         [[nodiscard]] virtual WidgetTypeId GetTypeId() const = 0;
         [[nodiscard]] UILayer* GetLayer() const { return m_pUILayer; }
@@ -116,14 +132,35 @@ namespace mcp
         static WidgetConstructionData GetWidgetConstructionData(const XMLElement widgetElement);
         //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Virtual function to override how this Widget handles Application Events. The default behavior is to do nothing.
+        ///         This function is only called if the Widget is active and is interactable.
         //-----------------------------------------------------------------------------------------------------------------------------
         virtual void HandleEvent([[maybe_unused]] ApplicationEvent& event) {}
 
+        //-----------------------------------------------------------------------------------------------------------------------------
+        ///		@brief : Called when this Widget's m_isInteractable is set to true.
+        //-----------------------------------------------------------------------------------------------------------------------------
         virtual void OnEnable() {}
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        ///		@brief : Called when this Widget's m_isInteractable is set to false.
+        //-----------------------------------------------------------------------------------------------------------------------------
         virtual void OnDisable() {}
-        virtual void OnChildAdded() {}
-        virtual void OnChildRemoved() {}
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        ///		@brief : Called when this Widget is set to 'Active'. Example task: Set the Widget to be rendered.
+        //-----------------------------------------------------------------------------------------------------------------------------
+        virtual void OnActive() {}
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        ///		@brief : Called when this Widget is set to 'Inactive'.  Example task: Stop the Widget from being rendered.
+        //-----------------------------------------------------------------------------------------------------------------------------
+        virtual void OnInactive() {}
+
+        virtual void OnParentSet() {}
+        virtual void OnChildAdded([[maybe_unused]] Widget* pChild) {}
+        virtual void OnChildRemoved([[maybe_unused]] Widget* pChild) {}
         [[nodiscard]] bool PointIntersectsRect(const Vec2 screenPos) const;
+        [[nodiscard]] bool GetPointRelativeToRect(const Vec2 screenPos, Vec2& relativePos) const;
 
     private:
         void OnParentActiveChanged(const bool parentActiveState);

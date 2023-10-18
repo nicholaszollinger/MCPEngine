@@ -13,16 +13,19 @@
 #include "MCP/Core/Application/Window/WindowBase.h"
 #include "Platform/SDL2/SDLHelpers.h"
 #include "MCP/Graphics/Graphics.h"
+#include "MCP/Graphics/Texture.h"
 
 namespace mcp
 {
+
+#if MCP_RENDERER_API == MCP_RENDERER_API_SDL
     //--------------------------------------------------------------------------------------------------------
     //      SDL_TEXTURES
     //--------------------------------------------------------------------------------------------------------
 
     template <>
     template <>
-    SDL_Texture* ResourceContainer<SDL_Texture>::LoadFromDiskImpl(const char* pFilePath, Vec2Int& sizeOut)
+    TextureData* ResourceContainer<TextureData>::LoadFromDiskImpl(const char* pFilePath)
     {
         SDL_Surface* pSurface = IMG_Load(pFilePath);
 
@@ -32,22 +35,15 @@ namespace mcp
             return nullptr;
         }
 
-        return CreateTextureFromSurface(pSurface, sizeOut);
+        Vec2Int sizeOut = {};
+        auto* pTexture = CreateTextureFromSurface(pSurface, sizeOut);
+
+        return BLEACH_NEW(TextureData(pTexture, sizeOut.x, sizeOut.y));
     }
 
-    /*template <>
-    template <>
-    SDL_Texture* ResourceContainer<SDL_Texture>::LoadFromDiskImpl(const char* pFilePath, const TextRenderData& data)
-    {
-        SDL_Surface* pSurface = TTF_RenderUTF8_Blended_Wrapped();
-
-        return CreateTextureFromSurface(pSurface, )
-    }*/
-
-
     template <>
     template <>
-    SDL_Texture* ResourceContainer<SDL_Texture>::LoadFromRawDataImpl(char* pRawData, const int dataSize, Vec2Int& sizeOut)
+    TextureData* ResourceContainer<TextureData>::LoadFromRawDataImpl(char* pRawData, const int dataSize)
     {
         SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
         // TODO: Check for nullptr.
@@ -60,14 +56,59 @@ namespace mcp
             return nullptr;
         }
 
-        return CreateTextureFromSurface(pSurface, sizeOut);
+        Vec2Int sizeOut = {};
+        auto* pTexture = CreateTextureFromSurface(pSurface, sizeOut);
+
+        return BLEACH_NEW(TextureData(pTexture, sizeOut.x, sizeOut.y));
     }
 
     template<>
-    void ResourceContainer<SDL_Texture>::FreeResourceImpl(SDL_Texture* pTexture)
+    void ResourceContainer<TextureData>::FreeResourceImpl(TextureData* pTextureData)
     {
-        SDL_DestroyTexture(pTexture);
+        SDL_DestroyTexture(static_cast<SDL_Texture*>(pTextureData->pTexture));
+        BLEACH_DELETE(pTextureData);
+        pTextureData = nullptr;
     }
+
+    //template <>
+    //template <>
+    //SDL_Texture* ResourceContainer<SDL_Texture>::LoadFromDiskImpl(const char* pFilePath, Vec2Int& sizeOut)
+    //{
+    //    SDL_Surface* pSurface = IMG_Load(pFilePath);
+
+    //    if (!pSurface)
+    //    {
+    //        MCP_ERROR("SDL", "Failed to Load SDL_Surface at filepath: ", pFilePath, ". SDL_Error: ", SDL_GetError());
+    //        return nullptr;
+    //    }
+
+    //    return CreateTextureFromSurface(pSurface, sizeOut);
+    //}
+
+    //template <>
+    //template <>
+    //SDL_Texture* ResourceContainer<SDL_Texture>::LoadFromRawDataImpl(char* pRawData, const int dataSize, Vec2Int& sizeOut)
+    //{
+    //    SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
+    //    // TODO: Check for nullptr.
+
+    //    SDL_Surface* pSurface = IMG_Load_RW(pSdlData, 0);
+
+    //    if (!pSurface)
+    //    {
+    //        MCP_ERROR("SDL", "Failed to Load SDL_Surface from raw data! SDL_Error: ", SDL_GetError());
+    //        return nullptr;
+    //    }
+
+    //    return CreateTextureFromSurface(pSurface, sizeOut);
+    //}
+
+    //template<>
+    //void ResourceContainer<SDL_Texture>::FreeResourceImpl(SDL_Texture* pTexture)
+    //{
+    //    SDL_DestroyTexture(pTexture);
+    //}
+#endif
 
     //--------------------------------------------------------------------------------------------------------
     //      MIX_CHUNK

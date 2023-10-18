@@ -426,7 +426,21 @@ namespace mcp
 
     void Application::RegisterLuaFunctions(lua_State* pState)
     {
-        lua_pushcfunction(pState, &QuitGame);
-        lua_setglobal(pState, "QuitGame");
+        static constexpr luaL_Reg kFuncs[]
+        {
+            {"QuitGame", QuitGame }
+            ,{nullptr, nullptr}
+        };
+
+        // Get the global Application library class,
+        lua_getglobal(pState, "Application");
+        MCP_CHECK(lua_type(pState, -1) == LUA_TTABLE);
+
+        // Set its functions
+        luaL_setfuncs(pState, kFuncs, 0);
+
+        // Pop the table off the stack.
+        lua_pop(pState, 1);
+
     }
 }

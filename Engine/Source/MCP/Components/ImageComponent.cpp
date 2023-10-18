@@ -18,7 +18,7 @@ namespace mcp
         , m_renderAngle(0.0)
         , m_flip(RenderFlip2D::kNone)
     {
-        m_size = m_texture.GetBaseSizeAsFloat();
+        m_size = m_texture.GetTextureSizeAsVec2();
     }
 
     ImageComponent::ImageComponent(Object* pObject, const char* pTextureFilepath, const RectInt& crop, const Vec2 size, const Color color, const RenderLayer layer, const int zOrder)

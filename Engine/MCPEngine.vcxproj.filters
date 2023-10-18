@@ -318,6 +318,21 @@
     <ClInclude Include="Source\MCP\Lua\LuaResource.h">
       <Filter>MCP\Lua</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MCP\UI\ToggleWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\SliderWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\SelectionWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\HorizontalLayoutWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\VerticalLayoutWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
@@ -502,6 +517,21 @@
     </ClCompile>
     <ClCompile Include="Source\MCP\Lua\LuaResource.cpp">
       <Filter>MCP\Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\ToggleWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\SliderWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\SelectionWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\HorizontalLayoutWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\VerticalLayoutWidget.cpp">
+      <Filter>MCP\UI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
