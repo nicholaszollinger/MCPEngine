@@ -13,7 +13,12 @@ namespace mcp
         , IRenderable(RenderLayer::kDebugOverlay, 0)
         , m_crop{}
     {
-        m_texture.Load(pImageFilePath);
+        if (!m_texture.Load({pImageFilePath, nullptr, false}))
+        {
+            MCP_ERROR("ImageWidget", "Failed to load texture!");
+            return;
+        }
+
         const auto imageSize = m_texture.GetTextureSize();
         m_crop = RectInt{0,0, imageSize.x, imageSize.y};
     }
@@ -26,7 +31,7 @@ namespace mcp
 
     bool ImageWidget::Init()
     {
-        if (IsActive())
+        if (IsActive() && m_texture.IsValid())
             m_pUILayer->AddRenderable(this);
 
         return true;

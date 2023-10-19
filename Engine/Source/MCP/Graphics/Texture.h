@@ -18,20 +18,20 @@ namespace mcp
         int height = 0;             // Base image height
     };
 
-    class Texture final : public Resource
+    class Texture final : public DiskResource
     {
     public:
         Texture() = default;
-        virtual ~Texture() override;
+        MCP_DEFINE_RESOURCE_DESTRUCTOR(Texture)
 
-        virtual void Load(const char* pFilePath, const char* pPackageName = nullptr, const bool isPersistent = false) override;
+        //void Load(const char* pFilePath, const char* pPackageName = nullptr, const bool isPersistent = false);
 
         [[nodiscard]] virtual void* Get() const override;
         [[nodiscard]] Vec2Int GetTextureSize() const;
         [[nodiscard]] Vec2 GetTextureSizeAsVec2() const;
 
-        
     protected:
+        virtual void* LoadResourceType() override;
         virtual void Free() override;
     };
 }

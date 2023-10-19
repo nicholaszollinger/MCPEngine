@@ -5,7 +5,7 @@
 
 namespace mcp
 {
-    class TiledTileSet
+    /*class TiledTileSet
     {
     public:
         struct Properties
@@ -25,6 +25,6 @@ namespace mcp
 
         [[nodiscard]] TextureRenderData GetRenderData(const size_t tileIndex) const;
         [[nodiscard]] const Properties& GetTileSetProps() const { return m_props; }
-    };
+    };*/
     
 }

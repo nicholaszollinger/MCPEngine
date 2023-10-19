@@ -31,7 +31,10 @@ namespace mcp
         , m_renderAngle(0.0)
         , m_flip(RenderFlip2D::kNone)
     {
-        m_texture.Load(pTextureFilepath);
+        if (m_texture.Load({pTextureFilepath, nullptr, false}))
+        {
+            MCP_WARN("ImageComponent", "Failed to load texture!");
+        }
     }
 
     ImageComponent::~ImageComponent()
@@ -46,7 +49,9 @@ namespace mcp
         // Add this component to the list of renderables in the scene.
         auto* pWorld = m_pOwner->GetWorld();
         assert(pWorld);
-        pWorld->AddRenderable(this);
+
+        if (m_texture.IsValid())
+            pWorld->AddRenderable(this);
 
         m_pTransformComponent = m_pOwner->GetComponent<TransformComponent>();
         if (!m_pTransformComponent)

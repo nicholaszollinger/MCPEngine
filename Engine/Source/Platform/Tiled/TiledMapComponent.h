@@ -19,39 +19,39 @@ namespace mcp
     //		
     ///		@brief : 
     //-----------------------------------------------------------------------------------------------------------------------------
-    class TiledMapComponent final : public Component, public IRenderable
-    {
-        MCP_DEFINE_COMPONENT_ID(TiledMapComponent)
+    //class TiledMapComponent final : public Component, public IRenderable
+    //{
+    //    MCP_DEFINE_COMPONENT_ID(TiledMapComponent)
 
-        using Layer = std::vector<size_t>;
+    //    using Layer = std::vector<size_t>;
 
-        static constexpr const char* kTileSetFileExtension = "tsx";
-        static constexpr const char* kTileMapFileExtension = "tmx";
-        static constexpr const char* kTiledTemplateFolder = "/Assets/Tiled/Templates/";
-        static constexpr const char* kPrefabsFolder = "/Assets/Prefabs/";
+    //    static constexpr const char* kTileSetFileExtension = "tsx";
+    //    static constexpr const char* kTileMapFileExtension = "tmx";
+    //    static constexpr const char* kTiledTemplateFolder = "/Assets/Tiled/Templates/";
+    //    static constexpr const char* kPrefabsFolder = "/Assets/Prefabs/";
 
-        std::vector<Layer> m_layers;
-        TiledTileSet m_tileSet;
-        TransformComponent* m_pTransformComponent = nullptr;
-        size_t m_mapSize            = 0;
-        uint32_t m_mapWidth         = 0;
-        uint32_t m_mapHeight        = 0;
-        float m_sizeScalar          = 1.f;
+    //    std::vector<Layer> m_layers;
+    //    TiledTileSet m_tileSet;
+    //    TransformComponent* m_pTransformComponent = nullptr;
+    //    size_t m_mapSize            = 0;
+    //    uint32_t m_mapWidth         = 0;
+    //    uint32_t m_mapHeight        = 0;
+    //    float m_sizeScalar          = 1.f;
 
-    public:
-        TiledMapComponent(Object* pObject, const char* pMapPath, const char* pTileSetPath, const char* pTileSetImagePath, const float scale = 1.f);
-        virtual ~TiledMapComponent() override;
+    //public:
+    //    TiledMapComponent(Object* pObject, const char* pMapPath, const char* pTileSetPath, const char* pTileSetImagePath, const float scale = 1.f);
+    //    virtual ~TiledMapComponent() override;
 
-        virtual bool Init() override;
-        virtual void Render() const override;
+    //    virtual bool Init() override;
+    //    virtual void Render() const override;
 
-        //RectInt GetMapDimensions();
-        static bool AddFromData(const XMLElement component, Object* pOwner);
+    //    //RectInt GetMapDimensions();
+    //    static bool AddFromData(const XMLElement component, Object* pOwner);
 
-    private:
-        void Load(const char* pMapPath, const char* pTileSetPath, const char* pTileSetImagePath);
-        bool LoadMapData(const char* pMapFilepath);
-        void GenerateLayerData(const char* pBuffer);
-    };
+    //private:
+    //    void Load(const char* pMapPath, const char* pTileSetPath, const char* pTileSetImagePath);
+    //    bool LoadMapData(const char* pMapFilepath);
+    //    void GenerateLayerData(const char* pBuffer);
+    //};
 }
 

@@ -290,27 +290,12 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     bool XMLParser::LoadFile(const char* pFilepath)
     {
-        m_loadedFile.Load(pFilepath, nullptr, false);
-        return m_loadedFile.IsValid();
+        return m_loadedFile.Load({pFilepath, nullptr, false});
     }
 
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Load the XML resource.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void XMLParser::XMLFile::Load(const char* pFilePath, [[maybe_unused]] const char* pPackageName, [[maybe_unused]] const bool isPersistent)
+    void* XMLParser::XMLFile::LoadResourceType()
     {
-        if (m_pResource)
-        {
-            Free();
-        }
-
-        m_loadData.pFilePath = pFilePath;
-        m_loadData.pPackageName = nullptr;
-        m_loadData.isPersistent = false;
-
-        m_pResource = ResourceManager::Get()->Load<tinyxml2::XMLDocument>(m_loadData);
+        return ResourceManager::Get()->LoadFromDisk<tinyxml2::XMLDocument>(m_request);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -320,7 +305,8 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void XMLParser::XMLFile::Free()
     {
-        ResourceManager::Get()->FreeResource<tinyxml2::XMLDocument>(m_loadData.pFilePath);
+        ResourceManager::Get()->FreeResource<tinyxml2::XMLDocument>(m_request);
+        m_pResource = nullptr;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------

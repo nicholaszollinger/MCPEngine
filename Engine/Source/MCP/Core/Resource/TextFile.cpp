@@ -20,13 +20,12 @@ namespace mcp
     };
 
     using TextFileAssetType = std::string;
-
+    
     template<>
-    template<>
-    TextFileAssetType* ResourceContainer<TextFileAssetType>::LoadFromDiskImpl(const char* pFilePath)
+    TextFileAssetType* ResourceContainer<TextFileAssetType, DiskResourceRequest>::LoadFromDiskImpl(const DiskResourceRequest& request)
     {
         std::fstream stream;
-        stream.open(pFilePath);
+        stream.open(request.path.GetCStr());
         if (!stream.is_open())
         {
             // Report an error.
@@ -42,10 +41,9 @@ namespace mcp
 
         return pString;
     }
-
+    
     template<>
-    template<>
-    TextFileAssetType* ResourceContainer<TextFileAssetType>::LoadFromRawDataImpl(char* pData, const int dataSize)
+    TextFileAssetType* ResourceContainer<TextFileAssetType, DiskResourceRequest>::LoadFromRawDataImpl(char* pData, const int dataSize, [[maybe_unused]] const DiskResourceRequest& request)
     {
         auto* pString = BLEACH_NEW(std::string);
         pString->reserve(dataSize);
@@ -56,36 +54,20 @@ namespace mcp
     }
 
     template<>
-    void ResourceContainer<TextFileAssetType>::FreeResourceImpl(TextFileAssetType* pAsset)
+    void ResourceContainer<TextFileAssetType, DiskResourceRequest>::FreeResourceImpl(TextFileAssetType* pAsset)
     {
         BLEACH_DELETE(pAsset);
     }
 
-    TextFile::~TextFile()
+    void* TextFile::LoadResourceType()
     {
-        if (m_pResource)
-        {
-            Free();
-        }
+        return ResourceManager::Get()->LoadFromDisk<TextFileAssetType>(m_request);
     }
 
-    void TextFile::Load(const char* pFilePath, const char* pPackageName, const bool isPersistent)
-    {
-        if (m_pResource)
-        {
-            Free();
-        }
-
-        m_loadData.pFilePath = pFilePath;
-        m_loadData.isPersistent = isPersistent;
-        m_loadData.pPackageName = pPackageName;
-
-        m_pResource = ResourceManager::Get()->Load<TextFileAssetType>(m_loadData);
-    }
 
     void TextFile::Free()
     {
-        ResourceManager::Get()->FreeResource<TextFileAssetType>(m_loadData.pFilePath);
+        ResourceManager::Get()->FreeResource<TextFileAssetType>(m_request);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -95,6 +77,6 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void TextFile::Dump() const
     {
-        std::cout << *(static_cast<std::string*>(m_pResource)) << "\n";
+        MCP_LOG("TextFile", *(static_cast<std::string*>(m_pResource)));
     }
 }

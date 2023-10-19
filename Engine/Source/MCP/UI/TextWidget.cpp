@@ -38,7 +38,12 @@ namespace mcp
             m_pUILayer->AddRenderable(this);
 
         // Load the font.
-        m_font.Load(m_textData.pFontFilepath, m_textData.fontSize);
+        if (!m_font.Load({{m_textData.pFontFilepath, nullptr, false } , m_textData.fontSize }))
+        {
+            MCP_ERROR("TextWidget", "Failed to load font!");
+            return false;
+        }
+
         MCP_CHECK(m_font.IsValid());
 
         // Generate the Texture

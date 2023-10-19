@@ -1,36 +1,35 @@
 #pragma once
 // Font.h
 
+#include <string>
 #include "Resource.h"
-#include "Utility/Types/EnumHelpers.h"
 
 namespace mcp
 {
-   /* enum class FontStyle
+    struct FontResourceRequest final : public DiskResourceRequest
     {
-        kNone,
-        kBold,
-        kItalic,
-        kUnderline,
-        kStrikeThrough,
+        int fontSize = 0;
+
+        uint64_t operator()(const FontResourceRequest& request) const
+        {
+            return HashString64(request.path.GetCStr()) ^ std::hash<int>{}(request.fontSize);
+        }
+
+        bool operator==(const FontResourceRequest& right) const
+        {
+            return path == right.path && fontSize == right.fontSize;
+        }
     };
 
-    DEFINE_ENUM_CLASS_BITWISE_OPERATORS(FontStyle)*/
-
-    class Font final : public Resource
+    class Font final : public Resource<FontResourceRequest>
     {
-        int m_fontSize = 0;
-
     public:
-        virtual ~Font() override;
+        MCP_DEFINE_RESOURCE_DESTRUCTOR(Font)
 
-        void Load(const char* pFilepath, const int fontSize, const char* pPackageName = nullptr, const bool isPersistent = false);
         virtual void Free() override;
-
         void SetSize(const int size) const;
-        //void SetStyle(const FontStyle style);
 
     private:
-        virtual void Load(const char* pFilePath, const char* pPackageName, const bool isPersistent) override;
+        virtual void* LoadResourceType() override;
     };
 }

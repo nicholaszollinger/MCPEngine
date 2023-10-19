@@ -5,14 +5,14 @@
 
 namespace mcp
 {
-    class AudioTrack final : public Resource
+    class AudioTrack final : public DiskResource
     {
     public:
         AudioTrack() = default;
-        virtual ~AudioTrack() override;
+        MCP_DEFINE_RESOURCE_DESTRUCTOR(AudioTrack)
 
-        virtual void Load(const char* pFilePath, const char* pPackageName = nullptr, const bool isPersistent = false) override;
     protected:
+        virtual void* LoadResourceType() override;
         virtual void Free() override;
     };
 }

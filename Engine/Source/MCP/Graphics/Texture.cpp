@@ -27,31 +27,48 @@ namespace mcp
     }
 
 
-    Texture::~Texture()
+    //Texture::~Texture()
+    //{
+    //    if (m_pResource)
+    //    {
+    //        Free();
+    //    }
+    //}
+
+    //void Texture::Load(const char* pFilePath, const char* pPackageName, const bool isPersistent)
+    //{
+    //    if (m_pResource)
+    //    {
+    //        Free();
+    //    }
+
+    //    //m_loadData.pFilePath = pFilePath;
+    //    //m_loadData.isPersistent = isPersistent;
+    //    //m_loadData.pPackageName = pPackageName;
+    //    m_request.path = pFilePath;
+    //    m_request.packagePath = pPackageName;
+    //    m_request.isPersistent = isPersistent;
+
+    //    m_pResource = ResourceManager::Get()->LoadFromDisk<TextureData>(m_request);
+    //}
+
+    /*bool Texture::Load(const DiskResourceRequest& request)
     {
-        if (m_pResource)
-        {
-            Free();
-        }
+        m_request = request;
+
+        m_pResource = ResourceManager::Get()->LoadFromDisk<TextureData>(m_request);
+        return m_pResource != nullptr;
+    }*/
+
+    void* Texture::LoadResourceType()
+    {
+        return ResourceManager::Get()->LoadFromDisk<TextureData>(m_request);
     }
 
-    void Texture::Load(const char* pFilePath, const char* pPackageName, const bool isPersistent)
-    {
-        if (m_pResource)
-        {
-            Free();
-        }
-
-        m_loadData.pFilePath = pFilePath;
-        m_loadData.isPersistent = isPersistent;
-        m_loadData.pPackageName = pPackageName;
-
-        m_pResource = ResourceManager::Get()->Load<TextureData>(m_loadData);
-    }
 
     void Texture::Free()
     {
-        ResourceManager::Get()->FreeResource<TextureData>(m_loadData.pFilePath);
+        ResourceManager::Get()->FreeResource<TextureData>(m_request);
     }
 
     void* Texture::Get() const

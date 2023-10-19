@@ -155,11 +155,14 @@ namespace mcp
     class XMLParser
     {
     private:
-        class XMLFile final : public Resource
+        class XMLFile final : public DiskResource
         {
         public:
-            virtual void Load(const char* pFilePath, const char* pPackageName, const bool isPersistent) override;
+            MCP_DEFINE_RESOURCE_DESTRUCTOR(XMLFile)
             virtual void Free() override;
+
+        private:
+            virtual void* LoadResourceType() override;
         };
 
         XMLFile m_loadedFile;

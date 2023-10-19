@@ -14,6 +14,7 @@
 #include "Platform/SDL2/SDLHelpers.h"
 #include "MCP/Graphics/Graphics.h"
 #include "MCP/Graphics/Texture.h"
+#include "MCP/Core/Resource/Font.h"
 
 namespace mcp
 {
@@ -24,14 +25,13 @@ namespace mcp
     //--------------------------------------------------------------------------------------------------------
 
     template <>
-    template <>
-    TextureData* ResourceContainer<TextureData>::LoadFromDiskImpl(const char* pFilePath)
+    TextureData* ResourceContainer<TextureData, DiskResourceRequest>::LoadFromDiskImpl(const DiskResourceRequest& request)
     {
-        SDL_Surface* pSurface = IMG_Load(pFilePath);
+        SDL_Surface* pSurface = IMG_Load(request.path.GetCStr());
 
         if (!pSurface)
         {
-            MCP_ERROR("SDL", "Failed to Load SDL_Surface at filepath: ", pFilePath, ". SDL_Error: ", SDL_GetError());
+            MCP_ERROR("SDL", "Failed to Load SDL_Surface at filepath: ", request.path.GetCStr(), ". SDL_Error: ", SDL_GetError());
             return nullptr;
         }
 
@@ -42,8 +42,7 @@ namespace mcp
     }
 
     template <>
-    template <>
-    TextureData* ResourceContainer<TextureData>::LoadFromRawDataImpl(char* pRawData, const int dataSize)
+    TextureData* ResourceContainer<TextureData, DiskResourceRequest>::LoadFromRawDataImpl(char* pRawData, const int dataSize, [[maybe_unused]] const DiskResourceRequest& request)
     {
         SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
         // TODO: Check for nullptr.
@@ -63,7 +62,7 @@ namespace mcp
     }
 
     template<>
-    void ResourceContainer<TextureData>::FreeResourceImpl(TextureData* pTextureData)
+    void ResourceContainer<TextureData, DiskResourceRequest>::FreeResourceImpl(TextureData* pTextureData)
     {
         SDL_DestroyTexture(static_cast<SDL_Texture*>(pTextureData->pTexture));
         BLEACH_DELETE(pTextureData);
@@ -115,13 +114,12 @@ namespace mcp
     //--------------------------------------------------------------------------------------------------------
 
     template <>
-    template <>
-    Mix_Chunk* ResourceContainer<Mix_Chunk>::LoadFromDiskImpl(const char* pFilePath)
+    Mix_Chunk* ResourceContainer<Mix_Chunk, DiskResourceRequest>::LoadFromDiskImpl(const DiskResourceRequest& request)
     {
-        auto* pChunk = Mix_LoadWAV(pFilePath);
+        auto* pChunk = Mix_LoadWAV(request.path.GetCStr());
         if (!pChunk)
         {
-            MCP_ERROR("SDL", "Failed to load Mix_Chunk at filepath: ", pFilePath);
+            MCP_ERROR("SDL", "Failed to load Mix_Chunk at filepath: ", request.path.GetCStr());
             return nullptr;
         }
 
@@ -129,8 +127,7 @@ namespace mcp
     }
 
     template <>
-    template <>
-    Mix_Chunk* ResourceContainer<Mix_Chunk>::LoadFromRawDataImpl(char* pRawData, const int dataSize)
+    Mix_Chunk* ResourceContainer<Mix_Chunk, DiskResourceRequest>::LoadFromRawDataImpl(char* pRawData, const int dataSize, [[maybe_unused]] const DiskResourceRequest& request)
     {
         SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
         auto* pChunk = Mix_LoadWAV_RW(pSdlData, 0);
@@ -144,7 +141,7 @@ namespace mcp
     }
 
     template <>
-    void ResourceContainer<Mix_Chunk>::FreeResourceImpl(Mix_Chunk* pChunk)
+    void ResourceContainer<Mix_Chunk, DiskResourceRequest>::FreeResourceImpl(Mix_Chunk* pChunk)
     {
         Mix_FreeChunk(pChunk);
     }
@@ -154,13 +151,12 @@ namespace mcp
     //--------------------------------------------------------------------------------------------------------
 
     template <>
-    template <>
-    Mix_Music* ResourceContainer<Mix_Music>::LoadFromDiskImpl(const char* pFilePath)
+    Mix_Music* ResourceContainer<Mix_Music, DiskResourceRequest>::LoadFromDiskImpl(const DiskResourceRequest& request)
     {
-        auto* pMusic = Mix_LoadMUS(pFilePath);
+        auto* pMusic = Mix_LoadMUS(request.path.GetCStr());
         if (!pMusic)
         {
-            MCP_ERROR("SDL", "Failed to load Mix_Music at filepath: ", pFilePath);
+            MCP_ERROR("SDL", "Failed to load Mix_Music at filepath: ", request.path.GetCStr());
             return nullptr;
         }
 
@@ -168,8 +164,7 @@ namespace mcp
     }
 
     template <>
-    template <>
-    Mix_Music* ResourceContainer<Mix_Music>::LoadFromRawDataImpl(char* pRawData, const int dataSize)
+    Mix_Music* ResourceContainer<Mix_Music, DiskResourceRequest>::LoadFromRawDataImpl(char* pRawData, const int dataSize, [[maybe_unused]] const DiskResourceRequest& request)
     {
         SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
         auto* pMusic = Mix_LoadMUS_RW(pSdlData, 0);
@@ -183,7 +178,7 @@ namespace mcp
     }
 
     template <>
-    void ResourceContainer<Mix_Music>::FreeResourceImpl(Mix_Music* pFont)
+    void ResourceContainer<Mix_Music, DiskResourceRequest>::FreeResourceImpl(Mix_Music* pFont)
     {
         Mix_FreeMusic(pFont);
     }
@@ -193,10 +188,9 @@ namespace mcp
     //--------------------------------------------------------------------------------------------------------
 
     template <>
-    template <>
-    _TTF_Font* ResourceContainer<_TTF_Font>::LoadFromDiskImpl(const char* pFilePath, int& fontSize)
+    _TTF_Font* ResourceContainer<_TTF_Font, FontResourceRequest>::LoadFromDiskImpl(const FontResourceRequest& request)
     {
-        auto* pFont = TTF_OpenFont(pFilePath, fontSize);
+        auto* pFont = TTF_OpenFont(request.path.GetCStr(), request.fontSize);
 
         if (!pFont)
         {
@@ -208,11 +202,10 @@ namespace mcp
     }
 
     template <>
-    template <>
-    _TTF_Font* ResourceContainer<_TTF_Font>::LoadFromRawDataImpl(char* pRawData, const int dataSize, int& fontSize)
+    _TTF_Font* ResourceContainer<_TTF_Font, FontResourceRequest>::LoadFromRawDataImpl(char* pRawData, const int dataSize, const FontResourceRequest& request)
     {
         SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
-        auto* pFont = TTF_OpenFontRW(pSdlData, 0, fontSize);
+        auto* pFont = TTF_OpenFontRW(pSdlData, 0, request.fontSize);
         if (!pFont)
         {
             MCP_ERROR("SDL", "Failed to load TTF_Font from raw data! TTF_Error: ", TTF_GetError());
@@ -223,7 +216,7 @@ namespace mcp
     }
 
     template <>
-    void ResourceContainer<_TTF_Font>::FreeResourceImpl(TTF_Font* pFont)
+    void ResourceContainer<_TTF_Font, FontResourceRequest>::FreeResourceImpl(TTF_Font* pFont)
     {
         TTF_CloseFont(pFont);
     }

@@ -41,6 +41,8 @@ public:
     [[nodiscard]] std::string GetStringCopy() const;
     [[nodiscard]] const std::string& GetStringRef() const;
     [[nodiscard]] const std::string* GetConstPtr() const;
+    [[nodiscard]] const char* GetCStr() const;
+    [[nodiscard]] bool IsValid() const { return m_pStrRef != &s_invalidStringId; }
 
     const std::string& operator*() const;
     constexpr bool operator==(const StringId& right) const { return m_pStrRef == right.m_pStrRef; }

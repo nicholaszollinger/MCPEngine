@@ -5,8 +5,6 @@
 
 namespace mcp
 {
-
-
     class HorizontalLayoutWidget final : public Widget
     {
         MCP_DEFINE_WIDGET(HorizontalLayoutWidget)

@@ -6,16 +6,16 @@
 
 namespace mcp
 {
-    class TextFile final : public Resource
+    class TextFile final : public DiskResource
     {
     public:
         TextFile() = default;
-        virtual ~TextFile() override;
-        virtual void Load(const char* pFilePath, const char* pPackageName, const bool isPersistent) override;
+        MCP_DEFINE_RESOURCE_DESTRUCTOR(TextFile)
 
         void Dump() const;
 
     protected:
+        virtual void* LoadResourceType() override;
         virtual void Free() override;
     };
 }

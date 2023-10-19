@@ -8,23 +8,21 @@
 namespace mcp
 {
     template<>
-    template<>
-    tinyxml2::XMLDocument* ResourceContainer<tinyxml2::XMLDocument>::LoadFromDiskImpl(const char* pFilepath)
+    tinyxml2::XMLDocument* ResourceContainer<tinyxml2::XMLDocument, DiskResourceRequest>::LoadFromDiskImpl(const DiskResourceRequest& request)
     {
         auto* pDoc = BLEACH_NEW(tinyxml2::XMLDocument);
 
-        if (pDoc->LoadFile(pFilepath) != tinyxml2::XML_SUCCESS)
+        if (pDoc->LoadFile(request.path.GetCStr()) != tinyxml2::XML_SUCCESS)
         {
-            MCP_ERROR("XML", "Failed to load xml file at filepath: ", pFilepath);
+            MCP_ERROR("XML", "Failed to load xml file at filepath: ", request.path.GetCStr());
             return nullptr;
         }
 
         return pDoc;
     }
-
+    
     template <>
-    template <>
-    tinyxml2::XMLDocument* ResourceContainer<tinyxml2::XMLDocument>::LoadFromRawDataImpl([[maybe_unused]] char* pRawData, [[maybe_unused]] const int dataSize)
+    tinyxml2::XMLDocument* ResourceContainer<tinyxml2::XMLDocument, DiskResourceRequest>::LoadFromRawDataImpl([[maybe_unused]] char* pRawData, [[maybe_unused]] const int dataSize, [[maybe_unused]] const DiskResourceRequest& request)
     {
         // TODO: There is a way to do it with LoadFile(FILE*), I just need to do testing for it.
         //auto* pDoc = BLEACH_NEW(tinyxml2::XMLDocument);
@@ -34,7 +32,7 @@ namespace mcp
     }
 
     template <>
-    void ResourceContainer<tinyxml2::XMLDocument>::FreeResourceImpl(tinyxml2::XMLDocument* pDoc)
+    void ResourceContainer<tinyxml2::XMLDocument, DiskResourceRequest>::FreeResourceImpl(tinyxml2::XMLDocument* pDoc)
     {
         pDoc->Clear();
         BLEACH_DELETE(pDoc);
