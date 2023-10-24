@@ -28,6 +28,7 @@ namespace mcp
 
         ColliderContainer m_colliders;              // Colliders that we own.
         CollisionSystem* m_pSystem;                 // CollisionSystem reference.
+        std::vector<void*> m_cells;
         void* m_pCell;
         TransformComponent* m_pTransformComponent;  // The transform component we are attached to.
         RectF m_myRelativeEstimationRect;           // This is a collider that encompasses all of the child colliders. Used as a quick filter.
@@ -63,6 +64,8 @@ namespace mcp
         [[nodiscard]] RectF GetEstimationRect() const;
         [[nodiscard]] TransformComponent* GetTransformComponent() const { return m_pTransformComponent; }
         [[nodiscard]] Vec2 GetVelocity() const { return m_velocity; }
+        [[nodiscard]] bool CollisionEnabled() const { return m_collisionEnabled; }
+        [[nodiscard]] size_t GetActiveColliderCount() const { return m_activeColliderCount; }
 
         static bool AddFromData(const XMLElement component, Object* pOwner);
     private:

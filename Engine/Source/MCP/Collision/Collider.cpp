@@ -31,6 +31,23 @@ namespace mcp
 
         m_isEnabled = isEnabled;
 
+        // If we are being disabled and we have colliders that we are overlapping,
+        // we need to remove those connections
+        if (!m_isEnabled && !m_overlappingColliders.empty())
+        {
+            for (auto* pOverlappedCollider : m_overlappingColliders)
+            {
+                // Send out the overlap exit events.
+                pOverlappedCollider->m_onExitOverlap.Broadcast(this, m_pOwner->GetOwner());
+                m_onExitOverlap.Broadcast(pOverlappedCollider, pOverlappedCollider->m_pOwner->GetOwner());
+            }
+
+            // Clear our set of overlapping colliders.
+            m_overlappingColliders.clear();
+
+            m_pSystem->RemoveOverlappingCollider(this);
+        }
+
         // Notify the Owner that we have changed.
         m_pOwner->ColliderCollisionChanged(m_colliderName);
     }

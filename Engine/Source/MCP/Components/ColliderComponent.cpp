@@ -16,6 +16,7 @@ namespace mcp
         , m_pSystem(nullptr)
         , m_pCell(nullptr)
         , m_pTransformComponent(nullptr)
+        , m_myRelativeEstimationRect{}
         , m_activeColliderCount(0)
         , m_isStatic(isStatic)
         , m_collisionEnabled(collisionEnabled)
@@ -26,7 +27,8 @@ namespace mcp
     ColliderComponent::~ColliderComponent()
     {
 #if RENDER_COLLIDER_VISUALS
-        m_pOwner->GetScene()->RemoveRenderable(this);
+        if (m_collisionEnabled)
+            m_pOwner->GetScene()->RemoveRenderable(this);
 #endif
 
         // If we were listening to the transform updated events, unregister.
@@ -34,10 +36,12 @@ namespace mcp
         //    m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
 
         // Remove ourselves from the collision system.
-        m_pSystem->RemoveCollideable(this);
+        if (m_collisionEnabled)
+            m_pSystem->RemoveCollideable(this);
 
         // Remove ourselves from the physics update.
-        m_pOwner->GetScene()->RemovePhysicsUpdateable(this);
+        if (!m_isStatic)
+            m_pOwner->GetScene()->RemovePhysicsUpdateable(this);
 
         // Delete all of our colliders
         for (auto&[ colliderId, pCollider] : m_colliders)
@@ -66,10 +70,12 @@ namespace mcp
         // Need to register with the collision system.
         m_pSystem = pScene->GetCollisionSystem();
 
-        pScene->AddPhysicsUpdateable(this);
+        if (!m_isStatic)
+            pScene->AddPhysicsUpdateable(this);
 
 #if RENDER_COLLIDER_VISUALS
-        pScene->AddRenderable(this);
+        if (m_collisionEnabled)
+            pScene->AddRenderable(this);
 #endif
 
         return true;
@@ -78,13 +84,14 @@ namespace mcp
     bool ColliderComponent::PostLoadInit()
     {
         // If we are an active, enabled collider, then we need to listen to the transform updates.
-        if (!m_isStatic && m_collisionEnabled)
-        {
-            //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
-        }
+        //if (!m_isStatic && m_collisionEnabled)
+        //{
+        //    //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
+        //}
 
         // Add ourselves to the CollisionSystem
-        m_pSystem->AddCollideable(this);
+        if (m_collisionEnabled)
+            m_pSystem->AddCollideable(this);
 
         return true;
     }
@@ -130,17 +137,20 @@ namespace mcp
         // If collision is enabled, we need to update our transform listening.
         if (m_collisionEnabled)
         {
-            // If we are becoming static, then we need to stop listening to the transform updates.
-            if (isStatic)
-            {
-                //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
-            }
+            // If we were enabled, then we need to update our status in the Collision system.
+            m_pSystem->SetCollideableStatic(this, isStatic);
+
+            //// If we are becoming static, then we need to stop listening to the transform updates.
+            //if (isStatic)
+            //{
+            //    //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
+            //}
 
             // Otherwise, we are becoming active and need to start listening.
-            else
-            {
-                //m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
-            }
+            //else
+            //{
+            //    //m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
+            //}
         }
 
         m_isStatic = isStatic;
@@ -161,25 +171,35 @@ namespace mcp
 
         // If we aren't a static collider, then we need to update if we
         // are listening to the Transform's updates.
-        if (!m_isStatic)
-        {
+        //if (!m_isStatic)
+        //{
             // If we are enabling the collision, then we need to
             //  - Add this Component to the collision grid.
             //  - Stop listening to Transform updates. Our collision will be updated by being active.
-            if (isEnabled)
-            {
-                m_pSystem->AddCollideable(this);
-                //m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
-            }
-            
-            // Otherwise, we to remove this component from the collision tree and start listening
-            // to transform updates.
-            else
-            {
-                m_pSystem->RemoveCollideable(this);
-                //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
-            }
+        if (isEnabled)
+        {
+#if RENDER_COLLIDER_VISUALS
+            m_pOwner->GetScene()->AddRenderable(this);
+#endif
+
+
+            m_pSystem->AddCollideable(this);
+            //m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
         }
+        
+        // Otherwise, we to remove this component from the collision tree and start listening
+        // to transform updates.
+        else
+        {
+#if RENDER_COLLIDER_VISUALS
+            m_pOwner->GetScene()->RemoveRenderable(this);
+#endif
+
+            //MCP_LOG("Collision", "Removing Collideable...");
+            m_pSystem->RemoveCollideable(this);
+            //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
+        }
+        //}
 
         m_collisionEnabled = isEnabled;
     }
@@ -243,11 +263,48 @@ namespace mcp
         // Add the collider to our container and set their owner.
         m_colliders.emplace(nameId, pCollider);
         pCollider->SetOwner(this);
+        pCollider->SetSystem(m_pSystem);
 
         // If we are adding an active collider, then we need to recalculate our estimation.
         if (pCollider->CollisionIsEnabled())
             UpdateEstimationRect();
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Remove a collider from the component, destroying it.
+    ///		@param pColliderName : 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void ColliderComponent::RemoveCollider(const char* pColliderName)
+    {
+        const Collider::ColliderNameId nameId = HashString32(pColliderName);
+        const auto result = m_colliders.find(nameId);
+        if (result == m_colliders.end())
+        {
+            MCP_WARN("Collision", "Tried to remove a Collider named '", pColliderName, "' that doesn't exist on the ColliderComponent");
+            return;
+        }
+
+        // If the collider's collision was enabled,
+        const bool wasEnabled = result->second->CollisionIsEnabled();
+        if (wasEnabled && result->second->IsOverlapping())
+        {
+            m_pSystem->RemoveOverlappingCollider(result->second);   
+        }
+
+        // Delete the collider.
+        BLEACH_DELETE(result->second);
+        result->second = nullptr;
+
+        // Remove the collider:
+        m_colliders.erase(result);
+
+        // If it was enabled, then we need to update our estimation rect.
+        if (wasEnabled)
+            UpdateEstimationRect();
+    }
+
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -293,7 +350,7 @@ namespace mcp
             // move our point over to to match the left most distance.
             if (colliderEstimation.x < m_myRelativeEstimationRect.x)
             {
-                m_myRelativeEstimationRect.width += colliderEstimation.x - m_myRelativeEstimationRect.x;
+                m_myRelativeEstimationRect.width += m_myRelativeEstimationRect.x - colliderEstimation.x;
                 m_myRelativeEstimationRect.x = colliderEstimation.x;
             }
             
@@ -314,7 +371,7 @@ namespace mcp
             // If the bottom of the collider is lower than our bottom, increase our height by the difference.
             if (colliderEstimation.y + colliderEstimation.height > m_myRelativeEstimationRect.y + m_myRelativeEstimationRect.height)
             {
-                m_myRelativeEstimationRect.height += colliderEstimation.y + colliderEstimation.height - m_myRelativeEstimationRect.y + m_myRelativeEstimationRect.height;
+                m_myRelativeEstimationRect.height += (colliderEstimation.y + colliderEstimation.height) - (m_myRelativeEstimationRect.y + m_myRelativeEstimationRect.height);
             }
         }
     }

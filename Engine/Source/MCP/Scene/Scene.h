@@ -12,13 +12,15 @@ namespace mcp
 {
     class Scene
     {
-
     private:
         using RenderableContainer = UnorderedDenseArray<RenderableId, IRenderable*>;
 
         static constexpr const char* kPackageElementName = "Package";
         static constexpr const char* kSceneElementName = "Scene";
+        static constexpr const char* kSceneAssetName = "SceneAsset";
         static constexpr const char* kObjectElementName = "Object";
+        static constexpr uint32_t kSceneAssetNameHash = HashString32(kSceneAssetName);
+        static constexpr uint32_t kObjectNameHash = HashString32(kObjectElementName);
         static constexpr float kFixedUpdateTimeSeconds = 1.f / 60.f;
         //static constexpr size_t kRenderLayerSize = static_cast<size_t>(RenderLayer::kRenderCount);
 
@@ -32,7 +34,8 @@ namespace mcp
         RenderableContainer m_debugOverlayRenderables;
 
         std::unordered_map<ObjectId, Object*> m_objects;            // Container of all of the Object's in the scene.
-        std::vector<ObjectId> m_queuedObjectsToDelete;               // Objects that will be deleted at the end of the update.
+        std::vector<IUpdateableId> m_updateablesToRemove;           // Updateables that we need to remove after the update finishes.
+        std::vector<ObjectId> m_queuedObjectsToDelete;              // Objects that will be deleted at the end of the update.
         CollisionSystem m_collisionSystem;
         MessageManager m_messageManager;
         float m_accumulatedTime;                                    // Amount of time before we perform a fixed update.
@@ -66,8 +69,11 @@ namespace mcp
         [[nodiscard]] CollisionSystem* GetCollisionSystem() { return &m_collisionSystem;}
 
     private:
+        void LoadSceneAsset(const XMLElement sceneAsset);
+        void LoadWorldObject(const XMLElement object);
         void RenderLayer(const RenderableContainer& renderables) const;
         void DeleteQueuedObjects();
+        void RemoveQueuedUpdateables();
         void ClearScene();
         void SetCollisionSettings(const QuadtreeBehaviorData& data);
     };

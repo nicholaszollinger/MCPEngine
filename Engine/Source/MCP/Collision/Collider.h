@@ -101,6 +101,13 @@ private:
         //-----------------------------------------------------------------------------------------------------------------------------
         //		NOTES:
         //		
+        ///		@brief : This delegate is called every frame that this collider and the other collider are still overlapping.
+        //-----------------------------------------------------------------------------------------------------------------------------
+        OnOverlap m_onOverlapUpdate;
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        //		NOTES:
+        //		
         ///		@brief : This delegate is called when this collider stops intersecting another collider that had originally sent the
         ///         OnBeginOverlap call. If the two colliders happen to be overlapping but they don't have an interest in each other's channel
         ///         this will NOT be called.
@@ -129,6 +136,7 @@ private:
 
         void SetCollisionEnabled(const bool isEnabled);
         void SetOwner(ColliderComponent* pComponent) { m_pOwner = pComponent; }
+        void SetSystem(CollisionSystem* pSystem) { m_pSystem = pSystem; }
 
         //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Get the smallest rect possible that encompasses the Collider's shape, in relative space. The position 
@@ -144,6 +152,8 @@ private:
         [[nodiscard]] virtual ColliderNameId GetNameId() const { return m_colliderName; }
         [[nodiscard]] Vec2 GetWorldCenter() const;
         [[nodiscard]] bool CollisionIsEnabled() const { return m_isEnabled; }
+        [[nodiscard]] ColliderComponent* GetOwner() const { return m_pOwner; }
+        [[nodiscard]] bool IsOverlapping() const { return !m_overlappingColliders.empty(); }
 
         //--------------------------------------------------------------------
         //  Collision Profile Interface

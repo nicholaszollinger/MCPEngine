@@ -14,6 +14,7 @@ namespace mcp
         
     public:
         Box2DCollider(const char* name, const bool isEnabled, const Vec2 position, const float width, const float height);
+        Box2DCollider(const char* name, const bool isEnabled, const RectF rect);
         
         [[nodiscard]] virtual RectF GetEstimateRectRelative() const override;
         [[nodiscard]] virtual RectF GetEstimateRectWorld() const override;
