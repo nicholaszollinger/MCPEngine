@@ -57,5 +57,4 @@ namespace mcp
         void Close() const;
     };
 
-
 }
