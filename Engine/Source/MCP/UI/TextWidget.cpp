@@ -298,8 +298,7 @@ namespace mcp
         // NOTE: This is for centered.
         if (m_glyphs.empty())
             return Vec2(GetLocalLineStartXPos(0), GetLocalLineStartYPos(0));
-
-        auto& lastLine = m_lines.back();
+        
         auto& lastGlyph = m_glyphs.back();
 
         // Get the start position of the text box.

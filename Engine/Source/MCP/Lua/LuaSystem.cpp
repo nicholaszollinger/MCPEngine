@@ -5,6 +5,7 @@
 #include "MCP/Core/Application/Application.h"
 
 #include "MCP/Lua/LuaDebug.h"
+#include "MCP/Scene/SceneManager.h"
 #include "MCP/UI/CanvasWidget.h"
 #include "MCP/UI/ImageWidget.h"
 #include "MCP/UI/TextWidget.h"
@@ -64,6 +65,7 @@ namespace mcp
 #endif
         // Register each of the types' lua capabilities to the state.
         Application::RegisterLuaFunctions(m_pState);
+        SceneManager::RegisterLuaFunctions(m_pState);
         Widget::RegisterLuaFunctions(m_pState);
         ImageWidget::RegisterLuaFunctions(m_pState);
         CanvasWidget::RegisterLuaFunctions(m_pState);

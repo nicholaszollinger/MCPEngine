@@ -3,14 +3,34 @@
 #include "Scene.h"
 #include "MCP/Core/GlobalManager.h"
 
+struct lua_State;
+
 namespace mcp
 {
     class SceneManager final : public IProcess
     {
-        using SceneIdentifier = const char*;
+    public:
+        using SceneIdentifier = StringId;
+
+    private:
+        struct SceneData
+        {
+            SceneData() = default;
+
+            SceneData(const char* path, Scene* pScene)
+                : dataPath(path)
+                , pScene(pScene)
+            {
+                //
+            }
+
+            std::string dataPath;           // Path to the scene data on disk. To be used to load the scene.
+            Scene* pScene = nullptr;        // The Scene resource.
+        };
 
         DEFINE_GLOBAL_MANAGER(SceneManager)
-            
+
+        std::unordered_map<StringId, SceneData, StringIdHasher> m_sceneList;
         Scene* m_pActiveScene;
         SceneIdentifier m_sceneToTransitionTo;
         bool m_transitionQueued;
@@ -20,25 +40,21 @@ namespace mcp
         SceneManager& operator=(const SceneManager&) = delete;
         SceneManager(SceneManager&&) = delete;
         SceneManager& operator=(SceneManager&&) = delete;
+
     private:
         SceneManager();
         
     public:
-        // This should get the Default scene ready.
-        bool LoadSceneData(const char* pSceneFilePath);
-        void Update(const float deltaTimeMs);
-        void Render() const;
-        void QueueTransition(const SceneIdentifier& identifier); // Needs some kind of identifier to designate what scene to go to.
-
-        // TODO: TEMPORARY SOLUTION. WE SHOULD BE SETTING SCENE INFO FROM DATA.
-        void SetScene(Scene* pScene) { m_pActiveScene = pScene; }
-
+        void QueueTransition(const SceneIdentifier& identifier);
         [[nodiscard]] Scene* GetActiveScene() const { return m_pActiveScene; }
 
+        static void RegisterLuaFunctions(lua_State* pState);
     private:
         virtual bool Init() override;
         virtual void Close() override;
+        bool LoadSceneData(const char* pSceneDataFilepath);
+        void Update(const float deltaTimeMs);
+        void Render() const;
         bool TransitionToScene();
-
     };
 }

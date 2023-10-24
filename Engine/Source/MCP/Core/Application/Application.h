@@ -46,17 +46,15 @@ namespace mcp
         Application(Application&&) = delete;
         Application& operator=(Application&&) = delete;
         
-        bool Init(const ApplicationProperties& props, const char* pGameDataFilepath);
         bool Init(const char* pGameDataFilepath);
         void Run();
         void Quit();
 
-        static void RegisterLuaFunctions(lua_State* pState); 
+        static void RegisterLuaFunctions(lua_State* pState);
+
     private:
         bool LoadApplicationProperties(ApplicationProperties& outProps, const char* pFilepath);
-        bool LoadGameData(const char* pGameDataFilepath);
         void Close() const;
-
     };
 
 

@@ -18,20 +18,20 @@ namespace mcp
         , m_renderAngle(0.0)
         , m_flip(RenderFlip2D::kNone)
     {
-        m_size = m_texture.GetTextureSizeAsVec2();
+        //m_scale = m_texture.GetTextureSizeAsVec2();
     }
 
-    ImageComponent::ImageComponent(Object* pObject, const char* pTextureFilepath, const RectInt& crop, const Vec2 size, const Color color, const RenderLayer layer, const int zOrder)
+    ImageComponent::ImageComponent(Object* pObject, const char* pTextureFilepath, const RectInt& crop, const Vec2 scale, const Color color, const RenderLayer layer, const int zOrder)
         : Component(pObject)
         , IRenderable(layer, zOrder)
         , m_pTransformComponent(nullptr)
         , m_crop(crop)
-        , m_size(size)
+        , m_scale(scale)
         , m_tint(color)
         , m_renderAngle(0.0)
         , m_flip(RenderFlip2D::kNone)
     {
-        if (m_texture.Load({pTextureFilepath, nullptr, false}))
+        if (!m_texture.Load({pTextureFilepath, nullptr, false}))
         {
             MCP_WARN("ImageComponent", "Failed to load texture!");
         }
@@ -39,16 +39,19 @@ namespace mcp
 
     ImageComponent::~ImageComponent()
     {
-        auto* pWorld = m_pOwner->GetWorld();
-        assert(pWorld);
-        pWorld->RemoveRenderable(this);
+        if (m_isActive)
+        {
+            auto* pWorld = m_pOwner->GetWorld();
+            MCP_CHECK(pWorld);
+            pWorld->RemoveRenderable(this);
+        }
     }
 
     bool ImageComponent::Init()
     {
         // Add this component to the list of renderables in the scene.
         auto* pWorld = m_pOwner->GetWorld();
-        assert(pWorld);
+        MCP_CHECK(pWorld);
 
         if (m_texture.IsValid())
             pWorld->AddRenderable(this);
@@ -85,13 +88,21 @@ namespace mcp
 
     void ImageComponent::Render() const
     {
-        assert(m_pTransformComponent && "Failed to Render ImageComponent! TransformComponent was nullptr!");
+        MCP_CHECK_MSG(m_pTransformComponent, "Failed to Render ImageComponent! TransformComponent was nullptr!");
+
+        const float width = m_scale.x * static_cast<float>(m_crop.width);
+        const float height = m_scale.y * static_cast<float>(m_crop.height);
 
         const Vec2 location = m_pTransformComponent->GetLocation();
-        const float renderXPos = location.x - m_size.x / 2.f;
-        const float renderYPos = location.y - m_size.y / 2.f;
-
-        const RectF destinationRect {renderXPos, renderYPos, m_size.x, m_size.y};
+        const float renderXPos = location.x - (width / 2.f);
+        const float renderYPos = location.y - (height / 2.f);
+        const RectF destinationRect
+        {
+            renderXPos
+            , renderYPos
+            , width
+            , height
+        };
 
         TextureRenderData renderData;
         renderData.pTexture = m_texture.Get();
@@ -150,17 +161,14 @@ namespace mcp
         crop.width = cropElement.GetAttributeValue<int>("w");
         crop.height = cropElement.GetAttributeValue<int>("h");
 
-        // Size
-        Vec2 size;
-        const XMLElement sizeElement = cropElement.GetSiblingElement("Size");
-        if (!sizeElement.IsValid())
+        // Scale
+        Vec2 scale = {1.f, 1.f};
+        const XMLElement scaleElement = cropElement.GetSiblingElement("Scale");
+        if (scaleElement.IsValid())
         {
-            MCP_ERROR("ImageComponent","Failed to add ImageComponent from Data! Couldn't find Size Attribute!");
-            return false;
+            scale.x = scaleElement.GetAttributeValue<float>("x");
+            scale.y = scaleElement.GetAttributeValue<float>("y");
         }
-
-        size.x = sizeElement.GetAttributeValue<float>("x");
-        size.y = sizeElement.GetAttributeValue<float>("y");
 
         Color color = Color::White();
         const XMLElement tintElement = cropElement.GetSiblingElement("Color");
@@ -179,7 +187,7 @@ namespace mcp
         const int zOrder = renderableElement.GetAttributeValue<int>("zOrder");
 
         // Add the component to the Object
-        if (!pOwner->AddComponent<ImageComponent>(pTextureFilePath, crop, size, color, layer, zOrder))
+        if (!pOwner->AddComponent<ImageComponent>(pTextureFilePath, crop, scale, color, layer, zOrder))
         {
             MCP_ERROR("ImageComponent","Failed to add ImageComponent from data!");
             return false;

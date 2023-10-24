@@ -40,93 +40,6 @@ namespace mcp
     {
         //
     }
-    
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //      TODO: In the future, I need to set up some window bitmask pertaining to different properties such as
-    //          - Fullscreen
-    //          - Fullscreen Border-less
-    //          - Other settings...
-    //
-    //      TODO: Both the Logger and Bleach lib need to be initialized outside of the Engine.
-    //
-    ///		@brief : Initialize the MCPEngine and all of its dependencies.
-    ///     @param props : Application properties to set up the application with.
-    ///     @param pGameDataFilepath : Path to the GameData that we are using to run the game.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    bool Application::Init(const ApplicationProperties& props, const char* pGameDataFilepath)
-    {
-        // Initialize Bleach Leak Detector:
-        BLEACH_INIT_LEAK_DETECTOR();
-
-#if MCP_LOGGING_ENABLED
-        // Initialize the Logger
-        if (!Logger::Init("Log/"))
-        {
-            Close();
-            return false;
-        }
-
-        // Load the Engine log categories.
-        if (!Logger::LoadCategories("../MCPEngine/Engine/Config/EngineLogs.config"))
-        {
-            MCP_ERROR("Application", "Failed to load EngineLog Categories!");
-            Close();
-            return false;
-        }
-#endif
-
-        // Create GlobalManagers and save a reference in processes.
-        GlobalManagerFactory::Create<lua::LuaLayer>();
-        GlobalManagerFactory::Create<GraphicsManager>();
-        GlobalManagerFactory::Create<AudioManager>();
-        GlobalManagerFactory::Create<ResourceManager>();
-        GlobalManagerFactory::Create<SceneManager>();
-        
-        m_processes.emplace_back(lua::LuaLayer::Get());
-        m_processes.emplace_back(GraphicsManager::Get());
-        m_processes.emplace_back(AudioManager::Get());
-        m_processes.emplace_back(ResourceManager::Get());
-        m_processes.emplace_back(SceneManager::Get());
-
-        // Initialize each process.
-        for (auto* pProcess : m_processes)
-        {
-            // If any fail, then we need to close and quit.
-            if (!pProcess->Init())
-            {
-                MCP_ERROR("Application", "Failed to Initialize Application!");
-                Close();
-                return false;
-            }
-        }
-
-        // Initialize the Window:
-        if (!GraphicsManager::Get()->GetWindow()->Init(props.windowName.c_str(), props.defaultWindowWidth, props.defaultWindowHeight))
-        {
-            MCP_ERROR("Application", "Failed to initialize Application! Failed to initialize the Window!");
-            Close();
-            return false;
-        }
-
-        // Set the Window as the RenderTarget for the Renderer.
-        if (!GraphicsManager::Get()->SetRenderTarget())
-        {
-            MCP_ERROR("Application", "Failed to initialize Application! Failed to set the main window as the Render Target!");
-            Close();
-            return false;
-        }
-
-        // Load the GameData:
-        if (!LoadGameData(pGameDataFilepath))
-        {
-            MCP_ERROR("Application", "Failed to load the GameData at filepath: ", pGameDataFilepath);
-            Close();
-            return false;
-        }
-
-        return true;
-    }
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -216,7 +129,8 @@ namespace mcp
         }
 
         // Load the GameData:
-        if (!LoadGameData(pGameDataFilepath))
+        //if (!LoadGameData(pGameDataFilepath))
+        if (!SceneManager::Get()->LoadSceneData(pGameDataFilepath))
         {
             MCP_ERROR("Application", "Failed to load the GameData at filepath: ", pGameDataFilepath);
             Close();
@@ -321,54 +235,6 @@ namespace mcp
         endOfName = line.find_first_of('=');
         val = line.substr(endOfName + 1, std::string::npos);
         outProps.defaultWindowHeight = std::stoi(val);
-
-        return true;
-    }
-
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //
-    ///		@brief : Loads the GameData necessary to run the game.
-    ///		@param pGameDataFilepath : Path to the xml file on disk.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    bool Application::LoadGameData(const char* pGameDataFilepath)
-    {
-        XMLParser parser;
-        
-        if (!parser.LoadFile(pGameDataFilepath))
-        {
-            MCP_ERROR("Application", "Failed to load game data from file: ", pGameDataFilepath);
-            return false;
-        }
-
-        // Get the Scenes
-        const XMLElement sceneList = parser.GetElement("SceneList");
-        if (!sceneList.IsValid())
-        {
-            MCP_ERROR("Application", "Failed to load game data! Couldn't find SceneList element!");
-            return false;
-        }
-
-        const XMLElement defaultScene = sceneList.GetChildElement("Default");
-        if (!defaultScene.IsValid())
-        {
-            MCP_ERROR("Application", "Failed to load game data! Couldn't find Default Scene element!");
-            return false;
-        }
-
-        const char* pDefaultSceneFilepath = defaultScene.GetAttributeValue<const char*>("sceneDataPath");
-        if (!pDefaultSceneFilepath)
-        {
-            MCP_ERROR("Application", "Failed to load game data! Couldn't find Default Scene Path attribute!");
-            return false;
-        }
-
-        if (!SceneManager::Get()->LoadSceneData(pDefaultSceneFilepath))
-        {
-            MCP_ERROR("Application", "Failed to load the initial Scene!");
-            return false;
-        }
 
         return true;
     }
