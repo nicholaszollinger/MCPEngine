@@ -156,7 +156,7 @@ struct Rect
 
     std::string ToString() const
     {
-        return CombineIntoString("(", x, ", " , y, ", ", width, ", ", height, ")");
+        return CombineIntoString("(x=", x, ", y=" , y, ", width=", width, ", height=", height, ")");
     }
 };
 

@@ -162,6 +162,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Components\TransformComponent.cpp" />
     <ClCompile Include="Source\MCP\Core\Application\Application.cpp" />
     <ClCompile Include="Source\MCP\Core\Application\Window\WindowBase.cpp" />
+    <ClCompile Include="Source\MCP\Core\Event\ApplicationEvent.cpp" />
     <ClCompile Include="Source\MCP\Core\Event\Message.cpp" />
     <ClCompile Include="Source\MCP\Core\Event\MessageManager.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\AssetPackage.cpp" />
@@ -193,6 +194,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\UI\ImageWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\SelectionWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\SliderWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\TextFieldWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\TextWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\ToggleWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\VerticalLayoutWidget.cpp" />
@@ -280,6 +282,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\UI\HorizontalLayoutWidget.h" />
     <ClInclude Include="Source\MCP\UI\SelectionWidget.h" />
     <ClInclude Include="Source\MCP\UI\SliderWidget.h" />
+    <ClInclude Include="Source\MCP\UI\TextFieldWidget.h" />
     <ClInclude Include="Source\MCP\UI\TextWidget.h" />
     <ClInclude Include="Source\MCP\UI\ImageWidget.h" />
     <ClInclude Include="Source\MCP\UI\ToggleWidget.h" />

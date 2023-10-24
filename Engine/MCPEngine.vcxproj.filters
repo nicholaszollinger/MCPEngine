@@ -333,6 +333,9 @@
     <ClInclude Include="Source\MCP\UI\VerticalLayoutWidget.h">
       <Filter>MCP\UI</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MCP\UI\TextFieldWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
@@ -532,6 +535,12 @@
     </ClCompile>
     <ClCompile Include="Source\MCP\UI\VerticalLayoutWidget.cpp">
       <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\TextFieldWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Event\ApplicationEvent.cpp">
+      <Filter>MCP\Core\Event</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

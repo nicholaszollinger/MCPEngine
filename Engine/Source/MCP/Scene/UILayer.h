@@ -31,6 +31,8 @@ namespace mcp
         void FocusWidget(Widget* pWidget);
         void DeleteWidget(Widget* pWidget);
 
+        [[nodiscard]] Widget* GetFocused() const { return m_pFocusedWidget; }
+
     private:
         virtual void LoadSceneDataAsset(const XMLElement sceneDataAsset) override;
         virtual void DestroyLayer() override;

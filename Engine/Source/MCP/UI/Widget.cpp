@@ -9,6 +9,7 @@
 #include "MCP/Graphics/Graphics.h"
 #include "MCP/Lua/Lua.h"
 #include "MCP/Scene/Scene.h"
+#include "MCP/Scene/SceneManager.h"
 
 namespace mcp
 {
@@ -29,6 +30,9 @@ namespace mcp
         , m_isActive(data.startEnabled)
     {
         SetZOffset(data.zOffset);
+
+        // Get the Current UI Layer.
+        m_pUILayer = SceneManager::Get()->GetActiveScene()->GetUILayer();
 
         // HACK. I need to have an early step dedicated to initializing the 'this' pointer in Script behavior.
         if (m_enableBehaviorScript.IsValid())
@@ -68,6 +72,7 @@ namespace mcp
     {
         m_children.push_back(pChild);
         pChild->m_pParent = this;
+
         pChild->OnParentSet();
         pChild->OnParentActiveChanged(IsActive());
         OnChildAdded(pChild);
@@ -401,12 +406,24 @@ namespace mcp
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Toggles the active state on the Widget.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::ToggleActive()
+    {
+        SetActive(!m_isActive);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
     ///		@brief : Respond to our parent widget's active state changing, and let all of our children know as well recursively.
     ///		@param parentActiveState : New state of the parent.
     //-----------------------------------------------------------------------------------------------------------------------------
     void Widget::OnParentActiveChanged(const bool parentActiveState)
     {
         // If we are active and our parent has changed, we need to respond.
+        // We also need to check if we have a valid UILayer. This is because if we are being created as child of a Widget
+        // that isn't a part of the Layer yet, we don't have access to the UILayer too. This becomes an issue for renderable
+        // Widgets, when they try to access Layer's Renderable Container. Plus, this will be called when the parent is added
+        // anyway.
         if (m_isActive)
         {
             if (parentActiveState)
@@ -456,6 +473,17 @@ namespace mcp
             return false;
 
         return m_isInteractable;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Returns whether this Widget is the focused widget or not. NOTE: Even if the widget is the child of the Focused widget,
+    ///         this returns false; it only pertains to the specifically focused Widget.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool Widget::IsFocused() const
+    {
+        return this == m_pUILayer->GetFocused();
     }
 
     void Widget::SetInteractable(const bool isInteractable)

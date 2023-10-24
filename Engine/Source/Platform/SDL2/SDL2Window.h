@@ -28,6 +28,7 @@ namespace mcp
         void PostApplicationEvent(ApplicationEvent& event);
         void Close() const;
 
+        [[nodiscard]] Vec2 GetMousePosition() const;
         [[nodiscard]] const RectInt& GetDimensions() const { return m_dimensions; }
         [[nodiscard]] SDL_Renderer* GetRenderer() const { return m_pRenderer; }
     };

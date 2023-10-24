@@ -6,8 +6,8 @@
 
 namespace mcp
 {
-    ToggleWidget::ToggleWidget(const WidgetConstructionData& data, const bool startVal, LuaResourcePtr&& onExecuteScript, LuaResourcePtr&& highlightBehaviorScript, LuaResourcePtr&& pressReleaseBehaviorScript)
-        : ButtonWidget(data, std::move(onExecuteScript), std::move(highlightBehaviorScript), std::move(pressReleaseBehaviorScript))
+    ToggleWidget::ToggleWidget(const WidgetConstructionData& data, const bool startVal, ButtonBehavior&& behavior)
+        : ButtonWidget(data, std::move(behavior))
         , m_value(startVal)
     {
         //
@@ -60,43 +60,8 @@ namespace mcp
         const auto data = GetWidgetConstructionData(element);
         const bool startVal = element.GetAttributeValue<bool>("startVal");
 
-        LuaResourcePtr executeScript;
-        LuaResourcePtr highlightScript;
-        LuaResourcePtr pressReleaseScript;
+        auto behavior = GetButtonBehavior(element);
 
-        // Toggle Behavior
-        auto scriptElement = element.GetChildElement("ToggleBehavior");
-        if (!scriptElement.IsValid())
-        {
-            MCP_ERROR("ToggleWidget", "Failed to find ToggleBehavior script!");
-            return nullptr;
-        }
-
-        const char* pScriptPath = scriptElement.GetAttributeValue<const char*>("scriptPath");
-        const char* pScriptDataPath = scriptElement.GetAttributeValue<const char*>("scriptData");
-        executeScript = lua::LoadScriptInstance(pScriptPath, pScriptDataPath);
-
-        // Highlight Behavior
-        pScriptPath = nullptr;
-        scriptElement = scriptElement.GetSiblingElement("HighlightBehavior");
-        if (scriptElement.IsValid())
-        {
-            pScriptPath = scriptElement.GetAttributeValue<const char*>("scriptPath");
-            pScriptDataPath = scriptElement.GetAttributeValue<const char*>("scriptData");
-            highlightScript = lua::LoadScriptInstance(pScriptPath, pScriptDataPath);
-        }
-        
-
-        // PressRelease Behavior
-        pScriptPath = nullptr;
-        scriptElement = scriptElement.GetSiblingElement("PressReleaseBehavior");
-        if (scriptElement.IsValid())
-        {
-            pScriptPath = scriptElement.GetAttributeValue<const char*>("scriptPath");
-            pScriptDataPath = scriptElement.GetAttributeValue<const char*>("scriptData");
-            pressReleaseScript = lua::LoadScriptInstance(pScriptPath, pScriptDataPath);
-        }
-
-        return BLEACH_NEW(ToggleWidget(data, startVal, std::move(executeScript),std::move(highlightScript), std::move(pressReleaseScript)));
+        return BLEACH_NEW(ToggleWidget(data, startVal, std::move(behavior)));
     }
 }

@@ -105,6 +105,7 @@ namespace mcp
         void SetAnchor(const float x, const float y);
         void SetZOffset(const int zOffset);
         void SetActive(const bool isActive);
+        void ToggleActive();
         void SetInteractable(const bool isInteractable);
         void SetUILayer(UILayer* pUILayer) { m_pUILayer = pUILayer; }
         void SetWidth(const float width) { m_width = width; }
@@ -125,6 +126,7 @@ namespace mcp
         [[nodiscard]] bool IsInteractable() const;
         [[nodiscard]] bool IsVisible() const;
         [[nodiscard]] bool IsActive() const;
+        [[nodiscard]] bool IsFocused() const;
         [[nodiscard]] virtual WidgetTypeId GetTypeId() const = 0;
         [[nodiscard]] UILayer* GetLayer() const { return m_pUILayer; }
 

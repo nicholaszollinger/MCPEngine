@@ -6,8 +6,6 @@
 
 namespace mcp
 {
-    
-
     class ToggleWidget final : public ButtonWidget
     {
         MCP_DEFINE_WIDGET(ToggleWidget)
@@ -20,7 +18,7 @@ namespace mcp
         bool m_value;
 
     public:
-        ToggleWidget(const WidgetConstructionData& data, const bool startVal, LuaResourcePtr&& onExecuteScript, LuaResourcePtr&& highlightBehaviorScript, LuaResourcePtr&& pressReleaseBehaviorScript);
+        ToggleWidget(const WidgetConstructionData& data, const bool startVal, ButtonBehavior&& behavior);
 
         virtual bool PostLoadInit() override;
         void SetValue(const bool value);

@@ -6,6 +6,15 @@
 
 namespace mcp
 {
+    class KeyEvent;
+
+    struct ButtonBehavior
+    {
+        LuaResourcePtr onExecuteScript;  
+        LuaResourcePtr highlightBehaviorScript;
+        LuaResourcePtr pressReleaseBehaviorScript;
+    };
+
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //      I originally had the idea to add multicast delegates that anyone can add themselves to. But I would want to have
@@ -28,6 +37,7 @@ namespace mcp
 
     public:
         ButtonWidget(const WidgetConstructionData& data, LuaResourcePtr&& onExecuteScript, LuaResourcePtr&& highlightBehaviorScript, LuaResourcePtr&& pressReleaseBehaviorScript);
+        ButtonWidget(const WidgetConstructionData& data, ButtonBehavior&& behavior);
         virtual bool PostLoadInit() override;
 
         static ButtonWidget* AddFromData( const XMLElement element);
@@ -59,10 +69,13 @@ namespace mcp
         //-----------------------------------------------------------------------------------------------------------------------------
         virtual void OnHoverExit();
 
+        static ButtonBehavior GetButtonBehavior(const XMLElement element);
     private:
         virtual void HandleEvent(ApplicationEvent& event) override;
         void HandleMouseButtonPress(MouseButtonEvent& event);
         void HandleMouseMotion(MouseMoveEvent& event);
+        virtual void HandleKeyPress(KeyEvent& event);
+
         virtual void OnInactive() override;
         // TODO: Handle keyboard and controller input. 
     };

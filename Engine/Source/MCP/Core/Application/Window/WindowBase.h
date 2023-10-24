@@ -26,7 +26,9 @@ namespace mcp
         void PostApplicationEvent(ApplicationEvent& event);
         void Close();
 
-        const RectInt& GetDimensions();
+        [[nodiscard]] Vec2 GetMousePosition();
+        [[nodiscard]] const RectInt& GetDimensions();
+
         void* GetRenderer();
 
     private:

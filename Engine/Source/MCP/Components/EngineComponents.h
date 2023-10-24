@@ -23,6 +23,7 @@
 #include "MCP/UI/ImageWidget.h"
 #include "MCP/UI/SelectionWidget.h"
 #include "MCP/UI/SliderWidget.h"
+#include "MCP/UI/TextFieldWidget.h"
 #include "MCP/UI/TextWidget.h"
 #include "MCP/UI/ToggleWidget.h"
 #include "MCP/UI/VerticalLayoutWidget.h"

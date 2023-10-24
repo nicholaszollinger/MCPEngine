@@ -43,16 +43,17 @@ namespace mcp
             case SDL_SCANCODE_Z: return MCPKey::Z;
 
             // Numbers
-            // ...
+            // TODO
 
             // Special
             case SDL_SCANCODE_ESCAPE: return MCPKey::Escape;
             case SDL_SCANCODE_SPACE: return MCPKey::Space;
             case SDL_SCANCODE_RETURN:
             case SDL_SCANCODE_RETURN2: return MCPKey::Enter;
+            case SDL_SCANCODE_BACKSPACE: return MCPKey::Backspace;
 
         default:
-            return MCPKey::kInvalid;
+            return MCPKey::kNull;
         }
     }
 

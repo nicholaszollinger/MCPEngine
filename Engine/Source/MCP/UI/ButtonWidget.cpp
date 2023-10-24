@@ -15,6 +15,15 @@ namespace mcp
         //
     }
 
+    ButtonWidget::ButtonWidget(const WidgetConstructionData& data, ButtonBehavior&& behavior)
+        : Widget(data)
+        , m_pOnExecuteScript(std::move(behavior.onExecuteScript))
+        , m_pHighlightBehaviorScript(std::move(behavior.highlightBehaviorScript))
+        , m_pPressReleaseBehaviorScript(std::move(behavior.pressReleaseBehaviorScript))
+    {
+        //
+    }
+
     bool ButtonWidget::PostLoadInit()
     {
         // Initialize our script behavior.
@@ -45,6 +54,13 @@ namespace mcp
         {
             auto& motion = static_cast<MouseMoveEvent&>(event);
             HandleMouseMotion(motion);
+        }
+
+        // Key Press
+        else if (eventId == KeyEvent::GetStaticId())
+        {
+            auto& key = static_cast<KeyEvent&>(event);
+            HandleKeyPress(key);
         }
     }
 
@@ -124,6 +140,12 @@ namespace mcp
         }
     }
 
+    void ButtonWidget::HandleKeyPress([[maybe_unused]] KeyEvent& event)
+    {
+        // TODO: Should this be navigation by default?
+    }
+
+
     void ButtonWidget::OnInactive()
     {
         // If we were hovered, we need to return to the original state by 'un-hovering'
@@ -169,44 +191,53 @@ namespace mcp
         auto data = GetWidgetConstructionData(element);
         data.isInteractable = true;
 
-        LuaResourcePtr executeScript;
-        LuaResourcePtr highlightScript;
-        LuaResourcePtr pressReleaseScript;
+        auto behavior = GetButtonBehavior(element);
+
+        return BLEACH_NEW(ButtonWidget(data, std::move(behavior)));
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Get the button behavior from a ButtonWidget or derived class's xml data.
+    ///		@param element : The ButtonWidget element.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ButtonBehavior ButtonWidget::GetButtonBehavior(const XMLElement element)
+    {
+        ButtonBehavior behavior;
+
+        const char* pScriptPath = nullptr;
+        const char* pScriptDataPath = nullptr;
 
         // Execute Behavior
         auto scriptElement = element.GetChildElement("OnExecuteBehavior");
-        if (!scriptElement.IsValid())
+        if (scriptElement.IsValid())
         {
-            MCP_ERROR("ButtonWidget", "Failed to find OnExecuteBehavior!");
-            return nullptr;
+            pScriptPath = scriptElement.GetAttributeValue<const char*>("scriptPath");
+            pScriptDataPath = scriptElement.GetAttributeValue<const char*>("scriptData");
+            behavior.onExecuteScript = lua::LoadScriptInstance(pScriptPath, pScriptDataPath);
         }
-
-        const char* pScriptPath = scriptElement.GetAttributeValue<const char*>("scriptPath");
-        const char* pScriptDataPath = scriptElement.GetAttributeValue<const char*>("scriptData");
-        executeScript = lua::LoadScriptInstance(pScriptPath, pScriptDataPath);
 
         // Highlight Behavior
         pScriptPath = nullptr;
-        scriptElement = scriptElement.GetSiblingElement("HighlightBehavior");
+        scriptElement = element.GetChildElement("HighlightBehavior");
         if (scriptElement.IsValid())
         {
             pScriptPath = scriptElement.GetAttributeValue<const char*>("scriptPath");
             pScriptDataPath = scriptElement.GetAttributeValue<const char*>("scriptData");
-            highlightScript = lua::LoadScriptInstance(pScriptPath, pScriptDataPath);
+            behavior.highlightBehaviorScript = lua::LoadScriptInstance(pScriptPath, pScriptDataPath);
         }
-        
 
         // PressRelease Behavior
         pScriptPath = nullptr;
-        scriptElement = scriptElement.GetSiblingElement("PressReleaseBehavior");
+        scriptElement = element.GetChildElement("PressReleaseBehavior");
         if (scriptElement.IsValid())
         {
             pScriptPath = scriptElement.GetAttributeValue<const char*>("scriptPath");
             pScriptDataPath = scriptElement.GetAttributeValue<const char*>("scriptData");
-            pressReleaseScript = lua::LoadScriptInstance(pScriptPath, pScriptDataPath);
+            behavior.pressReleaseBehaviorScript = lua::LoadScriptInstance(pScriptPath, pScriptDataPath);
         }
 
-        return BLEACH_NEW(ButtonWidget(data, std::move(executeScript), std::move(highlightScript), std::move(pressReleaseScript)));
+        return behavior;
     }
-
 }

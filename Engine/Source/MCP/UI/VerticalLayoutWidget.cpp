@@ -77,7 +77,7 @@ namespace mcp
         const float totalSpaceBetweenChildren = GetRectHeight() - totalSize;
         const float spaceBetweenChildren = totalSpaceBetweenChildren / static_cast<float>(m_children.size() - 1);
 
-        const auto rectWidth = GetRectWidth();
+        //const auto rectWidth = GetRectWidth();
 
         float lastPos = 0.f;
         for (size_t i = 0; i < m_children.size(); ++i)

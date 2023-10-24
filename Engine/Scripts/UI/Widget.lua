@@ -40,6 +40,7 @@ function WidgetScript.OnHoverExit() end;
 ---@field SetAnchor function
 ---@field GetDimensions function
 ---@field SetPosition function
+---@field GetTextWidget function
 ---@field GetFirstChildTextWidget function
 
 ---@type WidgetLib

@@ -24,8 +24,6 @@ namespace mcp
         Texture() = default;
         MCP_DEFINE_RESOURCE_DESTRUCTOR(Texture)
 
-        //void Load(const char* pFilePath, const char* pPackageName = nullptr, const bool isPersistent = false);
-
         [[nodiscard]] virtual void* Get() const override;
         [[nodiscard]] Vec2Int GetTextureSize() const;
         [[nodiscard]] Vec2 GetTextureSizeAsVec2() const;

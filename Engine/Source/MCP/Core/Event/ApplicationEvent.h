@@ -61,7 +61,7 @@ namespace mcp
     {
         MCP_DEFINE_EVENT_ID(KeyEvent)
 
-        MCPKey m_keycode  = MCPKey::kInvalid;
+        MCPKey m_keycode  = MCPKey::kNull;
         ButtonState m_state  = ButtonState::kPressed;
         bool m_ctrl       = false;
         bool m_alt        = false;
@@ -77,6 +77,7 @@ namespace mcp
             //
         }
 
+        [[nodiscard]] uint32_t GetGlyphValue() const;
         [[nodiscard]] MCPKey Key() const { return m_keycode; }
         [[nodiscard]] ButtonState State() const { return m_state; }
         [[nodiscard]] bool Ctrl() const { return m_ctrl; }

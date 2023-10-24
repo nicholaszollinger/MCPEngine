@@ -14,8 +14,7 @@ namespace mcp
         float m_step; // TODO: Set this up.
         float m_value;
     public:
-        SliderWidget(const WidgetConstructionData& data, const float min, const float max, const float step, const float startVal
-            , LuaResourcePtr&& executeScript, LuaResourcePtr&& highlightScript, LuaResourcePtr&& pressReleaseScript);
+        SliderWidget(const WidgetConstructionData& data, const float min, const float max, const float step, const float startVal, ButtonBehavior&& behavior);
 
         virtual bool PostLoadInit() override;
         [[nodiscard]] float GetValue() const { return m_value; }

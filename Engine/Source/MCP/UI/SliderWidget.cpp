@@ -7,9 +7,8 @@
 
 namespace mcp
 {
-    SliderWidget::SliderWidget(const WidgetConstructionData& data, const float min, const float max, const float step, const float startVal
-        , LuaResourcePtr&& executeScript, LuaResourcePtr&& highlightScript, LuaResourcePtr&& pressReleaseScript)
-        : ButtonWidget(data, std::move(executeScript), std::move(highlightScript), std::move(pressReleaseScript))
+    SliderWidget::SliderWidget(const WidgetConstructionData& data, const float min, const float max, const float step, const float startVal, ButtonBehavior&& behavior)
+        : ButtonWidget(data, std::move(behavior))
         , m_min(min)
         , m_max(max)
         , m_step(step)
@@ -65,44 +64,10 @@ namespace mcp
         const auto step = element.GetAttributeValue<float>("step", 1.f);
         const auto startVal = element.GetAttributeValue<float>("startVal", max);
 
-        // Get the Script data:
-        LuaResourcePtr executeScript;
-        LuaResourcePtr highlightScript;
-        LuaResourcePtr pressReleaseScript;
+        // Get the button behavior.
+        auto behavior = GetButtonBehavior(element);
 
-        // Slider Behavior
-        auto scriptElement = element.GetChildElement("SliderBehavior");
-        if (!scriptElement.IsValid())
-        {
-            MCP_ERROR("SliderWidget", "Failed to load from data! Failed to find SliderBehavior script!");
-            return nullptr;
-        }
-
-        const char* pScriptPath = scriptElement.GetAttributeValue<const char*>("scriptPath");
-        const char* pScriptDataPath = scriptElement.GetAttributeValue<const char*>("scriptData");
-        executeScript = lua::LoadScriptInstance(pScriptPath, pScriptDataPath);
-
-        // Highlight Behavior
-        pScriptPath = nullptr;
-        scriptElement = scriptElement.GetSiblingElement("HighlightBehavior");
-        if (scriptElement.IsValid())
-        {
-            pScriptPath = scriptElement.GetAttributeValue<const char*>("scriptPath");
-            pScriptDataPath = scriptElement.GetAttributeValue<const char*>("scriptData");
-            highlightScript = lua::LoadScriptInstance(pScriptPath, pScriptDataPath);
-        }
-
-        // PressRelease Behavior
-        pScriptPath = nullptr;
-        scriptElement = scriptElement.GetSiblingElement("PressReleaseBehavior");
-        if (scriptElement.IsValid())
-        {
-            pScriptPath = scriptElement.GetAttributeValue<const char*>("scriptPath");
-            pScriptDataPath = scriptElement.GetAttributeValue<const char*>("scriptData");
-            pressReleaseScript = lua::LoadScriptInstance(pScriptPath, pScriptDataPath);
-        }
-
-        return BLEACH_NEW(SliderWidget(data, min, max, step, startVal, std::move(executeScript), std::move(highlightScript), std::move(pressReleaseScript)));
+        return BLEACH_NEW(SliderWidget(data, min, max, step, startVal, std::move(behavior)));
     }
 }
 

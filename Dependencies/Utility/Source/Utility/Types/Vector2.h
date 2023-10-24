@@ -221,7 +221,7 @@ struct Vector2
     
     std::string ToString() const
     {
-        return CombineIntoString("(", x, ", " , y, ")");
+        return CombineIntoString("(x=", x, ", y=" , y, ")");
     }
 
     // Common Values.

@@ -174,6 +174,15 @@ namespace mcp
         return true;
     }
 
+    Vec2 SDL2Window::GetMousePosition() const
+    {
+        int x = 0;
+        int y = 0;
+        SDL_GetMouseState(&x, &y);
+
+        return {static_cast<float>(x), static_cast<float>(y)};
+    }
+
     void SDL2Window::PostApplicationEvent(ApplicationEvent& event)
     {
         const auto eventId = event.GetEventId();

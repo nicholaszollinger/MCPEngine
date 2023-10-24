@@ -17,6 +17,11 @@ struct TextGenerationData
 };
 
 void SetFontSize(_TTF_Font* pFont, const int size);
+int GetNewLineDistance(_TTF_Font* pFont);
+int SDLGetFontHeight(_TTF_Font* pFont);
+int GetNextGlyphDistance(_TTF_Font* pFont, const uint32_t lastGlyph, const uint32_t nextGlyph);
+int GetCursorDistance(_TTF_Font* pFont, const uint32_t glyph);
+
 SDL_Texture* GenerateTextTexture(Vec2Int& sizeOut, const TextGenerationData& data);
 SDL_Texture* GenerateTextTextureWithBackground(Vec2Int& sizeOut, const TextGenerationData& data);
 void FreeTextTexture(SDL_Texture* pTexture);
