@@ -34,7 +34,8 @@ namespace mcp
         explicit Object(Scene* pScene);
         ~Object();
 
-        bool PostLoadInit() const;
+        [[nodiscard]] bool PostLoadInit() const;
+        void AddComponent(Component* pComponent);
         void Destroy();
 
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -57,8 +58,10 @@ namespace mcp
                 return nullptr;
             }
 
-            // Create the new component and call its LoadSceneData() function. This is how we are going to handle Component Dependencies.
-            ComponentType* pNewComponent = BLEACH_NEW(ComponentType(this, params...));
+            // Create the new component, passing in the constructor parameters.
+            ComponentType* pNewComponent = BLEACH_NEW(ComponentType(params...));
+            pNewComponent->m_pOwner = this;
+
             if (!pNewComponent->Init())
             {
                 MCP_ERROR("Object", "Failed to add Component! Initialization of Component failed!");

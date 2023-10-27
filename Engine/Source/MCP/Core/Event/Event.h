@@ -21,6 +21,15 @@ GENERATE_DEPENDENT_TYPE_CHECK(CanCallEvent, EventType, FuncType, std::declval<Fu
 #define MCP_ADD_MEMBER_FUNC_EVENT_LISTENER(eventType, functionName) \
     mcp::GlobalEventDispatcher::AddListener<eventType>(this, [this](eventType& e) { this->functionName(e); })
 
+//-----------------------------------------------------------------------------------------------------------------------------
+//		NOTES:
+//		
+///		@brief : Helper macro that removes a listener from the global EventDispatcher.
+///		@param eventType : Name of the EventType.
+//-----------------------------------------------------------------------------------------------------------------------------
+#define MCP_REMOVE_MEMBER_FUNC_EVENT_LISTENER(eventType)        \
+    mcp::GlobalEventDispatcher::RemoveListener<eventType>(this)
+
 namespace mcp
 {
     /*enum class EventType

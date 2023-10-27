@@ -15,8 +15,8 @@
 
 namespace mcp
 {
-    TextComponent::TextComponent(Object* pObject, const char* pText, const TextComponentData& data, const RenderLayer layer, const int zOrder)
-        : Component(pObject)
+    TextComponent::TextComponent(const char* pText, const TextComponentData& data, const RenderLayer layer, const int zOrder)
+        : Component(true)
         , IRenderable(layer, zOrder)
         , m_data(data)
         , m_pTransform(nullptr)
@@ -28,14 +28,14 @@ namespace mcp
 
     TextComponent::~TextComponent()
     {
-        m_pOwner->GetWorld()->RemoveRenderable(this);
+        GetOwner()->GetWorld()->RemoveRenderable(this);
         FreeTexture();
     }
 
     bool TextComponent::Init()
     {
-        m_pOwner->GetWorld()->AddRenderable(this);
-        m_pTransform = m_pOwner->GetComponent<TransformComponent>();
+        GetOwner()->GetWorld()->AddRenderable(this);
+        m_pTransform = GetOwner()->GetComponent<TransformComponent>();
         MCP_CHECK(m_pTransform);
 
         // Load the font.
@@ -89,7 +89,17 @@ namespace mcp
         RegenerateTextTexture();
     }
 
-    bool TextComponent::AddFromData(const XMLElement element, Object* pObject)
+    void TextComponent::OnActive()
+    {
+        GetOwner()->GetWorld()->AddRenderable(this);
+    }
+
+    void TextComponent::OnInactive()
+    {
+        GetOwner()->GetWorld()->RemoveRenderable(this);
+    }
+
+    TextComponent* TextComponent::AddFromData(const XMLElement element)
     {
         TextComponentData data;
         const char* pText = element.GetAttributeValue<const char*>("text");
@@ -121,13 +131,7 @@ namespace mcp
         const auto layer = static_cast<RenderLayer>(child.GetAttributeValue<int>("layer"));
         const int zOrder = child.GetAttributeValue<int>("zOrder");
 
-        if (!pObject->AddComponent<TextComponent>(pText, data, layer, zOrder))
-        {
-            MCP_ERROR("TextComponent","Failed to load TextComponent from data!");
-            return false;
-        }
-
-        return true;
+        return BLEACH_NEW(TextComponent(pText, data, layer, zOrder));
     }
 
     void TextComponent::FreeTexture()

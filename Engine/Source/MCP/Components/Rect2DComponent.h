@@ -14,14 +14,14 @@ namespace mcp
         float m_height;
 
     public:
-        Rect2DComponent(Object* pObject, const float width, const float height, const RenderLayer = RenderLayer::kObject, const int zOrder = 0);
+        Rect2DComponent(const float width, const float height, const RenderLayer = RenderLayer::kObject, const int zOrder = 0);
 
         virtual void Render() const override;
 
         void SetWidth(const float width) { m_width = width; }
         void SetHeight(const float height) { m_height = height; }
         void SetDimensions(const float width, const float height) { m_width = width; m_height = height; }
-
-        static bool AddFromData(const XMLElement component, Object* pOwner);
+        
+        static Rect2DComponent* AddFromData(const XMLElement element);
     };
 }

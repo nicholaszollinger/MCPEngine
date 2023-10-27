@@ -7,8 +7,8 @@
 
 namespace mcp
 {
-    PrimitiveComponent::PrimitiveComponent(Object* pObject, const RenderLayer layer, const int zOrder)
-        : Component(pObject)
+    PrimitiveComponent::PrimitiveComponent(const RenderLayer layer, const int zOrder)
+        : Component(true)
         , IRenderable(layer, zOrder)
         , m_pTransformComponent(nullptr)
         , m_color(kDefaultColor)
@@ -20,22 +20,32 @@ namespace mcp
     PrimitiveComponent::~PrimitiveComponent()
     {
         // Remove the renderable from the scene.
-        auto* pWorld = m_pOwner->GetWorld();
-        assert(pWorld);
+        auto* pWorld = GetOwner()->GetWorld();
+        MCP_CHECK(pWorld);
         pWorld->RemoveRenderable(this);
     }
     
     bool PrimitiveComponent::Init()
     {
         // Add the renderable to the scene.
-        auto* pWorld = m_pOwner->GetWorld();
-        assert(pWorld);
+        auto* pWorld = GetOwner()->GetWorld();
+        MCP_CHECK(pWorld);
         pWorld->AddRenderable(this);
 
         // TransformComponent is required.
-        m_pTransformComponent = m_pOwner->GetComponent<mcp::TransformComponent>();
+        m_pTransformComponent = GetOwner()->GetComponent<mcp::TransformComponent>();
         assert(m_pTransformComponent);
 
         return true;
+    }
+
+    void PrimitiveComponent::OnActive()
+    {
+        GetOwner()->GetWorld()->AddRenderable(this);
+    }
+
+    void PrimitiveComponent::OnInactive()
+    {
+        GetOwner()->GetWorld()->RemoveRenderable(this);
     }
 }

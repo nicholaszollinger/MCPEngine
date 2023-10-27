@@ -22,6 +22,7 @@ namespace mcp
         UILayer* m_pUILayer;
         float m_accumulatedTime;                         // Amount of time before we perform a fixed update.
         bool m_transitionQueued;                         // Whether a scene transition has been queued or not.
+        bool m_isLoaded;
 
     public:
         Scene();
@@ -29,7 +30,7 @@ namespace mcp
 
         bool Init();
         bool Load(const char* pFilePath);
-        void Unload() {}
+        void Unload();
         bool OnSceneLoad();
         void Update(const float deltaTime);
         void Render() const;

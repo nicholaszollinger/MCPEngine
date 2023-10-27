@@ -172,6 +172,7 @@ namespace mcp
         MCP_CHECK(m_pActiveScene);
 
         // Load the Scene
+        MCP_LOG("SceneManager", "Loading Scene: ", m_sceneToTransitionTo.GetCStr());
         if (!m_pActiveScene->Load(sceneData.dataPath.c_str()))
         {
             MCP_ERROR("SceneManager", "Failed to Load Scene: ", m_sceneToTransitionTo.GetCStr());

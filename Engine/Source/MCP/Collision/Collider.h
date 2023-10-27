@@ -61,6 +61,7 @@ private:
     class Collider
     {
         friend class CollisionSystem;
+        friend class ColliderComponent;
 
     public:
         using ColliderNameId = uint32_t;
@@ -166,6 +167,9 @@ private:
         [[nodiscard]] CollisionResponse GetResponseToChannel(const CollisionChannel channel) const;
         [[nodiscard]] CollisionResponse GetResponseToCollider(const Collider* pOther) const;
         [[nodiscard]] CollisionChannel GetMyCollisionChannel() const { return m_profile.myCollisionChannel;} 
+
+    private:
+        void OnComponentActiveChanged(const bool isActive);
 
         //--------------------------------------------------------------------
         //  Debug Rendering

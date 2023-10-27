@@ -31,6 +31,7 @@ namespace mcp
 
         // Object Interface
         Object* CreateObject();
+        Object* CreateObjectFromPrefab(const char* pPrefabPath);
         void DestroyObject(const ObjectId id);
         bool IsValidId(const ObjectId id);
 
@@ -41,7 +42,7 @@ namespace mcp
     private:
         virtual void LoadSceneDataAsset(const XMLElement sceneDataAsset) override;
         virtual void DestroyLayer() override;
-        void LoadObject(XMLElement element);
+        void LoadObject(const XMLElement element);
         void SetCollisionSettings(const QuadtreeBehaviorData& data);
         void DeleteQueuedObjects();
     };

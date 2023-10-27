@@ -81,17 +81,18 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::RemoveCollideable(ColliderComponent* pColliderComponent)
     {
-        auto* pCell = static_cast<QuadtreeCell*> (pColliderComponent->m_pCell);
-        MCP_CHECK(pCell);
+        /*auto* pCell = static_cast<QuadtreeCell*> (pColliderComponent->m_pCell);
+        MCP_CHECK(pCell);*/
 
-        const RectF rect = pColliderComponent->GetEstimationRect();
+        //const RectF rect = pColliderComponent->GetEstimationRect();
         //std::vector<QuadtreeCell*> cells;
 
-        if (!rect.IsInside(pCell->dimensions))
+        /*if (!rect.IsInside(pCell->dimensions))
         {
             pCell = FindParentThatEncapsulatesRect(pCell, rect);
-        }
+        }*/
 
+        // Remove this ColliderComponent from each of our cells that we were in.
         for(auto* pCellToRemoveFrom : pColliderComponent->m_cells)
         {
             RemoveFromCell(static_cast<QuadtreeCell*>(pCellToRemoveFrom), pColliderComponent);
@@ -99,18 +100,17 @@ namespace mcp
 
         // Clear out the cells that we were in.
         pColliderComponent->m_cells.clear();
-        pColliderComponent->m_pCell = pCell;
+        pColliderComponent->m_pCell = nullptr;
 
         // If we are static, we are done.
         if (pColliderComponent->m_isStatic)
             return;
 
-
         // If the collider was an active one, remove it from our active colliders.
         // O(n) but until it is an issue, I am not going to worry about it. But this is a pain point.
         for (size_t i = 0; i < m_activeColliders.size(); ++i)
         {
-            if (m_activeColliders[i]->m_pOwner == pColliderComponent->m_pOwner)
+            if (m_activeColliders[i]->GetOwner() == pColliderComponent->GetOwner())
             {
                 //MCP_LOG("Collision", "Removing Active Collider");
                 std::swap(m_activeColliders[i], m_activeColliders.back());
@@ -130,6 +130,7 @@ namespace mcp
         // Run collisions for all of our active Colliders
         for (auto* pColliderComponent : m_activeColliders)
         {
+            //if (!pColliderComponent->CollisionEnabled())
             CheckCollision(pColliderComponent);
         }
 
@@ -147,7 +148,7 @@ namespace mcp
         size_t activeColliderIndex = 0;
         for (; activeColliderIndex != m_activeColliders.size(); ++activeColliderIndex)
         {
-            if (m_activeColliders[activeColliderIndex]->m_pOwner == pColliderComponent->m_pOwner)
+            if (m_activeColliders[activeColliderIndex]->GetOwner() == pColliderComponent->GetOwner())
             {
                 break;
             }
@@ -182,7 +183,8 @@ namespace mcp
     {
         auto* pCell = static_cast<QuadtreeCell*> (pColliderComponent->m_pCell);
 
-        MCP_CHECK(pCell);
+        if (!pCell)
+            return;
         MCP_CHECK(pColliderComponent->m_collisionEnabled); // We shouldn't be in the tree if our collision is disabled.
 
         // Re-find the lowest parent cell that holds this rect.
@@ -198,6 +200,10 @@ namespace mcp
         {
             RemoveFromCell(static_cast<QuadtreeCell*>(pOldCell), pColliderComponent);
         }
+        
+        // If our collision is no longer enabled or we have been queued for deletion return.
+        if (pColliderComponent->GetOwner()->IsQueuedForDeletion() || !pColliderComponent->CollisionEnabled())
+            return;
 
         // Get the new cells that this collider should be in,
         rect = pColliderComponent->GetEstimationRect();
@@ -238,12 +244,12 @@ namespace mcp
             for (auto& pComponent : pCell->m_colliderComponents)
             {
                 // Don't check against itself.
-                if (pComponent->m_pOwner == pColliderComponent->m_pOwner)
+                if (pComponent->GetOwner() == pColliderComponent->GetOwner())
                     continue;
 
                 // Make sure this component is still valid for collision. Collisions may result in objects being destroyed,
                 // colliders may be turned off, etc.
-                if (pComponent->m_pOwner->IsQueuedForDeletion())
+                if (pComponent->GetOwner()->IsQueuedForDeletion())
                     continue;
 
                 // If the bounding boxes of the ColliderComponents don't intersect, then we can leave.
@@ -566,16 +572,15 @@ namespace mcp
         //MCP_CHECK(IsLeaf(pCell));
         for (size_t i = 0; i < pCell->m_colliderComponents.size(); ++i)
         {
-            if (pCell->m_colliderComponents[i]->m_pOwner == pComponent->m_pOwner)
+            if (pCell->m_colliderComponents[i]->GetOwner() == pComponent->GetOwner())
             {
-                //MCP_LOG("Collision", "Removing Component from cell");
                 std::swap(pCell->m_colliderComponents[i], pCell->m_colliderComponents.back());
                 pCell->m_colliderComponents.pop_back();
-                break;
+                return;
             }
         }
 
-        //MCP_LOG("Collision", "pCell ColliderCount: ", pCell->m_colliderComponents.size());
+        MCP_WARN("Collision", "Failed to remove ColliderComponent from Cell!");
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------

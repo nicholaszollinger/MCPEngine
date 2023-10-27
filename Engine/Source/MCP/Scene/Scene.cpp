@@ -22,13 +22,15 @@ namespace mcp
         , m_pUILayer(nullptr)
         , m_accumulatedTime(0.f)
         , m_transitionQueued(false)
+        , m_isLoaded(false)
     {
         //
     }
 
     Scene::~Scene()
     {
-        CloseScene();
+        if (m_isLoaded)
+            CloseScene();
     }
 
     bool Scene::Load(const char* pFilePath)
@@ -94,13 +96,21 @@ namespace mcp
         }
 
         // Initialize the Scene.
-        return Init();
+        m_isLoaded = Init();
+
+        return m_isLoaded;
     }
+
+    void Scene::Unload()
+    {
+        CloseScene();
+    }
+
 
     bool Scene::Init()
     {
         MCP_ADD_MEMBER_FUNC_EVENT_LISTENER(ApplicationEvent, OnEvent);
-
+        
         return true;
     }
 
@@ -168,11 +178,16 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Scene::CloseScene()
     {
+        // Stop listening to ApplicationEvents.
+        MCP_REMOVE_MEMBER_FUNC_EVENT_LISTENER(ApplicationEvent);
+
         BLEACH_DELETE(m_pUILayer);
         m_pUILayer = nullptr;
 
         BLEACH_DELETE(m_pWorldLayer);
         m_pWorldLayer = nullptr;
+
+        m_isLoaded = false;
     }
 
     MessageManager* Scene::GetMessageManager()
@@ -186,7 +201,7 @@ namespace mcp
         // Right now I have two hard coded layers, so we are going to do UI and then the World
         m_pUILayer->OnEvent(event);
 
-        if (event.IsHandled())
+        if (!m_isLoaded || event.IsHandled())
             return;
 
         m_pWorldLayer->OnEvent(event);

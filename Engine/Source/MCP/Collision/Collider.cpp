@@ -48,9 +48,34 @@ namespace mcp
             m_pSystem->RemoveOverlappingCollider(this);
         }
 
+        // TODO: This needs to be changed!
         // Notify the Owner that we have changed.
         m_pOwner->ColliderCollisionChanged(m_colliderName);
     }
+
+    void Collider::OnComponentActiveChanged(const bool isActive)
+    {
+        if (m_isEnabled)
+        {
+            // If our Component is setting to inactive and we were overlapping with other colliders,
+            // then we need to remove ourselves from the system and send the exit overlap events.
+            if (!isActive && !m_overlappingColliders.empty())
+            {
+                for (auto* pOverlappedCollider : m_overlappingColliders)
+                {
+                    // Send out the overlap exit events.
+                    pOverlappedCollider->m_onExitOverlap.Broadcast(this, m_pOwner->GetOwner());
+                    m_onExitOverlap.Broadcast(pOverlappedCollider, pOverlappedCollider->m_pOwner->GetOwner());
+                }
+
+                // Clear our set of overlapping colliders.
+                m_overlappingColliders.clear();
+
+                m_pSystem->RemoveOverlappingCollider(this);
+            }
+        }
+    }
+
 
     Vec2 Collider::GetWorldCenter() const
     {

@@ -64,33 +64,31 @@ namespace mcp
     ///		@brief : Loads an object and all of its components. If loading a component fails, this will queue the object for destruction
     ///         and return.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void WorldLayer::LoadObject(XMLElement element)
+    void WorldLayer::LoadObject(const XMLElement element)
     {
-        while(element.IsValid())
+        auto* pObject = CreateObject();
+
+        // Get the first Component of the object.
+        XMLElement componentElement = element.GetChildElement();
+
+        while (componentElement.IsValid())
         {
-            // Create a new object and add it to the scene.
-            auto* pObject = CreateObject();
+            // Create the Component
+            auto* pComponent = ComponentFactory::CreateFromData(componentElement.GetName(), componentElement);
 
-            // Get the first Component of the object.
-            XMLElement componentElement = element.GetChildElement();
-
-            while (componentElement.IsValid())
+            if (!pComponent)
             {
-                // Add the Component to the new Object.
-                if (!ComponentFactory::AddToObjectFromData(componentElement.GetName(), componentElement, pObject))
-                {
-                    MCP_ERROR("WorldLayer", "Failed to load object!");
-                    // Delete the created object
-                    pObject->Destroy();
-                    return;
-                }
-
-                // Go to the next sibling to see if we have another component.
-                componentElement = componentElement.GetSiblingElement();
+                MCP_ERROR("WorldLayer", "Failed to load object!");
+                // Delete the created object
+                pObject->Destroy();
+                return;
             }
 
-            // Go to the next sibling to see if we have another gameObject.
-            element = element.GetSiblingElement(kObjectElementName);
+            // Add the Component to the new Object.
+            pObject->AddComponent(pComponent);
+
+            // Go to the next sibling to see if we have another component.
+            componentElement = componentElement.GetSiblingElement();
         }
     }
 
@@ -169,8 +167,6 @@ namespace mcp
             if (m_pScene->TransitionQueued()) // Get this from the Scene.
                 break;
         }
-
-        //DeleteQueuedObjects();
     }
 
     void WorldLayer::Render()
@@ -196,12 +192,69 @@ namespace mcp
 #endif
     }
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Create a new, empty object in the World.
+    ///		@returns : Pointer to the newly created object.
+    //-----------------------------------------------------------------------------------------------------------------------------
     Object* WorldLayer::CreateObject()
     {
         auto* pNewObject = BLEACH_NEW(Object(m_pScene));
         m_objects.emplace(pNewObject->GetId(), pNewObject);
 
         return pNewObject;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Create a new object in the World from a Prefab (XML file).
+    ///		@param pPrefabPath : Path to the prefab. 
+    ///		@returns : Pointer to the new object, or nullptr if it failed. (Like the path is wrong or something.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    Object* WorldLayer::CreateObjectFromPrefab(const char* pPrefabPath)
+    {
+        XMLParser parser;
+        if (!parser.LoadFile(pPrefabPath))
+        {
+            MCP_ERROR("World", "Failed to create Object from Data! Failed to find prefab file at path: ", pPrefabPath);
+            return nullptr;
+        }
+
+        const XMLElement element = parser.GetElement("Object");
+        if (!element.IsValid())
+        {
+            MCP_ERROR("World", "Failed to create Object from Data! Failed 'Object' element in file at path: ", pPrefabPath);
+            return nullptr;
+        }
+
+        // Create the new Object.
+        auto* pObject = CreateObject();
+
+        // Load the Components for the object:
+        XMLElement componentElement = element.GetChildElement();
+
+        while (componentElement.IsValid())
+        {
+            auto* pComponent = ComponentFactory::CreateFromData(componentElement.GetName(), componentElement);
+
+            if (!pComponent)
+            {
+                MCP_ERROR("WorldLayer", "Failed to load object! Failed to add Component!");
+                // Delete the created object
+                pObject->Destroy();
+                return nullptr;
+            }
+
+            // Add the Component to the new Object.
+            pObject->AddComponent(pComponent);
+
+            // Go to the next sibling to see if we have another component.
+            componentElement = componentElement.GetSiblingElement();
+        }
+
+        return pObject;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------

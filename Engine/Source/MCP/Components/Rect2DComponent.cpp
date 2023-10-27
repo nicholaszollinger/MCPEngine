@@ -7,8 +7,8 @@
 
 namespace mcp
 {
-    Rect2DComponent::Rect2DComponent(Object* pObject, const float width, const float height, const RenderLayer layer, const int zOrder)
-        : PrimitiveComponent(pObject, layer, zOrder)
+    Rect2DComponent::Rect2DComponent(const float width, const float height, const RenderLayer layer, const int zOrder)
+        : PrimitiveComponent(layer, zOrder)
         , m_width(width)
         , m_height(height)
     {
@@ -35,7 +35,7 @@ namespace mcp
         }
     }
 
-    bool Rect2DComponent::AddFromData(const XMLElement component, Object* pOwner)
+    Rect2DComponent* Rect2DComponent::AddFromData(const XMLElement component)
     {
         // Width and Height
         const auto width = component.GetAttributeValue<float>("width");
@@ -46,7 +46,7 @@ namespace mcp
         if (!renderableElement.IsValid())
         {
             MCP_ERROR("Rect2DComponent", "Failed to add ImageComponent from Data! Couldn't find RenderType Element!");
-            return false;
+            return nullptr;
         }
 
         // IRenderable Data.
@@ -54,11 +54,12 @@ namespace mcp
         const int zOrder = renderableElement.GetAttributeValue<int>("zOrder");
 
         // Add the component
-        auto* pRect2DComponent = pOwner->AddComponent<Rect2DComponent>(width, height, layer, zOrder);
+        auto* pRect2DComponent = BLEACH_NEW(Rect2DComponent(width, height, layer, zOrder));
         if (!pRect2DComponent)
         {
             MCP_ERROR("Rect2DComponent", "Failed to add Rect2DComponent from data!");
-            return false;
+            BLEACH_DELETE(pRect2DComponent);
+            return nullptr;
         }
 
         // RenderType
@@ -66,7 +67,8 @@ namespace mcp
         if (!renderTypeElement.IsValid())
         {
             MCP_ERROR("Rect2DComponent", "Failed to add ImageComponent from Data! Couldn't find RenderType Element!");
-            return false;
+            BLEACH_DELETE(pRect2DComponent);
+            return nullptr;
         }
         
         const char* pType = renderTypeElement.GetAttributeValue<const char*>("type");
@@ -78,7 +80,8 @@ namespace mcp
         if (!colorElement.IsValid())
         {
             MCP_ERROR("Rect2DComponent", "Failed to add ImageComponent from Data! Couldn't find Color Attribute!");
-            return false;
+            BLEACH_DELETE(pRect2DComponent);
+            return nullptr;
         }
 
         const auto r = colorElement.GetAttributeValue<uint8_t>("r");
@@ -87,7 +90,8 @@ namespace mcp
         const auto alpha = colorElement.GetAttributeValue<uint8_t>("alpha", 255);
         pRect2DComponent->SetColor(r,g,b,alpha);
 
-        return true;
+        return pRect2DComponent;
     }
+
 
 }

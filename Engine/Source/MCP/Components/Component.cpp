@@ -7,9 +7,9 @@
 
 namespace mcp
 {
-    Component::Component(Object* pObject)
-        : m_pOwner(pObject)
-        , m_isActive(true)
+    Component::Component(const bool startActive)
+        : m_pOwner(nullptr)
+        , m_isActive(startActive)
     {
         //
     }
@@ -17,6 +17,35 @@ namespace mcp
     MessageManager* Component::GetMessageManager() const
     {
         return m_pOwner->GetScene()->GetMessageManager();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Set this component's active state.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Component::SetActive(const bool isActive)
+    {
+        if (m_isActive == isActive)
+            return;
+
+        m_isActive = isActive;
+
+        m_isActive ? OnActive() : OnInactive();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Return whether the Component is active. Note, if the Component is active but the owner is not, this will return
+    ///         false.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool Component::IsActive() const
+    {
+        if (!m_pOwner->IsActive())
+            return false;
+
+        return m_isActive;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -51,4 +80,27 @@ namespace mcp
     {
         m_pOwner->GetScene()->GetMessageManager()->RemoveListener(this, messageId);
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Component response to the Object's active state changing.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Component::OnObjectActiveChanged(const bool objectActive)
+    {
+        // If we were active, then we need to respond to the active change.
+        if (m_isActive)
+        {
+            if (objectActive)
+            {
+                OnActive();
+            }
+
+            else
+            {
+                OnInactive();
+            }
+        }
+    }
+
 }

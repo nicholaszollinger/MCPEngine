@@ -37,7 +37,7 @@ namespace mcp
         Font m_font;                        // The font resource that we are using.
 
     public:
-        TextComponent(Object* pObject, const char* pText, const TextComponentData& data, const RenderLayer layer, const int zOrder);
+        TextComponent(const char* pText, const TextComponentData& data, const RenderLayer layer, const int zOrder);
         virtual ~TextComponent() override;
 
         virtual bool Init() override;
@@ -46,9 +46,12 @@ namespace mcp
         void SetText(const char* pText);
         void SetFont(const Font& font);
         // TODO: More font sizing/styling
-        static bool AddFromData(const XMLElement element, mcp::Object* pObject);
+
+        static TextComponent* AddFromData(const XMLElement element);
 
     private:
+        virtual void OnActive() override;
+        virtual void OnInactive() override;
         void RegenerateTextTexture();
         void FreeTexture();
     };

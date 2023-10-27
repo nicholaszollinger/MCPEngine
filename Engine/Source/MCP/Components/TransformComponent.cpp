@@ -6,15 +6,22 @@
 
 namespace mcp
 {
-    TransformComponent::TransformComponent(Object* pOwner, const Vec2& position)
-        : Component(pOwner)
+    TransformComponent::TransformComponent()
+        : Component(true)
+        , m_position{}
+    {
+        //
+    }
+
+    TransformComponent::TransformComponent(const Vec2& position)
+        : Component(true)
         , m_position(position)
     {
         //
     }
 
-    TransformComponent::TransformComponent(Object* pOwner, const float xPos, const float yPos)
-        : Component(pOwner)
+    TransformComponent::TransformComponent(const float xPos, const float yPos)
+        : Component(true)
         , m_position(xPos, yPos)
     {
         //
@@ -44,18 +51,13 @@ namespace mcp
         m_position = position;
         m_onLocationUpdated.Broadcast(m_position);
     }
-    
-    bool TransformComponent::AddFromData(const XMLElement component, Object* pOwner)
+
+    TransformComponent* TransformComponent::AddFromData(const XMLElement element)
     {
-        const auto x = component.GetAttributeValue<float>("x");
-        const auto y = component.GetAttributeValue<float>("y");
+        const auto x = element.GetAttributeValue<float>("x", 0.f);
+        const auto y = element.GetAttributeValue<float>("y", 0.f);
 
-        if (!pOwner->AddComponent<TransformComponent>(x, y))
-        {
-            MCP_ERROR("TransformComponent", "Failed to add TransformComponent from data!");
-            return false;
-        }
-
-        return true;
+        return BLEACH_NEW(TransformComponent(x, y));
     }
+
 }

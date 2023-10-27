@@ -25,8 +25,8 @@ namespace mcp
         RenderFlip2D m_flip;
 
     public:
-        ImageComponent(Object* pObject, const RenderLayer layer, const int zOrder);
-        ImageComponent(Object* pObject, const char* pTextureFilepath, const RectInt& crop = {}, const Vec2 scale = { 1.f, 1.f }, const Color tint = Color::White(), const RenderLayer layer = RenderLayer::kObject, const int zOrder = 0);
+        ImageComponent(const RenderLayer layer, const int zOrder);
+        ImageComponent(const char* pTextureFilepath, const RectInt& crop = {}, const Vec2 scale = { 1.f, 1.f }, const Color tint = Color::White(), const RenderLayer layer = RenderLayer::kObject, const int zOrder = 0);
         virtual ~ImageComponent() override;
 
         virtual bool Init() override;
@@ -35,12 +35,15 @@ namespace mcp
         void SetTexture(const Texture& texture) { m_texture = texture; }
         void SetCrop(const RectInt& crop) { m_crop = crop; }
         void SetSize(const float width, const float height) { m_scale = { width, height }; }
-        virtual void SetIsActive(const bool isActive) override;
         void SetTint(const Color color);
         void SetAlpha(const uint8_t alpha);
 
         [[nodiscard]] RectInt GetCrop() const { return m_crop; }
+        
+        static ImageComponent* AddFromData(const XMLElement element);
 
-        static bool AddFromData(const XMLElement component, Object* pOwner);
+    private:
+        virtual void OnActive() override;
+        virtual void OnInactive() override;
     };
 }

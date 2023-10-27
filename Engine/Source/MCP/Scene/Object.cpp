@@ -70,6 +70,27 @@ namespace mcp
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
+    //		
+    ///		@brief : Add a previously created Component to this Object.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Object::AddComponent(Component* pComponent)
+    {
+        if (!pComponent)
+        {
+            MCP_WARN("Object", "Attempted to add Component* that was nullptr!");
+            return;
+        }
+
+        // Set the owner directly.
+        pComponent->m_pOwner = this;
+        pComponent->Init();
+
+        // Add the Component to our list.
+        m_components.emplace_back(pComponent);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
     //      Should the components' Active state be set to match the GameObject?
     //          - No. I think the better option is to have Components check to see if their Owner is Active...hmm...
     //
@@ -78,12 +99,16 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Object::SetActive(const bool isActive)
     {
+        if (m_isActive == isActive)
+            return;
+
         m_isActive = isActive;
 
-        /*for (auto* pComponent : m_components)
+        // Update our component's active state
+        for (auto* pComponent : m_components)
         {
-            pComponent->SetIsActive(isActive);
-        }*/
+            pComponent->OnObjectActiveChanged(m_isActive);
+        }
     }
 
     WorldLayer* Object::GetWorld() const

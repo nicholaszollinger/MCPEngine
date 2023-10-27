@@ -8,8 +8,8 @@
 
 namespace mcp
 {
-    ColliderComponent::ColliderComponent(Object* pObject, const bool collisionEnabled, const bool isStatic)
-        : Component(pObject)
+    ColliderComponent::ColliderComponent(const bool collisionEnabled, const bool isStatic)
+        : Component(true)
 #if RENDER_COLLIDER_VISUALS
         , IRenderable(RenderLayer::kDebugOverlay)
 #endif
@@ -26,22 +26,23 @@ namespace mcp
 
     ColliderComponent::~ColliderComponent()
     {
+        // If this Component was active,
+        if (IsActive())
+        {
+            if (m_collisionEnabled)
+            {
 #if RENDER_COLLIDER_VISUALS
-        if (m_collisionEnabled)
-            m_pOwner->GetWorld()->RemoveRenderable(this);
+                GetOwner()->GetWorld()->RemoveRenderable(this);
 #endif
 
-        // If we were listening to the transform updated events, unregister.
-        //if (!m_isStatic && m_collisionEnabled)
-        //    m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
+                // Remove ourselves from the collision system.
+                m_pSystem->RemoveCollideable(this);
 
-        // Remove ourselves from the collision system.
-        if (m_collisionEnabled)
-            m_pSystem->RemoveCollideable(this);
-
-        // Remove ourselves from the physics update.
-        if (!m_isStatic)
-            m_pOwner->GetWorld()->RemovePhysicsUpdateable(this);
+                // Remove ourselves from the physics update.
+                if (!m_isStatic)
+                    GetOwner()->GetWorld()->RemovePhysicsUpdateable(this);
+            }
+        }
 
         // Delete all of our colliders
         for (auto&[ colliderId, pCollider] : m_colliders)
@@ -54,10 +55,10 @@ namespace mcp
     bool ColliderComponent::Init()
     {
         // Add this component to the list of renderables in the scene.
-        auto* pWorld = m_pOwner->GetWorld();
+        auto* pWorld = GetOwner()->GetWorld();
         MCP_CHECK(pWorld);
 
-        m_pTransformComponent = m_pOwner->GetComponent<TransformComponent>();
+        m_pTransformComponent = GetOwner()->GetComponent<TransformComponent>();
         if (!m_pTransformComponent)
         {
             MCP_ERROR("Collision", "Failed to initialize ColliderComponent! TransformComponent was nullptr!");
@@ -83,14 +84,8 @@ namespace mcp
 
     bool ColliderComponent::PostLoadInit()
     {
-        // If we are an active, enabled collider, then we need to listen to the transform updates.
-        //if (!m_isStatic && m_collisionEnabled)
-        //{
-        //    //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
-        //}
-
         // Add ourselves to the CollisionSystem
-        if (m_collisionEnabled)
+        if (CollisionEnabled())
             m_pSystem->AddCollideable(this);
 
         return true;
@@ -137,20 +132,17 @@ namespace mcp
         // If collision is enabled, we need to update our transform listening.
         if (m_collisionEnabled)
         {
-            // If we were enabled, then we need to update our status in the Collision system.
             m_pSystem->SetCollideableStatic(this, isStatic);
+            if (!isStatic)
+            {
+                // If we were enabled, then we need to update our status in the Collision system.
+                GetOwner()->GetWorld()->AddPhysicsUpdateable(this);
+            }
 
-            //// If we are becoming static, then we need to stop listening to the transform updates.
-            //if (isStatic)
-            //{
-            //    //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
-            //}
-
-            // Otherwise, we are becoming active and need to start listening.
-            //else
-            //{
-            //    //m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
-            //}
+            else
+            {
+                GetOwner()->GetWorld()->RemovePhysicsUpdateable(this);
+            }
         }
 
         m_isStatic = isStatic;
@@ -169,38 +161,48 @@ namespace mcp
         if (isEnabled == m_collisionEnabled)
             return;
 
-        // If we aren't a static collider, then we need to update if we
-        // are listening to the Transform's updates.
-        //if (!m_isStatic)
-        //{
-            // If we are enabling the collision, then we need to
-            //  - Add this Component to the collision grid.
-            //  - Stop listening to Transform updates. Our collision will be updated by being active.
-        if (isEnabled)
+        // If this Component is active, then we need to update our membership in the Collision System.
+        if (IsActive())
         {
+            if (isEnabled)
+            {
 #if RENDER_COLLIDER_VISUALS
-            m_pOwner->GetWorld()->AddRenderable(this);
+                GetOwner()->GetWorld()->AddRenderable(this);
 #endif
 
-            m_pSystem->AddCollideable(this);
-            //m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
-        }
-        
-        // Otherwise, we to remove this component from the collision tree and start listening
-        // to transform updates.
-        else
-        {
+                m_pSystem->AddCollideable(this);
+                //m_pTransformComponent->m_onLocationUpdated.RemoveListener(this);
+            }
+            
+            // Otherwise, we to remove this component from the collision tree
+            else
+            {
 #if RENDER_COLLIDER_VISUALS
-            m_pOwner->GetWorld()->RemoveRenderable(this);
+                GetOwner()->GetWorld()->RemoveRenderable(this);
 #endif
 
-            //MCP_LOG("Collision", "Removing Collideable...");
-            m_pSystem->RemoveCollideable(this);
-            //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
+                //MCP_LOG("Collision", "Removing Collideable...");
+                m_pSystem->RemoveCollideable(this);
+                //m_pTransformComponent->m_onLocationUpdated.AddListener(this, [this](const Vec2 pos){ this->TestCollisionNow(pos);});
+            }
         }
-        //}
 
         m_collisionEnabled = isEnabled;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Return whether this collider is being checked for collision against other colliders.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool ColliderComponent::CollisionEnabled() const
+    {
+        if (!IsActive())
+        {
+            return false;
+        }
+
+        return m_collisionEnabled;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -304,7 +306,6 @@ namespace mcp
             UpdateEstimationRect();
     }
 
-
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		This is called whenever there is a change to our colliders, whether they're active state changes,
@@ -386,25 +387,26 @@ namespace mcp
         result.SetPosition(result.GetPosition() + m_pTransformComponent->GetLocation());
         return result;
     }
-    
-    bool ColliderComponent::AddFromData(const XMLElement component, Object* pOwner)
+
+    ColliderComponent* ColliderComponent::AddFromData(const XMLElement element)
     {
         // CollisionEnabled
-        bool isEnabled = component.GetAttributeValue<bool>("collisionEnabled", true);
+        bool isEnabled = element.GetAttributeValue<bool>("collisionEnabled", true);
 
         // IsStatic
-        bool isStatic = component.GetAttributeValue<bool>("isStatic");
+        bool isStatic = element.GetAttributeValue<bool>("isStatic");
 
-        auto* pNewComponent = pOwner->AddComponent<ColliderComponent>(isEnabled, isStatic);
+        auto* pNewComponent = BLEACH_NEW(ColliderComponent(isEnabled, isStatic));
         // Add the component to the Object
         if (!pNewComponent)
         {
             MCP_ERROR("Collision", "Failed to add ColliderComponent from data!");
-            return false;
+            BLEACH_DELETE(pNewComponent);
+            return nullptr;
         }
 
         // Get each collider for this component.
-        auto colliderElement = component.GetChildElement();
+        auto colliderElement = element.GetChildElement();
 
         while (colliderElement.IsValid())
         {
@@ -412,24 +414,62 @@ namespace mcp
             if (!ColliderFactory::AddNewFromData(colliderElement.GetName(), colliderElement, pNewComponent))
             {
                 MCP_ERROR("Collision", "Failed to add Collider to new ColliderComponent from data!");
-                return false;
+                BLEACH_DELETE(pNewComponent);
+                return nullptr;
             }
 
             // Get the next collider.
             colliderElement = colliderElement.GetSiblingElement();
         }
 
-        return true;
+        return pNewComponent;
+    }
+
+    void ColliderComponent::OnActive()
+    {
+        if (m_collisionEnabled)
+            m_pSystem->AddCollideable(this);
+
+        // If we are not static, then we need to add ourselves to the physics update.
+        if (!m_isStatic)
+            GetOwner()->GetWorld()->AddPhysicsUpdateable(this);
+
+        // Notify our colliders of the active change:
+        for (auto&[colliderId, pCollider] : m_colliders)
+        {
+            pCollider->OnComponentActiveChanged(true);
+        }
+
+#if RENDER_COLLIDER_VISUALS
+            GetOwner()->GetWorld()->AddRenderable(this);
+#endif
+    }
+
+    void ColliderComponent::OnInactive()
+    {
+        if (m_collisionEnabled)
+            m_pSystem->RemoveCollideable(this);
+
+        // If we are not static, then we need to remove ourselves from the physics update.
+        if (!m_isStatic)
+            GetOwner()->GetWorld()->RemovePhysicsUpdateable(this);
+
+        // Notify our colliders of the active change:
+        for (auto&[colliderId, pCollider] : m_colliders)
+        {
+            pCollider->OnComponentActiveChanged(false);
+        }
+
+#if RENDER_COLLIDER_VISUALS
+        GetOwner()->GetWorld()->RemoveRenderable(this);
+#endif
     }
 
 #if RENDER_COLLIDER_VISUALS
     void ColliderComponent::Render() const
     {
-        if (!m_collisionEnabled)
+        if (!CollisionEnabled())
             return;
-
-        // I need to adjust the rect for rendering.
-        //DrawRect(GetEstimationRect(), Color::White());
 
         for (auto& [colliderId, pCollider] : m_colliders)
         {
