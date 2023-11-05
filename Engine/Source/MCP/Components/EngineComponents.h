@@ -8,15 +8,18 @@
 //      - This is something that I would like to fix structurally, like making a defined registration step
 //        instead of my 'automatic' version, but right now, this is the easy fix.
 
+// Components
 #include "ColliderComponent.h"
 #include "ImageComponent.h"
+#include "InputComponent.h"
 #include "PrimitiveComponent.h"
 #include "Rect2DComponent.h"
 #include "ScriptComponent.h"
 #include "TextComponent.h"
 #include "TransformComponent.h"
 
-// UI
+// UI Widgets
+#include "MCP/UI/BarWidget.h"
 #include "MCP/UI/ButtonWidget.h"
 #include "MCP/UI/CanvasWidget.h"
 #include "MCP/UI/HorizontalLayoutWidget.h"

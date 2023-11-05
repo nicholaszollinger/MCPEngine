@@ -40,8 +40,12 @@ function WidgetScript.OnHoverExit() end;
 ---@field SetAnchor function
 ---@field GetDimensions function
 ---@field SetPosition function
+---@field GetLocalPosition function
 ---@field GetTextWidget function
 ---@field GetFirstChildTextWidget function
+---@field AddToLayerStack function
+---@field PopLayerStack function
+---@field SetWidth function
 
 ---@type WidgetLib
 Widget = {};
@@ -81,3 +85,31 @@ function Widget.GetDimensions(widgetPtr) return 0,0; end
 ---@param y number
 ----------------------------------------------------------------------------------------------------
 function Widget.SetPosition(widgetPtr, x, y) end;
+
+----------------------------------------------------------------------------------------------------
+---Get the Local position of the Widget.
+---@param widgetPtr WidgetPtr
+---@return integer x
+---@return integer y
+----------------------------------------------------------------------------------------------------
+function Widget.GetLocalPosition(widgetPtr) return 0,0; end;
+
+----------------------------------------------------------------------------------------------------
+--- Add the passed in Widget to the UI Layer's widget stack. This can be used to open a new menu.
+---@param widgetPtr WidgetPtr
+----------------------------------------------------------------------------------------------------
+function Widget.AddToLayerStack(widgetPtr) end;
+
+----------------------------------------------------------------------------------------------------
+--- Pop the top widget off of the UI Layer's widget stack. This can be used to go back to a previous
+--- menu.
+---@param widgetPtr WidgetPtr
+----------------------------------------------------------------------------------------------------
+function Widget.PopLayerStack(widgetPtr) end;
+
+----------------------------------------------------------------------------------------------------
+--- Set the widget's width.
+---@param widgetPtr WidgetPtr
+---@param width number
+----------------------------------------------------------------------------------------------------
+function Widget.SetWidth(widgetPtr, width) end;

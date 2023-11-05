@@ -8,6 +8,8 @@
 
 namespace mcp
 {
+    class InputComponent;
+
     class WorldLayer final : public SceneLayer
     {
         static constexpr const char* kObjectElementName = "Object";
@@ -16,7 +18,8 @@ namespace mcp
         std::vector<ObjectId> m_queuedObjectsToDelete;               // Objects that will be deleted at the end of the update.
         CollisionSystem m_collisionSystem;
         MessageManager m_messageManager;
-        // InputComponent* m_pInput; // Only 1 active input receiver is active at a time.
+        InputComponent* m_activeInput; // Only 1 active input receiver is active at a time.
+        bool m_isPaused;
 
     public:
         WorldLayer(Scene* pScene);
@@ -28,6 +31,15 @@ namespace mcp
         virtual void Render() override;
         virtual void OnEvent(ApplicationEvent& event) override;
         virtual bool OnSceneLoad() override;
+
+        // Time
+        void Pause();
+        void Resume();
+        [[nodiscard]] bool IsPaused() const { return m_isPaused; }
+
+        // Input
+        void AddInputListener(InputComponent* pInputComponent);
+        void RemoveInputListener(InputComponent* pInputComponent);
 
         // Object Interface
         Object* CreateObject();
@@ -45,5 +57,8 @@ namespace mcp
         void LoadObject(const XMLElement element);
         void SetCollisionSettings(const QuadtreeBehaviorData& data);
         void DeleteQueuedObjects();
+
+        // Input
+        void TickInput(const float deltaTimeMs);
     };
 }

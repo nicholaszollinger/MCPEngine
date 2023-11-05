@@ -62,12 +62,16 @@ namespace mcp
             ComponentType* pNewComponent = BLEACH_NEW(ComponentType(params...));
             pNewComponent->m_pOwner = this;
 
+            // Initialize the Component
             if (!pNewComponent->Init())
             {
                 MCP_ERROR("Object", "Failed to add Component! Initialization of Component failed!");
                 BLEACH_DELETE(pNewComponent);
                 return nullptr;
             }
+
+            // Set the Component to its starting active state.
+            pNewComponent->OnObjectActiveChanged(m_isActive);
 
             // Add the Component* to our master list, then return the pointer to the new Component.
             m_components.push_back(pNewComponent); 

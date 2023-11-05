@@ -29,7 +29,7 @@ namespace mcp
         ColliderContainer m_colliders;              // Colliders that we own.
         CollisionSystem* m_pSystem;                 // CollisionSystem reference.
         std::vector<void*> m_cells;
-        void* m_pCell;
+        void* m_pReferenceCell;                     // Highest cell in the collision tree that completely encapsulated our rect.
         TransformComponent* m_pTransformComponent;  // The transform component we are attached to.
         RectF m_myRelativeEstimationRect;           // This is a collider that encompasses all of the child colliders. Used as a quick filter.
         Vec2 m_lastLocation;                        // The old location we have before any move.

@@ -112,7 +112,7 @@ namespace mcp
     void Collider::SetCollisionResponseToChannel(const CollisionChannel channel, const CollisionResponse response)
     {
         const size_t channelIndex = static_cast<size_t>(channel);
-        assert(channelIndex < Internal::kMaxChannels);
+        MCP_CHECK(channelIndex < Internal::kMaxChannels);
 
         m_profile.collisionResponses[channelIndex] = response;
     }
@@ -149,7 +149,7 @@ namespace mcp
     CollisionResponse Collider::GetResponseToChannel(const CollisionChannel channel) const
     {
         const size_t channelIndex = static_cast<size_t>(channel);
-        assert(channelIndex < Internal::kMaxChannels);
+        MCP_CHECK(channelIndex < Internal::kMaxChannels);
         return m_profile.collisionResponses[channelIndex];
     }
 

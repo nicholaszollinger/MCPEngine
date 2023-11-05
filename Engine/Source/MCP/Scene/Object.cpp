@@ -59,6 +59,8 @@ namespace mcp
 
         // Queue the deletion.
         m_isQueuedForDeletion = true;
+        SetActive(false);
+
         GetWorld()->DestroyObject(m_objectId);
 
         // Signal to the components that we are being destroyed.
@@ -84,6 +86,9 @@ namespace mcp
         // Set the owner directly.
         pComponent->m_pOwner = this;
         pComponent->Init();
+
+        // Set the Component to its starting active state.
+        pComponent->OnObjectActiveChanged(m_isActive);
 
         // Add the Component to our list.
         m_components.emplace_back(pComponent);

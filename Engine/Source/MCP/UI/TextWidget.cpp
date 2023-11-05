@@ -27,9 +27,6 @@ namespace mcp
     {
         if (IsActive())
             m_pUILayer->RemoveRenderable(this);
-
-        // Free the text texture.
-        //FreeTexture();
     }
 
     bool TextWidget::Init()
@@ -55,16 +52,19 @@ namespace mcp
     void TextWidget::Render() const
     {
         MCP_CHECK(m_font.IsValid());
-        //MCP_CHECK(m_pTexture);
 
         // Get the rect we are going to be in.
-        const RectF rect = GetRect();
-        
-        // Debug Render:
-        const float renderX = rect.x - rect.width / 2.f;
-        const float renderY = rect.y - rect.height / 2.f;
-        DrawRect(RectF{renderX, renderY, rect.width, rect.height}, Color::Black());
+        RectF rect = GetRect();
 
+        const auto center = GetRectCenter();
+        rect.x = center.x;
+        rect.y = center.y;
+
+#ifdef _DEBUG
+        // Debug Render the text Boundaries:
+        //DrawRect( GetRectTopLeft(), Color::Black());
+#endif
+        
         const float startPosY = GetTextStartYPos(rect);
         int glyphIndex = 0;
 
@@ -124,18 +124,24 @@ namespace mcp
         m_pUILayer->RemoveRenderable(this);
     }
 
-    void TextWidget::OnParentSet()
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : When a parent Widget's ZOffset changes, our Renderable ZOrder needs to be updated.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void TextWidget::OnZChanged()
     {
-        // When we set the parent, we need to update our zOrder to match the widget zOffset.
         SetZOrder(GetZOffset());
     }
-
 
     void TextWidget::SetFont(const Font& font)
     {
         m_font = font;
         //RegenerateTextTexture();
         SetGlyphData();
+
+        if (m_pParent)
+            m_pParent->OnChildSizeChanged();
     }
 
     void TextWidget::SetText(const char* pText)
@@ -143,6 +149,9 @@ namespace mcp
         m_text = pText;
         //RegenerateTextTexture();
         SetGlyphData();
+
+        if (m_pParent)
+            m_pParent->OnChildSizeChanged();
     }
 
     void TextWidget::SetText(const std::string& text)
@@ -150,6 +159,9 @@ namespace mcp
         m_text = text;
         //RegenerateTextTexture();
         SetGlyphData();
+
+        if (m_pParent)
+            m_pParent->OnChildSizeChanged();
     }
 
     bool TextWidget::Append(const char character)
@@ -247,6 +259,9 @@ namespace mcp
             m_lines.back().lineWidth = m_glyphs.back().localPos.x + m_glyphs.back().pTextureData->width;
             m_lines.back().glyphCount += 1;
         }
+
+        if (m_pParent)
+            m_pParent->OnChildSizeChanged();
         
         //MCP_LOG("TextWidget", "Line width: ", m_lines.back().lineWidth);
 
@@ -285,6 +300,9 @@ namespace mcp
 
             line.lineWidth = m_glyphs.back().localPos.x + m_glyphs.back().pTextureData->width;
         }
+
+        if (m_pParent)
+            m_pParent->OnChildSizeChanged();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------

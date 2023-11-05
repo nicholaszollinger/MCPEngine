@@ -172,7 +172,7 @@ namespace mcp
         MCP_CHECK(m_pActiveScene);
 
         // Load the Scene
-        MCP_LOG("SceneManager", "Loading Scene: ", m_sceneToTransitionTo.GetCStr());
+        //MCP_LOG("SceneManager", "Loading Scene: ", m_sceneToTransitionTo.GetCStr());
         if (!m_pActiveScene->Load(sceneData.dataPath.c_str()))
         {
             MCP_ERROR("SceneManager", "Failed to Load Scene: ", m_sceneToTransitionTo.GetCStr());
@@ -200,11 +200,31 @@ namespace mcp
         return 0;
     }
 
+    static int PauseWorld([[maybe_unused]] lua_State* pState)
+    {
+        auto* pScene = SceneManager::Get()->GetActiveScene();
+        MCP_CHECK(pScene);
+
+        pScene->GetWorldLayer()->Pause();
+        return 0;
+    }
+
+    static int ResumeWorld([[maybe_unused]] lua_State* pState)
+    {
+        auto* pScene = SceneManager::Get()->GetActiveScene();
+        MCP_CHECK(pScene);
+
+        pScene->GetWorldLayer()->Resume();
+        return 0;
+    }
+
     void SceneManager::RegisterLuaFunctions(lua_State* pState)
     {
         static constexpr luaL_Reg kFuncs[]
         {
              {"TransitionToScene", &ScriptTransitionToScene}
+             ,{"PauseWorld", &PauseWorld}
+             ,{"ResumeWorld", &ResumeWorld}
             ,{nullptr, nullptr}
         };
 

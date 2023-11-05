@@ -39,17 +39,7 @@ namespace mcp
 
     void ImageWidget::Render() const
     {
-        auto rect = GetRect();
-
-        // If we are using the image size to determine our rect:
-        /*if (m_scaleToContent)
-        {
-            rect.width = m_scale.x * static_cast<float>(m_crop.width);
-            rect.height = m_scale.y * static_cast<float>(m_crop.height);
-        }*/
-        
-        rect.x -= rect.width / 2.f;
-        rect.y -= rect.height / 2.f;
+        const auto rect = GetRectTopLeft();
 
         TextureRenderData renderData;
         renderData.pTexture = m_texture.Get();
@@ -105,7 +95,12 @@ namespace mcp
         m_pUILayer->RemoveRenderable(this);
     }
 
-    void ImageWidget::OnParentSet()
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : When a parent Widget's ZOffset changes, our Renderable ZOrder needs to be updated.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void ImageWidget::OnZChanged()
     {
         SetZOrder(GetZOffset());
     }
@@ -238,6 +233,101 @@ namespace mcp
         return 0;
     }
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Returns the a table containing the x, y, width, & height values of the crop.
+    ///
+    ///     \n LUA PARAMS: ImageWidget* pWidget
+    ///     \n RETURNS: VOID
+    //-----------------------------------------------------------------------------------------------------------------------------
+    static int GetImageCrop(lua_State* pState)
+    {
+        // Get the Widget
+        auto* pWidget = static_cast<ImageWidget*>(lua_touserdata(pState, -1));
+        MCP_CHECK(pWidget);
+
+        // Get the crop of the Widget.
+        RectInt crop = pWidget->GetCrop();
+
+        // Pop the Widget parameter
+        lua_pop(pState, 1);
+
+        // Create a table
+        lua_newtable(pState);
+
+        // Add the x
+        lua_pushinteger(pState, crop.x);
+        lua_setfield(pState, -2, "x");
+
+        // Add the y
+        lua_pushinteger(pState, crop.y);
+        lua_setfield(pState, -2, "y");
+
+        // Add width
+        lua_pushinteger(pState, crop.width);
+        lua_setfield(pState, -2, "width");
+
+        // Add Height
+        lua_pushinteger(pState, crop.height);
+        lua_setfield(pState, -2, "height");
+
+        return 1;
+    }
+
+    static int SetImageCrop(lua_State* pState)
+    {
+        // Get the Widget
+        auto* pWidget = static_cast<ImageWidget*>(lua_touserdata(pState, -2));
+        MCP_CHECK(pWidget);
+
+        RectInt crop{};
+        // X
+        lua_pushstring(pState, "x");
+        bool success = lua_gettable(pState, -2);
+        MCP_CHECK(success);
+        crop.x = static_cast<int>(lua_tointeger(pState, -1));
+        lua_pop(pState, 1);
+
+        // Y
+        lua_pushstring(pState, "y");
+        success = lua_gettable(pState, -2);
+        MCP_CHECK(success);
+        crop.y = static_cast<int>(lua_tointeger(pState, -1));
+        lua_pop(pState, 1);
+
+        // Width
+        lua_pushstring(pState, "width");
+        success = lua_gettable(pState, -2);
+        MCP_CHECK(success);
+        if (lua_type(pState, -1) == LUA_TNUMBER)
+        {
+            crop.width = static_cast<int>(lua_tonumber(pState, -1));
+        }
+
+        else
+        {
+            crop.width = static_cast<int>(lua_tointeger(pState, -1));
+        }
+
+        lua_pop(pState, 1);
+
+        // Height
+        lua_pushstring(pState, "height");
+        success = lua_gettable(pState, -2);
+        MCP_CHECK(success);
+        crop.height = static_cast<int>(lua_tointeger(pState, -1));
+        lua_pop(pState, 1);
+
+        // Pop the ImageWidget* and RectInt table params.
+        lua_pop(pState, 2);
+
+        // Set the crop of the Image
+        pWidget->SetCrop(crop);
+
+        return 0;
+    }
+
     void ImageWidget::RegisterLuaFunctions(lua_State* pState)
     {
         static constexpr luaL_Reg kFuncs[]
@@ -248,11 +338,26 @@ namespace mcp
             ,{nullptr, nullptr}
         };
 
+        static constexpr luaL_Reg kImageWidgetFuncs[]
+        {
+             {"SetTint", &SetImageWidgetTint}
+            ,{"GetCrop", &GetImageCrop}
+            ,{"SetCrop", &SetImageCrop}
+            ,{nullptr, nullptr}
+        };
+
+        // Set the Widget Functions:
         lua_getglobal(pState, "Widget");
         MCP_CHECK(lua_type(pState, -1) == LUA_TTABLE);
-
-        // Set its functions
         luaL_setfuncs(pState, kFuncs, 0);
+
+        // Pop the table off the stack.
+        lua_pop(pState, 1);
+
+        // Set the ImageWidget Functions:
+        lua_getglobal(pState, "ImageWidget");
+        MCP_CHECK(lua_type(pState, -1) == LUA_TTABLE);
+        luaL_setfuncs(pState, kImageWidgetFuncs, 0);
 
         // Pop the table off the stack.
         lua_pop(pState, 1);

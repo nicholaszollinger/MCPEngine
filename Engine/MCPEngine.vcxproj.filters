@@ -336,6 +336,36 @@
     <ClInclude Include="Source\MCP\UI\TextFieldWidget.h">
       <Filter>MCP\UI</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MCP\Input\InputAction.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Input\InputActionValue.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\InputComponent.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Input\InputListener.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Input\InputModifier.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Input\InputControlScheme.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Input\InputControl.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\BarWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\AlignmentTypes.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\Layout.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
@@ -541,6 +571,24 @@
     </ClCompile>
     <ClCompile Include="Source\MCP\Core\Event\ApplicationEvent.cpp">
       <Filter>MCP\Core\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\InputComponent.cpp">
+      <Filter>MCP\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Input\InputModifier.cpp">
+      <Filter>MCP\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Input\InputActionValue.cpp">
+      <Filter>MCP\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Input\InputControl.cpp">
+      <Filter>MCP\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\BarWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\Layout.cpp">
+      <Filter>MCP\UI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -4,6 +4,16 @@
 #include "Widget.h"
 #include "MCP/Lua/LuaSystem.h"
 
+#define MCP_DEBUG_RENDER_BUTTON_BOUNDS 0
+
+#ifndef _DEBUG
+#define MCP_DEBUG_RENDER_BUTTON_BOUNDS 0
+#endif
+
+#if MCP_DEBUG_RENDER_BUTTON_BOUNDS
+#include "MCP/Scene/IRenderable.h"
+#endif
+
 namespace mcp
 {
     class KeyEvent;
@@ -23,6 +33,9 @@ namespace mcp
     ///		@brief : Base ButtonWidget Component.
     //-----------------------------------------------------------------------------------------------------------------------------
     class ButtonWidget : public Widget
+#if MCP_DEBUG_RENDER_BUTTON_BOUNDS
+        , public IRenderable
+#endif
     {
         MCP_DEFINE_WIDGET(ButtonWidget)
 
@@ -71,12 +84,24 @@ namespace mcp
 
         static ButtonBehavior GetButtonBehavior(const XMLElement element);
     private:
+        virtual void OnChildAdded(Widget* pChild) override;
         virtual void HandleEvent(ApplicationEvent& event) override;
         void HandleMouseButtonPress(MouseButtonEvent& event);
         void HandleMouseMotion(MouseMoveEvent& event);
         virtual void HandleKeyPress(KeyEvent& event);
 
+        [[nodiscard]] virtual float GetRectWidth() const override;
+        [[nodiscard]] virtual float GetRectHeight() const override;
         virtual void OnInactive() override;
-        // TODO: Handle keyboard and controller input. 
+        virtual void OnFocus() override;
+        virtual void OnFocusLost() override;
+        // TODO: Handle keyboard and controller input.
+        
+#if MCP_DEBUG_RENDER_BUTTON_BOUNDS
+    public:
+        virtual void OnActive() override;
+        virtual void Render() const override;
+    private:
+#endif
     };
 }

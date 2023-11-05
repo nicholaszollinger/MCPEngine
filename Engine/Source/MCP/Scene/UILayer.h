@@ -8,9 +8,16 @@ namespace mcp
 {
     class UILayer final : public SceneLayer
     {
+        struct WidgetStackElement
+        {
+            Widget* pBaseWidget = nullptr; // The BaseWidget for this stack element. Ex: The base CanvasWidget of a Menu.
+            Widget* pPreviouslyFocused = nullptr; // The Widget on the previous menu that was focused. This can be nullptr.
+        };
+
         std::vector<Widget*> m_queuedWidgetsToDelete;
-        std::vector<Widget*> m_widgets;                // Container of all Widgets in the scene. More specifically, these are all of the 'roots'
-        Widget* m_pFocusedWidget;                      // The active Widget tree that is responding to ApplicationEvents
+        std::vector<Widget*> m_widgets;                 // Container of all Widgets in the scene. More specifically, these are all of the 'roots'
+        std::vector<WidgetStackElement> m_stack;        // Stack of Widgets that define Menu navigation, render order, etc.
+        Widget* m_pFocusedWidget;                       // The active Widget tree that is responding to ApplicationEvents
 
     public:
         UILayer(Scene* pScene);
@@ -25,6 +32,10 @@ namespace mcp
 
         template<typename WidgetType>
         WidgetType* GetWidgetByTag(const StringId tag);
+        [[nodiscard]] Widget* GetWidgetByTag(const StringId tag) const;
+
+        void AddToStack(Widget* pWidget);
+        void PopStack();
 
         void AddWidget(Widget* pWidget);
         Widget* CreateWidgetFromData(const XMLElement root);
@@ -40,6 +51,7 @@ namespace mcp
         void LoadChildWidget(Widget* pParent, XMLElement parentElement);
         void DeleteQueuedWidgets();
 
+        // DEBUG
         void DumpUITree();
         void PrintWidgetType(Widget* pWidget, int tabCount);
     };

@@ -19,6 +19,7 @@ namespace mcp
         , m_pParent(nullptr)
         , m_enableBehaviorScript(data.enableBehaviorScript)
         , m_localPos(data.rect.GetPosition())
+        , m_pivot(data.pivot)
         , m_anchor(data.anchor)
         , m_scale(data.scale)
         , m_width(data.rect.width)
@@ -74,6 +75,7 @@ namespace mcp
         pChild->m_pParent = this;
 
         pChild->OnParentSet();
+        pChild->OnZChanged();
         pChild->OnParentActiveChanged(IsActive());
         OnChildAdded(pChild);
     }
@@ -159,6 +161,41 @@ namespace mcp
     void Widget::Focus()
     {
         m_pUILayer->FocusWidget(this);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Have this Widget and all of its children respond to being focused or losing focus.
+    ///		@param isFocused : Whether this Widget is now focused or not.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::OnFocusChanged(const bool isFocused)
+    {
+        if (isFocused)
+            OnFocus();
+        else
+            OnFocusLost();
+
+        for (auto* pChild : m_children)
+        {
+            pChild->OnFocusChanged(isFocused);
+        }
+    }
+    
+    Widget* Widget::FindChildByTag(const StringId tag) const
+    {
+        for (auto* pChild : m_children)
+        {
+            if (pChild->GetTag() == tag)
+            {
+                return pChild;
+            }
+
+            if (Widget* pFound = pChild->FindChildByTag(tag))
+                return pFound;
+        }
+
+        return nullptr;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -256,39 +293,70 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Returns the final screen position of the widget.
+    ///		@brief : Returns the position of the rect centered about the origin of its parent, or  
+    ///		@returns : 
     //-----------------------------------------------------------------------------------------------------------------------------
-    Vec2 Widget::GetPos() const
+    Vec2 Widget::GetRectCenter() const
     {
-        const auto rect = GetRect();
-        return rect.GetPosition();
+        Vec2 center = GetOrigin();
+        center.x += (0.5f - m_pivot.x) * GetRectWidth();
+        center.y += (0.5f - m_pivot.y) * GetRectHeight();
+
+        return center;
+    }
+
+    Vec2 Widget::GetOrigin() const
+    {
+        if (!m_pParent)
+        {
+            return m_localPos;
+        }
+
+        // The origin is going to start from the center of the parent.
+        Vec2 parentCenter = m_pParent->GetRectCenter();
+
+        // Adjust to our anchor position.
+        parentCenter.x += (m_anchor.x - 0.5f) * m_pParent->GetRectWidth();
+        parentCenter.y += (m_anchor.y - 0.5f) * m_pParent->GetRectHeight();
+
+        // Offset by the local position.
+        parentCenter += m_localPos;
+
+        return parentCenter;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
     ///		@brief : Returns a RectF that describes where the Widget is on the screen. The x and y position of the RectF represent
-    ///             the center of the Rect.
+    ///             the Origin of the Rect. This is the pivot point in World Space
     //-----------------------------------------------------------------------------------------------------------------------------
     RectF Widget::GetRect() const
     {
-        // If we are the root, then just return our rect.
-        if (m_pParent == nullptr)
-            return RectF(m_localPos.x, m_localPos.y, this->GetRectWidth(), this->GetRectHeight());
+        const auto origin = GetOrigin();
+        return RectF(origin.x, origin.y, this->GetRectWidth(), this->GetRectHeight());
+    }
 
-        // Otherwise, get the rect of the Parent, and return our rect based on our anchor and offset.
-        const auto parentRect = m_pParent->GetRect();
-        const auto startPos = Vec2( parentRect.x + (m_anchor.x - 0.5f) * parentRect.width,  parentRect.y + (m_anchor.y - 0.5f) * parentRect.height);
-        const auto offsetPos = startPos + m_localPos;
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Returns the RectF whose position is at the top left of the rect. This is useful for rendering and collision.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    RectF Widget::GetRectTopLeft() const
+    {
+        auto rect = GetRect();
 
-        return RectF(offsetPos.x, offsetPos.y, this->GetRectWidth(), this->GetRectHeight());
+        // Adjust the position to be at the top left corner, instead of at the origin.
+        rect.x -= m_pivot.x * rect.width;
+        rect.y -= m_pivot.y * rect.height;
+
+        return rect;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
     ///		@brief : Get the Z-depth of this Widget.
-    ///		@returns : 
     //-----------------------------------------------------------------------------------------------------------------------------
     int Widget::GetZOffset() const
     {
@@ -296,6 +364,28 @@ namespace mcp
             return m_zOffset;
 
         return m_zOffset + m_pParent->GetZOffset();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Returns the ZOffset value of the lowest child.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    int Widget::GetMaxZ() const
+    {
+        int maxZ = GetZOffset();
+
+        if (m_children.empty())
+            return maxZ;
+
+        for (const auto* pChild : m_children)
+        {
+            const int childMax = pChild->GetMaxZ();
+            if (childMax > maxZ)
+                maxZ = childMax;
+        }
+
+        return maxZ;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -315,10 +405,24 @@ namespace mcp
         
         m_zOffset = zOffset;
 
-        // Force updates each child's zOffset.
+        // Let our children know of the change so they can respond.
+        OnZSet();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Starting with this Widget, respond to the ZChange and then recursively have each child respond.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::OnZSet()
+    {
+        // Respond to the ZChange.
+        OnZChanged();
+
+        // Have each child respond.
         for (auto* pChild : m_children)
         {
-            pChild->SetZOffset(pChild->m_zOffset);
+            pChild->OnZSet();    
         }
     }
 
@@ -329,10 +433,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     bool Widget::PointIntersectsRect(const Vec2 screenPos) const
     {
-        auto rect = GetRect();
-        rect.x -= rect.width / 2.f;
-        rect.y -= rect.height / 2.f;
-
+        const auto rect = GetRectTopLeft();
         return rect.Intersects(screenPos);
     }
 
@@ -347,9 +448,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     bool Widget::GetPointRelativeToRect(const Vec2 screenPos, Vec2& relativePos) const
     {
-        auto rect = GetRect();
-        rect.x -= rect.width / 2.f;
-        rect.y -= rect.height / 2.f;
+        const auto rect = GetRectTopLeft();
 
         relativePos = screenPos;
         relativePos.x -= rect.x;
@@ -372,12 +471,39 @@ namespace mcp
         if (isActive == m_isActive)
             return;
 
-        const bool parentActive = m_pParent ? m_pParent->IsActive() : m_isActive;
         m_isActive = isActive;
 
-        // If our parent was active and our state has changed, then we need to update.
-        if (parentActive)
+        // If we have a parent, we need to check with their active state before updating our active state.
+        if (m_pParent)
         {
+            // If our parent was active and our state has changed, then we need to update.
+            if (m_pParent->IsActive())
+            {
+                if (m_isActive)
+                {
+                    OnActive();
+
+                    // If we were interactable, we need to have the script respond to OnEnable.
+                    if (m_enableBehaviorScript.IsValid())
+                        lua::CallMemberFunction(m_enableBehaviorScript, "OnEnable");
+                }
+
+                // If we have been turned off:
+                else
+                {
+                    OnInactive();
+
+                    // If we were interactable, we need to have the script respond to OnDisable.
+                    if (m_enableBehaviorScript.IsValid())
+                        lua::CallMemberFunction(m_enableBehaviorScript, "OnDisable");
+                }
+            }
+        }
+
+        // Otherwise we update according to our active state.
+        else
+        {
+            // If we have been set active.
             if (m_isActive)
             {
                 OnActive();
@@ -397,6 +523,8 @@ namespace mcp
                     lua::CallMemberFunction(m_enableBehaviorScript, "OnDisable");
             }
         }
+
+        
 
         // Let our children know of the change.
         for (auto* pChild : m_children)
@@ -523,6 +651,59 @@ namespace mcp
         return m_isVisible;
     }
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Set the relative position of the origin for this Widget. The x and y values should range from [0,1]. 
+    ///         An origin of (0,0) would put the origin at the top left of the Rect. An origin of (1,1) would put it at the bottom right
+    ///         of the rect.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::SetPivot(const Vec2 pivot)
+    {
+        SetPivot(pivot.x, pivot.y);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Set the relative position of the origin for this Widget. The x and y values should range from [0,1]. 
+    ///         An origin of (0,0) would put the origin at the top left of the Rect. An origin of (1,1) would put it at the bottom right
+    ///         of the rect.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::SetPivot(float x, float y)
+    {
+        x = std::clamp(x, 0.f, 1.f);
+        y = std::clamp(y, 0.f, 1.f);
+        m_pivot.x = x;
+        m_pivot.y = y;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Set the base width of this Widget.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::SetWidth(const float width)
+    {
+        m_width = width;
+
+        if (m_pParent)
+            m_pParent->OnChildSizeChanged();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Set the base height of this Widget.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::SetHeight(const float height)
+    {
+        m_height = height;
+
+        if (m_pParent)
+            m_pParent->OnChildSizeChanged();
+    }
+
     void Widget::SetScale(const float uniformScale)
     {
         SetScale(uniformScale, uniformScale);
@@ -532,6 +713,9 @@ namespace mcp
     {
         m_scale.x = xScale;
         m_scale.y = yScale;
+
+        if (m_pParent)
+            m_pParent->OnChildSizeChanged();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -560,8 +744,18 @@ namespace mcp
         data.rect.y = childElement.GetAttributeValue<float>("y");
         data.rect.width = childElement.GetAttributeValue<float>("width");
         data.rect.height = childElement.GetAttributeValue<float>("height");
+
+        // TODO: This should be moved to its own Element.
         data.anchor.x = childElement.GetAttributeValue<float>("anchorX", 0.5f);
         data.anchor.y = childElement.GetAttributeValue<float>("anchorY", 0.5f);
+
+        // Pivot
+        childElement = widgetElement.GetChildElement("Pivot");
+        if (childElement.IsValid())
+        {
+            data.pivot.x = childElement.GetAttributeValue<float>("x", 0.5f);
+            data.pivot.y = childElement.GetAttributeValue<float>("y", 0.5f);
+        }
 
         // Scale.
         childElement = widgetElement.GetChildElement("Scale");
@@ -638,7 +832,6 @@ namespace mcp
         return 0;
     }
 
-
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
@@ -666,6 +859,24 @@ namespace mcp
         pWidget->SetAnchor(anchorX, anchorY);
 
         return 0;
+    }
+
+    static int GetWidgetLocalPosition(lua_State* pState)
+    {
+        // Get the Widget
+        auto* pWidget = static_cast<Widget*>(lua_touserdata(pState, -1));
+        MCP_CHECK(pWidget);
+
+        // Pop the param.
+        lua_pop(pState, 1);
+
+        const auto position = pWidget->GetLocalPosition();
+
+        // Push the position x and y onto the stack.
+        lua_pushnumber(pState, static_cast<double>(position.x));
+        lua_pushnumber(pState, static_cast<double>(position.y));
+
+        return 2;
     }
 
 
@@ -721,15 +932,80 @@ namespace mcp
         return 2;
     }
 
+    static int SetWidgetRectWidth(lua_State* pState)
+    {
+        // Get the Widget
+        auto* pWidget = static_cast<Widget*>(lua_touserdata(pState, -2));
+        MCP_CHECK(pWidget);
+
+        // Get the Width
+        const auto width = static_cast<float>(lua_tonumber(pState, -1)); 
+
+        // Pop the Params
+        lua_pop(pState, 2);
+
+        // Set the Width
+        pWidget->SetWidth(width);
+
+        return 0;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Adds the passed in widget to the UI stack in the UILayer.
+    ///
+    ///     \n LUA PARAMS: Widget* pWidget
+    ///     \n NO RETURN.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    static int AddWidgetToStack(lua_State* pState)
+    {
+        // Get the Widget
+        auto* pWidget = static_cast<Widget*>(lua_touserdata(pState, -1));
+        MCP_CHECK(pWidget);
+
+        // Pop the param.
+        lua_pop(pState, 1);
+
+        pWidget->GetLayer()->AddToStack(pWidget);
+
+        return 0;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Pop the top Widget off the UILayer's stack.
+    ///
+    ///     \n LUA PARAMS: Widget* pWidget
+    ///     \n NO RETURN.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    static int PopWidgetStack(lua_State* pState)
+    {
+        // Get the Widget
+        auto* pWidget = static_cast<Widget*>(lua_touserdata(pState, -1));
+        MCP_CHECK(pWidget);
+
+        // Pop the param.
+        lua_pop(pState, 1);
+
+        pWidget->GetLayer()->PopStack();
+        return 0;
+    }
+
     void Widget::RegisterLuaFunctions(lua_State* pState)
     {
         static constexpr luaL_Reg kWidgetFuncs[]
         {
             {"SetActive", &SetWidgetActive}
-             ,{"Focus", &FocusWidget }
+            ,{"Focus", &FocusWidget }
+            , { "SetWidth", &SetWidgetRectWidth }
             , {"SetAnchor", &SetWidgetAnchor }
             , {"SetPosition", &SetWidgetPosition }
+            , {"GetLocalPosition", &GetWidgetLocalPosition}
             , {"GetDimensions", &GetWidgetDimensions }
+            , {"AddToLayerStack", &AddWidgetToStack }
+            , {"PopLayerStack", &PopWidgetStack }
             ,{nullptr, nullptr}
         };
 

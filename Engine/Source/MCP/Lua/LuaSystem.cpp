@@ -6,6 +6,7 @@
 
 #include "MCP/Lua/LuaDebug.h"
 #include "MCP/Scene/SceneManager.h"
+#include "MCP/UI/BarWidget.h"
 #include "MCP/UI/CanvasWidget.h"
 #include "MCP/UI/ImageWidget.h"
 #include "MCP/UI/TextWidget.h"
@@ -63,6 +64,8 @@ namespace mcp
         // Register Debug functions.
         RegisterDebugFunctions(m_pState);
 #endif
+        // TODO: This should be done through the same means as 'AddFromData'
+        //       That way I don't have to manually add these every time I make a new one.
         // Register each of the types' lua capabilities to the state.
         Application::RegisterLuaFunctions(m_pState);
         SceneManager::RegisterLuaFunctions(m_pState);
@@ -70,6 +73,7 @@ namespace mcp
         ImageWidget::RegisterLuaFunctions(m_pState);
         CanvasWidget::RegisterLuaFunctions(m_pState);
         TextWidget::RegisterLuaFunctions(m_pState);
+        BarWidget::RegisterLuaFunctions(m_pState);
 
         return true;
     }

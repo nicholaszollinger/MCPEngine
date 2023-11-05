@@ -2,18 +2,33 @@
 
 #include "HorizontalLayoutWidget.h"
 
+#include "MCP/Scene/UILayer.h"
+
+#if MCP_DEBUG_RENDER_LAYOUT_BOUNDS
+#include "MCP/Graphics/Graphics.h"
+#endif
+
 namespace mcp
 {
-    HorizontalLayoutWidget::HorizontalLayoutWidget(const WidgetConstructionData& data)
+    HorizontalLayoutWidget::HorizontalLayoutWidget(const WidgetConstructionData& data, const LayoutData& layoutData)
         : Widget(data)
+#if MCP_DEBUG_RENDER_LAYOUT_BOUNDS
+        , IRenderable(RenderLayer::kDebugOverlay, 200)
+#endif
+        , m_horizontalAlignment(layoutData.horizontal)
+        , m_verticalAlignment(layoutData.vertical)
+        , m_padding(layoutData.padding)
     {
-        //        
+        m_sizedToContent = true;
     }
 
     HorizontalLayoutWidget* HorizontalLayoutWidget::AddFromData(const XMLElement element)
     {
         const auto data = GetWidgetConstructionData(element);
-        return BLEACH_NEW(HorizontalLayoutWidget(data));
+
+        const auto layoutData = GetLayoutData(element);
+
+        return BLEACH_NEW(HorizontalLayoutWidget(data, layoutData));
     }
 
     void HorizontalLayoutWidget::OnChildAdded([[maybe_unused]] Widget* pChild)
@@ -26,55 +41,205 @@ namespace mcp
         RecalculateChildRects();
     }
 
-    void HorizontalLayoutWidget::RecalculateChildRects()
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : The total width of a Horizontal Widget is equal to the total width of its immediate children plus the horizontal
+    ///         padding between them.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    float HorizontalLayoutWidget::GetRectWidth() const
     {
-        // TODO: I am only centering. I need other alignments.
+        float totalWidth = 0.f;
+        for (const auto* pChild : m_children)
+        {
+            totalWidth += pChild->GetRectWidth();
+        }
+
+        totalWidth += m_padding * static_cast<float>(m_children.size() - 1);
+
+        return totalWidth;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : The height of a horizontal widget is the max height of its children.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    float HorizontalLayoutWidget::GetRectHeight() const
+    {
+        float maxHeight = 0.f;
+        for (const auto* pChild : m_children)
+        {
+            const auto childHeight = pChild->GetRectHeight();
+            if (maxHeight < childHeight)
+            {
+                maxHeight = childHeight;
+            }
+        }
+
+        return maxHeight;
+    }
+
+    void HorizontalLayoutWidget::OnChildSizeChanged()
+    {
+        RecalculateChildRects();
+    }
+
+    void HorizontalLayoutWidget::RecalculateChildRects() const
+    {
         if (m_children.empty())
             return;
-
-        if (m_children.size() == 1)
-        {
-            // Set the only child as the center of our box.
-            m_children[0]->SetLocalPosition(0.f, 0.f);
-            m_children[0]->SetAnchor(0.5f, 0.5f);
-            return;
-        }
-
-        // Calculate the total size of the children
-        float totalSize = 0.f;
-        for (auto* pChild : m_children)
-        {
-            totalSize += pChild->GetRectWidth();
-            pChild->SetAnchor(0.f, 0.5f);
-        }
-
-        if (totalSize > m_width)
-        {
-            m_width = totalSize;
-        }
-
-        // TODO: I am going to assume this is larger for now.
-        const float totalSpaceBetweenChildren = GetRectWidth() - totalSize;
-        const float spaceBetweenChildren = totalSpaceBetweenChildren / static_cast<float>(m_children.size() - 1);
-
+        
         float lastPos = 0.f;
-        for (size_t i = 0; i < m_children.size(); ++i)
+
+        for(auto* pChild : m_children)
         {
-            auto* pChild = m_children[i];
+            SetChildAnchorAndPivot(pChild);
+            SetPositionAndMoveToNext(pChild, lastPos);
+        }
 
-            // Start from our last position.
-            float offset = lastPos;
+        if (m_pParent)
+            m_pParent->OnChildSizeChanged();
+    }
 
-            // If this isn't the first item, move over by the space between.
-            if (i != 0)
-                offset += spaceBetweenChildren;
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Set the local position of the Child widget and move the 'lastXPos' to be at the beginning of the next child.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void HorizontalLayoutWidget::SetPositionAndMoveToNext(Widget* pChild, float& lastXPos) const
+    {
+        float localYPos = 0.f;
 
-            // Move over half the width, to center it.
-            offset += (pChild->GetRectWidth() / 2.f);
-            pChild->SetLocalPosition(offset, 0.f);
+        /*switch (m_verticalAlignment)
+        {
+            case VerticalAlignment::kCenter: break;
+            case VerticalAlignment::kTop:
+            {
+                localYPos = pChild->GetRectHeight() / 2.f;
+                break;
+            }
 
-            // Update the last position.
-            lastPos = offset + (pChild->GetRectWidth() / 2.f);
+            case VerticalAlignment::kBottom:
+            {
+                localYPos = -(pChild->GetRectHeight() / 2.f);
+                break;
+            }
+
+        }*/
+
+        // Update the lastXPos position based on the Horizontal arrangement.
+        switch (m_horizontalAlignment)
+        {
+            case HorizontalAlignment::kCenter:
+            {
+                // Increment by half the width.
+                const auto halfChildWidth = pChild->GetRectWidth() / 2.f;
+                lastXPos += halfChildWidth;
+
+                pChild->SetLocalPosition(lastXPos, localYPos);
+
+                // Move over by half width to get the the end of the child.
+                lastXPos += halfChildWidth;
+
+                // Add the padding distance
+                lastXPos += m_padding;
+
+                break;
+            }
+
+            case HorizontalAlignment::kLeft:
+            {
+                pChild->SetLocalPosition(lastXPos, localYPos);
+
+                // Move over by the entire width of the child rect.
+                lastXPos += pChild->GetRectWidth();
+
+                // Add the padding distance
+                lastXPos += m_padding;
+
+                break;
+            }
+
+            case HorizontalAlignment::kRight:
+            {
+                pChild->SetLocalPosition(lastXPos, localYPos);
+
+                // Move back by the entire width of the child rect.
+                lastXPos -= pChild->GetRectWidth();
+
+                // Subtract the padding distance
+                lastXPos -= m_padding;
+
+                break;
+            }
         }
     }
+
+    void HorizontalLayoutWidget::SetChildAnchorAndPivot(Widget* pChild) const
+    {
+        // Default values are based on Center alignment.
+        float yAnchorPivot = 0.5f;
+        float xPivot = 0.5f;
+        float xAnchor = 0.f;
+
+        switch (m_verticalAlignment)
+        {
+            case VerticalAlignment::kCenter: break;
+            case VerticalAlignment::kTop:
+            {
+                yAnchorPivot = 0.f;
+                break;
+            }
+
+            case VerticalAlignment::kBottom:
+            {
+                yAnchorPivot = 1.f;
+                break;
+            }
+        }
+
+        switch (m_horizontalAlignment)
+        {
+            case HorizontalAlignment::kCenter: break;
+
+            case HorizontalAlignment::kLeft:
+            {
+                xAnchor = 0.f;
+                xPivot = 0.f;
+                break;
+            }
+
+            case HorizontalAlignment::kRight:
+            {
+                xAnchor = 1.f;
+                xPivot = 1.f;
+                break;
+            }
+        }
+
+        pChild->SetAnchor(xAnchor, yAnchorPivot);
+        pChild->SetPivot(xPivot, yAnchorPivot);
+    }
+
+#if MCP_DEBUG_RENDER_LAYOUT_BOUNDS
+    void HorizontalLayoutWidget::OnActive()
+    {
+        MCP_LOG("HorizontalLayout", "Rect: ", GetRect().ToString());
+        m_isVisible = true;
+        m_pUILayer->AddRenderable(this);
+    }
+
+    void HorizontalLayoutWidget::OnInactive()
+    {
+        m_isVisible = false;
+        m_pUILayer->RemoveRenderable(this);
+    }
+
+    void HorizontalLayoutWidget::Render() const
+    {
+        DrawRect(GetRectTopLeft(), Color::Black()); 
+    }
+#endif
+
 }

@@ -2,12 +2,21 @@
 
 #include "ButtonWidget.h"
 #include "MCP/Core/Event/ApplicationEvent.h"
+#include "MCP/Graphics/Graphics.h"
 #include "MCP/Lua/Lua.h"
+#include "MCP/Scene/UILayer.h"
+
+#if MCP_DEBUG_RENDER_BUTTON_BOUNDS
+#include "MCP/Graphics/Graphics.h"
+#endif
 
 namespace mcp
 {
     ButtonWidget::ButtonWidget(const WidgetConstructionData& data, LuaResourcePtr&& onExecuteScript, LuaResourcePtr&& highlightBehaviorScript, LuaResourcePtr&& pressReleaseBehaviorScript)
         : Widget(data)
+#if MCP_DEBUG_RENDER_BUTTON_BOUNDS
+        , IRenderable(RenderLayer::kDebugOverlay, 200)
+#endif
         , m_pOnExecuteScript(std::move(onExecuteScript))
         , m_pHighlightBehaviorScript(std::move(highlightBehaviorScript))
         , m_pPressReleaseBehaviorScript(std::move(pressReleaseBehaviorScript))
@@ -17,6 +26,9 @@ namespace mcp
 
     ButtonWidget::ButtonWidget(const WidgetConstructionData& data, ButtonBehavior&& behavior)
         : Widget(data)
+#if MCP_DEBUG_RENDER_BUTTON_BOUNDS
+        , IRenderable(RenderLayer::kDebugOverlay, 200)
+#endif
         , m_pOnExecuteScript(std::move(behavior.onExecuteScript))
         , m_pHighlightBehaviorScript(std::move(behavior.highlightBehaviorScript))
         , m_pPressReleaseBehaviorScript(std::move(behavior.pressReleaseBehaviorScript))
@@ -145,8 +157,78 @@ namespace mcp
         // TODO: Should this be navigation by default?
     }
 
+    void ButtonWidget::OnChildAdded([[maybe_unused]] Widget* pChild)
+    {
+        if (m_sizedToContent && m_pParent)
+        {
+            m_pParent->OnChildSizeChanged();
+        }
+    }
+
+    float ButtonWidget::GetRectWidth() const
+    {
+        // If we are sized to the content, then we are the total width of our children.
+        if (m_sizedToContent)
+        {
+            float totalWidth = 0.f;
+            for (const auto* pChild : m_children)
+            {
+                totalWidth += pChild->GetRectWidth();
+            }
+
+            return totalWidth;
+        }
+
+        // Otherwise return our set width.
+        return GetScale().x * m_width;
+    }
+
+    float ButtonWidget::GetRectHeight() const
+    {
+        // If we are sized to the content, then we are the total height of our children.
+        if (m_sizedToContent)
+        {
+            float totalHeight = 0.f;
+            for (const auto* pChild : m_children)
+            {
+                totalHeight += pChild->GetRectHeight();
+            }
+
+            return totalHeight;
+        }
+
+        // Otherwise return our set height.
+        return GetScale().y * m_height;
+    }
 
     void ButtonWidget::OnInactive()
+    {
+#if MCP_DEBUG_RENDER_BUTTON_BOUNDS
+        m_isVisible = false;
+        m_pUILayer->RemoveRenderable(this);
+#endif
+
+        // If we were hovered, we need to return to the original state by 'un-hovering'
+        if (m_isHovered)
+            OnHoverExit();
+
+        m_isHovered = false;
+    }
+
+    void ButtonWidget::OnFocus()
+    {
+        // If the mouse is active, we need to check to see if the mouse is overlapping with our rect.
+         // Check the position of the Mouse and determine if we need to Exit our over or not.
+        const auto mousePos = GraphicsManager::Get()->GetWindow()->GetMousePosition();
+
+        if (PointIntersectsRect(mousePos))
+        {
+            m_isHovered = true;
+            OnHoverEnter();
+        }
+    }
+
+    void ButtonWidget::OnFocusLost()
     {
         // If we were hovered, we need to return to the original state by 'un-hovering'
         if (m_isHovered)
@@ -240,4 +322,17 @@ namespace mcp
 
         return behavior;
     }
+
+#if MCP_DEBUG_RENDER_BUTTON_BOUNDS
+    void ButtonWidget::OnActive()
+    {
+        m_isVisible = true;
+        m_pUILayer->AddRenderable(this);
+    }
+
+    void ButtonWidget::Render() const
+    {
+        DrawRect(GetRectTopLeft(), Color::Black());
+    }
+#endif
 }

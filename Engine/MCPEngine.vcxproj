@@ -155,6 +155,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Components\Component.cpp" />
     <ClCompile Include="Source\MCP\Components\ComponentId.cpp" />
     <ClCompile Include="Source\MCP\Components\ImageComponent.cpp" />
+    <ClCompile Include="Source\MCP\Components\InputComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\PrimitiveComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\Rect2DComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\ScriptComponent.cpp" />
@@ -176,6 +177,9 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Graphics\Graphics.cpp" />
     <ClCompile Include="Source\MCP\Graphics\Texture.cpp" />
     <ClCompile Include="Source\MCP\Input\Input.cpp" />
+    <ClCompile Include="Source\MCP\Input\InputActionValue.cpp" />
+    <ClCompile Include="Source\MCP\Input\InputControl.cpp" />
+    <ClCompile Include="Source\MCP\Input\InputModifier.cpp" />
     <ClCompile Include="Source\MCP\Lua\Lua.cpp" />
     <ClCompile Include="Source\MCP\Lua\LuaDebug.cpp" />
     <ClCompile Include="Source\MCP\Lua\LuaResource.cpp" />
@@ -188,10 +192,12 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Scene\SceneManager.cpp" />
     <ClCompile Include="Source\MCP\Scene\UILayer.cpp" />
     <ClCompile Include="Source\MCP\Scene\WorldLayer.cpp" />
+    <ClCompile Include="Source\MCP\UI\BarWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\ButtonWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\CanvasWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\HorizontalLayoutWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\ImageWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\Layout.cpp" />
     <ClCompile Include="Source\MCP\UI\SelectionWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\SliderWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\TextFieldWidget.cpp" />
@@ -230,6 +236,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Components\ComponentId.h" />
     <ClInclude Include="Source\MCP\Components\EngineComponents.h" />
     <ClInclude Include="Source\MCP\Components\ImageComponent.h" />
+    <ClInclude Include="Source\MCP\Components\InputComponent.h" />
     <ClInclude Include="Source\MCP\Components\Rect2DComponent.h" />
     <ClInclude Include="Source\MCP\Components\ScriptComponent.h" />
     <ClInclude Include="Source\MCP\Components\PrimitiveComponent.h" />
@@ -263,7 +270,13 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Graphics\RenderData\BaseRenderData.h" />
     <ClInclude Include="Source\MCP\Graphics\Texture.h" />
     <ClInclude Include="Source\MCP\Input\Input.h" />
+    <ClInclude Include="Source\MCP\Input\InputAction.h" />
+    <ClInclude Include="Source\MCP\Input\InputActionValue.h" />
     <ClInclude Include="Source\MCP\Input\InputCodes.h" />
+    <ClInclude Include="Source\MCP\Input\InputControl.h" />
+    <ClInclude Include="Source\MCP\Input\InputListener.h" />
+    <ClInclude Include="Source\MCP\Input\InputControlScheme.h" />
+    <ClInclude Include="Source\MCP\Input\InputModifier.h" />
     <ClInclude Include="Source\MCP\Lua\Lua.h" />
     <ClInclude Include="Source\MCP\Lua\LuaDebug.h" />
     <ClInclude Include="Source\MCP\Lua\LuaResource.h" />
@@ -277,9 +290,12 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Scene\SceneManager.h" />
     <ClInclude Include="Source\MCP\Scene\UILayer.h" />
     <ClInclude Include="Source\MCP\Scene\WorldLayer.h" />
+    <ClInclude Include="Source\MCP\UI\AlignmentTypes.h" />
+    <ClInclude Include="Source\MCP\UI\BarWidget.h" />
     <ClInclude Include="Source\MCP\UI\ButtonWidget.h" />
     <ClInclude Include="Source\MCP\UI\CanvasWidget.h" />
     <ClInclude Include="Source\MCP\UI\HorizontalLayoutWidget.h" />
+    <ClInclude Include="Source\MCP\UI\Layout.h" />
     <ClInclude Include="Source\MCP\UI\SelectionWidget.h" />
     <ClInclude Include="Source\MCP\UI\SliderWidget.h" />
     <ClInclude Include="Source\MCP\UI\TextFieldWidget.h" />

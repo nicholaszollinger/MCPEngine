@@ -39,12 +39,7 @@ namespace mcp
 
     ImageComponent::~ImageComponent()
     {
-        if (IsActive())
-        {
-            auto* pWorld = GetOwner()->GetWorld();
-            MCP_CHECK(pWorld);
-            pWorld->RemoveRenderable(this);
-        }
+        //
     }
 
     bool ImageComponent::Init()
@@ -56,24 +51,19 @@ namespace mcp
             return false;
         }
 
-        // Add this component to the list of renderables in the scene.
-        auto* pWorld = GetOwner()->GetWorld();
-        MCP_CHECK(pWorld);
-
-        if (m_texture.IsValid())
-            pWorld->AddRenderable(this);
-
         return true;
     }
 
     void ImageComponent::OnActive()
     {
-        GetOwner()->GetWorld()->AddRenderable(this);
+        if (m_texture.IsValid())
+            GetOwner()->GetWorld()->AddRenderable(this);
     }
 
     void ImageComponent::OnInactive()
     {
-        GetOwner()->GetWorld()->RemoveRenderable(this);
+        if (m_texture.IsValid())
+            GetOwner()->GetWorld()->RemoveRenderable(this);
     }
 
     void ImageComponent::Render() const

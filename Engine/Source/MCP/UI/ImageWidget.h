@@ -31,16 +31,18 @@ namespace mcp
         virtual bool Init() override;
         virtual void Render() const override;
         void SetTint(const Color tint) { m_tint = tint; }
+        void SetCrop(const RectInt crop) { m_crop = crop; }
 
         [[nodiscard]] Color GetTint() const { return m_tint; }
-        virtual float GetRectWidth() const override;
-        virtual float GetRectHeight() const override;
+        [[nodiscard]] virtual float GetRectWidth() const override;
+        [[nodiscard]] virtual float GetRectHeight() const override;
+        [[nodiscard]] RectInt GetCrop() const { return m_crop; }
 
         static ImageWidget* AddFromData(const XMLElement element);
         static void RegisterLuaFunctions(lua_State* pState);
     private:
         virtual void OnActive() override;
         virtual void OnInactive() override;
-        virtual void OnParentSet() override;
+        virtual void OnZChanged() override;
     };
 }

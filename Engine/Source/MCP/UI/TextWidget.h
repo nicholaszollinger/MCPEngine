@@ -88,7 +88,7 @@ namespace mcp
         void SetGlyphData();
         virtual void OnActive() override;
         virtual void OnInactive() override;
-        virtual void OnParentSet() override;
+        virtual void OnZChanged() override;
 
     };
 }

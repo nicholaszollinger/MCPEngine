@@ -19,7 +19,6 @@
 #define DEBUG_RENDER_COLLISION_TREE 0
 #endif
 
-
 namespace mcp
 {
     class Collider;
@@ -93,7 +92,8 @@ namespace mcp
         // Collider Registration.
         void AddCollideable(ColliderComponent* pColliderComponent);
         void RemoveCollideable(ColliderComponent* pColliderComponent);
-        void SetCollideableStatic(ColliderComponent* pColliderComponent, const bool bIsStatic);
+        void SetCollideableStatic(ColliderComponent* pColliderComponent);
+        void SetCollideableActive(ColliderComponent* pColliderComponent);
         void RemoveOverlappingCollider(Collider* pCollider);
 
         // Collision
@@ -113,21 +113,24 @@ namespace mcp
 
     private:
         // Collision
-        //void RunCollisionForColliderComponent(const std::vector<QuadtreeCell*>& cells, ColliderComponent* pColliderComponent);
-        void RunCollisionForColliderComponent(const std::vector<void*>& cells, ColliderComponent* pColliderComponent);
+        void RunCollisionForColliderComponent(ColliderComponent* pColliderComponent);
+        void AddActiveCollider(ColliderComponent* pColliderComponent);
+        void RemoveActiveCollider(ColliderComponent* pColliderComponent);
         void UpdateOverlappingColliders();
 
         // Quadtree
         static bool IsLeaf(const QuadtreeCell* cell) { return cell->children[0] == nullptr; }
-        //static void FindCellsForRect(QuadtreeCell* pCell, const RectF& rect, std::vector<QuadtreeCell*>& outCells);
-        static void FindCellsForRect(QuadtreeCell* pCell, const RectF& rect, std::vector<void*>& outCells);
-        void TryInsert(QuadtreeCell* pCell, const RectF& rect, ColliderComponent* pColliderComponent);
-        void TrySubdivide(QuadtreeCell* pCell);
+        void UpdateMembership(ColliderComponent* pColliderComponent);
+        void RemoveDanglingCells(ColliderComponent* pColliderComponent, const RectF& colliderRect) const;
+        void TryInsert(QuadtreeCell* pCell, ColliderComponent* pColliderComponent, const RectF& rect);
         void RemoveFromCell(QuadtreeCell* pCell, const ColliderComponent* pComponent) const;
+        void TrySubdivide(QuadtreeCell* pCell);
         void TryCleanup(QuadtreeCell* pCell) const;
-        void DeleteAllCells(QuadtreeCell* pCell);
         void ClearTree();
+        void DeleteAllCells(QuadtreeCell* pCell);
         void CalculateGrid();
+
+        // TO BE REMOVED...
         QuadtreeCell* FindLowestCellThatEncapsulatesRect(QuadtreeCell* pCell, const RectF& rect);
         QuadtreeCell* FindParentThatEncapsulatesRect(QuadtreeCell* pCell, const RectF& rect);
         QuadtreeCell* FindChildThatEncapsulatesRect(QuadtreeCell* pCell, const RectF& rect);

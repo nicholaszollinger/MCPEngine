@@ -2,23 +2,32 @@
 
 #include "VerticalLayoutWidget.h"
 
+#include "MCP/Scene/UILayer.h"
+
+#if MCP_DEBUG_RENDER_LAYOUT_BOUNDS
+#include "MCP/Graphics/Graphics.h"
+#endif
+
 namespace mcp
 {
-    VerticalLayoutWidget::VerticalLayoutWidget(const WidgetConstructionData& data, const Justification justification)
+    VerticalLayoutWidget::VerticalLayoutWidget(const WidgetConstructionData& data, const LayoutData& layoutData)
         : Widget(data)
-        , m_justification(justification)
+#if MCP_DEBUG_RENDER_LAYOUT_BOUNDS
+        , IRenderable(RenderLayer::kDebugOverlay, 200)
+#endif
+        , m_horizontalAlignment(layoutData.horizontal)
+        , m_verticalAlignment(layoutData.vertical)
+        , m_padding(layoutData.padding)
     {
-        //
+        m_sizedToContent = true;
     }
 
     VerticalLayoutWidget* VerticalLayoutWidget::AddFromData(const XMLElement element)
     {
         const auto data = GetWidgetConstructionData(element);
+        const auto layoutData = GetLayoutData(element);
 
-        const char* justificationLabel = element.GetAttributeValue<const char*>("justification", "center");
-        const auto justification = static_cast<Justification>(HashString32(justificationLabel));
-
-        return BLEACH_NEW(VerticalLayoutWidget(data, justification));
+        return BLEACH_NEW(VerticalLayoutWidget(data, layoutData));
     }
 
     void VerticalLayoutWidget::OnChildAdded([[maybe_unused]] Widget* pChild)
@@ -31,87 +40,198 @@ namespace mcp
         RecalculateChildRects();
     }
 
-    void VerticalLayoutWidget::RecalculateChildRects()
+    void VerticalLayoutWidget::OnChildSizeChanged()
     {
-        // TODO: I am only centering. I need other alignments.
+        RecalculateChildRects();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : The width of a vertical layout widget is the max widget of its children.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    float VerticalLayoutWidget::GetRectWidth() const
+    {
+        float maxWidth = 0.f;
+        for (const auto* pChild : m_children)
+        {
+            const auto childWidth = pChild->GetRectWidth();
+            if (maxWidth < childWidth)
+            {
+                maxWidth = childWidth;
+            }
+        }
+
+        return maxWidth;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : The height of a vertical layout widget is equal to the total height of its immediate children plus the vertical
+    ///         padding between them.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    float VerticalLayoutWidget::GetRectHeight() const
+    {
+        float height = 0.f;
+        for (const auto* pChild : m_children)
+        {
+            height += pChild->GetRectHeight();
+        }
+
+        height += m_padding * static_cast<float>(m_children.size() - 1);
+
+        return height;
+    }
+
+    void VerticalLayoutWidget::RecalculateChildRects() const
+    {
         if (m_children.empty())
             return;
-
-        if (m_children.size() == 1)
-        {
-            // Set the only child as the center of our box.
-            m_children[0]->SetLocalPosition(0.f, 0.f);
-            m_children[0]->SetAnchor(0.5f, 0.5f);
-            return;
-        }
-
-        // Calculate the total size of the children
-        float totalSize = 0.f;
-        for (auto* pChild : m_children)
-        {
-            totalSize += pChild->GetRectHeight();
-
-            if (m_justification == Justification::kLeft)
-            {
-                pChild->SetAnchor(0.0f, 0.0f);
-            }
-
-            else if (m_justification == Justification::kRight)
-            {
-                pChild->SetAnchor(1.f, 0.0f);
-            }
-
-            // Default to center.
-            else
-            {
-                pChild->SetAnchor(0.5f, 0.0f);
-            }
-        }
-
-        if (totalSize > m_height)
-        {
-            m_height = totalSize;
-        }
-
-        // TODO: I am going to assume this is larger for now.
-        const float totalSpaceBetweenChildren = GetRectHeight() - totalSize;
-        const float spaceBetweenChildren = totalSpaceBetweenChildren / static_cast<float>(m_children.size() - 1);
-
-        //const auto rectWidth = GetRectWidth();
-
+        
         float lastPos = 0.f;
-        for (size_t i = 0; i < m_children.size(); ++i)
+
+        for(auto* pChild : m_children)
         {
-            auto* pChild = m_children[i];
+            SetChildAnchorAndPivot(pChild);
+            SetPositionAndMoveToNext(pChild, lastPos);
+        }
 
-            // Start from our last position.
-            float offset = lastPos;
+        if (m_pParent)
+            m_pParent->OnChildSizeChanged();
+    }
 
-            // If this isn't the first item, move over by the space between.
-            if (i != 0)
-                offset += spaceBetweenChildren;
-
-            const auto halfChildHeight = (pChild->GetRectHeight() / 2.f);
-
-            // Move over half the width, to center it.
-            offset += halfChildHeight;
-
-            float localXPos = 0.f;
-
-            if (m_justification == Justification::kLeft)
+    void VerticalLayoutWidget::SetPositionAndMoveToNext(Widget* pChild, float& lastYPos) const
+    {
+        //float localXPos = 0.f;
+        /*switch (m_horizontalAlignment)
+        {
+            case HorizontalAlignment::kCenter: break;
+            case HorizontalAlignment::kLeft:
             {
                 localXPos = pChild->GetRectWidth() / 2.f;
+                break;
             }
 
-            else if (m_justification == Justification::kRight)
+            case HorizontalAlignment::kRight:
             {
                 localXPos = -(pChild->GetRectWidth() / 2.f);
+                break;
+            }
+        }*/
+
+        switch (m_verticalAlignment)
+        {
+            case VerticalAlignment::kCenter:
+            {
+                // Move down by half the child height
+                const auto halfChildHeight = pChild->GetRectHeight() / 2.f;
+                lastYPos += halfChildHeight;
+
+                pChild->SetLocalPosition(0.f, lastYPos);
+
+                // Move down by half to get to the end of the child.
+                lastYPos += halfChildHeight;
+
+                // Add the padding distance
+                lastYPos += m_padding;
+
+                break;
             }
 
-            pChild->SetLocalPosition(localXPos, offset);
+            case VerticalAlignment::kTop:
+            {
+                pChild->SetLocalPosition(0.f, lastYPos);
 
-            // Update the last position.
-            lastPos = offset + halfChildHeight;
+                // Move down by the entire height of the child rect:
+                lastYPos += pChild->GetRectHeight();
+
+                // Add the padding distance
+                lastYPos += m_padding;
+
+                break;
+            }
+
+            case VerticalAlignment::kBottom:
+            {
+                pChild->SetLocalPosition(0.f, lastYPos);
+
+                // Move up by the entire height of the child rect.
+                lastYPos -= pChild->GetRectHeight();
+
+                // Subtract the padding distance.
+                lastYPos -= m_padding;
+
+                break;
+            }
         }
     }
+
+    void VerticalLayoutWidget::SetChildAnchorAndPivot(Widget* pChild) const
+    {
+        // Default values are based on center alignment
+        float xAnchorPivot = 0.5f;
+        float yPivot = 0.5f;
+        float yAnchor = 0.f;
+
+        switch (m_verticalAlignment)
+        {
+            case VerticalAlignment::kCenter: break;
+            case VerticalAlignment::kTop:
+            {
+                yPivot = 0.f;
+                yAnchor = 0.f;
+                break;
+            }
+
+            case VerticalAlignment::kBottom:
+            {
+                yPivot = 1.f;
+                yAnchor = 1.f;
+                break;
+            }
+        }
+
+        switch (m_horizontalAlignment)
+        {
+            case HorizontalAlignment::kCenter: break;
+
+            case HorizontalAlignment::kLeft:
+            {
+                xAnchorPivot = 0.f;
+                break;
+            }
+
+            case HorizontalAlignment::kRight:
+            {
+                xAnchorPivot = 1.f;
+                break;
+            }
+        }
+
+        pChild->SetAnchor(xAnchorPivot, yAnchor);
+        pChild->SetPivot(xAnchorPivot, yPivot);
+    }
+
+#if MCP_DEBUG_RENDER_LAYOUT_BOUNDS
+    void VerticalLayoutWidget::OnActive()
+    {
+        MCP_LOG("VerticalLayout", "Rect: ", GetRect().ToString());
+        m_isVisible = true;
+        m_pUILayer->AddRenderable(this);
+    }
+
+    void VerticalLayoutWidget::OnInactive()
+    {
+        m_isVisible = false;
+        m_pUILayer->RemoveRenderable(this);
+    }
+
+    void VerticalLayoutWidget::Render() const
+    {
+        DrawRect(GetRectTopLeft(), Color::Black()); 
+    }
+#endif
+
+
 }

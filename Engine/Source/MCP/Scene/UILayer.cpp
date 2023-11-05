@@ -2,9 +2,8 @@
 
 #include "UILayer.h"
 
+#include "LuaSource.h"
 #include "MCP/Core/Event/ApplicationEvent.h"
-#include "MCP/Scene/Scene.h"
-
 #include "MCP/UI/Widget.h"
 #include "MCP/UI/CanvasWidget.h"
 #include "MCP/UI/ImageWidget.h"
@@ -12,6 +11,7 @@
 #include "MCP/UI/SliderWidget.h"
 #include "MCP/UI/TextWidget.h"
 #include "MCP/UI/ToggleWidget.h"
+#include "MCP/Scene/Scene.h"
 
 namespace mcp
 {
@@ -27,16 +27,6 @@ namespace mcp
         DestroyLayer();
     }
 
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Add a widget to the Layer.
-    ///		@param pWidget : 
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void UILayer::AddWidget(Widget* pWidget)
-    {
-        m_widgets.push_back(pWidget);
-    }
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -87,6 +77,67 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
+    ///		@brief : Adds the Widget onto our current UIStack, and sets it active. NOTE: This does not create a widget, it just adds
+    ///             the widget to our current stack.
+    ///		@param pWidget : Widget that you are adding. This Widget should already be loaded in memory.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void UILayer::AddToStack(Widget* pWidget)
+    {
+        if (!pWidget)
+        {
+            MCP_WARN("UI", "Failed to open menu! pWidget was nullptr!");
+            return;
+        }
+
+        // Set the new zOffset of the widget:
+        // Get the current Z value of our widget stack.
+        auto currentMaxZ = 0;
+        if (!m_stack.empty())
+            currentMaxZ = m_stack.back().pBaseWidget->GetMaxZ() + 1;
+
+        pWidget->SetZOffset(currentMaxZ);
+
+        // Add the to the top of the stack and set it active.
+        // Activate the new top Widget
+        m_stack.emplace_back(WidgetStackElement{pWidget, m_pFocusedWidget});
+        pWidget->SetActive(true);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Closes the top Widget on the stack, and if valid, it will return focus to the Widget that was previously focused.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void UILayer::PopStack()
+    {
+        if (m_stack.empty())
+            return;
+
+        // Disable the top menu
+        auto& pTop = m_stack.back();
+        pTop.pBaseWidget->SetActive(false);
+
+        // Refocus the last focused widget.
+        FocusWidget(pTop.pPreviouslyFocused);
+
+        // Remove it from the stack.
+        m_stack.pop_back();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Add a widget to the Layer.
+    ///		@param pWidget : 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void UILayer::AddWidget(Widget* pWidget)
+    {
+        m_widgets.push_back(pWidget);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
     ///		@brief : Load a widget and all of its children from data.
     //-----------------------------------------------------------------------------------------------------------------------------
     void UILayer::LoadWidget(XMLElement rootElement)
@@ -106,6 +157,11 @@ namespace mcp
 
             // Add the parent widget to the UILayer.
             AddWidget(pWidget);
+
+            // If the parent widget is enabled, then we will add it to the UI Stack.
+            // This means that the order of the loading is potentially something to worry about...
+            if (pWidget->IsActive())
+                AddToStack(pWidget);
 
             // Get the next root Widget element.
             rootElement = rootElement.GetSiblingElement("Widget");
@@ -226,6 +282,23 @@ namespace mcp
         // Send the event down to the widgets.
         m_pFocusedWidget->OnEvent(event);
     }
+    
+    Widget* UILayer::GetWidgetByTag(const StringId tag) const
+    {
+        for (auto* pWidget : m_widgets)
+        {
+            if (pWidget->GetTag() == tag)
+            {
+                return pWidget;
+            }
+
+            // Search the children, and if we found the Widget, return it.
+            if (auto* pFound = pWidget->FindChildByTag(tag))
+                return pFound;
+        }
+
+        return nullptr;
+    }
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -242,8 +315,16 @@ namespace mcp
             return;
         }
 
+        // If we had a previously focused widget, have it respond to the change.
+        if (m_pFocusedWidget)
+            m_pFocusedWidget->OnFocusChanged(false);
+
         //MCP_LOG("UILayer", "Setting FocusedWidget: ", *pWidget->GetTag());
         m_pFocusedWidget = pWidget;
+
+        // If our widget is not nullptr, have it respond to the change.
+        if (m_pFocusedWidget)
+            m_pFocusedWidget->OnFocusChanged(true);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -387,7 +468,4 @@ namespace mcp
             pWidget->ForAllChildren([this, tabCount](Widget* pWidget){ this->PrintWidgetType(pWidget, tabCount); });
         }
     }
-
-    
-
 }

@@ -4,12 +4,16 @@
 
 #include "MCP/Graphics/Graphics.h"
 #include "MCP/Scene/Scene.h"
+#include "MCP/Components/InputComponent.h"
+#include "MCP/Core/Event/ApplicationEvent.h"
 
 namespace mcp
 {
     WorldLayer::WorldLayer(Scene* pScene)
         : SceneLayer(pScene)
         , m_collisionSystem(QuadtreeBehaviorData{ 4, 4, 1600.f, 900.f }) // Load this from data
+        , m_activeInput(nullptr)
+        , m_isPaused(false)
     {
         //
     }
@@ -138,6 +142,13 @@ namespace mcp
 
     void WorldLayer::Update(const float deltaTimeMs)
     {
+        if (m_isPaused)
+            return;
+
+        // Process Input
+        TickInput(deltaTimeMs);
+
+        // Process Messages 
         m_messageManager.ProcessMessages();
 
         const auto& updateableArray = m_updateables.GetArray();
@@ -158,6 +169,9 @@ namespace mcp
 
     void WorldLayer::FixedUpdate(const float fixedUpdateTimeS)
     {
+        if (m_isPaused)
+            return;
+
         const auto& updateableArray = m_fixedUpdateables.GetArray();
 
         for (auto* pUpdateable : updateableArray)
@@ -190,6 +204,48 @@ namespace mcp
 #if DEBUG_RENDER_COLLISION_TREE
         m_collisionSystem.Render();
 #endif
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Pause the entire World Layer, stopping the Update and FixedUpdate from occurring.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void WorldLayer::Pause()
+    {
+        m_isPaused = true;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Resume the World Layer, allowing the Update and FixedUpdate to resume.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void WorldLayer::Resume()
+    {
+        m_isPaused = false;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //      Right now, I have a single listener. In the future I would like to have multiple.
+    //		
+    ///		@brief : Add an Input listener to receive input events.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void WorldLayer::AddInputListener(InputComponent* pInputComponent)
+    {
+        m_activeInput = pInputComponent;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //      In the future, if and when I have multiple listeners, I would have this find the specific component.
+    //		
+    ///		@brief : Remove an Input listener.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void WorldLayer::RemoveInputListener([[maybe_unused]] InputComponent* pInputComponent)
+    {
+        m_activeInput = nullptr;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -326,8 +382,23 @@ namespace mcp
 
     void WorldLayer::OnEvent([[maybe_unused]] ApplicationEvent& event)
     {
-        // TODO: This needs to be called by the Scene, and the Scene needs to register for the application events.
+        if (!m_activeInput)
+            return;
+        
+        // If our input component is active, then we need to process the event
+        if (m_activeInput->IsActive())
+        {
+            if (event.GetEventId() == KeyEvent::GetStaticId())
+            {
+                auto& keyEvent = static_cast<KeyEvent&>(event);
 
+                // If we don't care about that key, return.
+                if (!m_activeInput->HasActionForControl(keyEvent.Key()))
+                    return;
+
+                //m_activeInput->UpdateKeyState(keyEvent);
+            }
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -338,5 +409,11 @@ namespace mcp
     void WorldLayer::SetCollisionSettings(const QuadtreeBehaviorData& data)
     {
         m_collisionSystem.SetQuadtreeBehaviorData(data);
+    }
+
+    void WorldLayer::TickInput([[maybe_unused]] const float deltaTimeMs)
+    {
+        if (m_activeInput)
+            m_activeInput->TickInput(deltaTimeMs);
     }
 }

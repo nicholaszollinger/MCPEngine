@@ -33,6 +33,7 @@ namespace mcp
         RectF rect {};                           // Position of the rect is the offset from the parent, or the actual screen position if the parent is nullptr.
         Vec2 anchor = {0.5f, 0.5f};         // How the Widget is anchored to it's parent. Default is to anchor to the center.
         Vec2 scale = {1.f, 1.f};            // Scale of the Widget.
+        Vec2 pivot = {0.5f, 0.5f};          // Position of the Widget in relation to its dimensions. Default is an origin at the center of the Rect.
         StringId tag = {};                       // Optional tag to give the Widget.
         LuaResourcePtr enableBehaviorScript;     // Optional script that defines extra behavior for enabling and disabling this widget.
         int zOffset = 1;                         // z-Axis difference from the parent.
@@ -57,7 +58,8 @@ namespace mcp
         const StringId m_tag;               // Optional tag to be able to find this specific widget.
         Widget* m_pParent;                  // Parent of this widget. If the parent is nullptr, then it is the Root.
         LuaResourcePtr m_enableBehaviorScript;  // Optional Script that defines behavior when this script is enabled or disabled.
-        Vec2 m_localPos;                      // Offset from the anchor position 
+        Vec2 m_localPos;                    // Offset from the origin position
+        Vec2 m_pivot;                       // The alignment of the center point of the Widget.
         Vec2 m_anchor;                      // Determines the position of Widget based on the Parent's position. An anchor can have values from [0, 1]
         Vec2 m_scale;                       // Scale of the two axes.
         float m_width;                      // Width of the Widget.
@@ -90,12 +92,15 @@ namespace mcp
         void DestroyWidget();
         void DestroyWidgetAndChildren();
         void Focus();
+        void OnFocusChanged(const bool isFocused);
 
         // Querying Children
         template<typename WidgetType> WidgetType* FindChildByTag(const StringId tag);
         template<typename WidgetType> WidgetType* FindFirstChildOfType();
-        [[nodiscard]] const std::vector<Widget*>& GetChildren() const { return m_children; }
         void ForAllChildren(const std::function<void(Widget* pWidget)>& task) const;
+        [[nodiscard]] Widget* FindChildByTag(const StringId tag) const;
+        [[nodiscard]] const std::vector<Widget*>& GetChildren() const { return m_children; }
+        virtual void OnChildSizeChanged() {}
 
         // Event Handling
         void OnEvent(ApplicationEvent& event);
@@ -108,19 +113,24 @@ namespace mcp
         void ToggleActive();
         void SetInteractable(const bool isInteractable);
         void SetUILayer(UILayer* pUILayer) { m_pUILayer = pUILayer; }
-        void SetWidth(const float width) { m_width = width; }
-        void SetHeight(const float height) { m_height = height; }
+        void SetPivot(const Vec2 pivot);
+        void SetPivot(float x, float y);
+        void SetWidth(const float width);
+        void SetHeight(const float height);
         void SetScale(const float xScale, const float yScale);
         void SetScale(const float uniformScale);
 
         // Getters
         [[nodiscard]] virtual float GetRectWidth() const;
         [[nodiscard]] virtual float GetRectHeight() const;
-        [[nodiscard]] Vec2 GetLocalPos() const { return m_localPos; }
-        [[nodiscard]] Vec2 GetPos() const;
+        [[nodiscard]] Vec2 GetOrigin() const;
+        [[nodiscard]] Vec2 GetRectCenter() const;
+        [[nodiscard]] Vec2 GetLocalPosition() const { return m_localPos; }
         [[nodiscard]] Vec2 GetScale() const;
         [[nodiscard]] StringId GetTag() const { return m_tag; }
         [[nodiscard]] RectF GetRect() const;
+        [[nodiscard]] RectF GetRectTopLeft() const;
+        [[nodiscard]] int GetMaxZ() const;
         [[nodiscard]] int GetZOffset() const;
         [[nodiscard]] bool HasChildren() const { return !m_children.empty(); }
         [[nodiscard]] bool IsInteractable() const;
@@ -158,13 +168,25 @@ namespace mcp
         //-----------------------------------------------------------------------------------------------------------------------------
         virtual void OnInactive() {}
 
+        //-----------------------------------------------------------------------------------------------------------------------------
+        ///		@brief : Called when this Widget is Focused in the UILayer.
+        //-----------------------------------------------------------------------------------------------------------------------------
+        virtual void OnFocus() {}
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        ///		@brief : Called when this Widget is removed as the focused Widget in the UILayer.
+        //-----------------------------------------------------------------------------------------------------------------------------
+        virtual void OnFocusLost() {}
+        
         virtual void OnParentSet() {}
+        virtual void OnZChanged() {}
         virtual void OnChildAdded([[maybe_unused]] Widget* pChild) {}
         virtual void OnChildRemoved([[maybe_unused]] Widget* pChild) {}
         [[nodiscard]] bool PointIntersectsRect(const Vec2 screenPos) const;
         [[nodiscard]] bool GetPointRelativeToRect(const Vec2 screenPos, Vec2& relativePos) const;
 
     private:
+        void OnZSet();
         void OnParentActiveChanged(const bool parentActiveState);
         static void RegisterLuaFunctions(lua_State* pState);
     };

@@ -51,27 +51,11 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::AddCollideable(ColliderComponent* pColliderComponent)
     {
-        // Get the last cell that completely encompassed this pColliderComponent was in.
-        QuadtreeCell* pCell = static_cast<QuadtreeCell*>(pColliderComponent->m_pCell);
-
-        // If did not have a cell, then our starting point will be the root.
-        if (!pCell)
-        {
-            pCell = m_pRoot;
-        }
-
-        const RectF estimationRect = pColliderComponent->GetEstimationRect();
-        TryInsert(pCell, estimationRect, pColliderComponent);
-
-        if (!pColliderComponent->m_pCell)
-            pColliderComponent->m_pCell = m_pRoot;
+        UpdateMembership(pColliderComponent);
 
         // If we are an active collider, add it to our list of active colliders.
         if (!pColliderComponent->m_isStatic)
-            m_activeColliders.emplace_back(pColliderComponent);
-
-        // This is to ensure that I have completed the 'registration'.
-        MCP_CHECK(pColliderComponent->m_pCell);
+            AddActiveCollider(pColliderComponent);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -81,42 +65,13 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::RemoveCollideable(ColliderComponent* pColliderComponent)
     {
-        /*auto* pCell = static_cast<QuadtreeCell*> (pColliderComponent->m_pCell);
-        MCP_CHECK(pCell);*/
+        const auto rect = pColliderComponent->GetEstimationRect();
+        RemoveDanglingCells(pColliderComponent, rect);
 
-        //const RectF rect = pColliderComponent->GetEstimationRect();
-        //std::vector<QuadtreeCell*> cells;
-
-        /*if (!rect.IsInside(pCell->dimensions))
+        // If we are not static, remove ourselves from the active collider array:
+        if (!pColliderComponent->m_isStatic)
         {
-            pCell = FindParentThatEncapsulatesRect(pCell, rect);
-        }*/
-
-        // Remove this ColliderComponent from each of our cells that we were in.
-        for(auto* pCellToRemoveFrom : pColliderComponent->m_cells)
-        {
-            RemoveFromCell(static_cast<QuadtreeCell*>(pCellToRemoveFrom), pColliderComponent);
-        }
-
-        // Clear out the cells that we were in.
-        pColliderComponent->m_cells.clear();
-        pColliderComponent->m_pCell = nullptr;
-
-        // If we are static, we are done.
-        if (pColliderComponent->m_isStatic)
-            return;
-
-        // If the collider was an active one, remove it from our active colliders.
-        // O(n) but until it is an issue, I am not going to worry about it. But this is a pain point.
-        for (size_t i = 0; i < m_activeColliders.size(); ++i)
-        {
-            if (m_activeColliders[i]->GetOwner() == pColliderComponent->GetOwner())
-            {
-                //MCP_LOG("Collision", "Removing Active Collider");
-                std::swap(m_activeColliders[i], m_activeColliders.back());
-                m_activeColliders.pop_back();
-                break;
-            }
+            RemoveActiveCollider(pColliderComponent);
         }
     }
 
@@ -130,7 +85,6 @@ namespace mcp
         // Run collisions for all of our active Colliders
         for (auto* pColliderComponent : m_activeColliders)
         {
-            //if (!pColliderComponent->CollisionEnabled())
             CheckCollision(pColliderComponent);
         }
 
@@ -140,37 +94,29 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : If the collider component is no longer active, we will remove it from the 'active' colliders that are
-    ///         updated each frame. Else, we will add it to the list.
+    ///		@brief : If the collider is in our tree, remove it from our actively updated colliders.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void CollisionSystem::SetCollideableStatic(ColliderComponent* pColliderComponent, const bool bIsStatic)
+    void CollisionSystem::SetCollideableStatic(ColliderComponent* pColliderComponent)
     {
-        size_t activeColliderIndex = 0;
-        for (; activeColliderIndex != m_activeColliders.size(); ++activeColliderIndex)
+        // If the collider Component was active, then we need to remove it.
+        if (pColliderComponent->IsActive())
         {
-            if (m_activeColliders[activeColliderIndex]->GetOwner() == pColliderComponent->GetOwner())
-            {
-                break;
-            }
+            RemoveActiveCollider(pColliderComponent);
         }
+    }
 
-        // If the collider component is now static, we need to remove it from our active colliders.
-        if (bIsStatic)
-        {
-            if (activeColliderIndex < m_activeColliders.size())
-            {
-                std::swap(m_activeColliders[activeColliderIndex], m_activeColliders.back());
-                m_activeColliders.pop_back();
-            }
-        }
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Adds the Collider Component to our array of colliders that we constantly check collisions for.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void CollisionSystem::SetCollideableActive(ColliderComponent* pColliderComponent)
+    {
+        // If there are no actual active colliders, don't add it to the array.
+        if (pColliderComponent->GetActiveColliderCount() == 0 || !pColliderComponent->IsActive())
+            return;
 
-        else
-        {
-            if (activeColliderIndex == m_activeColliders.size())
-            {
-                m_activeColliders.emplace_back(pColliderComponent);
-            }
-        }
+        AddActiveCollider(pColliderComponent);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -181,59 +127,34 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::CheckCollision(ColliderComponent* pColliderComponent)
     {
-        auto* pCell = static_cast<QuadtreeCell*> (pColliderComponent->m_pCell);
+        // We shouldn't be in the tree if our collision is disabled.
+        MCP_CHECK(pColliderComponent->m_collisionEnabled);
 
-        if (!pCell)
-            return;
-        MCP_CHECK(pColliderComponent->m_collisionEnabled); // We shouldn't be in the tree if our collision is disabled.
+        // This one should be handled earlier... When the the owner of the Collider moves.
+        UpdateMembership(pColliderComponent);
 
-        // Re-find the lowest parent cell that holds this rect.
-        RectF rect = pColliderComponent->GetEstimationRect();
-        pCell = FindLowestCellThatEncapsulatesRect(pCell, rect);
-
-        // Run the collision.
-        RunCollisionForColliderComponent(pColliderComponent->m_cells, pColliderComponent);
-
-        // I am going to do what is easy and remove the collider from each cell it was in and reinsert
-        // to update the membership.
-        for (auto* pOldCell : pColliderComponent->m_cells)
-        {
-            RemoveFromCell(static_cast<QuadtreeCell*>(pOldCell), pColliderComponent);
-        }
-        
-        // If our collision is no longer enabled or we have been queued for deletion return.
-        if (pColliderComponent->GetOwner()->IsQueuedForDeletion() || !pColliderComponent->CollisionEnabled())
+        // If we are no longer in the bounds of the collision tree, return.
+        if (pColliderComponent->m_cells.empty())
             return;
 
-        // Get the new cells that this collider should be in,
-        rect = pColliderComponent->GetEstimationRect();
-        pCell = FindLowestCellThatEncapsulatesRect(pCell, rect);
-        pColliderComponent->m_pCell = pCell;
+        // If we are still in the Tree, Run the collision.
+        RunCollisionForColliderComponent(pColliderComponent);
 
-
-        // Find all of the leaf cells that we should be in.
-        pColliderComponent->m_cells.clear();
-        FindCellsForRect(pCell, rect, pColliderComponent->m_cells);
-
-        for (auto* pNewCell : pColliderComponent->m_cells)
-        {
-            static_cast<QuadtreeCell*>(pNewCell)->m_colliderComponents.emplace_back(pColliderComponent);
-        }
-        
+        // Update the membership post-collision
+        UpdateMembership(pColliderComponent);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
     ///		@brief : Takes in the cells that the Collider Component is in and Checks for collisions in each cell.
-    ///		@param cells : Cells that the Collider Component is in.
     ///		@param pColliderComponent : Component we are testing.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void CollisionSystem::RunCollisionForColliderComponent(const std::vector<void*>& cells, ColliderComponent* pColliderComponent)
+    void CollisionSystem::RunCollisionForColliderComponent(ColliderComponent* pColliderComponent)
     {
         const RectF& estimationRect = pColliderComponent->GetEstimationRect();
 
-        for (auto* pVoid : cells)
+        for (auto* pVoid : pColliderComponent->m_cells)
         {
             auto* pCell = static_cast<QuadtreeCell*>(pVoid);
             // If we have 1 or less components in this cell, then continue.
@@ -362,6 +283,44 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
+    ///		@brief : Add a ColliderComponent to our array of actively collision checked colliders.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void CollisionSystem::AddActiveCollider(ColliderComponent* pColliderComponent)
+    {
+        // Make sure that our collider isn't already in our active collider array
+        for(const auto* pActiveCollider : m_activeColliders)
+        {
+            if (pActiveCollider == pColliderComponent)
+                return;
+        }
+
+        m_activeColliders.emplace_back(pColliderComponent);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Remove a ColliderComponent from our array of actively collision checked colliders.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void CollisionSystem::RemoveActiveCollider(ColliderComponent* pColliderComponent)
+    {
+        // If the collider was an active one, remove it from our active colliders.
+        // O(n) but until it is an issue, I am not going to worry about it. But this is a pain point.
+        for (size_t i = 0; i < m_activeColliders.size(); ++i)
+        {
+            if (m_activeColliders[i]->GetOwner() == pColliderComponent->GetOwner())
+            {
+                //MCP_LOG("Collision", "Removing Active Collider");
+                std::swap(m_activeColliders[i], m_activeColliders.back());
+                m_activeColliders.pop_back();
+                break;
+            }
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
     ///		@brief : Checks to see if every collider that was overlapping is still overlapping.
     //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::UpdateOverlappingColliders()
@@ -468,7 +427,7 @@ namespace mcp
     ///		@param rect : The rect that we are comparing. Should be pColliderComponent's 'EstimationRect'.
     ///		@param pColliderComponent : The Collider Component we are trying to add.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void CollisionSystem::TryInsert(QuadtreeCell* pCell, const RectF& rect, ColliderComponent* pColliderComponent)
+    void CollisionSystem::TryInsert(QuadtreeCell* pCell, ColliderComponent* pColliderComponent, const RectF& rect)
     {
         // If we don't intersect, then return.
         if (!rect.Intersects(pCell->dimensions))
@@ -486,8 +445,6 @@ namespace mcp
         if (IsLeaf(pCell))
         {
             pCell->m_colliderComponents.emplace_back(pColliderComponent);
-
-            // GET RID IF THIS DOESN'T WORK.
             pColliderComponent->m_cells.emplace_back(pCell);
         }
 
@@ -498,12 +455,12 @@ namespace mcp
             // then we need to set it for the collider as a reference point.
             if (rect.IsInside(pCell->dimensions))
             {
-                pColliderComponent->m_pCell = pCell;
+                pColliderComponent->m_pReferenceCell = pCell;
             }
 
             for (size_t i = 0; i < 4; ++i)
             {
-                TryInsert(pCell->children[i], rect, pColliderComponent);
+                TryInsert(pCell->children[i], pColliderComponent, rect);
             }
         }
     }
@@ -552,7 +509,7 @@ namespace mcp
             for(auto& m_colliderComponent : pCell->m_colliderComponents)
             {
                 const RectF rect = m_colliderComponent->GetEstimationRect();
-                TryInsert(children[i], rect, m_colliderComponent);
+                TryInsert(children[i],  m_colliderComponent, rect);
             }
         }
 
@@ -563,12 +520,15 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Remove a Component from a cell. This is called in conjunction with 'FindCellsForRect'
+    ///		@brief : Remove a Component from a cell.
     ///		@param pCell : Cell we are checking for the component.
     ///		@param pComponent : Component we are removing.
     //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::RemoveFromCell(QuadtreeCell* pCell, const ColliderComponent* pComponent) const
     {
+        if (pCell->m_colliderComponents.empty())
+            return;
+
         //MCP_CHECK(IsLeaf(pCell));
         for (size_t i = 0; i < pCell->m_colliderComponents.size(); ++i)
         {
@@ -661,46 +621,67 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Get each leaf cell that the rect belongs to in the tree.
-    ///		@param pCell : 
-    ///		@param rect : 
-    ///		@param outCells : 
+    ///		@brief : Removes the Component from any non intersecting cells, and adds the cells that it intersects with.
+    ///		@param pColliderComponent : 
     //-----------------------------------------------------------------------------------------------------------------------------
-    void CollisionSystem::FindCellsForRect(QuadtreeCell* pCell, const RectF& rect, std::vector<void*>& outCells)
+    void CollisionSystem::UpdateMembership(ColliderComponent* pColliderComponent)
     {
-        // If we don't intersect with this cell, then return.
-        if (!rect.Intersects(pCell->dimensions))
-        {
+        const auto rect = pColliderComponent->GetEstimationRect();
+        RemoveDanglingCells(pColliderComponent, rect);
+
+        // If our collision is no longer enabled or we have been queued for deletion return.
+        if (pColliderComponent->GetOwner()->IsQueuedForDeletion() || !pColliderComponent->CollisionEnabled())
             return;
+
+        TryInsert(m_pRoot, pColliderComponent, rect);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //      For now, I am going to do the easy thing and completely remove all cells that this collider was in.
+    //      This could be changed to only remove the ones we are not intersecting with, but that will require changes to
+    //      AddIntersecting Cells.
+    //		
+    ///		@brief : Remove cells that this component is no longer intersecting with.
+    ///		@param pColliderComponent : Component we are updating.
+    ///		@param colliderRect : EstimationRect for this colliderComponent.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void CollisionSystem::RemoveDanglingCells(ColliderComponent* pColliderComponent, [[maybe_unused]] const RectF& colliderRect) const
+    {
+        // Remove this collider from each cell that it intersects with.
+        for (auto* pCell : pColliderComponent->m_cells)
+        {
+            RemoveFromCell(static_cast<QuadtreeCell*>(pCell), pColliderComponent);
         }
 
-        // If we intersect and this leaf
-        if (IsLeaf(pCell))
-        {
-            outCells.emplace_back(pCell);
-        }
+        // TODO LATER: For each cell that we have been removed from, attempt to clean up those cells'.
 
-        // If we intersect but this isn't a leaf, then we need to find the leaf that
-        // we intersect with.
-        else
-        {
-            for (size_t i = 0; i < 4; ++i)
-            {
-                FindCellsForRect(pCell->children[i], rect, outCells);
-            }
-        }
+        pColliderComponent->m_cells.clear();
     }
 
     CollisionSystem::QuadtreeCell* CollisionSystem::FindLowestCellThatEncapsulatesRect(QuadtreeCell* pCell, const RectF& rect)
     {
+        // If we were outside of the Tree, start by checking the root.
+        if (!pCell)
+            pCell = m_pRoot;
+
         QuadtreeCell* pParent = FindParentThatEncapsulatesRect(pCell, rect);
+
+        // If there is no cell that encapsulates the Rect in our tree, return nullptr.
+        if (!pParent)
+            return nullptr;
+
         return FindChildThatEncapsulatesRect(pParent, rect);
     }
 
     CollisionSystem::QuadtreeCell* CollisionSystem::FindParentThatEncapsulatesRect(QuadtreeCell* pCell, const RectF& rect)
     {
-        if (pCell == m_pRoot)
-            return m_pRoot;
+        // If the rect is outside our root, return nullptr.
+        if (!pCell)
+            return nullptr;
+
+        /*if (pCell == m_pRoot)
+            return m_pRoot;*/
 
         // Check to see if the current cell encapsulates the Rect.
         if (rect.IsInside(pCell->dimensions))
@@ -715,7 +696,7 @@ namespace mcp
 
     CollisionSystem::QuadtreeCell* CollisionSystem::FindChildThatEncapsulatesRect(QuadtreeCell* pCell, const RectF& rect)
     {
-        assert(pCell);
+        MCP_CHECK(pCell);
 
         // If we are on a leaf, we can't go any further.
         if (IsLeaf(pCell))
