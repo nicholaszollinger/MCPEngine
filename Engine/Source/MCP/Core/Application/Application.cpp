@@ -46,11 +46,13 @@ namespace mcp
     //		
     ///		@brief : Initialize the MCPEngine and all of its dependencies.
     ///		@param pGameDataFilepath : Path to the GameData that we are using to run the game.
+    ///     @param pInstance : Game instance associated with this Application.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool Application::Init(const char* pGameDataFilepath)
+    bool Application::Init(const char* pGameDataFilepath, GameInstance* pInstance)
     {
         // Initialize Bleach Leak Detector:
-        BLEACH_INIT_LEAK_DETECTOR();
+        //BLEACH_INIT_LEAK_DETECTOR();
+        m_pGameInstance = pInstance;
 
 #if MCP_LOGGING_ENABLED
         // Initialize the Logger
@@ -257,12 +259,15 @@ namespace mcp
     //
     ///		@brief : Closes the Engine, shutting down all systems.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void Application::Close() const
+    void Application::Close()
     {
         if (m_isRunning)
             return;
 
         MCP_LOG("Application", "Closing MCPEngine...");
+
+        BLEACH_DELETE(m_pGameInstance);
+        m_pGameInstance = nullptr;
 
         // Close the processes in reverse order.
         for (auto it = m_processes.rbegin(); it != m_processes.rend(); ++it)
@@ -281,7 +286,7 @@ namespace mcp
         Logger::Close();
 #endif
 
-        BLEACH_DUMP_AND_DESTROY_LEAK_DETECTOR();
+        //BLEACH_DUMP_AND_DESTROY_LEAK_DETECTOR();
     }
 
     static int QuitGame([[maybe_unused]] lua_State* pState)

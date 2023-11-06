@@ -4,12 +4,21 @@
 #include "ButtonWidget.h"
 #include "TextWidget.h"
 #include "MCP/Core/Event/MulticastDelegate.h"
+#include "MCP/Input/InputCodes.h"
 #include "MCP/Scene/IUpdateable.h"
 
 namespace mcp
 {
     class ImageWidget;
     class Font;
+
+    enum class TextInputConstraints : uint32_t
+    {
+        kNone                = HashString32("None")         // The user can input any symbols supported by the Engine.
+        , kAlphaOnly         = HashString32("AlphaOnly")    // The user can only input alpha keys.
+        , kNumericOnly       = HashString32("NumericOnly")  // The user can only input numeric keys.
+        , kAlphaNumericOnly  = HashString32("AlphaNumeric") // The user can only input alpha or numeric keys.
+    };
 
     struct TextFieldData
     {
@@ -18,7 +27,8 @@ namespace mcp
         const char* cursorImagePath = nullptr;
         const char* defaultText = nullptr;
         int maxCharCount = -1;
-        float cursorBlinkSpeed;
+        float cursorBlinkSpeed = 0.f;
+        TextInputConstraints constraints = TextInputConstraints::kNone;
     };
 
     class TextFieldWidget final : public ButtonWidget, public IUpdateable
@@ -39,6 +49,7 @@ namespace mcp
         size_t m_maxCharCount = 0;                    // Maximum number of characters allowed in the Field. 0 Means unlimited.
         float m_cursorBlinkInterval = 1.f;
         float m_timeLeftToBlink = 1.f;
+        TextInputConstraints m_constraints;
         bool m_valueEmpty;
 
     public:
@@ -50,7 +61,6 @@ namespace mcp
 
         static TextFieldWidget* AddFromData(const XMLElement element);
 
-        //static void RegisterLuaFunctions(lua_State* pState);
     private:
         virtual void OnExecute(const Vec2 relativeClickPosition) override;
         virtual void OnHoverEnter() override;
@@ -59,5 +69,6 @@ namespace mcp
         void CreateChildWidgets(const TextFieldData& data);
         void FinishText();
         void StopEditing();
+        [[nodiscard]] bool CanAppendCharacter(const MCPKey key) const;
     };
 }

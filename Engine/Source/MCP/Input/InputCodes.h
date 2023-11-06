@@ -65,6 +65,13 @@ enum class MCPKey : int
     Backspace = 8,
 };
 
+namespace mcp
+{
+    [[nodiscard]] bool IsAlpha(const MCPKey key);
+    [[nodiscard]] bool IsNumeric(const MCPKey key);
+    [[nodiscard]] bool IsAlphaNumeric(const MCPKey key);
+}
+
 enum class MCPMouseButton : int
 {
     Invalid,

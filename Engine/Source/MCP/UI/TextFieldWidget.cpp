@@ -3,7 +3,7 @@
 #include "TextFieldWidget.h"
 
 #include "ImageWidget.h"
-#include "LuaSource/lstate.h"
+#include "LuaSource.h"
 #include "MCP/Core/Application/Application.h"
 #include "MCP/Core/Event/ApplicationEvent.h"
 #include "MCP/Graphics/Graphics.h"
@@ -17,6 +17,7 @@ namespace mcp
         , m_defaultText{}
         , m_maxCharCount(fieldData.maxCharCount)
         , m_cursorBlinkInterval(fieldData.cursorBlinkSpeed)
+        , m_constraints(fieldData.constraints)
         , m_valueEmpty(true)
     {
         if (fieldData.defaultText)
@@ -133,12 +134,12 @@ namespace mcp
                     if (m_maxCharCount > 0 && m_pTextWidget->GetTextLength() >= m_maxCharCount)
                         return;
 
-                    const auto glyphValue = static_cast<char>(event.GetGlyphValue());
-
-                    // Don't append the null character.
-                    if (glyphValue == '\0')
+                    if (!CanAppendCharacter(event.Key()))
+                    {
                         return;
+                    }
 
+                    const auto glyphValue = static_cast<char>(event.GetGlyphValue());
                     m_pTextWidget->Append(glyphValue);
 
                     // Move the Cursor
@@ -200,6 +201,35 @@ namespace mcp
             OnHoverExit();
         }
     }
+
+    bool TextFieldWidget::CanAppendCharacter(const MCPKey key) const
+    {
+        // Don't append the null character.
+        if (key == MCPKey::kNull)
+            return false;
+
+        switch (m_constraints)
+        {
+            case TextInputConstraints::kNone: break;
+            case TextInputConstraints::kAlphaOnly:
+            {
+                return IsAlpha(key);
+            }
+
+            case TextInputConstraints::kNumericOnly:
+            {
+                return IsNumeric(key);
+            }
+
+            case TextInputConstraints::kAlphaNumericOnly:
+            {
+                return IsAlphaNumeric(key);
+            }
+        }
+
+        return true;
+    }
+
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -276,41 +306,24 @@ namespace mcp
         // Text Format
         fieldData.format = TextWidget::GetTextFormatData(element);
 
-        // TODO: Cursor path and blink speed.
+        // Cursor
         childElement = childElement.GetSiblingElement("Cursor");
         if (childElement.IsValid())
         {
             fieldData.cursorBlinkSpeed = childElement.GetAttributeValue<float>("blinkSpeed", 1.f);
         }
 
+        // Constraints
+        childElement = element.GetChildElement("Constraints");
+        if (childElement.IsValid())
+        {
+            const auto label = childElement.GetAttributeValue<const char*>("value", "None");
+            fieldData.constraints = static_cast<TextInputConstraints>(HashString32(label));
+
+            // TODO: Have a 'SpacesAllowed' attribute?
+        }
+
         return BLEACH_NEW(TextFieldWidget(data, std::move(buttonBehavior), fieldData));
     }
-
-    //static int RegisterOnValueChanged(lua_State* pState)
-    //{
-    //    // Get the TextFieldWidget
-    //    auto* pWidget = static_cast<TextFieldWidget*>(lua_touserdata(pState, -2));
-    //    MCP_CHECK(pWidget);
-
-    //    // Get the FunctionName
-    //    auto* pFunctionName = lua_tostring(pState, -1);
-
-    //    // Pop the parameters
-    //    lua_pop(pState, 2);
-
-    //    // Register the function to OnValueChanged
-    //    pWidget->m_onValueChanged.AddListener(pWidget, [pWidget, pFunctionName](const std::string& text)
-    //    {
-    //        //lua::CallMemberFunction(pWidget->m_pOnExecuteScript, pFunctionName, text); 
-    //    });
-
-
-    //    return 0;
-    //}
-
-    //void TextFieldWidget::RegisterLuaFunctions(lua_State* pState)
-    //{
-    //    
-    //}
 
 }

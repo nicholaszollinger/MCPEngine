@@ -4,6 +4,7 @@
 
 #include <BleachNew.h>
 #include "LuaSource.h"
+#include "SceneAsset.h"
 #include "MCP/Debug/Log.h"
 #include "MCP/Graphics/Graphics.h"
 
@@ -72,6 +73,14 @@ namespace mcp
         XMLElement scene = sceneList.GetChildElement("Scene");
         while (scene.IsValid())
         {
+#ifndef _DEBUG
+            if (AssetIsDebugOnly(scene))
+            {
+                scene = scene.GetSiblingElement("Scene");
+                continue;
+            }
+#endif
+
             const SceneIdentifier id = scene.GetAttributeValue<const char*>("sceneId");
             if (!id.IsValid())
             {

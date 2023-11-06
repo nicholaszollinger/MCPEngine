@@ -366,6 +366,15 @@
     <ClInclude Include="Source\MCP\UI\Layout.h">
       <Filter>MCP\UI</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\SceneAsset.h">
+      <Filter>MCP\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Application\GameInstance.h">
+      <Filter>MCP\Core\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\EntryPoint.h">
+      <Filter>MCP\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
@@ -589,6 +598,12 @@
     </ClCompile>
     <ClCompile Include="Source\MCP\UI\Layout.cpp">
       <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\SceneAsset.cpp">
+      <Filter>MCP\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Input\InputCodes.cpp">
+      <Filter>MCP\Input</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@
 
 #include "WorldLayer.h"
 
+#include "SceneAsset.h"
 #include "MCP/Graphics/Graphics.h"
 #include "MCP/Scene/Scene.h"
 #include "MCP/Components/InputComponent.h"
@@ -70,6 +71,13 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void WorldLayer::LoadObject(const XMLElement element)
     {
+#ifndef _DEBUG
+        if (AssetIsDebugOnly(element))
+        {
+            return;
+        }
+#endif
+
         auto* pObject = CreateObject();
 
         // Get the first Component of the object.
@@ -77,6 +85,14 @@ namespace mcp
 
         while (componentElement.IsValid())
         {
+#ifndef _DEBUG
+            if (AssetIsDebugOnly(componentElement))
+            {
+                componentElement = componentElement.GetSiblingElement();
+                continue;
+            }
+#endif
+
             // Create the Component
             auto* pComponent = ComponentFactory::CreateFromData(componentElement.GetName(), componentElement);
 
@@ -98,6 +114,14 @@ namespace mcp
 
     void WorldLayer::LoadSceneDataAsset(const XMLElement sceneDataAsset)
     {
+#ifndef _DEBUG
+        if (AssetIsDebugOnly(sceneDataAsset))
+        {
+            return;
+        }
+#endif
+
+
         const char* pPath = sceneDataAsset.GetAttributeValue<const char*>("path");
         MCP_CHECK_MSG(pPath, "Failed to load SceneDataAsset on the UI Layer! No path was found!");
 

@@ -43,7 +43,16 @@ namespace mcp
             case SDL_SCANCODE_Z: return MCPKey::Z;
 
             // Numbers
-            // TODO
+            case SDL_SCANCODE_0: return MCPKey::Num0;
+            case SDL_SCANCODE_1: return MCPKey::Num1;
+            case SDL_SCANCODE_2: return MCPKey::Num2;
+            case SDL_SCANCODE_3: return MCPKey::Num3;
+            case SDL_SCANCODE_4: return MCPKey::Num4;
+            case SDL_SCANCODE_5: return MCPKey::Num5;
+            case SDL_SCANCODE_6: return MCPKey::Num6;
+            case SDL_SCANCODE_7: return MCPKey::Num7;
+            case SDL_SCANCODE_8: return MCPKey::Num8;
+            case SDL_SCANCODE_9: return MCPKey::Num9;
 
             // Special
             case SDL_SCANCODE_ESCAPE: return MCPKey::Escape;
@@ -90,7 +99,16 @@ namespace mcp
             case MCPKey::Z: return SDL_SCANCODE_Z;
 
             // Numbers
-            // ...
+            case MCPKey::Num0: return SDL_SCANCODE_0;
+            case MCPKey::Num1: return SDL_SCANCODE_1;
+            case MCPKey::Num2: return SDL_SCANCODE_2;
+            case MCPKey::Num3: return SDL_SCANCODE_3;
+            case MCPKey::Num4: return SDL_SCANCODE_4;
+            case MCPKey::Num5: return SDL_SCANCODE_5;
+            case MCPKey::Num6: return SDL_SCANCODE_6;
+            case MCPKey::Num7: return SDL_SCANCODE_7;
+            case MCPKey::Num8: return SDL_SCANCODE_8;
+            case MCPKey::Num9: return SDL_SCANCODE_9;
 
             // Special
             case MCPKey::Escape:   return SDL_SCANCODE_ESCAPE;

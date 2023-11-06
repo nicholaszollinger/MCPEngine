@@ -178,6 +178,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Graphics\Texture.cpp" />
     <ClCompile Include="Source\MCP\Input\Input.cpp" />
     <ClCompile Include="Source\MCP\Input\InputActionValue.cpp" />
+    <ClCompile Include="Source\MCP\Input\InputCodes.cpp" />
     <ClCompile Include="Source\MCP\Input\InputControl.cpp" />
     <ClCompile Include="Source\MCP\Input\InputModifier.cpp" />
     <ClCompile Include="Source\MCP\Lua\Lua.cpp" />
@@ -188,6 +189,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Scene\IUpdateable.cpp" />
     <ClCompile Include="Source\MCP\Scene\Object.cpp" />
     <ClCompile Include="Source\MCP\Scene\Scene.cpp" />
+    <ClCompile Include="Source\MCP\Scene\SceneAsset.cpp" />
     <ClCompile Include="Source\MCP\Scene\SceneLayer.cpp" />
     <ClCompile Include="Source\MCP\Scene\SceneManager.cpp" />
     <ClCompile Include="Source\MCP\Scene\UILayer.cpp" />
@@ -243,8 +245,10 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Components\TextComponent.h" />
     <ClInclude Include="Source\MCP\Components\TransformComponent.h" />
     <ClInclude Include="Source\MCP\Core\Application\Application.h" />
+    <ClInclude Include="Source\MCP\Core\Application\GameInstance.h" />
     <ClInclude Include="Source\MCP\Core\Application\Window\WindowBase.h" />
     <ClInclude Include="Source\MCP\Core\Config.h" />
+    <ClInclude Include="Source\MCP\Core\EntryPoint.h" />
     <ClInclude Include="Source\MCP\Core\Event\ApplicationEvent.h" />
     <ClInclude Include="Source\MCP\Core\Event\Event.h" />
     <ClInclude Include="Source\MCP\Core\Event\KeyEvent.h" />
@@ -284,6 +288,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Scene\Entity.h" />
     <ClInclude Include="Source\MCP\Scene\IRenderable.h" />
     <ClInclude Include="Source\MCP\Scene\IUpdateable.h" />
+    <ClInclude Include="Source\MCP\Scene\SceneAsset.h" />
     <ClInclude Include="Source\MCP\Scene\SceneLayer.h" />
     <ClInclude Include="Source\MCP\Scene\Object.h" />
     <ClInclude Include="Source\MCP\Scene\Scene.h" />

@@ -3,6 +3,7 @@
 #include "UILayer.h"
 
 #include "LuaSource.h"
+#include "SceneAsset.h"
 #include "MCP/Core/Event/ApplicationEvent.h"
 #include "MCP/UI/Widget.h"
 #include "MCP/UI/CanvasWidget.h"
@@ -144,6 +145,14 @@ namespace mcp
     {
         while (rootElement.IsValid())
         {
+#ifndef _DEBUG
+            if (AssetIsDebugOnly(rootElement))
+            {
+                rootElement = rootElement.GetSiblingElement("Widget");
+                continue;
+            }
+#endif
+
             // Create a new widget in the context of this layer.
                 // I need to add layer context somehow.
             const char* widgetTypename = rootElement.GetAttributeValue<const char*>("type");
@@ -178,6 +187,14 @@ namespace mcp
         XMLElement childWidgetElement = parentElement.GetChildElement("Widget");
         while(childWidgetElement.IsValid())
         {
+#ifndef _DEBUG
+            if (AssetIsDebugOnly(childWidgetElement))
+            {
+                childWidgetElement = childWidgetElement.GetSiblingElement("Widget");
+                continue;
+            }
+#endif
+
             const char* widgetTypename = childWidgetElement.GetAttributeValue<const char*>("type");
 
             Widget* pChild = WidgetFactory::CreateWidgetFromData(widgetTypename, childWidgetElement);
@@ -194,6 +211,13 @@ namespace mcp
 
     void UILayer::LoadSceneDataAsset(const XMLElement sceneDataAsset)
     {
+#ifndef _DEBUG
+        if (AssetIsDebugOnly(sceneDataAsset))
+        {
+            return;
+        }
+#endif
+
         const char* pPath = sceneDataAsset.GetAttributeValue<const char*>("path");
         MCP_CHECK_MSG(pPath, "Failed to load SceneDataAsset on the UI Layer! No path was found!");
 
@@ -343,6 +367,13 @@ namespace mcp
             MCP_ERROR("UILayer", "Failed to Add Widget from data! Root element was invalid!");
             return nullptr;
         }
+
+#ifndef _DEBUG
+        if (AssetIsDebugOnly(root))
+        {
+            return nullptr;
+        }
+#endif
 
         const char* widgetTypename = root.GetAttributeValue<const char*>("type");
 

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "GameInstance.h"
 
 struct lua_State;
 namespace mcp
@@ -30,6 +31,7 @@ namespace mcp
         static inline Application* s_pInstance = nullptr;
 
         std::vector<IProcess*> m_processes;
+        GameInstance* m_pGameInstance = nullptr;
         bool m_isRunning;
 
     public:
@@ -46,15 +48,17 @@ namespace mcp
         Application(Application&&) = delete;
         Application& operator=(Application&&) = delete;
         
-        bool Init(const char* pGameDataFilepath);
+        bool Init(const char* pGameDataFilepath, GameInstance* pGameInstance);
         void Run();
         void Quit();
+
+        [[nodiscard]] const GameInstance* GetGameInstance() const { return m_pGameInstance; }
 
         static void RegisterLuaFunctions(lua_State* pState);
 
     private:
         bool LoadApplicationProperties(ApplicationProperties& outProps, const char* pFilepath);
-        void Close() const;
+        void Close();
     };
 
 }
