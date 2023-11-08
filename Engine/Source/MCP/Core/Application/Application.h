@@ -14,8 +14,9 @@ namespace mcp
 
     struct ApplicationProperties
     {
-        // Name to give the Application's Main Window.
-        std::string windowName;
+        std::string windowName;             // Name to give the Application's Main Window.
+        std::string gameInstanceClassName;  // Name of the gameInstance class type for this application.
+        std::string gameInstanceDataPath;   // Path to the GameInstance data.
 
         // Starting window width of the application. Setting either width or height to -1
         // will default to fullscreen.
@@ -48,11 +49,11 @@ namespace mcp
         Application(Application&&) = delete;
         Application& operator=(Application&&) = delete;
         
-        bool Init(const char* pGameDataFilepath, GameInstance* pGameInstance);
+        bool Init(const char* pGameDataFilepath);
         void Run();
         void Quit();
 
-        [[nodiscard]] const GameInstance* GetGameInstance() const { return m_pGameInstance; }
+        [[nodiscard]] GameInstance* GetGameInstance() const { return m_pGameInstance; }
 
         static void RegisterLuaFunctions(lua_State* pState);
 

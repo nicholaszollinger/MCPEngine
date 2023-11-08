@@ -190,6 +190,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Scene\Object.cpp" />
     <ClCompile Include="Source\MCP\Scene\Scene.cpp" />
     <ClCompile Include="Source\MCP\Scene\SceneAsset.cpp" />
+    <ClCompile Include="Source\MCP\Scene\SceneEntity.cpp" />
     <ClCompile Include="Source\MCP\Scene\SceneLayer.cpp" />
     <ClCompile Include="Source\MCP\Scene\SceneManager.cpp" />
     <ClCompile Include="Source\MCP\Scene\UILayer.cpp" />
@@ -255,6 +256,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Core\Event\Message.h" />
     <ClInclude Include="Source\MCP\Core\Event\MessageManager.h" />
     <ClInclude Include="Source\MCP\Core\Event\MulticastDelegate.h" />
+    <ClInclude Include="Source\MCP\Core\TypeFactory.h" />
     <ClInclude Include="Source\MCP\Core\GlobalManager.h" />
     <ClInclude Include="Source\MCP\Core\Macros.h" />
     <ClInclude Include="Source\MCP\Core\Process.h" />
@@ -285,7 +287,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Lua\LuaDebug.h" />
     <ClInclude Include="Source\MCP\Lua\LuaResource.h" />
     <ClInclude Include="Source\MCP\Lua\LuaSystem.h" />
-    <ClInclude Include="Source\MCP\Scene\Entity.h" />
+    <ClInclude Include="Source\MCP\Scene\SceneEntity.h" />
     <ClInclude Include="Source\MCP\Scene\IRenderable.h" />
     <ClInclude Include="Source\MCP\Scene\IUpdateable.h" />
     <ClInclude Include="Source\MCP\Scene\SceneAsset.h" />

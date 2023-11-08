@@ -3,12 +3,13 @@
 
 #include "IRenderable.h"
 #include "IUpdateable.h"
-#include "Object.h"
+#include "SceneEntity.h"
 #include "Utility/Types/Containers/UnorderedDenseArray.h"
 
 namespace mcp
 {
     class Scene;
+    class SceneEntity;
     class ApplicationEvent;
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -21,6 +22,9 @@ namespace mcp
     {
     protected:
         static constexpr uint32_t kSceneLayerAssetId = HashString32("SceneLayerAsset");
+
+        std::unordered_map<EntityId, SceneEntity*> m_entities;                  // Container of all of the Entities in the scene.
+        std::vector<EntityId> m_queuedEntitiesToDelete;                         // Entities that will be deleted at the end of the update.
 
         UnorderedDenseArray<UpdateableId, IUpdateable*> m_updateables;          // Anything that is updating on this layer.
         UnorderedDenseArray<UpdateableId, IUpdateable*> m_fixedUpdateables;     // Any physics based updateables that need to be updated in a fixed time.
@@ -37,6 +41,7 @@ namespace mcp
         SceneLayer& operator=(SceneLayer&&) = delete;
 
         virtual bool LoadLayer(const XMLElement layer) = 0;
+
         virtual void Update(const float deltaTimeMs) = 0;
         virtual void FixedUpdate(const float fixedUpdateTimeMs) = 0;
         virtual void Render() = 0;
@@ -56,6 +61,14 @@ namespace mcp
         void RemovePhysicsUpdateable(const IUpdateable* pUpdateable);
 
     protected:
+        // Entity Management
+        /*
+        SceneEntity* CreateEntity();
+        SceneEntity* CreateEntityFromPrefab(const char* pPrefabPath);
+        void DestroyEntity(const EntityId id);
+        bool IsValidId(const EntityId);
+        */
+
         virtual void LoadSceneDataAsset(const XMLElement sceneDataAsset) = 0;
         virtual void DestroyLayer() = 0;
     };

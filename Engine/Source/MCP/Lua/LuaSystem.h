@@ -10,17 +10,22 @@
     #define DEBUG_LUA 1
 #endif
 
+// Hack:
+struct luaL_Reg;
+
 namespace mcp
 {
     class LuaSystem
     {
-        //std::unordered_map<uint64_t, LuaResourcePtr> m_resources;
         lua_State* m_pState = nullptr;
 
     public:
         // Initialization
         bool Init();
         void Close();
+
+        // HACK:
+        bool RegisterScriptFunctions(const char* pTypename, const char* pScriptFilepath, const luaL_Reg* functionArray) const;
 
         // Load Lua Scripts
         bool LoadScript(const char* pFilepath) const;

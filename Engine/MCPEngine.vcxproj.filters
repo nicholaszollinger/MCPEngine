@@ -76,6 +76,9 @@
     <Filter Include="MCP\Core\Resource\Parsers\XML">
       <UniqueIdentifier>{e9d447cf-eb7f-4f33-ab4a-becedb95ed4e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MCP\Scene\Entities">
+      <UniqueIdentifier>{7d1db196-fc24-48d6-9035-37944a0fd5d8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Platform\SDL2\SDL2Window.h">
@@ -306,9 +309,6 @@
     <ClInclude Include="Source\MCP\UI\WidgetFactory.h">
       <Filter>MCP\UI</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MCP\Scene\Entity.h">
-      <Filter>MCP\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Source\MCP\UI\TextWidget.h">
       <Filter>MCP\UI</Filter>
     </ClInclude>
@@ -373,6 +373,12 @@
       <Filter>MCP\Core\Application</Filter>
     </ClInclude>
     <ClInclude Include="Source\MCP\Core\EntryPoint.h">
+      <Filter>MCP\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\SceneEntity.h">
+      <Filter>MCP\Scene\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\TypeFactory.h">
       <Filter>MCP\Core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -604,6 +610,9 @@
     </ClCompile>
     <ClCompile Include="Source\MCP\Input\InputCodes.cpp">
       <Filter>MCP\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\SceneEntity.cpp">
+      <Filter>MCP\Scene\Entities</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,6 +1,5 @@
 #pragma once
 // Scene.h
-
 #include "IRenderable.h"
 #include "IUpdateable.h"
 #include "MCP/Collision/CollisionSystem.h"
@@ -10,6 +9,8 @@
 
 namespace mcp
 {
+    class SceneEntity;
+
     class Scene
     {
     private:
@@ -28,10 +29,9 @@ namespace mcp
         Scene();
         ~Scene();
 
-        bool Init();
         bool Load(const char* pFilePath);
-        void Unload();
         bool OnSceneLoad();
+        void Destroy();
         void Update(const float deltaTime);
         void Render() const;
 
@@ -41,7 +41,7 @@ namespace mcp
         [[nodiscard]] bool TransitionQueued() const { return m_transitionQueued; }
 
     private:
-        void CloseScene();
+        bool Init();
         void OnEvent(ApplicationEvent& event) const;
     };
 }

@@ -7,6 +7,8 @@ struct lua_State;
 
 namespace mcp
 {
+    class SceneEntity;
+
     class SceneManager final : public IProcess
     {
     public:

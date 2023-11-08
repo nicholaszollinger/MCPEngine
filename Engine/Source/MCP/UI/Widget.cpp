@@ -524,8 +524,6 @@ namespace mcp
             }
         }
 
-        
-
         // Let our children know of the change.
         for (auto* pChild : m_children)
         {

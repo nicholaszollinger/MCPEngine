@@ -2,16 +2,19 @@
 
 #include "SelectionWidget.h"
 
+#include "LuaSource.h"
 #include "ToggleWidget.h"
+#include "LuaSource/lstate.h"
 #include "MCP/Lua/Lua.h"
 #include "MCP/Scene/UILayer.h"
 
 namespace mcp
 {
-    SelectionWidget::SelectionWidget(const WidgetConstructionData& data, const char* pPrefabPath, LuaResourcePtr&& initializationScript,  const unsigned startVal)
+    SelectionWidget::SelectionWidget(const WidgetConstructionData& data, const char* pPrefabPath, LuaResourcePtr&& initializationScript, LuaResourcePtr&& onValueChangedScript, const unsigned startVal)
         : Widget(data)
         , m_prefabPath(pPrefabPath)
         , m_initializationScript(std::move(initializationScript))
+        , m_onValueChangedScript(std::move(onValueChangedScript))
         , m_selection(startVal)
     {
         //
@@ -22,6 +25,11 @@ namespace mcp
         // Create the Options
         if (!CreateOptionWidgets())
             return false;
+
+        if (m_onValueChangedScript.IsValid())
+        {
+            lua::CallMemberFunction(m_onValueChangedScript, "Init", this);
+        }
 
         return true;
     }
@@ -34,6 +42,14 @@ namespace mcp
         m_options[m_selection]->SetValue(true);
 
         return true;
+    }
+
+    void SelectionWidget::SetValue(const size_t value)
+    {
+        MCP_CHECK(value < m_options.size());
+        m_selection = value;
+
+        OnSelection(m_options[m_selection], true);
     }
 
 
@@ -131,7 +147,11 @@ namespace mcp
         // Set our old option to false.
         m_options[oldSelection]->SetValue(false);
 
-        MCP_LOG("SelectionWidget", "Selected: ", m_selection);
+        // Have the script respond to the change.
+        if (m_onValueChangedScript.IsValid())
+        {
+            lua::CallMemberFunction(m_onValueChangedScript, "OnValueChanged", m_selection);
+        }
     }
 
     void SelectionWidget::PrintChildRect(const Widget* pWidget)
@@ -157,8 +177,6 @@ namespace mcp
             m_children[i]->SetAnchor(0.f, 0.5f);
             m_children[i]->SetLocalPosition((static_cast<float>(i) * distance) + (distance / 2.f), 0.f);
         }
-
-        //PrintChildRect(this);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -275,6 +293,16 @@ namespace mcp
             return nullptr;
         }
 
+        // Get the OnValueChangedScript
+        LuaResourcePtr onValueChangedScript;
+        const auto onValueChangedElement = element.GetChildElement("OnValueChanged");
+        if (onValueChangedElement.IsValid())
+        {
+            const auto path = onValueChangedElement.GetAttributeValue<const char*>("scriptPath");
+            const auto dataPath = onValueChangedElement.GetAttributeValue<const char*>("scriptData", nullptr);
+            onValueChangedScript = lua::LoadScriptInstance(path, dataPath);
+        }
+
         // Load the initialization script.
         const auto path = optionInitializationElement.GetAttributeValue<const char*>("scriptPath");
         MCP_CHECK(path);
@@ -286,7 +314,42 @@ namespace mcp
         }
 
         // Create the selection Widget.
-        return BLEACH_NEW(SelectionWidget(data, pPrefabPath, std::move(initializationScript), startVal));
+        return BLEACH_NEW(SelectionWidget(data, pPrefabPath, std::move(initializationScript), std::move(onValueChangedScript), startVal));
+    }
+
+    static int ScriptSetValue(lua_State* pState)
+    {
+        // Get the Widget
+        auto* pWidget = static_cast<SelectionWidget*>(lua_touserdata(pState, -2));
+        MCP_CHECK(pWidget);
+
+        // Get the index
+        const auto index = lua_tointeger(pState, -1);
+
+        lua_pop(pState, 2);
+
+        pWidget->SetValue(index);
+
+        return 0;
+    }
+
+    void SelectionWidget::RegisterLuaFunctions(lua_State* pState)
+    {
+        static constexpr luaL_Reg kFuncs[]
+        {
+            {"SetValue", &ScriptSetValue}
+            , {nullptr, nullptr}
+        };
+
+        // Get the global Widget library class,
+        lua_getglobal(pState, "SelectionWidget");
+        MCP_CHECK(lua_type(pState, -1) == LUA_TTABLE);
+
+        // Set its functions
+        luaL_setfuncs(pState, kFuncs, 0);
+
+        // Pop the table off the stack.
+        lua_pop(pState, 1);
     }
 
 }

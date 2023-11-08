@@ -46,13 +46,11 @@ namespace mcp
     //		
     ///		@brief : Initialize the MCPEngine and all of its dependencies.
     ///		@param pGameDataFilepath : Path to the GameData that we are using to run the game.
-    ///     @param pInstance : Game instance associated with this Application.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool Application::Init(const char* pGameDataFilepath, GameInstance* pInstance)
+    bool Application::Init(const char* pGameDataFilepath)
     {
         // Initialize Bleach Leak Detector:
         //BLEACH_INIT_LEAK_DETECTOR();
-        m_pGameInstance = pInstance;
 
 #if MCP_LOGGING_ENABLED
         // Initialize the Logger
@@ -130,8 +128,32 @@ namespace mcp
             return false;
         }
 
+        // Create the GameInstance
+        XMLParser parser;
+        if (!parser.LoadFile(props.gameInstanceDataPath.c_str()))
+        {
+            MCP_ERROR("Application", "Failed to initialize Application! Failed to load GameInstance data!");
+            Close();
+            return false;
+        }
+
+        const auto instanceElement = parser.GetElement("GameInstance");
+        if (!instanceElement.IsValid())
+        {
+            MCP_ERROR("Application", "Failed to initialize Application! Failed to find GameInstance element in game instance data!");
+            Close();
+            return false;
+        }
+
+        m_pGameInstance = GameInstanceFactory::CreateTypeFromData(props.gameInstanceClassName.c_str(), instanceElement);
+        if (!m_pGameInstance)
+        {
+            MCP_ERROR("Application", "Failed to initialize Application! Failed to create the GameInstance!");
+            Close();
+            return false;
+        }
+
         // Load the GameData:
-        //if (!LoadGameData(pGameDataFilepath))
         if (!SceneManager::Get()->LoadSceneData(pGameDataFilepath))
         {
             MCP_ERROR("Application", "Failed to load the GameData at filepath: ", pGameDataFilepath);
@@ -224,19 +246,31 @@ namespace mcp
 
         // Get the Window Name.
         auto endOfName = line.find_first_of('=');
-        outProps.windowName = line.substr(endOfName + 1, std::string::npos);
+        outProps.windowName = line.substr(endOfName + 2, std::string::npos);
 
         // Get the Width
         std::getline(inFile, line);
         endOfName = line.find_first_of('=');
-        auto val = line.substr(endOfName + 1, std::string::npos);
+        auto val = line.substr(endOfName + 2, std::string::npos);
         outProps.defaultWindowWidth = std::stoi(val);
 
         // Get the Height
         std::getline(inFile, line);
         endOfName = line.find_first_of('=');
-        val = line.substr(endOfName + 1, std::string::npos);
+        val = line.substr(endOfName + 2, std::string::npos);
         outProps.defaultWindowHeight = std::stoi(val);
+
+        // Get the GameInstance class
+        std::getline(inFile, line);
+        endOfName = line.find_first_of('=');
+        val = line.substr(endOfName + 2, std::string::npos);
+        outProps.gameInstanceClassName = val;
+
+        // Get the GameInstance Path
+        std::getline(inFile, line);
+        endOfName = line.find_first_of('=');
+        val = line.substr(endOfName + 2, std::string::npos);
+        outProps.gameInstanceDataPath = val;
 
         return true;
     }
@@ -252,7 +286,6 @@ namespace mcp
         ApplicationQuitEvent event;
         GraphicsManager::Get()->GetWindow()->PostApplicationEvent(event);
     }
-
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:

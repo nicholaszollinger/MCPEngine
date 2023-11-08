@@ -30,7 +30,7 @@ namespace mcp
     Scene::~Scene()
     {
         if (m_isLoaded)
-            CloseScene();
+            Destroy();
     }
 
     bool Scene::Load(const char* pFilePath)
@@ -79,7 +79,7 @@ namespace mcp
         if (!m_pUILayer->LoadLayer(sceneLayer))
         {
             MCP_ERROR("Scene", "Failed to load UI Layer");
-            CloseScene();
+            Destroy();
             return false;
         }
 
@@ -91,7 +91,7 @@ namespace mcp
         if (!m_pWorldLayer->LoadLayer(sceneLayer))
         {
             MCP_ERROR("Scene", "Failed to load World layer!");
-            CloseScene();
+            Destroy();
             return false;
         }
 
@@ -101,16 +101,10 @@ namespace mcp
         return m_isLoaded;
     }
 
-    void Scene::Unload()
-    {
-        CloseScene();
-    }
-
-
     bool Scene::Init()
     {
         MCP_ADD_MEMBER_FUNC_EVENT_LISTENER(ApplicationEvent, OnEvent);
-        
+
         return true;
     }
 
@@ -176,16 +170,17 @@ namespace mcp
     //		
     ///		@brief : Closes the scene, destroying each scene layer.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void Scene::CloseScene()
+    void Scene::Destroy()
     {
         // Stop listening to ApplicationEvents.
         MCP_REMOVE_MEMBER_FUNC_EVENT_LISTENER(ApplicationEvent);
 
-        BLEACH_DELETE(m_pUILayer);
-        m_pUILayer = nullptr;
-
+        // Destroy each layer
         BLEACH_DELETE(m_pWorldLayer);
         m_pWorldLayer = nullptr;
+
+        BLEACH_DELETE(m_pUILayer);
+        m_pUILayer = nullptr;
 
         m_isLoaded = false;
     }

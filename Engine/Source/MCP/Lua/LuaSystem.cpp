@@ -9,7 +9,9 @@
 #include "MCP/UI/BarWidget.h"
 #include "MCP/UI/CanvasWidget.h"
 #include "MCP/UI/ImageWidget.h"
+#include "MCP/UI/SelectionWidget.h"
 #include "MCP/UI/TextWidget.h"
+#include "MCP/UI/ToggleWidget.h"
 #include "MCP/UI/Widget.h"
 
 namespace mcp
@@ -74,6 +76,8 @@ namespace mcp
         CanvasWidget::RegisterLuaFunctions(m_pState);
         TextWidget::RegisterLuaFunctions(m_pState);
         BarWidget::RegisterLuaFunctions(m_pState);
+        SelectionWidget::RegisterLuaFunctions(m_pState);
+        ToggleWidget::RegisterLuaFunctions(m_pState);
 
         return true;
     }
@@ -96,6 +100,40 @@ namespace mcp
 #endif
 
         lua_close(m_pState);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //      HACKY IMPLEMENTATION. But I will need something like this for Game scripts.
+    //		
+    ///		@brief : Register a scripts functions to the LuaSystem.
+    ///     @param pTypename : Name of the type, as well as the global table that will house all of this scripts functions.
+    ///     @param pScriptFilepath : Filepath to the lua file that contains the global table named 'pTypename'
+    ///		@param functionArray : Array of functions that are going to be added to the global table.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool LuaSystem::RegisterScriptFunctions(const char* pTypename, const char* pScriptFilepath, const luaL_Reg* functionArray) const
+    {
+        MCP_CHECK(functionArray);
+
+        // HACK: I am assuming that this class is going to have a global table named 'pTypename'.
+        if (luaL_dofile(m_pState, pScriptFilepath) != 0)
+        {
+            lua_pop(m_pState, 1);
+            MCP_ERROR("Lua", "Failed to run Script lib! Filepath: ", pScriptFilepath);
+            return false;
+        }
+
+        // Get the global script class:
+        lua_getglobal(m_pState, pTypename);
+        MCP_CHECK(lua_type(m_pState, -1) == LUA_TTABLE);
+
+        // Set the functions passed in.
+        luaL_setfuncs(m_pState, functionArray, 0);
+
+        // Pop the table off the stack:
+        lua_pop(m_pState, 1);
+
+        return true;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------

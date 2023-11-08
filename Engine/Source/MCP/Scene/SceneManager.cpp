@@ -26,7 +26,7 @@ namespace mcp
     void SceneManager::Close()
     {
         if (m_pActiveScene)
-            m_pActiveScene->Unload();
+            m_pActiveScene->Destroy();
 
         // Delete all of our scenes.
         for (auto&[id, data] : m_sceneList)
@@ -172,7 +172,8 @@ namespace mcp
     {
         if (m_pActiveScene)
         {
-            m_pActiveScene->Unload(); // This isn't great, because I can't asynchronously transition between scenes.
+            //m_pActiveScene->PreDestroy();
+            m_pActiveScene->Destroy();
         }
 
         // This is guaranteed to be valid. Invalid Ids cannot be queued.

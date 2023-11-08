@@ -13,7 +13,6 @@ namespace mcp::lua
     // Creating a Table
     LuaResourcePtr CreateTable();
 
-
     // Get Global Variables
     std::optional<bool> GetBoolean(const char* varName);
     std::optional<int64_t> GetInteger(const char* varName);

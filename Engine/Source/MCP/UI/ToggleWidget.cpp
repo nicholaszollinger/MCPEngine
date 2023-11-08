@@ -2,6 +2,7 @@
 
 #include "ToggleWidget.h"
 
+#include "LuaSource.h"
 #include "MCP/Lua/Lua.h"
 
 namespace mcp
@@ -63,5 +64,40 @@ namespace mcp
         auto behavior = GetButtonBehavior(element);
 
         return BLEACH_NEW(ToggleWidget(data, startVal, std::move(behavior)));
+    }
+
+    static int ScriptSetValue(lua_State* pState)
+    {
+        // Get the Widget
+        auto* pWidget = static_cast<ToggleWidget*>(lua_touserdata(pState, -2));
+        MCP_CHECK(pWidget);
+
+        // Get the index
+        const bool value = lua_toboolean(pState, -1);
+
+        lua_pop(pState, 2);
+
+        pWidget->SetValue(value);
+
+        return 0;
+    }
+
+    void ToggleWidget::RegisterLuaFunctions(lua_State* pState)
+    {
+        static constexpr luaL_Reg kFuncs[]
+        {
+            {"SetValue", &ScriptSetValue}
+            , {nullptr, nullptr}
+        };
+
+        // Get the global Widget library class,
+        lua_getglobal(pState, "ToggleWidget");
+        MCP_CHECK(lua_type(pState, -1) == LUA_TTABLE);
+
+        // Set its functions
+        luaL_setfuncs(pState, kFuncs, 0);
+
+        // Pop the table off the stack.
+        lua_pop(pState, 1);
     }
 }

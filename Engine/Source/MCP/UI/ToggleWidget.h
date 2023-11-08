@@ -23,8 +23,9 @@ namespace mcp
         virtual bool PostLoadInit() override;
         void SetValue(const bool value);
         [[nodiscard]] bool GetValue() const { return m_value; }
-        static ToggleWidget* AddFromData(const XMLElement element);
 
+        static ToggleWidget* AddFromData(const XMLElement element);
+        static void RegisterLuaFunctions(lua_State* pState);
     private:
         virtual void OnExecute([[maybe_unused]] const Vec2 relativeClickPosition) override;
     };
