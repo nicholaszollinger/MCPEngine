@@ -317,7 +317,7 @@ namespace mcp
         return BLEACH_NEW(SelectionWidget(data, pPrefabPath, std::move(initializationScript), std::move(onValueChangedScript), startVal));
     }
 
-    static int ScriptSetValue(lua_State* pState)
+    static int ScriptSetSelectionValue(lua_State* pState)
     {
         // Get the Widget
         auto* pWidget = static_cast<SelectionWidget*>(lua_touserdata(pState, -2));
@@ -337,7 +337,7 @@ namespace mcp
     {
         static constexpr luaL_Reg kFuncs[]
         {
-            {"SetValue", &ScriptSetValue}
+            {"SetValue", &ScriptSetSelectionValue}
             , {nullptr, nullptr}
         };
 

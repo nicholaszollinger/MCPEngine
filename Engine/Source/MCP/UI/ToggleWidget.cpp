@@ -47,6 +47,8 @@ namespace mcp
         if (m_value == value)
             return;
 
+        //MCP_LOG("ToggleWidget", "Setting value to " , value? "true" : "false");
+
         m_value = value;
         m_onValueChanged.Broadcast(this, m_value);
 
@@ -66,7 +68,7 @@ namespace mcp
         return BLEACH_NEW(ToggleWidget(data, startVal, std::move(behavior)));
     }
 
-    static int ScriptSetValue(lua_State* pState)
+    static int ScriptSetToggleValue(lua_State* pState)
     {
         // Get the Widget
         auto* pWidget = static_cast<ToggleWidget*>(lua_touserdata(pState, -2));
@@ -86,7 +88,7 @@ namespace mcp
     {
         static constexpr luaL_Reg kFuncs[]
         {
-            {"SetValue", &ScriptSetValue}
+            {"SetValue", &ScriptSetToggleValue}
             , {nullptr, nullptr}
         };
 

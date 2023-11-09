@@ -15,9 +15,7 @@ namespace mcp
     TextWidget::TextWidget(const WidgetConstructionData& data, const char* pText, const TextFormatData& textData)
         : Widget(data)
         , IRenderable(RenderLayer::kDebugOverlay, 0)
-        //, m_crop({ })
         , m_format(textData)
-        //, m_pTexture(nullptr)
         , m_text(pText)
     {
         //
