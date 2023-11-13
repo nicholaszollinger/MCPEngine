@@ -52,12 +52,18 @@ function m.OnExecute(isActive)
 end
 
 function m.OnHoverEnter()
+    if (m.owner == nil) then
+        return;
+    end
     --MCP_DEBUG.LOG("Checkbox", "Entering button...");
     Widget.SetTint(m.backgroundImageWidget, m.hoveredBackgroundColor);
     Widget.SetTint(m.checkImageWidget, m.hoveredCheckColor);
 end
 
 function m.OnHoverExit()
+    if (m.owner == nil) then
+        return;
+    end
     Widget.SetTint(m.backgroundImageWidget, m.defaultBackgroundColor);
     Widget.SetTint(m.checkImageWidget, m.defaultCheckColor);
 end

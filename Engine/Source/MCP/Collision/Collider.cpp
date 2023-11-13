@@ -79,7 +79,7 @@ namespace mcp
 
     Vec2 Collider::GetWorldCenter() const
     {
-        const Vec2 ownerPos = m_pOwner->GetTransformComponent()->GetLocation();
+        const Vec2 ownerPos = m_pOwner->GetTransformComponent()->GetPosition();
         return ownerPos + m_relativePosition;
     }
 

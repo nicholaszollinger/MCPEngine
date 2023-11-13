@@ -9,7 +9,6 @@ namespace mcp
     class TextFile final : public DiskResource
     {
     public:
-        TextFile() = default;
         MCP_DEFINE_RESOURCE_DESTRUCTOR(TextFile)
 
         void Dump() const;

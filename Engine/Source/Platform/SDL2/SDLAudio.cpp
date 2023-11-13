@@ -34,6 +34,9 @@ bool SDLAudioManager::Init()
         return false;
     }
 
+    // Set our channels to expire when they finish.
+    Mix_ChannelFinished(&SDLAudioManager::ExpireChannel);
+
     return true;
 }
 
@@ -42,21 +45,134 @@ void SDLAudioManager::Close()
     Mix_CloseAudio();
 }
 
-void SDLAudioManager::PlayClip(const mcp::AudioClip& clip, mcp::AudioData& data)
+void SDLAudioManager::Mute()
 {
-    SetClipVolume(clip, data);
-    data.channel = Mix_PlayChannel(data.channel, static_cast<Mix_Chunk*>(clip.Get()), data.loops);
+    s_musicVolume = Mix_VolumeMusic(0);
 }
 
-void SDLAudioManager::PlayTrack(const mcp::AudioTrack& track, mcp::AudioData& data)
+void SDLAudioManager::UnMute()
 {
-    // TODO: Set up how to handle music fades.
-
-    data.channel = Mix_PlayMusic(static_cast<Mix_Music*>(track.Get()), data.loops);
-    Mix_VolumeMusic(data.volume);
+    Mix_VolumeMusic(s_musicVolume);
 }
 
-void SDLAudioManager::SetClipVolume(const mcp::AudioClip& clip, const mcp::AudioData& data)
+int SDLAudioManager::PlayClip(void* pResource, const int volume, const bool isLooping, const int tag)
 {
-    Mix_VolumeChunk(static_cast<Mix_Chunk*>(clip.Get()), data.volume);
+    auto* pChunk = static_cast<Mix_Chunk*>(pResource);
+
+    // Set the volume
+    Mix_VolumeChunk(pChunk, volume);
+
+    // Play it on an available channel.
+    const auto channel = Mix_PlayChannel(-1, pChunk, isLooping? -1 : 0);
+
+    // Set the tag for this channel.
+    SetHardwareChannelTag(channel, tag);
+
+    return channel;
+}
+
+void SDLAudioManager::PauseAudio()
+{
+    SDL_PauseAudio(1);
+}
+
+void SDLAudioManager::ResumeAudio()
+{
+    SDL_PauseAudio(0);
+}
+
+void SDLAudioManager::MuteGroup([[maybe_unused]] const int tag)
+{
+    // Set all channels with this tag to 
+}
+
+void SDLAudioManager::UnMuteGroup([[maybe_unused]] const int tag, [[maybe_unused]] const int volume)
+{
+    
+}
+
+
+int SDLAudioManager::PlayMusic([[maybe_unused]] void* pResource, [[maybe_unused]] const int volume, [[maybe_unused]] const bool isLooping, [[maybe_unused]] const int tag)
+{
+    auto* pMusic = static_cast<Mix_Music*>(pResource);
+
+    // Set the volume
+    Mix_VolumeMusic(volume);
+
+    // Play it on an available channel.
+    if (Mix_PlayMusic(pMusic, isLooping? -1 : 0) == 0)
+    {
+        MCP_ERROR("SDL", "Failed to play music!");
+    }
+
+    return -1;
+}
+
+void SDLAudioManager::ReleaseChannel(const int channel)
+{
+    // If our channel is currently playing, we are going to fade it out, then it will release once complete.
+    if (ChannelPlayingOrPaused(channel))
+    {
+        Mix_FadeOutChannel(channel, 1000);
+    }
+
+    // If nothing is playing right now, then expire the channel immediately.
+    else
+    {
+        ExpireChannel(channel);   
+    }
+}
+
+void SDLAudioManager::SetChannelVolume(const int channel, const int volume)
+{
+    if (ChannelPlayingOrPaused(channel))
+    {
+        Mix_Volume(channel, volume);
+    }
+}
+
+void SDLAudioManager::SetMusicVolume(const int volume)
+{
+    // If we have music playing,
+    if (MusicPlayingOrPaused())
+    {
+        Mix_VolumeMusic(volume);
+    }
+}
+
+bool SDLAudioManager::MusicPlayingOrPaused()
+{
+    return Mix_PlayingMusic() != 0;
+}
+
+bool SDLAudioManager::ChannelPlayingOrPaused(const int channel)
+{
+    if (channel == -1)
+        return false;
+
+    return Mix_Playing(channel);
+}
+
+void SDLAudioManager::SetHardwareChannelTag(const int channel, const int tag)
+{
+    if (Mix_GroupChannel(channel, tag) == 0)
+    {
+        MCP_ERROR("SDL", "Failed to set tag for audio channel!");
+    }
+}
+
+void SDLAudioManager::PauseChannels()
+{
+    Mix_Pause(-1);
+}
+
+void SDLAudioManager::PauseMusic()
+{
+    Mix_PauseMusic();
+}
+
+void SDLAudioManager::ExpireChannel(const int channel)
+{
+    // Remove the tag from the channel.
+    SetHardwareChannelTag(channel, -1);
 }

@@ -381,6 +381,15 @@
     <ClInclude Include="Source\MCP\Core\TypeFactory.h">
       <Filter>MCP\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MCP\Audio\AudioGroup.h">
+      <Filter>MCP\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\AudioSourceComponent.h">
+      <Filter>MCP\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Audio\AudioResource.h">
+      <Filter>MCP\Audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
@@ -613,6 +622,15 @@
     </ClCompile>
     <ClCompile Include="Source\MCP\Scene\SceneEntity.cpp">
       <Filter>MCP\Scene\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\AudioSourceComponent.cpp">
+      <Filter>MCP\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Audio\AudioGroup.cpp">
+      <Filter>MCP\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Audio\AudioResource.cpp">
+      <Filter>MCP\Audio</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

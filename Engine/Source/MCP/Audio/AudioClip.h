@@ -8,7 +8,6 @@ namespace mcp
     class AudioClip final : public DiskResource
     {
     public:
-        AudioClip() = default;
         MCP_DEFINE_RESOURCE_DESTRUCTOR(AudioClip)
 
     protected:

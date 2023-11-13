@@ -12,17 +12,17 @@ namespace mcp
         //
     }
 
-    void InputComponent::BindAction(const InputAction* action, InputTriggerEvent event, void* pOwner, const InputActionCallback& memberFunction)
+    void InputComponent::BindAction([[maybe_unused]] const InputAction* action, [[maybe_unused]] InputTriggerEvent event, [[maybe_unused]] void* pOwner, [[maybe_unused]] const InputActionCallback& memberFunction)
     {
         //
     }
 
-    bool InputComponent::HasActionForControl(const MCPKey key)
+    bool InputComponent::HasActionForControl([[maybe_unused]] const MCPKey key)
     {
         return false;
     }
 
-    void InputComponent::AddAction(InputAction* action)
+    void InputComponent::AddAction([[maybe_unused]] InputAction* action)
     {
         //
     }
@@ -44,7 +44,7 @@ namespace mcp
         // I need to update
     }
 
-    InputComponent* InputComponent::AddFromData(const XMLElement element)
+    InputComponent* InputComponent::AddFromData([[maybe_unused]] const XMLElement element)
     {
         // TODO
         return BLEACH_NEW(InputComponent);

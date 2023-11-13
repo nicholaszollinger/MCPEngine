@@ -133,8 +133,7 @@ namespace mcp
         {
             if (m_isHovered)
                 return;
-
-            m_isHovered = true;
+            
             OnHoverEnter();
 
             // We handled the event if it was inside our rect.
@@ -147,7 +146,6 @@ namespace mcp
             if (!m_isHovered)
                 return;
 
-            m_isHovered = false;
             OnHoverExit();
         }
     }
@@ -159,9 +157,11 @@ namespace mcp
 
     void ButtonWidget::OnChildAdded([[maybe_unused]] Widget* pChild)
     {
+        Widget::OnChildAdded(pChild);
+        
         if (m_sizedToContent && m_pParent)
         {
-            m_pParent->OnChildSizeChanged();
+            GetParent()->OnChildSizeChanged();
         }
     }
 
@@ -173,7 +173,9 @@ namespace mcp
             float totalWidth = 0.f;
             for (const auto* pChild : m_children)
             {
-                totalWidth += pChild->GetRectWidth();
+                const auto* pWidget = SafeCastEntity<Widget>(pChild);
+
+                totalWidth += pWidget->GetRectWidth();
             }
 
             return totalWidth;
@@ -191,7 +193,8 @@ namespace mcp
             float totalHeight = 0.f;
             for (const auto* pChild : m_children)
             {
-                totalHeight += pChild->GetRectHeight();
+                const auto* pWidget = SafeCastEntity<Widget>(pChild);
+                totalHeight += pWidget->GetRectHeight();
             }
 
             return totalHeight;
@@ -211,8 +214,6 @@ namespace mcp
         // If we were hovered, we need to return to the original state by 'un-hovering'
         if (m_isHovered)
             OnHoverExit();
-
-        m_isHovered = false;
     }
 
     void ButtonWidget::OnFocus()
@@ -223,7 +224,6 @@ namespace mcp
 
         if (PointIntersectsRect(mousePos))
         {
-            m_isHovered = true;
             OnHoverEnter();
         }
     }
@@ -233,8 +233,6 @@ namespace mcp
         // If we were hovered, we need to return to the original state by 'un-hovering'
         if (m_isHovered)
             OnHoverExit();
-
-        m_isHovered = false;
     }
 
     void ButtonWidget::OnExecute([[maybe_unused]] const Vec2 relativeClickPosition)
@@ -258,12 +256,16 @@ namespace mcp
 
     void ButtonWidget::OnHoverEnter()
     {
+        m_isHovered = true;
+
         if (m_pHighlightBehaviorScript.IsValid())
             lua::CallMemberFunction(m_pHighlightBehaviorScript, "OnHoverEnter");
     }
 
     void ButtonWidget::OnHoverExit()
     {
+        m_isHovered = false;
+
         if (m_pHighlightBehaviorScript.IsValid())
             lua::CallMemberFunction(m_pHighlightBehaviorScript, "OnHoverExit");
     }

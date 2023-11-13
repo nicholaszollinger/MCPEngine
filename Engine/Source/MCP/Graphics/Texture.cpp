@@ -26,6 +26,54 @@ namespace mcp
         //
     }
 
+    Texture::Texture(const Texture& right)
+    {
+        m_request = right.m_request;
+
+        if (m_request.path.IsValid())
+            m_pResource = LoadResourceType();
+    }
+
+    Texture::Texture(Texture&& right) noexcept
+    {
+        m_request = right.m_request;
+        m_pResource = right.m_pResource;
+
+        right.m_pResource = nullptr;
+    }
+
+    Texture& Texture::operator=(const Texture& right)
+    {
+        if (&right != this)
+        {
+            if (m_pResource)
+                Free();
+
+            m_request = right.m_request;
+
+            if (m_request.path.IsValid())
+                m_pResource = LoadResourceType();
+        }
+
+        return *this;
+    }
+
+    Texture& Texture::operator=(Texture&& right) noexcept
+    {
+        if (&right != this)
+        {
+            if (m_pResource)
+                Free();
+
+            m_request = right.m_request;
+            m_pResource = right.m_pResource;
+
+            right.m_pResource = nullptr;
+        }
+        
+        return *this;
+    }
+
     void* Texture::LoadResourceType()
     {
         return ResourceManager::Get()->LoadFromDisk<TextureData>(m_request);
@@ -33,7 +81,8 @@ namespace mcp
 
     void Texture::Free()
     {
-        ResourceManager::Get()->FreeResource<TextureData>(m_request);
+        if (m_request.path.IsValid())
+            ResourceManager::Get()->FreeResource<TextureData>(m_request);
     }
 
     void* Texture::Get() const

@@ -24,13 +24,13 @@ namespace mcp
     TextWidget::~TextWidget()
     {
         if (IsActive())
-            m_pUILayer->RemoveRenderable(this);
+            GetUILayer()->RemoveRenderable(this);
     }
 
     bool TextWidget::Init()
     {
         if (IsActive())
-            m_pUILayer->AddRenderable(this);
+            GetUILayer()->AddRenderable(this);
 
         // Load the font.
         if (!m_font.Load({{m_format.fontFilepath, nullptr, false } , m_format.fontSize }))
@@ -108,7 +108,9 @@ namespace mcp
     void TextWidget::OnActive()
     {
         m_isVisible = true;
-        m_pUILayer->AddRenderable(this);
+        GetUILayer()->AddRenderable(this);
+
+        Widget::OnActive();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -119,7 +121,9 @@ namespace mcp
     void TextWidget::OnInactive()
     {
         m_isVisible = false;
-        m_pUILayer->RemoveRenderable(this);
+        GetUILayer()->RemoveRenderable(this);
+
+        Widget::OnInactive();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -139,27 +143,25 @@ namespace mcp
         SetGlyphData();
 
         if (m_pParent)
-            m_pParent->OnChildSizeChanged();
+            GetParent()->OnChildSizeChanged();
     }
 
     void TextWidget::SetText(const char* pText)
     {
         m_text = pText;
-        //RegenerateTextTexture();
         SetGlyphData();
 
         if (m_pParent)
-            m_pParent->OnChildSizeChanged();
+            GetParent()->OnChildSizeChanged();
     }
 
     void TextWidget::SetText(const std::string& text)
     {
         m_text = text;
-        //RegenerateTextTexture();
         SetGlyphData();
 
         if (m_pParent)
-            m_pParent->OnChildSizeChanged();
+            GetParent()->OnChildSizeChanged();
     }
 
     bool TextWidget::Append(const char character)
@@ -259,7 +261,7 @@ namespace mcp
         }
 
         if (m_pParent)
-            m_pParent->OnChildSizeChanged();
+            GetParent()->OnChildSizeChanged();
         
         //MCP_LOG("TextWidget", "Line width: ", m_lines.back().lineWidth);
 
@@ -300,7 +302,7 @@ namespace mcp
         }
 
         if (m_pParent)
-            m_pParent->OnChildSizeChanged();
+            GetParent()->OnChildSizeChanged();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -487,6 +489,7 @@ namespace mcp
         // Create our starting line.
         m_lines.emplace_back();
         m_lines.back().lineHeight = m_font.GetFontHeight();
+
         const float rectWidth = GetScale().x * m_width;
         Vec2Int glyphPos {};
         size_t lineStart = 0;
@@ -573,7 +576,7 @@ namespace mcp
                 ++i;
             }
 
-            // If completing the word, set our textDimensions and break
+            // If completing the entire text, set our textDimensions and break
             if (i >= m_text.size())
             {
                 for (const auto& line : m_lines)
@@ -591,7 +594,7 @@ namespace mcp
             const auto distanceToPlaceGlyph = i == 0 ? 0 : m_font.GetNextCharDistance(m_glyphs.back().glyph, ' ');
 
             // If adding the space will start a new line, update the positions but don't add it.
-            if (static_cast<float>(glyphPos.x + distanceToPlaceGlyph) > rectWidth)
+            if (!m_sizedToContent && static_cast<float>(glyphPos.x + distanceToPlaceGlyph) > rectWidth)
             {
                 // Start a new line
                 m_lines.emplace_back();
@@ -636,7 +639,7 @@ namespace mcp
         lua_pop(pState, 2);
 
         // Try to get the TextWidget.
-        auto* pResult = pWidget->GetLayer()->GetWidgetByTag<TextWidget>(pTag);
+        auto* pResult = pWidget->GetUILayer()->GetWidgetByTag<TextWidget>(pTag);
 
         if (pResult)
             lua_pushlightuserdata(pState, pResult);

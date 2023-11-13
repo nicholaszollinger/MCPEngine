@@ -58,7 +58,7 @@ namespace mcp
         MCP_CHECK(m_font.IsValid());
         MCP_CHECK(m_pTexture);
 
-        const Vec2 location = m_pTransform->GetLocation();
+        const Vec2 location = m_pTransform->GetPosition();
         const float renderXPos = location.x - m_size.x / 2.f;
         const float renderYPos = location.y - m_size.y / 2.f;
 

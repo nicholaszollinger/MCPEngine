@@ -13,6 +13,11 @@ namespace mcp
         , IRenderable(RenderLayer::kDebugOverlay, 0)
         , m_crop{}
     {
+        if (!pImageFilePath)
+        {
+            return;
+        }
+
         if (!m_texture.Load({pImageFilePath, nullptr, false}))
         {
             MCP_ERROR("ImageWidget", "Failed to load texture!");
@@ -23,16 +28,10 @@ namespace mcp
         m_crop = RectInt{0,0, imageSize.x, imageSize.y};
     }
 
-    ImageWidget::~ImageWidget()
-    {
-        if (IsActive())
-            m_pUILayer->RemoveRenderable(this);
-    }
-
     bool ImageWidget::Init()
     {
         if (IsActive() && m_texture.IsValid())
-            m_pUILayer->AddRenderable(this);
+            GetUILayer()->AddRenderable(this);
 
         return true;
     }
@@ -73,6 +72,41 @@ namespace mcp
         return GetScale().y * m_height;
     }
 
+    void ImageWidget::SetTexture(const Texture* pTexture)
+    {
+        if (!pTexture || !pTexture->IsValid())
+        {
+            // If we were already invalid, return.
+            if (!m_texture.IsValid())
+                return;
+
+            m_texture = kInvalidTexture;
+
+            if (IsActive() && m_isVisible)
+            {
+                m_isVisible = false;
+                GetUILayer()->RemoveRenderable(this);
+            }
+        }
+
+        else
+        {
+            m_texture = *pTexture;
+
+            if (m_sizedToContent)
+            {
+                const auto imageSize = m_texture.GetTextureSize();
+                m_crop = RectInt{0,0, imageSize.x, imageSize.y};
+            }
+
+            if (IsActive() && !m_isVisible)
+            {
+                m_isVisible = true;
+                GetUILayer()->AddRenderable(this);
+            }
+        }
+    }
+
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
@@ -80,8 +114,13 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void ImageWidget::OnActive()
     {
-        m_isVisible = true;
-        m_pUILayer->AddRenderable(this);
+        if (m_texture.IsValid())
+        {
+            m_isVisible = true;
+            GetUILayer()->AddRenderable(this);
+        }
+
+        Widget::OnActive();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -91,8 +130,13 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void ImageWidget::OnInactive()
     {
-        m_isVisible = false;
-        m_pUILayer->RemoveRenderable(this);
+        if (m_texture.IsValid())
+        {
+            m_isVisible = false;
+            GetUILayer()->RemoveRenderable(this);
+        }
+
+        Widget::OnInactive();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -108,7 +152,7 @@ namespace mcp
     ImageWidget* ImageWidget::AddFromData(const XMLElement element)
     {
         const auto data = GetWidgetConstructionData(element);
-        const char* pFilepath = element.GetAttributeValue<const char*>("path");
+        const char* pFilepath = element.GetAttributeValue<const char*>("path", nullptr);
 
         return BLEACH_NEW(ImageWidget(data, pFilepath));
     }
@@ -179,6 +223,29 @@ namespace mcp
         return 1;
     }
 
+    static int FindImageWidgetByTag(lua_State* pState)
+    {
+        // Get the Widget and string parameters off the stack.
+        auto* pWidget = static_cast<Widget*>(lua_touserdata(pState, -2));
+        MCP_CHECK(pWidget);
+        const auto* pTag = lua_tostring(pState, -1);
+        MCP_CHECK(pTag);
+
+        // Pop the two parameters
+        lua_pop(pState, 2);
+
+        auto* pResult = pWidget->GetUILayer()->GetWidgetByTag(pTag);
+
+        // If valid, return a the data as a pointer.
+        if (pResult)
+            lua_pushlightuserdata(pState, pResult);
+        // Otherwise, return nil.
+        else
+            lua_pushnil(pState);
+
+        return 1;
+    }
+
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
@@ -193,7 +260,11 @@ namespace mcp
 
         // Get the Widget and string parameters off the stack.
         auto* pWidget = static_cast<ImageWidget*>(lua_touserdata(pState, -2));
-        MCP_CHECK(pWidget);
+        if (!pWidget)
+        {
+            lua_pop(pState, 2);
+            return 0;
+        }
 
         Color color{};
         // R
@@ -328,6 +399,25 @@ namespace mcp
         return 0;
     }
 
+    static int ScriptSetTexture(lua_State* pState)
+    {
+        // Get the Widget
+        auto* pWidget = static_cast<ImageWidget*>(lua_touserdata(pState, -2));
+        MCP_CHECK(pWidget);
+
+        // Get the texture pointer
+        auto* pTexture = static_cast<Texture*>(lua_touserdata(pState, -1));
+        //MCP_CHECK(pTexture);
+
+        // Pop the parameters
+        lua_pop(pState, 2);
+
+        // Set the Texture:
+        pWidget->SetTexture(pTexture);
+
+        return 0;
+    }
+
     void ImageWidget::RegisterLuaFunctions(lua_State* pState)
     {
         static constexpr luaL_Reg kFuncs[]
@@ -335,12 +425,14 @@ namespace mcp
             {"SetTint", &SetImageWidgetTint}
              ,{"GetChildImageWidgetByTag", &GetChildImageWidgetByTag}
              ,{"GetFirstChildImageWidget", &GetFirstChildImageWidget}
+            ,{"FindImageWidgetByTag", &FindImageWidgetByTag}
             ,{nullptr, nullptr}
         };
 
         static constexpr luaL_Reg kImageWidgetFuncs[]
         {
              {"SetTint", &SetImageWidgetTint}
+             ,{"SetTexture", &ScriptSetTexture}
             ,{"GetCrop", &GetImageCrop}
             ,{"SetCrop", &SetImageCrop}
             ,{nullptr, nullptr}

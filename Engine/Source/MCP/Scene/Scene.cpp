@@ -175,6 +175,9 @@ namespace mcp
         // Stop listening to ApplicationEvents.
         MCP_REMOVE_MEMBER_FUNC_EVENT_LISTENER(ApplicationEvent);
 
+        m_pWorldLayer->DestroyLayer();
+        m_pUILayer->DestroyLayer();
+
         // Destroy each layer
         BLEACH_DELETE(m_pWorldLayer);
         m_pWorldLayer = nullptr;
@@ -188,6 +191,17 @@ namespace mcp
     MessageManager* Scene::GetMessageManager()
     {
         return m_pWorldLayer->GetMessageManager();
+    }
+
+    SceneLayer* Scene::GetLayer(const LayerId id) const
+    {
+        // TODO: When/if I have layers in an array, this would just compare to each id in a loop.
+        switch(id)
+        {
+            case WorldLayer::GetStaticLayerId(): return m_pWorldLayer;
+            case UILayer::GetStaticLayerId(): return m_pUILayer;
+            default: return nullptr;
+        }
     }
 
     void Scene::OnEvent(ApplicationEvent& event) const

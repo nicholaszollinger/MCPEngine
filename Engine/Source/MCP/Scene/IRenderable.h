@@ -17,7 +17,8 @@ namespace mcp
     class IRenderable
     {
         static inline RenderableId s_idCounter = 0;
-        
+
+        IRenderable* m_pRenderableParent;
         const RenderableId m_renderableId;
         int m_zOrder;
         RenderLayer m_renderLayer; // TODO: Delete
@@ -27,9 +28,11 @@ namespace mcp
         virtual ~IRenderable() = default;
         virtual void Render() const = 0;
 
+        void SetZOrder(const int zOrder) { m_zOrder = zOrder; }
+        void SetRenderableParent(IRenderable* pParent) { m_pRenderableParent = pParent; }
+
         [[nodiscard]] RenderableId GetRenderId() const { return m_renderableId;}
         [[nodiscard]] RenderLayer GetRenderLayer() const { return m_renderLayer;} // TODO: Delete
-        [[nodiscard]] int GetZOrder() const { return m_zOrder;}
-        void SetZOrder(const int zOrder) { m_zOrder = zOrder; }
+        [[nodiscard]] int GetZOrder() const;
     };
 }

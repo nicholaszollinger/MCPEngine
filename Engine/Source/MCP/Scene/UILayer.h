@@ -8,49 +8,46 @@ namespace mcp
 {
     class UILayer final : public SceneLayer
     {
+        MCP_DECLARE_LAYER_ENTITY_TYPE(Widget)
+
         struct WidgetStackElement
         {
             Widget* pBaseWidget = nullptr; // The BaseWidget for this stack element. Ex: The base CanvasWidget of a Menu.
             Widget* pPreviouslyFocused = nullptr; // The Widget on the previous menu that was focused. This can be nullptr.
         };
 
-        std::vector<Widget*> m_queuedWidgetsToDelete;
-        std::vector<Widget*> m_widgets;                 // Container of all Widgets in the scene. More specifically, these are all of the 'roots'
         std::vector<WidgetStackElement> m_stack;        // Stack of Widgets that define Menu navigation, render order, etc.
         Widget* m_pFocusedWidget;                       // The active Widget tree that is responding to ApplicationEvents
 
     public:
-        UILayer(Scene* pScene);
-        virtual ~UILayer() override;
+        // Entity Management
+        virtual Widget* CreateEntityFromPrefab(const XMLElement root) override;
+        template<typename WidgetType> WidgetType* GetWidgetByTag(const StringId tag);
+        [[nodiscard]] Widget* GetWidgetByTag(const StringId tag) const;
 
+        // UI Stack
+        void AddToStack(Widget* pWidget);
+        void PopStack();
+
+        void FocusWidget(Widget* pWidget);
+        [[nodiscard]] Widget* GetFocused() const { return m_pFocusedWidget; }
+
+    private:
+        // Private Ctor
+        UILayer(Scene* pScene);
+
+        // Scene Layer Loop
         virtual bool OnSceneLoad() override;
-        virtual bool LoadLayer(const XMLElement layer) override;
         virtual void Update(const float deltaTimeMs) override;
         virtual void FixedUpdate(const float fixedUpdateTimeS) override;
         virtual void Render() override;
         virtual void OnEvent(ApplicationEvent& event) override;
 
-        template<typename WidgetType>
-        WidgetType* GetWidgetByTag(const StringId tag);
-        [[nodiscard]] Widget* GetWidgetByTag(const StringId tag) const;
-
-        void AddToStack(Widget* pWidget);
-        void PopStack();
-
-        void AddWidget(Widget* pWidget);
-        Widget* CreateWidgetFromData(const XMLElement root);
-        void FocusWidget(Widget* pWidget);
-        void DeleteWidget(Widget* pWidget);
-
-        [[nodiscard]] Widget* GetFocused() const { return m_pFocusedWidget; }
-
-    private:
-        virtual void LoadSceneDataAsset(const XMLElement sceneDataAsset) override;
-        virtual void DestroyLayer() override;
-        void LoadWidget(XMLElement rootElement);
+        // Entity Management
+        virtual Widget* CreateEntity() override;
+        virtual void LoadEntity(XMLElement element) override;
         void LoadChildWidget(Widget* pParent, XMLElement parentElement);
-        void DeleteQueuedWidgets();
-
+        
         // DEBUG
         void DumpUITree();
         void PrintWidgetType(Widget* pWidget, int tabCount);
@@ -68,8 +65,10 @@ namespace mcp
     template <typename WidgetType>
     WidgetType* UILayer::GetWidgetByTag(const StringId tag)
     {
-        for (auto* pWidget : m_widgets)
+        for (auto&[id, pEntity] : m_entities)
         {
+            auto* pWidget = SceneEntity::SafeCastEntity<Widget>(pEntity);
+
             // Check the parent
             if (pWidget->GetTypeId() == WidgetType::GetStaticTypeId() && tag == pWidget->GetTag())
             {

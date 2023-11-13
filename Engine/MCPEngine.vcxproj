@@ -144,13 +144,16 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
   <ItemGroup>
     <ClCompile Include="ExternalLib\BleachLeakDetector\include\BleachNew.cpp" />
     <ClCompile Include="Source\MCP\Audio\AudioClip.cpp" />
+    <ClCompile Include="Source\MCP\Audio\AudioGroup.cpp" />
     <ClCompile Include="Source\MCP\Audio\AudioManager.cpp" />
+    <ClCompile Include="Source\MCP\Audio\AudioResource.cpp" />
     <ClCompile Include="Source\MCP\Audio\AudioTrack.cpp" />
     <ClCompile Include="Source\MCP\Collision\Box2DCollider.cpp" />
     <ClCompile Include="Source\MCP\Collision\Collider.cpp" />
     <ClCompile Include="Source\MCP\Collision\CollisionChannels.cpp" />
     <ClCompile Include="Source\MCP\Collision\CollisionProfile.cpp" />
     <ClCompile Include="Source\MCP\Collision\CollisionSystem.cpp" />
+    <ClCompile Include="Source\MCP\Components\AudioSourceComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\ColliderComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\Component.cpp" />
     <ClCompile Include="Source\MCP\Components\ComponentId.cpp" />
@@ -225,7 +228,9 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="ExternalLib\BleachLeakDetector\include\BleachNewConfig.h" />
     <ClInclude Include="Source\MCP\Audio\AudioClip.h" />
     <ClInclude Include="Source\MCP\Audio\AudioData.h" />
+    <ClInclude Include="Source\MCP\Audio\AudioGroup.h" />
     <ClInclude Include="Source\MCP\Audio\AudioManager.h" />
+    <ClInclude Include="Source\MCP\Audio\AudioResource.h" />
     <ClInclude Include="Source\MCP\Audio\AudioTrack.h" />
     <ClInclude Include="Source\MCP\Collision\Box2DCollider.h" />
     <ClInclude Include="Source\MCP\Collision\Collider.h" />
@@ -233,6 +238,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Collision\CollisionChannels.h" />
     <ClInclude Include="Source\MCP\Collision\CollisionProfile.h" />
     <ClInclude Include="Source\MCP\Collision\CollisionSystem.h" />
+    <ClInclude Include="Source\MCP\Components\AudioSourceComponent.h" />
     <ClInclude Include="Source\MCP\Components\ColliderComponent.h" />
     <ClInclude Include="Source\MCP\Components\Component.h" />
     <ClInclude Include="Source\MCP\Components\ComponentFactory.h" />

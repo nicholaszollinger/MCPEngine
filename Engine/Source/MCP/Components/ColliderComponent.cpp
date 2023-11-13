@@ -65,7 +65,7 @@ namespace mcp
             return false;
         }
 
-        m_lastLocation = m_pTransformComponent->GetLocation();
+        m_lastLocation = m_pTransformComponent->GetPosition();
         UpdateEstimationRect();
 
         // Need to register with the collision system.
@@ -102,7 +102,7 @@ namespace mcp
         if (!m_isStatic)
         {
             // Calculate our velocity.
-            m_velocity = m_pTransformComponent->GetLocation() - m_lastLocation;
+            m_velocity = m_pTransformComponent->GetPosition() - m_lastLocation;
 
             // If the x or y value is approximately zero, clamp it to zero.
             if (CheckEqualFloats(m_velocity.x, 0.f))
@@ -112,7 +112,7 @@ namespace mcp
                 m_velocity.y = 0;
             
             // Update our last location.
-            m_lastLocation = m_pTransformComponent->GetLocation();
+            m_lastLocation = m_pTransformComponent->GetPosition();
         }
     }
 
@@ -211,7 +211,7 @@ namespace mcp
     //		
     ///		@brief : If the Collider's data has changed like its size or enabled status, this will update the estimation rect. 
     //-----------------------------------------------------------------------------------------------------------------------------
-    void ColliderComponent::ColliderCollisionChanged(const Collider::ColliderNameId id)
+    void ColliderComponent::ColliderCollisionChanged([[maybe_unused]] const Collider::ColliderNameId id)
     {
         // If we don't have a collider with that id or the state is not changing, return.
         MCP_CHECK(m_colliders.find(id)->second);
@@ -385,7 +385,7 @@ namespace mcp
     RectF ColliderComponent::GetEstimationRect() const
     {
         RectF result = m_myRelativeEstimationRect;
-        result.SetPosition(result.GetPosition() + m_pTransformComponent->GetLocation());
+        result.SetPosition(result.GetPosition() + m_pTransformComponent->GetPosition());
         return result;
     }
 
@@ -437,7 +437,7 @@ namespace mcp
         if (!m_isStatic)
         {
             m_velocity = Vec2::ZeroVector();
-            m_lastLocation = m_pTransformComponent->GetLocation();
+            m_lastLocation = m_pTransformComponent->GetPosition();
             GetOwner()->GetWorld()->AddPhysicsUpdateable(this);
         }
 

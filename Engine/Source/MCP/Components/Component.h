@@ -31,6 +31,11 @@ public:                                                                         
     virtual mcp::ComponentTypeId GetTypeId() const override { return kComponentTypeId; }                                                                \
 private:                                                                                                                                                \
 
+    struct ComponentConstructionData
+    {
+        bool startActive = true;
+    };
+
     class Component
     {
         friend class Object;
@@ -41,6 +46,7 @@ private:                                                                        
 
     public:
         Component(const bool startActive);
+        Component(const ComponentConstructionData& data);
 
         // TODO: Figure out what you want to do with copying and moving components.
         //      - The crucial part of the components is that they operate on
@@ -87,8 +93,11 @@ private:                                                                        
         void StopListeningToMessage(const MessageId messageId) const;
         virtual void OnActive() {}
         virtual void OnInactive() {}
+        virtual void OnOwnerParentSet([[maybe_unused]] Object* pParent) {}
+
+        static ComponentConstructionData GetComponentConstructionData(const XMLElement element);
 
     private:
-        void OnObjectActiveChanged(const bool objectActive);
+        void OnOwnerActiveChanged(const bool objectActive);
     };
 }

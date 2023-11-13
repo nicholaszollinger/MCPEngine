@@ -28,8 +28,6 @@ namespace mcp
 
     bool TextFieldWidget::Init()
     {
-        //MCP_LOG("TextFieldWidget", "Rect: ", GetRect().ToString());
-
         if (!ButtonWidget::Init())
             return false;
 
@@ -52,7 +50,7 @@ namespace mcp
         if (IsFocused())
             return;
         
-        m_pPreviousFocused = m_pUILayer->GetFocused();
+        m_pPreviousFocused = GetUILayer()->GetFocused();
 
         // Set the focus of this Widget. We are the only Widget that should be active now.
         Focus();
@@ -191,7 +189,7 @@ namespace mcp
         }
 
         // Focus the previous widget.
-        m_pUILayer->FocusWidget(m_pPreviousFocused);
+        GetUILayer()->FocusWidget(m_pPreviousFocused);
 
         // Check the position of the Mouse and determine if we need to Exit our over or not.
         const auto mousePos = GraphicsManager::Get()->GetWindow()->GetMousePosition();
@@ -242,11 +240,12 @@ namespace mcp
         WidgetConstructionData constructData;
         constructData.rect.width = m_width;
         constructData.rect.height = m_height;
-        constructData.startEnabled = true;
+        constructData.entityConstructionData.startActive = true;
         constructData.sizedToContent = false;
 
         // Create the Background Image
         auto* pBackgroundImage = BLEACH_NEW(ImageWidget(constructData, data.backgroundImagePath));
+        GetUILayer()->AddEntity(pBackgroundImage);
         pBackgroundImage->Init();
         AddChild(pBackgroundImage);
 
@@ -255,16 +254,18 @@ namespace mcp
         constructData.rect.width -= 40.f;        // This should be in data.
 
         m_pTextWidget = BLEACH_NEW(TextWidget(constructData, m_defaultText.c_str(), data.format));
+        GetUILayer()->AddEntity(m_pTextWidget);
         m_pTextWidget->Init();
         pBackgroundImage->AddChild(m_pTextWidget);
 
         // Create the Cursor
         // For now, we are just going to create a TextWidget with a single '|'. In the future this could be an image.
         constructData.sizedToContent = true;
-        constructData.startEnabled = false;
+        constructData.entityConstructionData.startActive = false;
         constructData.rect.width = m_width;
 
         m_pCursor = BLEACH_NEW(TextWidget(constructData, "|", data.format));
+        GetUILayer()->AddEntity(m_pCursor);
         m_pCursor->Init();
         m_pTextWidget->AddChild(m_pCursor);
     }

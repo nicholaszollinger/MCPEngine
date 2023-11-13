@@ -33,6 +33,7 @@ namespace mcp
 
     void HorizontalLayoutWidget::OnChildAdded([[maybe_unused]] Widget* pChild)
     {
+        Widget::OnChildAdded(pChild);
         RecalculateChildRects();
     }
 
@@ -52,7 +53,8 @@ namespace mcp
         float totalWidth = 0.f;
         for (const auto* pChild : m_children)
         {
-            totalWidth += pChild->GetRectWidth();
+            const auto* pWidget = SafeCastEntity<Widget>(pChild);
+            totalWidth += pWidget->GetRectWidth();
         }
 
         totalWidth += m_padding * static_cast<float>(m_children.size() - 1);
@@ -70,7 +72,9 @@ namespace mcp
         float maxHeight = 0.f;
         for (const auto* pChild : m_children)
         {
-            const auto childHeight = pChild->GetRectHeight();
+            const auto* pWidget = SafeCastEntity<Widget>(pChild);
+
+            const auto childHeight = pWidget->GetRectHeight();
             if (maxHeight < childHeight)
             {
                 maxHeight = childHeight;
@@ -94,12 +98,13 @@ namespace mcp
 
         for(auto* pChild : m_children)
         {
-            SetChildAnchorAndPivot(pChild);
-            SetPositionAndMoveToNext(pChild, lastPos);
+            auto* pWidget = SafeCastEntity<Widget>(pChild);
+            SetChildAnchorAndPivot(pWidget);
+            SetPositionAndMoveToNext(pWidget, lastPos);
         }
 
         if (m_pParent)
-            m_pParent->OnChildSizeChanged();
+            GetParent()->OnChildSizeChanged();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -110,23 +115,6 @@ namespace mcp
     void HorizontalLayoutWidget::SetPositionAndMoveToNext(Widget* pChild, float& lastXPos) const
     {
         float localYPos = 0.f;
-
-        /*switch (m_verticalAlignment)
-        {
-            case VerticalAlignment::kCenter: break;
-            case VerticalAlignment::kTop:
-            {
-                localYPos = pChild->GetRectHeight() / 2.f;
-                break;
-            }
-
-            case VerticalAlignment::kBottom:
-            {
-                localYPos = -(pChild->GetRectHeight() / 2.f);
-                break;
-            }
-
-        }*/
 
         // Update the lastXPos position based on the Horizontal arrangement.
         switch (m_horizontalAlignment)

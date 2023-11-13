@@ -21,8 +21,13 @@ namespace mcp
     class Texture final : public DiskResource
     {
     public:
-        Texture() = default;
         MCP_DEFINE_RESOURCE_DESTRUCTOR(Texture)
+
+        Texture() = default;
+        Texture(const Texture& right);
+        Texture(Texture&& right) noexcept;
+        Texture& operator=(const Texture& right);
+        Texture& operator=(Texture&& right) noexcept;
 
         [[nodiscard]] virtual void* Get() const override;
         [[nodiscard]] Vec2Int GetTextureSize() const;
@@ -32,4 +37,12 @@ namespace mcp
         virtual void* LoadResourceType() override;
         virtual void Free() override;
     };
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //	    :( This is a global.
+    //  
+    ///	   	@brief : A texture that is guaranteed to be invalid.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    static inline const Texture kInvalidTexture = {};
 }

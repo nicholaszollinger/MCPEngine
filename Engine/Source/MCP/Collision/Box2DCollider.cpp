@@ -33,7 +33,7 @@ namespace mcp
 
     RectF Box2DCollider::GetEstimateRectWorld() const
     {
-        Vec2 worldPos = m_relativePosition + m_pOwner->GetTransformComponent()->GetLocation();
+        Vec2 worldPos = m_relativePosition + m_pOwner->GetTransformComponent()->GetPosition();
         worldPos.x -= m_width / 2.f;
         worldPos.y -= m_height / 2.f;
 

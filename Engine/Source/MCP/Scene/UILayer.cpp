@@ -23,45 +23,15 @@ namespace mcp
         //
     }
 
-    UILayer::~UILayer()
-    {
-        DestroyLayer();
-    }
-
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Load the UILayer
-    //-----------------------------------------------------------------------------------------------------------------------------
-    bool UILayer::LoadLayer(const XMLElement layer)
-    {
-        XMLElement element = layer.GetChildElement();
-
-        while(element.IsValid())
-        {
-            if (HashString32(element.GetName()) == kSceneLayerAssetId)
-            {
-                LoadSceneDataAsset(element);
-            }
-
-            else
-            {
-                LoadWidget(element);   
-            }
-
-            element = element.GetSiblingElement();
-        }
-
-        //DumpUITree();
-
-        return true;
-    }
-
     bool UILayer::OnSceneLoad()
     {
-        for (auto* pWidget : m_widgets)
+        for (auto&[id, pEntity] : m_entities)
         {
+            auto* pWidget = SceneEntity::SafeCastEntity<Widget>(pEntity);
+
+            if (pWidget->HasAParent())
+                continue;
+
             // Initialize all of our children,
             pWidget->ForAllChildren([](Widget* pWidget)
             {
@@ -125,15 +95,40 @@ namespace mcp
         m_stack.pop_back();
     }
 
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Add a widget to the Layer.
-    ///		@param pWidget : 
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void UILayer::AddWidget(Widget* pWidget)
+    Widget* UILayer::CreateEntity()
     {
-        m_widgets.push_back(pWidget);
+        MCP_CHECK(false);
+        return nullptr;
+    }
+
+    Widget* UILayer::CreateEntityFromPrefab(const XMLElement root)
+    {
+        if (!root.IsValid())
+        {
+            MCP_ERROR("UILayer", "Failed to Add Widget from data! Root element was invalid!");
+            return nullptr;
+        }
+
+#ifndef _DEBUG
+        if (AssetIsDebugOnly(root))
+        {
+            return nullptr;
+        }
+#endif
+
+        const char* widgetTypename = root.GetAttributeValue<const char*>("type");
+
+        auto* pWidget = WidgetFactory::CreateWidgetFromData(widgetTypename, root);
+        pWidget->SetLayer(this);
+        pWidget->Init();
+
+        // Recursively load each child widget.
+        LoadChildWidget(pWidget, root);
+
+        // Add the Widget to our Layer.
+        AddEntity(pWidget);
+
+        return pWidget;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -141,7 +136,7 @@ namespace mcp
     //		
     ///		@brief : Load a widget and all of its children from data.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void UILayer::LoadWidget(XMLElement rootElement)
+    void UILayer::LoadEntity(XMLElement rootElement)
     {
         while (rootElement.IsValid())
         {
@@ -158,14 +153,15 @@ namespace mcp
             const char* widgetTypename = rootElement.GetAttributeValue<const char*>("type");
 
             auto* pWidget = WidgetFactory::CreateWidgetFromData(widgetTypename, rootElement);
-            pWidget->SetUILayer(this);
+
+            // Add the parent widget to the UILayer.
+            AddEntity(pWidget);
+
+            // Initialize
             pWidget->Init();
 
             // Recursively load each child widget.
             LoadChildWidget(pWidget, rootElement);
-
-            // Add the parent widget to the UILayer.
-            AddWidget(pWidget);
 
             // If the parent widget is enabled, then we will add it to the UI Stack.
             // This means that the order of the loading is potentially something to worry about...
@@ -187,61 +183,24 @@ namespace mcp
         XMLElement childWidgetElement = parentElement.GetChildElement("Widget");
         while(childWidgetElement.IsValid())
         {
-#ifndef _DEBUG
-            if (AssetIsDebugOnly(childWidgetElement))
-            {
-                childWidgetElement = childWidgetElement.GetSiblingElement("Widget");
-                continue;
-            }
-#endif
-
             const char* widgetTypename = childWidgetElement.GetAttributeValue<const char*>("type");
 
             Widget* pChild = WidgetFactory::CreateWidgetFromData(widgetTypename, childWidgetElement);
-            pChild->SetUILayer(this);
+
+            // Add the child to our Layer
+            AddEntity(pChild);
+
+            // Initialize
             pChild->Init();
+
+            // Set the Parent.
             pChild->SetParent(pParent);
+
             // Recursively get the Children of this child.
             LoadChildWidget(pChild, childWidgetElement);
 
             // Get the next child.
             childWidgetElement = childWidgetElement.GetSiblingElement("Widget");
-        }
-    }
-
-    void UILayer::LoadSceneDataAsset(const XMLElement sceneDataAsset)
-    {
-#ifndef _DEBUG
-        if (AssetIsDebugOnly(sceneDataAsset))
-        {
-            return;
-        }
-#endif
-
-        const char* pPath = sceneDataAsset.GetAttributeValue<const char*>("path");
-        MCP_CHECK_MSG(pPath, "Failed to load SceneDataAsset on the UI Layer! No path was found!");
-
-        XMLParser parser;
-        if (!parser.LoadFile(pPath))
-        {
-            MCP_ERROR("UILayer", "Failed to load SceneDataAsset at path: ", pPath);
-            return;
-        }
-
-        XMLElement assetElement = parser.GetElement();
-        while(assetElement.IsValid())
-        {
-            if (HashString32(assetElement.GetName()) == kSceneLayerAssetId)
-            {
-                LoadSceneDataAsset(assetElement);
-            }
-
-            else
-            {
-                LoadWidget(assetElement);   
-            }
-
-            assetElement = assetElement.GetSiblingElement();
         }
     }
 
@@ -309,15 +268,21 @@ namespace mcp
     
     Widget* UILayer::GetWidgetByTag(const StringId tag) const
     {
-        for (auto* pWidget : m_widgets)
+        for (auto&[id, pEntity] : m_entities)
         {
+            auto* pWidget = SceneEntity::SafeCastEntity<Widget>(pEntity);
+
+            // If this isn't a root, don't search it.
+            if (pWidget->HasAParent())
+                continue;
+
             if (pWidget->GetTag() == tag)
             {
                 return pWidget;
             }
 
             // Search the children, and if we found the Widget, return it.
-            if (auto* pFound = pWidget->FindChildByTag(tag))
+            if (auto* pFound = pWidget->GetChildByTag(tag))
                 return pFound;
         }
 
@@ -354,93 +319,14 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Creates a new Widget from data. This function does NOT add the returned widget to the array of 'root' widgets.
-    ///             if you want to add it afterwards, call AddWidget(). This function assumes that we are loading a single widget and
-    ///             its children from data; it will NOT check for sibling widgets.
-    ///		@param root : Root element for the widget we are loading.
-    ///		@returns : Nullptr if there was an error, otherwise, the new Widget.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    Widget* UILayer::CreateWidgetFromData(const XMLElement root)
-    {
-        if (!root.IsValid())
-        {
-            MCP_ERROR("UILayer", "Failed to Add Widget from data! Root element was invalid!");
-            return nullptr;
-        }
-
-#ifndef _DEBUG
-        if (AssetIsDebugOnly(root))
-        {
-            return nullptr;
-        }
-#endif
-
-        const char* widgetTypename = root.GetAttributeValue<const char*>("type");
-
-        auto* pWidget = WidgetFactory::CreateWidgetFromData(widgetTypename, root);
-        pWidget->SetUILayer(this);
-        pWidget->Init();
-
-        // Recursively load each child widget.
-        LoadChildWidget(pWidget, root);
-
-        return pWidget;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Queue the deletion of a Widget. NOTE: This should only be called by Widgets themselves so that they can properly
-    ///         handle their relationships to other Widgets!
-    ///		@param pWidget : Widget that is going to be deleted.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void UILayer::DeleteWidget(Widget* pWidget)
-    {
-        m_queuedWidgetsToDelete.push_back(pWidget);
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Delete all of the Widgets that have been queued for deletion.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void UILayer::DeleteQueuedWidgets()
-    {
-        for (const auto pWidget : m_queuedWidgetsToDelete)
-        {
-            BLEACH_DELETE(pWidget);
-        }
-
-        m_queuedWidgetsToDelete.clear();
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Destroys the Root and all of its children.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void UILayer::DestroyLayer()
-    {
-        // Destroy each 'root' that we have.
-        for (auto* pWidget : m_widgets)
-        {
-            pWidget->DestroyWidgetAndChildren();
-        }
-
-        DeleteQueuedWidgets();
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
     ///		@brief : Debug function to visualize the UI tree
     //-----------------------------------------------------------------------------------------------------------------------------
     void UILayer::DumpUITree()
     {
-        for (auto* pWidget : m_widgets)
+        /*for (auto* pWidget : m_widgets)
         {
             PrintWidgetType(pWidget, 0);
-        }
+        }*/
     }
 
     void UILayer::PrintWidgetType(Widget* pWidget, int tabCount)

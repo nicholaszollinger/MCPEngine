@@ -17,8 +17,9 @@ namespace mcp
         , m_tint(Color::White())
         , m_renderAngle(0.0)
         , m_flip(RenderFlip2D::kNone)
+        , m_sizedToContent(true)
     {
-        //   
+        //
     }
 
     ImageComponent::ImageComponent(const char* pTextureFilepath, const RectInt& crop, const Vec2 scale, const Color color, const RenderLayer layer, const int zOrder)
@@ -30,16 +31,46 @@ namespace mcp
         , m_tint(color)
         , m_renderAngle(0.0)
         , m_flip(RenderFlip2D::kNone)
+        , m_sizedToContent(true)
     {
+        if (!pTextureFilepath)
+        {
+            return;
+        }
+
         if (!m_texture.Load({pTextureFilepath, nullptr, false}))
         {
             MCP_WARN("ImageComponent", "Failed to load texture!");
         }
     }
 
-    ImageComponent::~ImageComponent()
+    ImageComponent::ImageComponent(const ImageComponentConstructionData& data)
+        : Component(data.componentData)
+        , IRenderable(RenderLayer::kWorld, data.zOrder)
+        , m_pTransformComponent(nullptr)
+        , m_crop(data.crop)
+        , m_renderAngle(0.0)
+        , m_flip(RenderFlip2D::kNone)
+        , m_sizedToContent(data.sizedToContent)
     {
-        //
+        // If we don't have an image path, then just return.
+        if (!data.pImagePath)
+        {
+            return;
+        }
+
+        if (!m_texture.Load({data.pImagePath, nullptr, false}))
+        {
+            MCP_WARN("ImageComponent", "Failed to load texture! Path: ", data.pImagePath);
+            return;
+        }
+
+        // If we are sized to our content, then we are going to set the crop to contain the whole image.
+        if (m_sizedToContent)
+        {
+            const auto imageSize = m_texture.GetTextureSize();
+            m_crop = RectInt{0,0, imageSize.x, imageSize.y};
+        }
     }
 
     bool ImageComponent::Init()
@@ -51,7 +82,31 @@ namespace mcp
             return false;
         }
 
+        if (IsActive() && m_texture.IsValid())
+        {
+            GetOwner()->GetWorld()->AddRenderable(this);
+        }
+
         return true;
+    }
+
+    void ImageComponent::OnOwnerParentSet(Object* pParent)
+    {
+        if (!pParent)
+        {
+            return;
+        }
+
+        // HACK: I need a way for a renderable component to know that their owner has a renderable component.
+        if (auto* pImage = pParent->GetComponent<ImageComponent>())
+        {
+            SetRenderableParent(pImage);
+        }
+
+        else
+        {
+            SetRenderableParent(nullptr);
+        }
     }
 
     void ImageComponent::OnActive()
@@ -70,10 +125,11 @@ namespace mcp
     {
         MCP_CHECK_MSG(m_pTransformComponent, "Failed to Render ImageComponent! TransformComponent was nullptr!");
 
-        const float width = m_scale.x * static_cast<float>(m_crop.width);
-        const float height = m_scale.y * static_cast<float>(m_crop.height);
+        const Vec2 scale = m_pTransformComponent->GetScale();
+        const float width = scale.x * static_cast<float>(m_crop.width);
+        const float height = scale.y * static_cast<float>(m_crop.height);
 
-        const Vec2 location = m_pTransformComponent->GetLocation();
+        const Vec2 location = m_pTransformComponent->GetPosition();
         const float renderXPos = location.x - (width / 2.f);
         const float renderYPos = location.y - (height / 2.f);
 
@@ -95,6 +151,46 @@ namespace mcp
         renderData.flip = m_flip;
 
         DrawTexture(renderData);
+    }
+
+    void ImageComponent::SetTexture(const Texture* pTexture)
+    {
+        if (!pTexture || !pTexture->IsValid())
+        {
+            // If we were already invalid, return.
+            if (!m_texture.IsValid())
+                return;
+
+            m_texture = kInvalidTexture;
+
+            // If this is active, we need to not render the null texture.
+            if (IsActive())
+            {
+                GetOwner()->GetWorld()->RemoveRenderable(this);
+            }
+        }
+
+        else
+        {
+            // Get if our current texture is valid.
+            const bool textureWasValid = m_texture.IsValid();
+
+            // Assign the new texture:
+            m_texture = *pTexture;
+
+            // If we are sized to our content, adjust our crop.
+            if (m_sizedToContent)
+            {
+                const auto imageSize = m_texture.GetTextureSize();
+                m_crop = RectInt{0,0, imageSize.x, imageSize.y};
+            }
+
+            // If we are active and our texture was previously invalid (null texture), then add us to World for rendering.
+            if (IsActive() && !textureWasValid)
+            {
+                GetOwner()->GetWorld()->AddRenderable(this);
+            }
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -119,55 +215,58 @@ namespace mcp
 
     ImageComponent* ImageComponent::AddFromData(const XMLElement element)
     {
-        // File Path
-        const char* pTextureFilePath = element.GetAttributeValue<const char*>("imagePath");
+        ImageComponentConstructionData data;
 
-        if (!pTextureFilePath)
-        {
-            MCP_ERROR("ImageComponent","Failed to add ImageComponent from Data! Couldn't find imagePath Attribute!");
-            return nullptr;
-        }
+        // Base Component data:
+        data.componentData = GetComponentConstructionData(element);
+
+        // File Path
+        data.pImagePath = element.GetAttributeValue<const char*>("imagePath", nullptr);
+
+        // ZOrder
+        data.zOrder = element.GetAttributeValue<int>("zOrder", 0);
+
+        // Size to content:
+        data.sizedToContent = element.GetAttributeValue<bool>("sizedToContent", true);
 
         // Crop
-        RectInt crop;
         const XMLElement cropElement = element.GetChildElement("Crop");
-        if (!cropElement.IsValid())
+        if (cropElement.IsValid())
         {
-            MCP_ERROR("ImageComponent","Failed to add ImageComponent from Data! Couldn't find Crop Attribute!");
-            return nullptr;
+            /*MCP_ERROR("ImageComponent","Failed to add ImageComponent from Data! Couldn't find Crop Attribute!");
+            return nullptr;*/
+
+            data.crop.x = cropElement.GetAttributeValue<int>("x", 0);
+            data.crop.y = cropElement.GetAttributeValue<int>("y", 0);
+            data.crop.width = cropElement.GetAttributeValue<int>("w", 0);
+            data.crop.height = cropElement.GetAttributeValue<int>("h", 0);
+        }
+
+        // If there is no crop element, then we know that we want to size to the content.
+        else
+        {
+            data.sizedToContent = true;
         }
         
-        crop.x = cropElement.GetAttributeValue<int>("x");
-        crop.y = cropElement.GetAttributeValue<int>("y");
-        crop.width = cropElement.GetAttributeValue<int>("w");
-        crop.height = cropElement.GetAttributeValue<int>("h");
-
-        // Scale
-        Vec2 scale = {1.f, 1.f};
-        const XMLElement scaleElement = cropElement.GetSiblingElement("Scale");
-        if (scaleElement.IsValid())
-        {
-            scale.x = scaleElement.GetAttributeValue<float>("x");
-            scale.y = scaleElement.GetAttributeValue<float>("y");
-        }
-
-        Color color = Color::White();
-        const XMLElement tintElement = cropElement.GetSiblingElement("Color");
+        const XMLElement tintElement = element.GetChildElement("Color");
         if (tintElement.IsValid())
         {
-            color.r = tintElement.GetAttributeValue<uint8_t>("r");
-            color.g = tintElement.GetAttributeValue<uint8_t>("g");
-            color.b = tintElement.GetAttributeValue<uint8_t>("b");
-            color.alpha = tintElement.GetAttributeValue<uint8_t>("alpha");
+            data.tint.r = tintElement.GetAttributeValue<uint8_t>("r");
+            data.tint.g = tintElement.GetAttributeValue<uint8_t>("g");
+            data.tint.b = tintElement.GetAttributeValue<uint8_t>("b");
+            data.tint.alpha = tintElement.GetAttributeValue<uint8_t>("alpha");
         }
 
+        // TODO: Refactor when we get rid of the layer concept:
         // IRenderable Data.
-        const XMLElement renderableElement = cropElement.GetSiblingElement("Renderable");
-        
-        const auto layer =static_cast<RenderLayer>(renderableElement.GetAttributeValue<int>("layer"));
-        const int zOrder = renderableElement.GetAttributeValue<int>("zOrder");
+        const XMLElement renderableElement = element.GetChildElement("Renderable");
+        if (renderableElement.IsValid())
+        {
+            //const auto layer =static_cast<RenderLayer>(renderableElement.GetAttributeValue<int>("layer"));
+            data.zOrder = renderableElement.GetAttributeValue<int>("zOrder");
+        }
 
-        return BLEACH_NEW(ImageComponent(pTextureFilePath, crop, scale, color, layer, zOrder));
+        return BLEACH_NEW(ImageComponent(data));
     }
 
 }

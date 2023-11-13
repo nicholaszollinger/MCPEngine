@@ -3,6 +3,7 @@
 #include "ToggleWidget.h"
 
 #include "LuaSource.h"
+#include "MCP/Graphics/Graphics.h"
 #include "MCP/Lua/Lua.h"
 
 namespace mcp
@@ -16,8 +17,6 @@ namespace mcp
 
     bool ToggleWidget::PostLoadInit()
     {
-        //MCP_LOG("ToggleWidget", "Rect: ", GetScreenRect().ToString());
-
         // Initialize our script behavior.
         if (m_pOnExecuteScript.IsValid())
             lua::CallMemberFunction(m_pOnExecuteScript, "Init", this, m_value);
@@ -47,14 +46,25 @@ namespace mcp
         if (m_value == value)
             return;
 
-        //MCP_LOG("ToggleWidget", "Setting value to " , value? "true" : "false");
-
         m_value = value;
         m_onValueChanged.Broadcast(this, m_value);
 
         if (m_pOnExecuteScript.IsValid())
         {
             lua::CallMemberFunction(m_pOnExecuteScript, "OnExecute", m_value);
+        }
+
+        // If our value was set outside of an input event, we need to exit our hover state.
+        const auto mousePos = GraphicsManager::Get()->GetWindow()->GetMousePosition();
+        const bool intersects = PointIntersectsRect(mousePos);
+        if (!m_value && !intersects)
+        {
+            OnHoverExit();
+        }
+
+        else if (m_value && intersects)
+        {
+            OnHoverEnter();
         }
     }
 
@@ -84,11 +94,25 @@ namespace mcp
         return 0;
     }
 
+    static int ScriptGetToggleValue(lua_State* pState)
+    {
+        // Get the Widget
+        auto* pWidget = static_cast<ToggleWidget*>(lua_touserdata(pState, -1));
+        MCP_CHECK(pWidget);
+
+        lua_pop(pState, 1);
+
+        lua_pushboolean(pState, pWidget->GetValue());
+
+        return 1;
+    }
+
     void ToggleWidget::RegisterLuaFunctions(lua_State* pState)
     {
         static constexpr luaL_Reg kFuncs[]
         {
             {"SetValue", &ScriptSetToggleValue}
+            ,{"GetValue", &ScriptGetToggleValue}
             , {nullptr, nullptr}
         };
 

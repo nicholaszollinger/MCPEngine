@@ -75,7 +75,7 @@ namespace mcp
         lua_pop(pState, 2);
 
         // Try to find the result in the UILayer.
-        auto* pResult = pWidget->GetLayer()->GetWidgetByTag<CanvasWidget>(pTag);
+        auto* pResult = pWidget->GetUILayer()->GetWidgetByTag<CanvasWidget>(pTag);
 
         // If valid, return a the data as a pointer.
         if (pResult)

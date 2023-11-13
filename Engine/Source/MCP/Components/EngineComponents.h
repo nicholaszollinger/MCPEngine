@@ -9,6 +9,7 @@
 //        instead of my 'automatic' version, but right now, this is the easy fix.
 
 // Components
+#include "AudioSourceComponent.h"
 #include "ColliderComponent.h"
 #include "ImageComponent.h"
 #include "InputComponent.h"

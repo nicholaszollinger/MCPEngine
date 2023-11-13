@@ -14,9 +14,7 @@
 namespace mcp
 {
     Widget::Widget(const WidgetConstructionData& data)
-        : m_pUILayer(nullptr)
-        , m_tag(data.tag)
-        , m_pParent(nullptr)
+        : SceneEntity(data.entityConstructionData)
         , m_enableBehaviorScript(data.enableBehaviorScript)
         , m_localPos(data.rect.GetPosition())
         , m_pivot(data.pivot)
@@ -28,114 +26,15 @@ namespace mcp
         , m_isInteractable(data.isInteractable)
         , m_isVisible(false)
         , m_sizedToContent(data.sizedToContent)
-        , m_isActive(data.startEnabled)
     {
         SetZOffset(data.zOffset);
 
-        // Get the Current UI Layer.
-        m_pUILayer = SceneManager::Get()->GetActiveScene()->GetUILayer();
+        // HACK: Get the Current UI Layer.
+        SetLayer(SceneManager::Get()->GetActiveScene()->GetUILayer());
 
         // HACK. I need to have an early step dedicated to initializing the 'this' pointer in Script behavior.
         if (m_enableBehaviorScript.IsValid())
             lua::CallMemberFunction(m_enableBehaviorScript, "Init", this);
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Set the parent of this widget.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void Widget::SetParent(Widget* pParent)
-    {
-        // If this is a new parent,
-        if (pParent != m_pParent)
-        {
-            // If our parent was not nullptr, then we need to remove ourselves as the child of our parent.
-            if (m_pParent)
-            {
-                m_pParent->RemoveChild(this);
-            }
-
-            // If our new parent isn't nullptr, we need to add ourselves as a child.
-            // This will set the parent relationship.
-            if (pParent)
-            {
-                pParent->AddChild(this);
-            }
-
-            m_pParent = pParent;
-            SetZOffset(m_zOffset); // Update our zOffset
-            OnParentSet();
-        }
-    }
-
-    void Widget::AddChild(Widget* pChild)
-    {
-        m_children.push_back(pChild);
-        pChild->m_pParent = this;
-
-        pChild->OnParentSet();
-        pChild->OnZChanged();
-        pChild->OnParentActiveChanged(IsActive());
-        OnChildAdded(pChild);
-    }
-
-    void Widget::RemoveChild(Widget* pChild)
-    {
-        for (size_t i = 0; i < m_children.size(); ++i)
-        {
-            if (pChild == m_children[i])
-            {
-                std::swap(m_children[i], m_children.back());
-                m_children.pop_back();
-                OnChildRemoved(pChild);
-                return;
-            }
-        }
-
-        MCP_WARN("Widget", "Tried to remove a child that doesn't not exist on the parent!");
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Queues the destruction of this widget. All children of this widget will be linked to the parent of this child.
-    ///         If this Widget is the root, this function will do nothing. Deleting the Root must be done with DestroyWidgetBranch().
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void Widget::DestroyWidget()
-    {
-        // If we are the root, we do nothing.
-        if (m_pParent)
-        {
-            // Set each child's parent to be this Widget's parent, and add the child to that parent's children.
-            for (auto* pChild : m_children)
-            {
-                pChild->SetParent(m_pParent);
-                m_pParent->AddChild(pChild);
-            }
-        }
-
-        // Now that we are outside of the tree, queue this Widget for deletion.
-        m_pUILayer->DeleteWidget(this);
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Queues the destruction of this widget and all of its Children. If this widget is the Root, then the entire
-    ///         tree will be destroyed.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void Widget::DestroyWidgetAndChildren()
-    {
-        // Queue the Destruction of each child.
-        for (auto* pChild : m_children)
-        {
-            pChild->DestroyWidgetAndChildren();
-        }
-
-        // Now that all of the children have been queued for deletion,
-        // Queue ourselves for deletion.
-        m_pUILayer->DeleteWidget(this);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -148,8 +47,9 @@ namespace mcp
     {
         for (auto* pChild : m_children)
         {
-            pChild->ForAllChildren(task);
-            task(pChild);
+            auto* pWidget = SafeCastEntity<Widget>(pChild);
+            pWidget->ForAllChildren(task);
+            task(pWidget);
         }
     }
 
@@ -160,7 +60,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Widget::Focus()
     {
-        m_pUILayer->FocusWidget(this);
+        GetUILayer()->FocusWidget(this);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -178,24 +78,29 @@ namespace mcp
 
         for (auto* pChild : m_children)
         {
-            pChild->OnFocusChanged(isFocused);
+            auto* pWidgetChild = SafeCastEntity<Widget>(pChild);
+            pWidgetChild->OnFocusChanged(isFocused);
         }
     }
     
-    Widget* Widget::FindChildByTag(const StringId tag) const
+    Widget* Widget::GetChildByTag(const StringId tag) const
     {
-        for (auto* pChild : m_children)
-        {
-            if (pChild->GetTag() == tag)
-            {
-                return pChild;
-            }
+        auto* pChild = SceneEntity::GetChildByTag(tag);
 
-            if (Widget* pFound = pChild->FindChildByTag(tag))
-                return pFound;
-        }
+        if (!pChild)
+            return nullptr;
 
-        return nullptr;
+        return SafeCastEntity<Widget>(pChild);
+    }
+
+    Widget* Widget::GetChildByTag(const StringId tag)
+    {
+        auto* pChild = SceneEntity::GetChildByTag(tag);
+
+        if (!pChild)
+            return nullptr;
+
+        return SafeCastEntity<Widget>(pChild);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -207,14 +112,15 @@ namespace mcp
     {
         // If we are not active, then don't even consult the children and return.
         // - If a parent is not active, the children are not active.
-        if (!m_isActive)
+        if (!IsActive())
             return;
 
         // If we have children, we need to check to see if they should handle the event
         // 'Move down the tree'
         for (auto* pChild : m_children)
         {
-            pChild->OnEvent(event);
+            auto* pWidgetChild = SafeCastEntity<Widget>(pChild);
+            pWidgetChild->OnEvent(event);
 
             // If the child handled the event, we are done.
             if (event.IsHandled())
@@ -284,7 +190,7 @@ namespace mcp
     {
         if (m_pParent)
         {
-            return m_scale * m_pParent->GetScale();
+            return m_scale * GetParent()->GetScale();
         }
 
         return m_scale;
@@ -313,11 +219,11 @@ namespace mcp
         }
 
         // The origin is going to start from the center of the parent.
-        Vec2 parentCenter = m_pParent->GetRectCenter();
+        Vec2 parentCenter = GetParent()->GetRectCenter();
 
         // Adjust to our anchor position.
-        parentCenter.x += (m_anchor.x - 0.5f) * m_pParent->GetRectWidth();
-        parentCenter.y += (m_anchor.y - 0.5f) * m_pParent->GetRectHeight();
+        parentCenter.x += (m_anchor.x - 0.5f) * GetParent()->GetRectWidth();
+        parentCenter.y += (m_anchor.y - 0.5f) * GetParent()->GetRectHeight();
 
         // Offset by the local position.
         parentCenter += m_localPos;
@@ -363,7 +269,7 @@ namespace mcp
         if (!m_pParent)
             return m_zOffset;
 
-        return m_zOffset + m_pParent->GetZOffset();
+        return m_zOffset + GetParent()->GetZOffset();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -380,7 +286,8 @@ namespace mcp
 
         for (const auto* pChild : m_children)
         {
-            const int childMax = pChild->GetMaxZ();
+            const auto* pWidgetChild = SafeCastEntity<Widget>(pChild);
+            const int childMax = pWidgetChild->GetMaxZ();
             if (childMax > maxZ)
                 maxZ = childMax;
         }
@@ -422,7 +329,8 @@ namespace mcp
         // Have each child respond.
         for (auto* pChild : m_children)
         {
-            pChild->OnZSet();    
+            auto* pWidgetChild = SafeCastEntity<Widget>(pChild);
+            pWidgetChild->OnZSet();    
         }
     }
 
@@ -459,137 +367,6 @@ namespace mcp
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
-    //      This tells the children of the active state change of the Parent Widget, so they can respond without
-    //      changing their active state necessarily.
-    //		
-    ///		@brief : Sets the Widget active or not.
-    ///		@param isActive : 
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void Widget::SetActive(const bool isActive)
-    {
-        // If our status isn't changing, return.
-        if (isActive == m_isActive)
-            return;
-
-        m_isActive = isActive;
-
-        // If we have a parent, we need to check with their active state before updating our active state.
-        if (m_pParent)
-        {
-            // If our parent was active and our state has changed, then we need to update.
-            if (m_pParent->IsActive())
-            {
-                if (m_isActive)
-                {
-                    OnActive();
-
-                    // If we were interactable, we need to have the script respond to OnEnable.
-                    if (m_enableBehaviorScript.IsValid())
-                        lua::CallMemberFunction(m_enableBehaviorScript, "OnEnable");
-                }
-
-                // If we have been turned off:
-                else
-                {
-                    OnInactive();
-
-                    // If we were interactable, we need to have the script respond to OnDisable.
-                    if (m_enableBehaviorScript.IsValid())
-                        lua::CallMemberFunction(m_enableBehaviorScript, "OnDisable");
-                }
-            }
-        }
-
-        // Otherwise we update according to our active state.
-        else
-        {
-            // If we have been set active.
-            if (m_isActive)
-            {
-                OnActive();
-
-                // If we were interactable, we need to have the script respond to OnEnable.
-                if (m_enableBehaviorScript.IsValid())
-                    lua::CallMemberFunction(m_enableBehaviorScript, "OnEnable");
-            }
-
-            // If we have been turned off:
-            else 
-            {
-                OnInactive();
-
-                // If we were interactable, we need to have the script respond to OnDisable.
-                if (m_enableBehaviorScript.IsValid())
-                    lua::CallMemberFunction(m_enableBehaviorScript, "OnDisable");
-            }
-        }
-
-        // Let our children know of the change.
-        for (auto* pChild : m_children)
-        {
-            pChild->OnParentActiveChanged(m_isActive);
-        }
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    ///		@brief : Toggles the active state on the Widget.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void Widget::ToggleActive()
-    {
-        SetActive(!m_isActive);
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    ///		@brief : Respond to our parent widget's active state changing, and let all of our children know as well recursively.
-    ///		@param parentActiveState : New state of the parent.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void Widget::OnParentActiveChanged(const bool parentActiveState)
-    {
-        // If we are active and our parent has changed, we need to respond.
-        // We also need to check if we have a valid UILayer. This is because if we are being created as child of a Widget
-        // that isn't a part of the Layer yet, we don't have access to the UILayer too. This becomes an issue for renderable
-        // Widgets, when they try to access Layer's Renderable Container. Plus, this will be called when the parent is added
-        // anyway.
-        if (m_isActive)
-        {
-            if (parentActiveState)
-            {
-                OnActive();
-                // We need to have the script respond to OnEnable.
-                if (m_enableBehaviorScript.IsValid())
-                    lua::CallMemberFunction(m_enableBehaviorScript, "OnEnable");
-            }
-
-            else
-            {
-                OnInactive();
-                // We need to have the script respond to OnDisable.
-                if (m_enableBehaviorScript.IsValid())
-                    lua::CallMemberFunction(m_enableBehaviorScript, "OnDisable");
-            }
-        }
-
-        for (auto* pChild : m_children)
-        {
-            pChild->OnParentActiveChanged(parentActiveState);
-        }
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Returns if the Widget is active or not. If a parent Widget is inactive, then this will return inactive.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    bool Widget::IsActive() const
-    {
-        if (m_pParent && !m_pParent->IsActive())
-            return false;
-
-        return m_isActive;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
     //		
     ///		@brief : Returns if this Widget responds to an input events. If the Widget is Inactive, this will always return false.
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -609,8 +386,14 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     bool Widget::IsFocused() const
     {
-        return this == m_pUILayer->GetFocused();
+        return this == GetUILayer()->GetFocused();
     }
+
+    UILayer* Widget::GetUILayer() const
+    {
+        return SceneLayer::SafeCastLayer<UILayer>(GetLayer());
+    }
+
 
     void Widget::SetInteractable(const bool isInteractable)
     {
@@ -686,7 +469,7 @@ namespace mcp
         m_width = width;
 
         if (m_pParent)
-            m_pParent->OnChildSizeChanged();
+            GetParent()->OnChildSizeChanged();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -699,7 +482,7 @@ namespace mcp
         m_height = height;
 
         if (m_pParent)
-            m_pParent->OnChildSizeChanged();
+            GetParent()->OnChildSizeChanged();
     }
 
     void Widget::SetScale(const float uniformScale)
@@ -713,7 +496,74 @@ namespace mcp
         m_scale.y = yScale;
 
         if (m_pParent)
-            m_pParent->OnChildSizeChanged();
+            GetParent()->OnChildSizeChanged();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : By default, when a Widget is set Active, if we have an EnableBehavior script, it will call the OnEnable function
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::OnActive()
+    {
+        if (m_enableBehaviorScript.IsValid())
+            lua::CallMemberFunction(m_enableBehaviorScript, "OnEnable");
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : By default, when a Widget is set InActive, if we have an EnableBehavior script, it will call the OnDisable function
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::OnInactive()
+    {
+        if (m_enableBehaviorScript.IsValid())
+            lua::CallMemberFunction(m_enableBehaviorScript, "OnDisable");
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : By default, when a Widget's parent is set, we need to force update their Z-Offset.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::OnParentSet()
+    {
+        // Update our zOffset
+        SetZOffset(m_zOffset);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : SceneEntity override of responding to adding child. We call into the OnChildAdded that takes in a Widget*.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::OnChildAdded(SceneEntity* pChild)
+    {
+        MCP_CHECK(pChild->GetLayerId() == Widget::GetStaticLayerId());
+
+        auto* pChildWidget = static_cast<Widget*>(pChild);
+        OnChildAdded(pChildWidget);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : SceneEntity override of responding to removing child. We call into the OnChildAdded that takes in a Widget*.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::OnChildRemoved(SceneEntity* pChild)
+    {
+        MCP_CHECK(pChild->GetLayerId() == Widget::GetStaticLayerId());
+
+        auto* pChildWidget = static_cast<Widget*>(pChild);
+        OnChildRemoved(pChildWidget);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : By default, we notify of the Z-Change of the Child.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::OnChildAdded(Widget* pChild)
+    {
+        pChild->OnZChanged();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -725,9 +575,11 @@ namespace mcp
     {
         // Get the Widget information:
         WidgetConstructionData data;
+        data.entityConstructionData = GetEntityConstructionData(widgetElement);
+
         data.isInteractable = widgetElement.GetAttributeValue<bool>("isInteractable", false);
         data.zOffset = widgetElement.GetAttributeValue<int>("zOffset", 1);
-        data.startEnabled = widgetElement.GetAttributeValue<bool>("startEnabled", true);
+        //data.startEnabled = widgetElement.GetAttributeValue<bool>("startEnabled", true);
 
         // Tag. Optional element.
         const char* pTag = widgetElement.GetAttributeValue<const char*>("tag", nullptr);
@@ -965,7 +817,7 @@ namespace mcp
         // Pop the param.
         lua_pop(pState, 1);
 
-        pWidget->GetLayer()->AddToStack(pWidget);
+        pWidget->GetUILayer()->AddToStack(pWidget);
 
         return 0;
     }
@@ -987,7 +839,7 @@ namespace mcp
         // Pop the param.
         lua_pop(pState, 1);
 
-        pWidget->GetLayer()->PopStack();
+        pWidget->GetUILayer()->PopStack();
         return 0;
     }
 

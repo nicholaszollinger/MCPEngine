@@ -32,6 +32,7 @@ namespace mcp
 
     void VerticalLayoutWidget::OnChildAdded([[maybe_unused]] Widget* pChild)
     {
+        Widget::OnChildAdded(pChild);
         RecalculateChildRects();
     }
 
@@ -55,7 +56,8 @@ namespace mcp
         float maxWidth = 0.f;
         for (const auto* pChild : m_children)
         {
-            const auto childWidth = pChild->GetRectWidth();
+            const auto* pWidget = SafeCastEntity<Widget>(pChild);
+            const auto childWidth = pWidget->GetRectWidth();
             if (maxWidth < childWidth)
             {
                 maxWidth = childWidth;
@@ -76,7 +78,8 @@ namespace mcp
         float height = 0.f;
         for (const auto* pChild : m_children)
         {
-            height += pChild->GetRectHeight();
+            const auto* pWidget = SafeCastEntity<Widget>(pChild);
+            height += pWidget->GetRectHeight();
         }
 
         height += m_padding * static_cast<float>(m_children.size() - 1);
@@ -93,12 +96,13 @@ namespace mcp
 
         for(auto* pChild : m_children)
         {
-            SetChildAnchorAndPivot(pChild);
-            SetPositionAndMoveToNext(pChild, lastPos);
+            auto* pWidget = SafeCastEntity<Widget>(pChild);
+            SetChildAnchorAndPivot(pWidget);
+            SetPositionAndMoveToNext(pWidget, lastPos);
         }
 
         if (m_pParent)
-            m_pParent->OnChildSizeChanged();
+            GetParent()->OnChildSizeChanged();
     }
 
     void VerticalLayoutWidget::SetPositionAndMoveToNext(Widget* pChild, float& lastYPos) const

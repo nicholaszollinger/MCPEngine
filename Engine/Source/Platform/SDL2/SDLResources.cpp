@@ -15,6 +15,7 @@
 #include "MCP/Graphics/Graphics.h"
 #include "MCP/Graphics/Texture.h"
 #include "MCP/Core/Resource/Font.h"
+#include "MCP/Audio/AudioResource.h"
 
 namespace mcp
 {
@@ -68,6 +69,127 @@ namespace mcp
         pTextureData = nullptr;
     }
 #endif
+
+    //--------------------------------------------------------------------------------------------------------
+    //      AUDIO RESOURCE DATA
+    //--------------------------------------------------------------------------------------------------------
+
+    Mix_Chunk* LoadMixChunk(const char* pPath)
+    {
+        auto* pChunk = Mix_LoadWAV(pPath);
+        if (!pChunk)
+        {
+            MCP_ERROR("SDL", "Failed to load Mix_Chunk at filepath: ", pPath);
+            return nullptr;
+        }
+
+        return pChunk;
+    }
+
+    Mix_Chunk* LoadMixChunkRaw(void* pRawData, const int dataSize)
+    {
+        SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
+        auto* pChunk = Mix_LoadWAV_RW(pSdlData, 0);
+        if (!pChunk)
+        {
+            MCP_ERROR("SDL", "Failed to load Mix_Chunk from data! SDL_Error: ", Mix_GetError());
+            return nullptr;
+        }
+
+        return pChunk;
+    }
+
+    Mix_Music* LoadMixMusic(const char* pPath)
+    {
+        auto* pMusic = Mix_LoadMUS(pPath);
+        if (!pMusic)
+        {
+            MCP_ERROR("SDL", "Failed to load Mix_Music at filepath: ", pPath);
+            return nullptr;
+        }
+
+        return pMusic;
+    }
+
+    Mix_Music* LoadMixMusicRaw(void* pRawData, const int dataSize)
+    {
+        SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
+        auto* pMusic = Mix_LoadMUS_RW(pSdlData, 0);
+        if (!pMusic)
+        {
+            MCP_ERROR("SDL", "Failed to load Mix_Chunk from data! SDL_Error: ", Mix_GetError());
+            return nullptr;
+        }
+
+        return pMusic;
+    }
+
+    template <>
+    AudioResourceData* ResourceContainer<AudioResourceData, AudioResourceRequest>::LoadFromDiskImpl(const AudioResourceRequest& request)
+    {
+        if (request.isMusicResource)
+        {
+            auto* pResource = LoadMixMusic(request.path.GetCStr());
+            if (!pResource)
+                return nullptr;
+
+            auto* pResourceData =  BLEACH_NEW(AudioResourceData);
+            pResourceData->isMusicResource = true;
+            pResourceData->pResource = pResource;
+            return pResourceData;
+        }
+        
+        auto* pResource = LoadMixChunk(request.path.GetCStr());
+        if (!pResource)
+                return nullptr;
+
+        auto* pResourceData =  BLEACH_NEW(AudioResourceData);
+        pResourceData->isMusicResource = false;
+        pResourceData->pResource = pResource;
+        return pResourceData;
+    }
+
+    template <>
+    AudioResourceData* ResourceContainer<AudioResourceData, AudioResourceRequest>::LoadFromRawDataImpl(char* pRawData, const int dataSize, const AudioResourceRequest& request)
+    {
+        if (request.isMusicResource)
+        {
+            auto* pResource = LoadMixChunkRaw(pRawData, dataSize);
+            if (!pResource)
+                return nullptr;
+
+            auto* pResourceData =  BLEACH_NEW(AudioResourceData);
+            pResourceData->isMusicResource = true;
+            pResourceData->pResource = pResource;
+            return pResourceData;
+        }
+
+        auto* pResource = LoadMixChunkRaw(pRawData, dataSize);
+        if (!pResource)
+                return nullptr;
+
+        auto* pResourceData =  BLEACH_NEW(AudioResourceData);
+        pResourceData->isMusicResource = false;
+        pResourceData->pResource = pResource;
+        return pResourceData;
+    }
+
+    template <>
+    void ResourceContainer<AudioResourceData, AudioResourceRequest>::FreeResourceImpl(AudioResourceData* pResourceData)
+    {
+        if (pResourceData->isMusicResource)
+        {
+            Mix_FreeMusic(static_cast<Mix_Music*>(pResourceData->pResource));
+        }
+
+        else
+        {
+            Mix_FreeChunk(static_cast<Mix_Chunk*>(pResourceData->pResource));
+        }
+
+        BLEACH_DELETE(pResourceData);
+        pResourceData = nullptr;
+    }
 
     //--------------------------------------------------------------------------------------------------------
     //      MIX_CHUNK

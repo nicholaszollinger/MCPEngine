@@ -3,15 +3,24 @@
 #include "SceneEntity.h"
 
 #include "MCP/Debug/Log.h"
+#include "MCP/Lua/Lua.h"
 #include "MCP/Scene/Scene.h"
 #include "MCP/Scene/SceneLayer.h"
 
 namespace mcp
 {
+    SceneEntity::SceneEntity()
+        : m_pParent(nullptr)
+        , m_id(s_idCounter++)
+        , m_isActive(true)
+    {
+        //
+    }
+
     SceneEntity::SceneEntity(const SceneEntityConstructionData& data)
-        : m_id(s_idCounter++)
-        , m_pParent(nullptr)
-        , m_pScene(nullptr)
+        : m_pParent(nullptr)
+        , m_id(s_idCounter++)
+        , m_tag(data.tag)
         , m_isActive(data.startActive)
     {
         //
@@ -39,10 +48,13 @@ namespace mcp
         // If pEntity isn't nullptr, we need to add ourselves as a child
         if (m_pParent)
         {
-            m_pParent->AddChild(this);
-            OnParentActiveChanged(m_pParent->IsActive());
+            m_pParent->m_children.emplace_back(this);
+
+            // Have the parent respond to the change
+            m_pParent->OnChildAdded(this);
 
             // Have the entity respond to the change.
+            OnParentActiveChanged(m_pParent->IsActive());
             OnParentSet();
         }
     }
@@ -94,8 +106,43 @@ namespace mcp
             }
         }
 
-        MCP_WARN("SceneEntity", "Tried to remove a child that doesn't not exist on the parent!");
+        MCP_WARN("SceneEntity", "Tried to remove a child that doesn't exist on the parent!");
     }
+
+    SceneEntity* SceneEntity::GetChildByTag(const StringId tag)
+    {
+        for (auto* pChild : m_children)
+        {
+            if (pChild->GetTag() == tag)
+            {
+                return pChild;
+            }
+
+            // Recursively check their children:
+            if (auto* pFound = pChild->GetChildByTag(tag))
+                return pFound;
+        }
+
+        return nullptr;
+    }
+
+    SceneEntity* SceneEntity::GetChildByTag(const StringId tag) const
+    {
+        for (auto* pChild : m_children)
+        {
+            if (pChild->GetTag() == tag)
+            {
+                return pChild;
+            }
+
+            // Recursively check their children:
+            if (auto* pFound = pChild->GetChildByTag(tag))
+                return pFound;
+        }
+
+        return nullptr;
+    }
+
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -109,43 +156,23 @@ namespace mcp
         if (m_isQueuedForDeletion)
             return;
 
-        // If I have a parent, we are going to re-parent all of our children's parents to our parent.
-        if (m_pParent)
-        {
-            for (auto* pChild : m_children)
-            {
-                pChild->SetParent(m_pParent);
-            }
-        }
-
-        // Get the Layer we are on and destroy it.
-        // GetLayer()->DeleteEntity(this);
-
+        // Queue ourselves.
         m_isQueuedForDeletion = true;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Queues the deletion of this Scene Entity and all of its children recursively.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void SceneEntity::DestroyEntityAndChildren()
-    {
-        // If we are already queued for deletion, return.
-        if (m_isQueuedForDeletion)
-            return;
 
         // Queue the Destruction of each child.
         for (auto* pChild : m_children)
         {
-            pChild->DestroyEntityAndChildren();
+            pChild->Destroy();
         }
 
-        // Now that all of the children have been queued for deletion,
-        // Queue ourselves.
-        // GetLayer()->DeleteEntity(this);
+        // Set the Entity to inactive.
+        SetActive(false);
 
-        m_isQueuedForDeletion = true;
+        // Let the Entity respond to the deletion.
+        OnDestroy();
+
+        // Queue the Entity for deletion.
+        GetLayer()->DestroyEntity(m_id);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -169,18 +196,10 @@ namespace mcp
             {
                 // If our parent was active and our state has changed, then we need to update.
                 if (m_isActive)
-                {
                     OnActive();
 
-                    // TODO: How am I going to handle the Scripts????
-                }
-
                 else
-                {
                     OnInactive();
-
-                    // TODO: How am I going to handle the Scripts????
-                }
             }
         }
 
@@ -189,19 +208,12 @@ namespace mcp
         {
             // If we have been set active.
             if (m_isActive)
-            {
                 OnActive();
-
-                // TODO: How am I going to handle the Scripts????
-            }
 
             // If we have been turned off:
             else 
-            {
                 OnInactive();
-
-                // TODO: How am I going to handle the Scripts????
-            }
+            
         }
 
         // Let our children know of the change:
@@ -241,28 +253,54 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void SceneEntity::OnParentActiveChanged(const bool parentActiveState)
     {
-        // If we are active and our parent has changed, we need to respond.
+        // If were active and our parent has changed, we need to respond.
         if (m_isActive)
         {
             if (parentActiveState)
-            {
                 OnActive();
 
-                // TODO: How am I going to handle the scripts????
-            }
-
             else
-            {
                 OnInactive();
-
-                // TODO: How am I going to handle the scripts????
-            }
         }
 
         for (auto* pChild : m_children)
         {
             pChild->OnParentActiveChanged(parentActiveState);
         }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Get the Scene that this Entity is in.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    Scene* SceneEntity::GetScene() const
+    {
+        MCP_CHECK(m_pLayer);
+        return m_pLayer->GetScene();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Set the Entities' layer.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void SceneEntity::SetLayer(SceneLayer* pLayer)
+    {
+        // If this layer is not nullptr and the LayerIds don't match then return.
+        if (pLayer && pLayer->GetLayerId() != GetLayerId())
+        {
+            MCP_WARN("SceneEntity", "Attempted to set an SceneEntity's layer to one that it doesn't belong to!");
+            return;
+        }
+
+        m_pLayer = pLayer;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Get the Layer that this SceneEntity is in.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    SceneLayer* SceneEntity::GetLayer() const
+    {
+        return m_pLayer;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -275,9 +313,11 @@ namespace mcp
     {
         SceneEntityConstructionData data;
 
+        // Start Active flag
         data.startActive = element.GetAttributeValue<bool>("startActive", true);
 
-        // Add the Enable behavior Script data:
+        // Tag
+        data.tag = element.GetAttributeValue<const char*>("tag", nullptr);
 
         return data;
     }

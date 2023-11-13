@@ -4,6 +4,7 @@
 ---@field SetCrop function
 ---@field GetCrop function
 ---@field SetTint function
+---@field SetTexture function
 
 ---@type ImageWidgetLib
 ImageWidget = {};
@@ -31,6 +32,14 @@ function Widget.GetFirstChildImageWidget(widgetPtr)  return nil end;
 function Widget.GetChildImageWidgetByTag(widgetPtr, tag) return nil end
 
 ---------------------------------------------------------------------
+---Attempt to find a widget by tag.
+---@param widgetPtr ImageWidgetPtr
+---@param tag string
+---@return ImageWidgetPtr|nil childPtr
+---------------------------------------------------------------------
+function Widget.FindImageWidgetByTag(widgetPtr, tag) return nil end;
+
+---------------------------------------------------------------------
 ---Set the crop of an ImageWidget.
 ---@param imageWidgetPtr ImageWidgetPtr
 ---@param crop Rect
@@ -50,3 +59,10 @@ function ImageWidget.GetCrop(imageWidgetPtr) end
 ---@param color Color
 ---------------------------------------------------------------------
 function ImageWidget.SetTint(imageWidgetPtr, color) end;
+
+---------------------------------------------------------------------
+--- Set the texture of the ImageWidget.
+---@param imageWidgetPtr ImageWidgetPtr
+---@param pTexture userdata Pointer to the Texture. Cannot be null.
+---------------------------------------------------------------------
+function ImageWidget.SetTexture(imageWidgetPtr, pTexture) end;

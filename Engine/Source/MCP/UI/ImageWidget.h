@@ -26,10 +26,10 @@ namespace mcp
 
     public:
         ImageWidget(const WidgetConstructionData& data, const char* pImageFilePath);
-        virtual ~ImageWidget() override;
 
         virtual bool Init() override;
         virtual void Render() const override;
+        void SetTexture(const Texture* pTexture);
         void SetTint(const Color tint) { m_tint = tint; }
         void SetCrop(const RectInt crop) { m_crop = crop; }
 

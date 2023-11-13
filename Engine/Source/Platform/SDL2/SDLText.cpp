@@ -72,8 +72,8 @@ int GetNextGlyphDistance(_TTF_Font* pFont, const uint32_t lastGlyph, const uint3
     TTF_GlyphMetrics32(pFont, lastGlyph, &xMin, &xMax, &yMin, &yMax, &advance);
     const int kerningSize = TTF_GetFontKerningSizeGlyphs32(pFont, lastGlyph, nextGlyph);
 
-    // This is the case for spaces.
-    if (xMax + kerningSize == 0)
+    // HACK: This is the case for spaces.
+    if (lastGlyph == 32)
         return advance;
 
     return xMax + kerningSize;

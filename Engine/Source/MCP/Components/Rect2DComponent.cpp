@@ -17,7 +17,7 @@ namespace mcp
 
     void Rect2DComponent::Render() const
     {
-        const Vec2 location = m_pTransformComponent->GetLocation();
+        const Vec2 location = m_pTransformComponent->GetPosition();
 
         const float renderXPos = location.x - m_width / 2.f;
         const float renderYPos = location.y - m_height / 2.f;

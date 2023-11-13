@@ -44,12 +44,20 @@ function m.OnExecute(sliderPercentage)
 end
 
 function m.OnHoverEnter()
+    if (m.owner == nil) then
+        return;
+    end
+
     --MCP_DEBUG.LOG("Checkbox", "Entering button...");
     Widget.SetTint(m.sliderGrooveImageWidget, m.hoveredSliderGrooveColor);
     Widget.SetTint(m.knobImageWidget, m.hoveredKnobColor);
 end
 
 function m.OnHoverExit()
+    if (m.owner == nil) then
+        return;
+    end
+    
     Widget.SetTint(m.sliderGrooveImageWidget, m.defaultSliderGrooveColor);
     Widget.SetTint(m.knobImageWidget, m.defaultKnobColor);
 end

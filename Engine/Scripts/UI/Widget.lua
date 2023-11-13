@@ -46,6 +46,7 @@ function WidgetScript.OnHoverExit() end;
 ---@field AddToLayerStack function
 ---@field PopLayerStack function
 ---@field SetWidth function
+---@field FindImageWidgetByTag function
 
 ---@type WidgetLib
 Widget = {};

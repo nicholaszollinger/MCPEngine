@@ -64,12 +64,19 @@ function m.OnExecute(isActive)
 end
 
 function m.OnHoverEnter()
+    if (m.owner == nil) then
+        return;
+    end
     --MCP_DEBUG.LOG("Checkbox", "Entering button...");
     Widget.SetTint(m.trayImageWidget, m.hoveredTrayColor);
     Widget.SetTint(m.knobImageWidget, m.hoveredKnobColor);
 end
 
 function m.OnHoverExit()
+    if (m.owner == nil) then
+        return;
+    end
+    
     Widget.SetTint(m.trayImageWidget, m.defaultTrayColor);
     Widget.SetTint(m.knobImageWidget, m.defaultKnobColor);
 end

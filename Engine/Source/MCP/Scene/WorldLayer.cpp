@@ -19,11 +19,6 @@ namespace mcp
         //
     }
 
-    WorldLayer::~WorldLayer()
-    {
-        DestroyLayer();
-    }
-
     bool WorldLayer::LoadLayer(const XMLElement layer)
     {
         // Get global settings for the Scene.
@@ -43,22 +38,9 @@ namespace mcp
         data.maxObjectsInCell = setting.GetAttributeValue<unsigned>("maxObjectsInCell", 4);
         SetCollisionSettings(data);
 
-        // Elements:
-        XMLElement element = layer.GetChildElement(kObjectElementName);
-        while(element.IsValid())
-        {
-            if (HashString32(element.GetName()) == kSceneLayerAssetId)
-            {
-                LoadSceneDataAsset(element);
-            }
-
-            else
-            {
-                LoadObject(element);   
-            }
-
-            element = element.GetSiblingElement();
-        }
+        // Entities:
+        const XMLElement element = layer.GetChildElement(kEntityElementTag);
+        LoadLayerAssetsAndEntities(element);
 
         return true;
     }
@@ -69,7 +51,7 @@ namespace mcp
     ///		@brief : Loads an object and all of its components. If loading a component fails, this will queue the object for destruction
     ///         and return.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void WorldLayer::LoadObject(const XMLElement element)
+    void WorldLayer::LoadEntity(const XMLElement element)
     {
 #ifndef _DEBUG
         if (AssetIsDebugOnly(element))
@@ -78,81 +60,140 @@ namespace mcp
         }
 #endif
 
-        auto* pObject = CreateObject();
+        // Get the SceneEntity construction data from the root element.
+        const auto cData = SceneEntity::GetEntityConstructionData(element);
 
-        // Get the first Component of the object.
-        XMLElement componentElement = element.GetChildElement();
+        // Create the Object and add it to the layer.
+        auto* pObject = BLEACH_NEW(Object(cData));
+        AddEntity(pObject);
 
-        while (componentElement.IsValid())
+        // Load each of the components:
+        if (!LoadObjectComponents(pObject, element))
+        {
+            MCP_ERROR("WorldLayer", "Failed to load object from data! Failed to Load component(s)!");
+            pObject->Destroy();
+            return;
+        }
+
+        // Load any Child Objects:
+        if (!LoadChildObject(pObject, element))
+        {
+            MCP_ERROR("WorldLayer", "Failed to load object from data! Failed to load child object(s)!");
+            pObject->Destroy();
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //      This function has to hash each name to check to see if it is a Object or not. If Components were set up like Widgets
+    //      in that there was <Component type="TransformComponent">, this could just search for "Component" children. Right now
+    //      each element's name is the ComponentType.
+    //		
+    ///		@brief : Load all components for this Object.
+    ///		@param pObject : Object we are loading the Components for.
+    ///		@param rootElement : The Object's element in data.
+    ///		@returns : False if this failed to load a component.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool WorldLayer::LoadObjectComponents(Object* pObject, const XMLElement rootElement) const
+    {
+        MCP_CHECK(pObject);
+        MCP_CHECK(rootElement.IsValid());
+
+        auto childElement = rootElement.GetChildElement();
+        while (childElement.IsValid())
         {
 #ifndef _DEBUG
-            if (AssetIsDebugOnly(componentElement))
+            // Skip any debug components:
+            if (AssetIsDebugOnly(childElement))
             {
-                componentElement = componentElement.GetSiblingElement();
+                childElement = childElement.GetSiblingElement();
                 continue;
             }
 #endif
 
+            // If this child element is an object, skip
+            if (HashString32(childElement.GetName()) == kEntityElementHash)
+            {
+                childElement = childElement.GetSiblingElement();
+                continue;
+            }
+
+            // Load the Component
             // Create the Component
-            auto* pComponent = ComponentFactory::CreateFromData(componentElement.GetName(), componentElement);
+            auto* pComponent = ComponentFactory::CreateFromData(childElement.GetName(), childElement);
 
             if (!pComponent)
             {
-                MCP_ERROR("WorldLayer", "Failed to load object!");
-                // Delete the created object
-                pObject->Destroy();
-                return;
+                MCP_ERROR("WorldLayer", "Failed to load component!");
+                return false;
             }
 
             // Add the Component to the new Object.
             pObject->AddComponent(pComponent);
 
-            // Go to the next sibling to see if we have another component.
-            componentElement = componentElement.GetSiblingElement();
+            childElement = childElement.GetSiblingElement();
         }
+
+        return true;
     }
 
-    void WorldLayer::LoadSceneDataAsset(const XMLElement sceneDataAsset)
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Recursively loads all child Objects and their components from a parent.
+    ///		@returns : False if this or any child object failed to load.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool WorldLayer::LoadChildObject(Object* pParent, const XMLElement parentElement)
     {
-#ifndef _DEBUG
-        if (AssetIsDebugOnly(sceneDataAsset))
+        XMLElement childObjectElement = parentElement.GetChildElement(kEntityElementTag);
+
+        // While we have a child:
+        while (childObjectElement.IsValid())
         {
-            return;
-        }
+#ifndef _DEBUG
+            // Skip any debug objects:
+            if (AssetIsDebugOnly(childObjectElement))
+            {
+                childObjectElement = childObjectElement.GetSiblingElement(kEntityElementTag);
+                continue;
+            }
 #endif
 
+            // Get the SceneEntity construction data from the root element.
+            const auto cData = SceneEntity::GetEntityConstructionData(childObjectElement);
 
-        const char* pPath = sceneDataAsset.GetAttributeValue<const char*>("path");
-        MCP_CHECK_MSG(pPath, "Failed to load SceneDataAsset on the UI Layer! No path was found!");
+            // Create the ChildObject and add it to the layer.
+            auto* pChildObject = BLEACH_NEW(Object(cData));
+            AddEntity(pChildObject);
 
-        XMLParser parser;
-        if (!parser.LoadFile(pPath))
-        {
-            MCP_ERROR("UILayer", "Failed to load SceneDataAsset at path: ", pPath);
-            return;
-        }
+            // Set the parent
+            pChildObject->SetParent(pParent);
 
-        XMLElement assetElement = parser.GetElement();
-        while(assetElement.IsValid())
-        {
-            if (HashString32(assetElement.GetName()) == kSceneLayerAssetId)
+            // Load the Components for the object:
+            if (!LoadObjectComponents(pChildObject, childObjectElement))
             {
-                LoadSceneDataAsset(assetElement);
+                MCP_ERROR("WorldLayer", "Failed to load Child Object!");
+                return false;
             }
 
-            else
+            // Load any children that they have:
+            if (!LoadChildObject(pChildObject, childObjectElement))
             {
-                LoadObject(assetElement);   
+                return false;
             }
 
-            assetElement = assetElement.GetSiblingElement();
+            // Get the next child object:
+            childObjectElement = childObjectElement.GetSiblingElement(kEntityElementTag);
         }
+
+        return true;
     }
 
     bool WorldLayer::OnSceneLoad()
     {
-        for (auto& [id, pObject] : m_objects)
+        for (auto& [id, pEntity] : m_entities)
         {
+            auto* pObject = SceneEntity::SafeCastEntity<Object>(pEntity);
             if (!pObject->PostLoadInit())
             {
                 // Should I return false here and stop execution entirely based on an Object failing to initialize???
@@ -185,7 +226,7 @@ namespace mcp
                 break;
         }
 
-        DeleteQueuedObjects();
+        DeleteQueuedEntities();
 
         // Run Collisions, after all of the updates have gone through.
         m_collisionSystem.RunCollisions();
@@ -275,13 +316,12 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Create a new, empty object in the World.
-    ///		@returns : Pointer to the newly created object.
+    ///		@brief : Creates a new, empty object in the World and adds it to this layer.
     //-----------------------------------------------------------------------------------------------------------------------------
-    Object* WorldLayer::CreateObject()
+    Object* WorldLayer::CreateEntity()
     {
-        auto* pNewObject = BLEACH_NEW(Object(m_pScene));
-        m_objects.emplace(pNewObject->GetId(), pNewObject);
+        auto* pNewObject = BLEACH_NEW(Object(SceneEntityConstructionData()));
+        AddEntity(pNewObject);
 
         return pNewObject;
     }
@@ -290,118 +330,37 @@ namespace mcp
     //		NOTES:
     //		
     ///		@brief : Create a new object in the World from a Prefab (XML file).
-    ///		@param pPrefabPath : Path to the prefab. 
-    ///		@returns : Pointer to the new object, or nullptr if it failed. (Like the path is wrong or something.
+    ///		@param root : "Object" element in the XML File.
+    ///		@returns : Pointer to the new object, or nullptr if it failed.
     //-----------------------------------------------------------------------------------------------------------------------------
-    Object* WorldLayer::CreateObjectFromPrefab(const char* pPrefabPath)
+    Object* WorldLayer::CreateEntityFromPrefab(const XMLElement root)
     {
-        XMLParser parser;
-        if (!parser.LoadFile(pPrefabPath))
+        MCP_CHECK(root.IsValid());
+
+        // Get the SceneEntity construction data from the root element.
+        const auto cData = SceneEntity::GetEntityConstructionData(root);
+
+        // Create the Object and add it to the layer.
+        auto* pObject = BLEACH_NEW(Object(cData));
+        AddEntity(pObject);
+
+        // Load each of the components:
+        if (!LoadObjectComponents(pObject, root))
         {
-            MCP_ERROR("World", "Failed to create Object from Data! Failed to find prefab file at path: ", pPrefabPath);
+            MCP_ERROR("WorldLayer", "Failed to load object prefab! Failed to Load component(s)!");
+            pObject->Destroy();
             return nullptr;
         }
 
-        const XMLElement element = parser.GetElement("Object");
-        if (!element.IsValid())
+        // Load any Child Objects:
+        if (!LoadChildObject(pObject, root))
         {
-            MCP_ERROR("World", "Failed to create Object from Data! Failed 'Object' element in file at path: ", pPrefabPath);
+            MCP_ERROR("WorldLayer", "Failed to load object prefab! Failed to load child object(s)!");
+            pObject->Destroy();
             return nullptr;
-        }
-
-        // Create the new Object.
-        auto* pObject = CreateObject();
-
-        // Load the Components for the object:
-        XMLElement componentElement = element.GetChildElement();
-
-        while (componentElement.IsValid())
-        {
-            auto* pComponent = ComponentFactory::CreateFromData(componentElement.GetName(), componentElement);
-
-            if (!pComponent)
-            {
-                MCP_ERROR("WorldLayer", "Failed to load object! Failed to add Component!");
-                // Delete the created object
-                pObject->Destroy();
-                return nullptr;
-            }
-
-            // Add the Component to the new Object.
-            pObject->AddComponent(pComponent);
-
-            // Go to the next sibling to see if we have another component.
-            componentElement = componentElement.GetSiblingElement();
         }
 
         return pObject;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief :  Queues an Object for destruction. The object will be deleted after the update loop has finished.
-    ///		@param id : Id of the Object you want to destroy.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void WorldLayer::DestroyObject(const ObjectId id)
-    {
-        const auto result = m_objects.find(id);
-        if (result == m_objects.end())
-        {
-            MCP_WARN("World", "Failed to Destroy Object! Object Id was invalid.");
-            return;
-        }
-
-        m_queuedObjectsToDelete.emplace_back(result->first);
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Checks to see if the ObjectId points to a valid Object or not.
-    ///		@param id : Id of the Object you want to destroy.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    bool WorldLayer::IsValidId(const ObjectId id)
-    {
-        if (const auto result = m_objects.find(id); result == m_objects.end())
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Deletes every object that has been queued for destruction.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void WorldLayer::DeleteQueuedObjects()
-    {
-        for (const auto objectId : m_queuedObjectsToDelete)
-        {
-            auto result = m_objects.find(objectId);
-
-            BLEACH_DELETE(result->second);
-            m_objects.erase(result);
-        }
-
-        m_queuedObjectsToDelete.clear();
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Safely destroys the layer.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void WorldLayer::DestroyLayer()
-    {
-        for (const auto&[id, pObject] : m_objects)
-        {
-            BLEACH_DELETE(pObject);
-        }
-
-        m_objects.clear();
     }
 
     void WorldLayer::OnEvent([[maybe_unused]] ApplicationEvent& event)

@@ -14,6 +14,14 @@ namespace mcp
         //
     }
 
+    Component::Component(const ComponentConstructionData& data)
+        : m_pOwner(nullptr)
+        , m_isActive(data.startActive)
+    {
+        //
+    }
+
+
     MessageManager* Component::GetMessageManager() const
     {
         return m_pOwner->GetScene()->GetMessageManager();
@@ -86,7 +94,7 @@ namespace mcp
     //		
     ///		@brief : Component response to the Object's active state changing.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void Component::OnObjectActiveChanged(const bool objectActive)
+    void Component::OnOwnerActiveChanged(const bool objectActive)
     {
         // If we were active, then we need to respond to the active change.
         if (m_isActive)
@@ -102,5 +110,13 @@ namespace mcp
             }
         }
     }
+
+    ComponentConstructionData Component::GetComponentConstructionData(const XMLElement element)
+    {
+        ComponentConstructionData data;
+        data.startActive = element.GetAttributeValue<bool>("startActive", true);
+        return data;
+    }
+
 
 }

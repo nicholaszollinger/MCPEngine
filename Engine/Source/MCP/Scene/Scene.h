@@ -36,6 +36,7 @@ namespace mcp
         void Render() const;
 
         [[nodiscard]] MessageManager* GetMessageManager();
+        [[nodiscard]] SceneLayer* GetLayer(const LayerId id) const;
         [[nodiscard]] WorldLayer* GetWorldLayer() const { return m_pWorldLayer; }
         [[nodiscard]] UILayer* GetUILayer() const { return m_pUILayer; }
         [[nodiscard]] bool TransitionQueued() const { return m_transitionQueued; }

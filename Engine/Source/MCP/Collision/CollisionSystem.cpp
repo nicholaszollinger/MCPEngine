@@ -240,7 +240,7 @@ namespace mcp
 
                                 const Vec2 deltaPos = significantFaceIsWidth ? Vec2{0, distanceScalar * intersectionRect.height} : Vec2 { distanceScalar * intersectionRect.width, 0.f};
 
-                                pColliderComponent->GetTransformComponent()->AddToLocationNoUpdate(deltaPos);
+                                pColliderComponent->GetTransformComponent()->AddToPositionNoUpdate(deltaPos);
                                 pColliderComponent->SetVelocity(significantFaceNormal * distanceOnFaceNormal);
 
                                 // Broadcast the events.

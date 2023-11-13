@@ -8,7 +8,6 @@ namespace mcp
     class AudioTrack final : public DiskResource
     {
     public:
-        AudioTrack() = default;
         MCP_DEFINE_RESOURCE_DESTRUCTOR(AudioTrack)
 
     protected:

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "WidgetFactory.h"
+#include "MCP/Scene/SceneEntity.h"
 #include "MCP/Lua/LuaResource.h"
 #include "Utility/String/StringId.h"
 #include "Utility/Types/Rect.h"
@@ -30,6 +31,7 @@ namespace mcp
 
     struct WidgetConstructionData
     {
+        SceneEntityConstructionData entityConstructionData;
         RectF rect {};                           // Position of the rect is the offset from the parent, or the actual screen position if the parent is nullptr.
         Vec2 anchor = {0.5f, 0.5f};         // How the Widget is anchored to it's parent. Default is to anchor to the center.
         Vec2 scale = {1.f, 1.f};            // Scale of the Widget.
@@ -38,7 +40,6 @@ namespace mcp
         LuaResourcePtr enableBehaviorScript;     // Optional script that defines extra behavior for enabling and disabling this widget.
         int zOffset = 1;                         // z-Axis difference from the parent.
         bool isInteractable = false;             // Whether this Widget is interactable or not.
-        bool startEnabled = true;                // Whether this Widget is active when loaded.
         bool sizedToContent = false;             // Whether the Widget's dimensions is based on the size of its content.
     };
 
@@ -47,16 +48,12 @@ namespace mcp
     //		
     ///		@brief : Base class for any UI Components.
     //-----------------------------------------------------------------------------------------------------------------------------
-    class Widget
+    class Widget : public SceneEntity
     {
         friend class LuaSystem;
-    protected:
-        static constexpr StringId kInvalidTag = StringId();
+        MCP_DEFINE_SCENE_ENTITY(Widget)
 
-        std::vector<Widget*> m_children;    // Child widgets. Their positions are offsets 
-        UILayer* m_pUILayer;                // Reference to the UILayer that we are in.
-        const StringId m_tag;               // Optional tag to be able to find this specific widget.
-        Widget* m_pParent;                  // Parent of this widget. If the parent is nullptr, then it is the Root.
+    protected:
         LuaResourcePtr m_enableBehaviorScript;  // Optional Script that defines behavior when this script is enabled or disabled.
         Vec2 m_localPos;                    // Offset from the origin position
         Vec2 m_pivot;                       // The alignment of the center point of the Widget.
@@ -69,37 +66,31 @@ namespace mcp
         bool m_isVisible;                   // Whether this Widget is being rendered or not.
         bool m_sizedToContent;              // Whether the size of this widget is based on its content and its children.
 
-    private:
-        bool m_isActive;     // Whether this widget is active or not. Use IsActive() to properly check to if you are active or not.
-
     public: 
         Widget(const WidgetConstructionData& data);
-        virtual ~Widget() = default;
+        virtual ~Widget() override = default;
 
         //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Called right after construction, no Potential parent is set and child widgets will not be created or set yet!
         //-----------------------------------------------------------------------------------------------------------------------------
-        virtual bool Init() { return true; }
+        virtual bool Init() override { return true; }
 
         //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Called once the layer is loaded. All scene entities loaded from data have been created.
         //-----------------------------------------------------------------------------------------------------------------------------
-        virtual bool PostLoadInit() { return true; }
-
-        void SetParent(Widget* pParent);
-        void AddChild(Widget* pChild); // Should this handle the creation of the widget and return the child?
-        void RemoveChild(Widget* pChild);
-        void DestroyWidget();
-        void DestroyWidgetAndChildren();
+        virtual bool PostLoadInit() override { return true; }
+        
         void Focus();
         void OnFocusChanged(const bool isFocused);
 
         // Querying Children
         template<typename WidgetType> WidgetType* FindChildByTag(const StringId tag);
         template<typename WidgetType> WidgetType* FindFirstChildOfType();
+        template<typename WidgetType> std::vector<WidgetType*> GetAllChildrenOfType();
+
         void ForAllChildren(const std::function<void(Widget* pWidget)>& task) const;
-        [[nodiscard]] Widget* FindChildByTag(const StringId tag) const;
-        [[nodiscard]] const std::vector<Widget*>& GetChildren() const { return m_children; }
+        [[nodiscard]] virtual Widget* GetChildByTag(const StringId tag) const override;
+        [[nodiscard]] virtual Widget* GetChildByTag(const StringId tag) override;
         virtual void OnChildSizeChanged() {}
 
         // Event Handling
@@ -109,10 +100,7 @@ namespace mcp
         virtual void SetLocalPosition(const float x, const float y);
         void SetAnchor(const float x, const float y);
         void SetZOffset(const int zOffset);
-        void SetActive(const bool isActive);
-        void ToggleActive();
         void SetInteractable(const bool isInteractable);
-        void SetUILayer(UILayer* pUILayer) { m_pUILayer = pUILayer; }
         void SetPivot(const Vec2 pivot);
         void SetPivot(float x, float y);
         void SetWidth(const float width);
@@ -127,7 +115,6 @@ namespace mcp
         [[nodiscard]] Vec2 GetRectCenter() const;
         [[nodiscard]] Vec2 GetLocalPosition() const { return m_localPos; }
         [[nodiscard]] Vec2 GetScale() const;
-        [[nodiscard]] StringId GetTag() const { return m_tag; }
         [[nodiscard]] RectF GetRect() const;
         [[nodiscard]] RectF GetRectTopLeft() const;
         [[nodiscard]] int GetMaxZ() const;
@@ -135,10 +122,10 @@ namespace mcp
         [[nodiscard]] bool HasChildren() const { return !m_children.empty(); }
         [[nodiscard]] bool IsInteractable() const;
         [[nodiscard]] bool IsVisible() const;
-        [[nodiscard]] bool IsActive() const;
         [[nodiscard]] bool IsFocused() const;
         [[nodiscard]] virtual WidgetTypeId GetTypeId() const = 0;
-        [[nodiscard]] UILayer* GetLayer() const { return m_pUILayer; }
+        [[nodiscard]] UILayer* GetUILayer() const;
+        [[nodiscard]] virtual Widget* GetParent() const override { return SafeCastEntity<Widget>(m_pParent);}
 
     protected:
         static WidgetConstructionData GetWidgetConstructionData(const XMLElement widgetElement);
@@ -159,16 +146,6 @@ namespace mcp
         virtual void OnDisable() {}
 
         //-----------------------------------------------------------------------------------------------------------------------------
-        ///		@brief : Called when this Widget is set to 'Active'. Example task: Set the Widget to be rendered.
-        //-----------------------------------------------------------------------------------------------------------------------------
-        virtual void OnActive() {}
-
-        //-----------------------------------------------------------------------------------------------------------------------------
-        ///		@brief : Called when this Widget is set to 'Inactive'.  Example task: Stop the Widget from being rendered.
-        //-----------------------------------------------------------------------------------------------------------------------------
-        virtual void OnInactive() {}
-
-        //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Called when this Widget is Focused in the UILayer.
         //-----------------------------------------------------------------------------------------------------------------------------
         virtual void OnFocus() {}
@@ -178,16 +155,24 @@ namespace mcp
         //-----------------------------------------------------------------------------------------------------------------------------
         virtual void OnFocusLost() {}
         
-        virtual void OnParentSet() {}
+        virtual void OnActive() override;
+        virtual void OnInactive() override;
+        virtual void OnParentSet() override;
         virtual void OnZChanged() {}
-        virtual void OnChildAdded([[maybe_unused]] Widget* pChild) {}
+        virtual void OnDestroy() override {}
+
+        virtual void OnChildAdded(SceneEntity* pChild) override;
+        virtual void OnChildRemoved(SceneEntity* pChild) override;
+        virtual void OnChildAdded([[maybe_unused]] Widget* pChild);
         virtual void OnChildRemoved([[maybe_unused]] Widget* pChild) {}
         [[nodiscard]] bool PointIntersectsRect(const Vec2 screenPos) const;
         [[nodiscard]] bool GetPointRelativeToRect(const Vec2 screenPos, Vec2& relativePos) const;
 
     private:
         void OnZSet();
-        void OnParentActiveChanged(const bool parentActiveState);
+
+        template<typename WidgetType> void AddAllChildrenOfType(std::vector<WidgetType*>& childrenOfType);
+
         static void RegisterLuaFunctions(lua_State* pState);
     };
 
@@ -202,14 +187,16 @@ namespace mcp
     {
         for (auto* pChild : m_children)
         {
+            auto* pWidgetChild = SafeCastEntity<Widget>(pChild);
+
             // If it matches this child, return the child casted to the correct type.
-            if (pChild->GetTypeId() == WidgetType::GetStaticTypeId() && tag == pChild->GetTag())
+            if (pWidgetChild->GetTypeId() == WidgetType::GetStaticTypeId() && tag == pWidgetChild->GetTag())
             {
-                return static_cast<WidgetType*>(pChild);
+                return static_cast<WidgetType*>(pWidgetChild);
             }
 
             // Recursively check the children.
-            if (WidgetType* pResult = pChild->FindChildByTag<WidgetType>(tag))
+            if (WidgetType* pResult = pWidgetChild->FindChildByTag<WidgetType>(tag))
                 return pResult;
         }
 
@@ -228,14 +215,16 @@ namespace mcp
     {
         for (auto* pChild : m_children)
         {
+            auto* pWidgetChild = SafeCastEntity<Widget>(pChild);
+
             // If it matches this child, return the child casted to the correct type.
-            if (pChild->GetTypeId() == WidgetType::GetStaticTypeId())
+            if (pWidgetChild->GetTypeId() == WidgetType::GetStaticTypeId())
             {
-                return static_cast<WidgetType*>(pChild);
+                return static_cast<WidgetType*>(pWidgetChild);
             }
 
             // Recursively check the children.
-            if (WidgetType* pResult = pChild->FindFirstChildOfType<WidgetType>())
+            if (WidgetType* pResult = pWidgetChild->FindFirstChildOfType<WidgetType>())
                 return pResult;
         }
 
@@ -243,5 +232,32 @@ namespace mcp
         return nullptr;
     }
 
+    template <typename WidgetType>
+    std::vector<WidgetType*> Widget::GetAllChildrenOfType()
+    {
+        std::vector<WidgetType*> widgets;
 
+        AddAllChildrenOfType(widgets);
+
+        return widgets;
+    }
+
+    template <typename WidgetType>
+    void Widget::AddAllChildrenOfType(std::vector<WidgetType*>& childrenOfType)
+    {
+        for (auto* pChild : m_children)
+        {
+            auto* pWidgetChild = SafeCastEntity<Widget>(pChild);
+
+            // If this child is the type, add it to the array
+            if (pWidgetChild->GetTypeId() == WidgetType::GetStaticTypeId())
+            {
+                auto* pTypedWidget = static_cast<WidgetType*>(pWidgetChild);
+                childrenOfType.emplace_back(pTypedWidget);
+            }
+
+            // Check the children of this Widget, recursively.
+            pWidgetChild->AddAllChildrenOfType(childrenOfType);
+        }
+    }
 }
