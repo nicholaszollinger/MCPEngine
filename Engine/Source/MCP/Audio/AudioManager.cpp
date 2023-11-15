@@ -5,6 +5,7 @@
 #include "MCP/Components/AudioSourceComponent.h"
 #include "MCP/Core/Config.h"
 #include "MCP/Debug/Log.h"
+#include "MCP/Core/Application/Application.h"
 
 #if MCP_AUDIO_PLATFORM == MCP_AUDIO_PLATFORM_SDL
 
@@ -18,6 +19,8 @@ using AudioPlatform = SDLAudioManager;
 
 namespace mcp
 {
+    MCP_DEFINE_STATIC_SYSTEM_GETTER(AudioManager)
+
     bool AudioManager::Init()
     {
         if (!AudioPlatform::Init())

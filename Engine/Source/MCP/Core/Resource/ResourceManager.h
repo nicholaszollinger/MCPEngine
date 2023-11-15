@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include "PackageManager.h"
 #include "Resource.h"
-#include "MCP/Core/GlobalManager.h"
+#include "MCP/Core/System.h"
 #include "MCP/Debug/Log.h"
 
 namespace mcp
@@ -103,29 +103,25 @@ namespace mcp
         ResourcePtr<ResourceType>* GetResourcePtr(const RequestType& key);
     };
 
-    class ResourceManager final : public IProcess
+    class ResourceManager final : public System
     {
     private:
         // This is the asset zip file. In the future, this may look different. This is purpose build right now.
         static constexpr const char* kAssetDirectory = "AssetsPkg.zip";
 
-        DEFINE_GLOBAL_MANAGER(ResourceManager)
+        MCP_DEFINE_SYSTEM(ResourceManager)
 
     public:
-        ResourceManager(const ResourceManager&) = delete;
-        ResourceManager(ResourceManager&&) = delete;
-        ResourceManager& operator=(const ResourceManager&) = delete;
-        ResourceManager& operator=(ResourceManager&&) = delete;
-        
         template<typename ResourceType, typename DiskRequestType>
         ResourceType* LoadFromDisk(const DiskRequestType& request);
 
         template<typename ResourceType, typename RequestType>
         void FreeResource(const RequestType& request);
 
-    private:
-        ResourceManager() = default;
+        static ResourceManager* Get();
+        static ResourceManager* AddFromData(const XMLElement) { return BLEACH_NEW(ResourceManager); }
 
+    private:
         virtual bool Init() override;
         virtual void Close() override;
         

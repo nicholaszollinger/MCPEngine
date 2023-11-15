@@ -9,8 +9,6 @@
 #include "MCP/Components/ComponentFactory.h"
 #include "MCP/Components/EngineComponents.h"
 #include "MCP/Core/Event/ApplicationEvent.h"
-#include "MCP/Core/Resource/Parser.h"
-#include "MCP/Core/Event/KeyEvent.h"
 #include "MCP/Graphics/Graphics.h"
 #include "MCP/Lua/Lua.h"
 #include "LuaSource.h"
@@ -45,9 +43,9 @@ namespace mcp
     //		NOTES:
     //		
     ///		@brief : Initialize the MCPEngine and all of its dependencies.
-    ///		@param pGameDataFilepath : Path to the GameData that we are using to run the game.
+    ///		@param pGameSystemsFilepath : Path to the GameData that we are using to run the game.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool Application::Init(const char* pGameDataFilepath)
+    bool Application::Init(const char* pGameSystemsFilepath)
     {
         // Initialize Bleach Leak Detector:
         //BLEACH_INIT_LEAK_DETECTOR();
@@ -78,87 +76,64 @@ namespace mcp
 
 #endif
 
-        // Load the ApplicationProperties from Data.
-        ApplicationProperties props;
-        if (!LoadApplicationProperties(props, "Config/AppProps.config"))
+        // Create the Resource system immediately and initialize it:
+        auto* pResourceManager = m_systems.emplace_back(BLEACH_NEW(ResourceManager));
+        if (!pResourceManager->Init())
         {
-            MCP_CRITICAL("Application", "Failed to load ApplicationProperties!");
+            MCP_ERROR("application", "Failed to initialize! Failed to initialize the ResourceManager!");
             Close();
             return false;
         }
 
-        // Create GlobalManagers and save a reference in processes.
-        GlobalManagerFactory::Create<lua::LuaLayer>();
-        GlobalManagerFactory::Create<GraphicsManager>();
-        GlobalManagerFactory::Create<AudioManager>();
-        GlobalManagerFactory::Create<ResourceManager>();
-        GlobalManagerFactory::Create<SceneManager>();
-        
-        m_processes.emplace_back(lua::LuaLayer::Get());
-        m_processes.emplace_back(GraphicsManager::Get());
-        m_processes.emplace_back(AudioManager::Get());
-        m_processes.emplace_back(ResourceManager::Get());
-        m_processes.emplace_back(SceneManager::Get());
+        // Load the project settings:
+        XMLParser projectSettingsFile;
+        // TODO: This file path could be a parameter:
+        if (!projectSettingsFile.LoadFile("Config/ProjectSettings.xml"))
+        {
+            MCP_CRITICAL("Application", "Failed to load project settings!");
+            Close();
+            return false;
+        }
 
-        // Initialize each process.
-        for (auto* pProcess : m_processes)
+        const auto settingsRoot = projectSettingsFile.GetElement();
+
+        // Add the Engine Systems using the project settings:
+        m_systems.emplace_back(lua::LuaLayer::AddFromData(settingsRoot));
+        m_systems.emplace_back(GraphicsManager::AddFromData(settingsRoot));
+        m_systems.emplace_back(AudioManager::AddFromData(settingsRoot));
+        m_systems.emplace_back(SceneManager::AddFromData(settingsRoot));
+
+        // Initialize each engine system in order. (skipping the ResourceManager)
+        for (size_t i = 1; i < m_systems.size(); ++i)
         {
             // If any fail, then we need to close and quit.
-            if (!pProcess->Init())
+            if (!m_systems[i]->Init())
             {
-                MCP_ERROR("Application", "Failed to Initialize Application!");
+                MCP_ERROR("Application", "Failed to Initialize Application! Failed to initialize Engine Systems!");
                 Close();
                 return false;
             }
         }
 
-        // Initialize the Window:
-        if (!GraphicsManager::Get()->GetWindow()->Init(props.windowName.c_str(), props.defaultWindowWidth, props.defaultWindowHeight))
+        const auto gameSystemIndex = m_systems.size();
+
+        // Load the GameSystems:
+        if (!LoadGameSystems(pGameSystemsFilepath))
         {
-            MCP_ERROR("Application", "Failed to initialize Application! Failed to initialize the Window!");
-            Close();
+            MCP_ERROR("Application", "Failed to load GameSystems!");
             return false;
         }
 
-        // Set the Window as the RenderTarget for the Renderer.
-        if (!GraphicsManager::Get()->SetRenderTarget())
+        // Initialize Game Systems
+        for (size_t i = gameSystemIndex; i < m_systems.size(); ++i)
         {
-            MCP_ERROR("Application", "Failed to initialize Application! Failed to set the main window as the Render Target!");
-            Close();
-            return false;
-        }
-
-        // Create the GameInstance
-        XMLParser parser;
-        if (!parser.LoadFile(props.gameInstanceDataPath.c_str()))
-        {
-            MCP_ERROR("Application", "Failed to initialize Application! Failed to load GameInstance data!");
-            Close();
-            return false;
-        }
-
-        const auto instanceElement = parser.GetElement("GameInstance");
-        if (!instanceElement.IsValid())
-        {
-            MCP_ERROR("Application", "Failed to initialize Application! Failed to find GameInstance element in game instance data!");
-            Close();
-            return false;
-        }
-
-        m_pGameInstance = GameInstanceFactory::CreateTypeFromData(props.gameInstanceClassName.c_str(), instanceElement);
-        if (!m_pGameInstance)
-        {
-            MCP_ERROR("Application", "Failed to initialize Application! Failed to create the GameInstance!");
-            Close();
-            return false;
-        }
-
-        // Load the GameData:
-        if (!SceneManager::Get()->LoadSceneData(pGameDataFilepath))
-        {
-            MCP_ERROR("Application", "Failed to load the GameData at filepath: ", pGameDataFilepath);
-            Close();
-            return false;
+            // If any fail, then we need to close and quit.
+            if (!m_systems[i]->Init())
+            {
+                MCP_ERROR("Application", "Failed to Initialize Application! Failed to initialize Game Systems!");
+                Close();
+                return false;
+            }
         }
 
         return true;
@@ -171,6 +146,10 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Application::Run()
     {
+        // Enter the start scene:
+        if (!SceneManager::Get()->EnterStartScene())
+            return;
+
         m_isRunning = true;
 
         // Start the timer.
@@ -198,79 +177,74 @@ namespace mcp
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
-    //      This is very 'built for specific data'. I would like to extract certain functions when I get to making my parser interfaces.
-    //		
-    ///		@brief : 
-    ///		@param outProps : 
-    ///		@param pFilepath : 
-    ///		@returns : 
+    //
+    ///		@brief : Attempts to load each game system. If any GameSystem fails to load properly, this will return false.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool Application::LoadApplicationProperties(ApplicationProperties& outProps, const char* pFilepath)
+    bool Application::LoadGameSystems(const char* pGameSystemsPath)
     {
-        std::ifstream inFile(pFilepath, std::ios::in);
-        if (!inFile.is_open())
+        // Load GameSystems:
+        XMLParser gameSystems;
+        if (gameSystems.LoadFile(pGameSystemsPath))
         {
-            MCP_ERROR("Application", "Failed to open AppProps.config at filepath: ", pFilepath);
-            return false;
+            auto systemElement = gameSystems.GetElement("System");
+            XMLParser gameSystemData;
+
+            while(systemElement.IsValid())
+            {
+                // Get the System typename
+                auto* pSystemType = systemElement.GetAttributeValue<const char*>("typename", nullptr);
+                if (!pSystemType)
+                {
+                    MCP_ERROR("Application", "Failed to load game system! System 'typename' was invalid!");
+                    systemElement = systemElement.GetSiblingElement("System");
+                    continue;
+                }
+
+                // Get the Path to the data to construct the System
+                auto* pDataPath = systemElement.GetAttributeValue<const char*>("dataPath", nullptr);
+
+                // If there is a valid path:
+                if (pDataPath)
+                {
+                    if (!gameSystemData.LoadFile(pDataPath))
+                    {
+                        MCP_ERROR("Application", "Failed to load game system: ", pSystemType, "! 'dataPath' was invalid!");
+                        return false;
+                    }
+
+                    const auto rootElement = gameSystemData.GetElement();
+                    auto* pSystem = SystemFactory::CreateTypeFromData(pSystemType, rootElement);
+
+                    if (!pSystem)
+                    {
+                        MCP_ERROR("Application", "Failed to load game system: ", pSystemType, " from data!");
+                        return false;
+                    }
+
+                    m_systems.emplace_back(pSystem);
+
+                    // Close the current file we were working on.
+                    gameSystemData.CloseCurrentFile();
+                }
+
+                // If there is no data path, try to create a new default system:
+                else
+                {
+                    auto* pSystem = SystemFactory::CreateDefaultType(pSystemType);
+
+                    if (!pSystem)
+                    {
+                        MCP_ERROR("Application", "Failed to create game system: ", pSystemType, "!");
+                        return false;
+                    }
+
+                    m_systems.emplace_back(pSystem);
+                }
+
+                // Continue to the next system:
+                systemElement = systemElement.GetSiblingElement("System");
+            }
         }
-
-        // Lambda to check for a whitespace char.
-        const auto isWhiteSpace = [](const char val) -> bool
-        {
-           return val == ' '
-                || val == '\t'
-                || val == '\n'
-                || val == '\r'
-                || val == '\v'
-                || val == '\f';
-        };
-
-        // Lambda to remove all whitespace from the line.
-        // I can't use the c++20 version -> std::erase_if(line, isWhiteSpace);
-        // So I just grabbed the implementation from cppreference and put it in a lambda.
-        // https://en.cppreference.com/w/cpp/string/basic_string/erase2
-        auto eraseIf = [](std::string& str, const std::function<bool(const char)>& predicate) -> void
-        {
-            const auto it = std::remove_if(str.begin(), str.end(), predicate);
-            str.erase(it, str.end());
-        };
-
-        std::string line;
-
-        // Go to the first item.
-        while (std::getline(inFile, line))
-        {
-            if (line[0] != '#' && line[0] != ';' && !line.empty())
-                break;
-        }
-
-        // Get the Window Name.
-        auto endOfName = line.find_first_of('=');
-        outProps.windowName = line.substr(endOfName + 2, std::string::npos);
-
-        // Get the Width
-        std::getline(inFile, line);
-        endOfName = line.find_first_of('=');
-        auto val = line.substr(endOfName + 2, std::string::npos);
-        outProps.defaultWindowWidth = std::stoi(val);
-
-        // Get the Height
-        std::getline(inFile, line);
-        endOfName = line.find_first_of('=');
-        val = line.substr(endOfName + 2, std::string::npos);
-        outProps.defaultWindowHeight = std::stoi(val);
-
-        // Get the GameInstance class
-        std::getline(inFile, line);
-        endOfName = line.find_first_of('=');
-        val = line.substr(endOfName + 2, std::string::npos);
-        outProps.gameInstanceClassName = val;
-
-        // Get the GameInstance Path
-        std::getline(inFile, line);
-        endOfName = line.find_first_of('=');
-        val = line.substr(endOfName + 2, std::string::npos);
-        outProps.gameInstanceDataPath = val;
 
         return true;
     }
@@ -299,23 +273,18 @@ namespace mcp
 
         MCP_LOG("Application", "Closing MCPEngine...");
 
-        BLEACH_DELETE(m_pGameInstance);
-        m_pGameInstance = nullptr;
-
-        // Close the processes in reverse order.
-        for (auto it = m_processes.rbegin(); it != m_processes.rend(); ++it)
+        // Close the Systems in reverse order.
+        for (auto it = m_systems.rbegin(); it != m_systems.rend(); ++it)
         {
-            (*it)->Close();
+            auto* pSystem = (*it);
+            pSystem->Close();
+
+            BLEACH_DELETE(pSystem);
+            pSystem = nullptr;
         }
 
-        // Destroy all of the GlobalManagers:
-        GlobalManagerFactory::Destroy<SceneManager>();
-        GlobalManagerFactory::Destroy<ResourceManager>();
-        GlobalManagerFactory::Destroy<AudioManager>();
-        GlobalManagerFactory::Destroy<GraphicsManager>();
-        GlobalManagerFactory::Destroy<lua::LuaLayer>();
-
 #if MCP_LOGGING_ENABLED
+        // Close the Logger
         Logger::Close();
 #endif
 

@@ -2,37 +2,21 @@
 // Application.h
 
 #include <string>
+#include <unordered_set>
 #include <vector>
-#include "GameInstance.h"
+#include "MCP/Core/System.h"
 
 struct lua_State;
 namespace mcp
 {
     class KeyEvent;
     class Scene;
-    class IProcess;
-
-    struct ApplicationProperties
-    {
-        std::string windowName;             // Name to give the Application's Main Window.
-        std::string gameInstanceClassName;  // Name of the gameInstance class type for this application.
-        std::string gameInstanceDataPath;   // Path to the GameInstance data.
-
-        // Starting window width of the application. Setting either width or height to -1
-        // will default to fullscreen.
-        int defaultWindowWidth   = -1;
-
-        // Starting window height of the application. Setting either width or height to -1
-        // will default to fullscreen.
-        int defaultWindowHeight  = -1;
-    };
 
     class Application
     {
         static inline Application* s_pInstance = nullptr;
 
-        std::vector<IProcess*> m_processes;
-        GameInstance* m_pGameInstance = nullptr;
+        std::vector<System*> m_systems;
         bool m_isRunning;
 
     public:
@@ -49,17 +33,41 @@ namespace mcp
         Application(Application&&) = delete;
         Application& operator=(Application&&) = delete;
         
-        bool Init(const char* pGameDataFilepath);
+        bool Init(const char* pGameSystemsFilepath);
         void Run();
         void Quit();
 
-        [[nodiscard]] GameInstance* GetGameInstance() const { return m_pGameInstance; }
+        template<typename SystemType>
+        SystemType* GetSystem() const;
 
         static void RegisterLuaFunctions(lua_State* pState);
 
     private:
-        bool LoadApplicationProperties(ApplicationProperties& outProps, const char* pFilepath);
+        bool LoadGameSystems(const char* pGameSystemsPath);
         void Close();
     };
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Get one of the global Systems in our Application.
+    ///		@tparam SystemType : Type of system you are looking for. Example 'GraphicsSystem'.
+    ///		@returns : Pointer to the system, or nullptr if the system was not found.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template <typename SystemType>
+    SystemType* Application::GetSystem() const
+    {
+        static_assert(std::is_base_of_v<System, SystemType>, "SystemType must be a derived class of System!");
+
+        for (auto* pSystem : m_systems)
+        {
+            if (pSystem->GetTypeId() == SystemType::GetStaticTypeId())
+            {
+                // TODO: This should be checked_cast
+                return static_cast<SystemType*>(pSystem);
+            }
+        }
+
+        return nullptr;
+    }
 }

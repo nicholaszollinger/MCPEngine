@@ -2,6 +2,7 @@
 // Lua.h
 
 #include "LuaSystem.h"
+#include "MCP/Core/System.h"
 
 namespace mcp::lua
 {
@@ -48,13 +49,17 @@ namespace mcp::lua
     ///		@brief : Internal class to hold onto the Engine-wide LuaSystem. You don't need to interact with this at, just call
     ///         the functions provided.
     //-----------------------------------------------------------------------------------------------------------------------------
-    class LuaLayer final : public IProcess
+    class LuaLayer final : public System
     {
-        DEFINE_GLOBAL_MANAGER(LuaLayer)
+        MCP_DEFINE_SYSTEM(LuaLayer)
+
         LuaSystem m_system;
 
     public:
         [[nodiscard]] LuaSystem& GetSystem() { return m_system; }
+
+        static LuaLayer* Get();
+        static LuaLayer* AddFromData(const XMLElement) { return BLEACH_NEW(LuaLayer); }
 
     private:
         virtual bool Init() override;

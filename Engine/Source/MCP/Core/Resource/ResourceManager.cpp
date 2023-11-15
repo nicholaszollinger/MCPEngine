@@ -1,9 +1,12 @@
 // ResourceManager.cpp
 
 #include "ResourceManager.h"
+#include "MCP/Core/Application/Application.h"
 
 namespace mcp
 {
+    MCP_DEFINE_STATIC_SYSTEM_GETTER(ResourceManager)
+
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //

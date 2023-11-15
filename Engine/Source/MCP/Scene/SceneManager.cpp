@@ -5,21 +5,40 @@
 #include <BleachNew.h>
 #include "LuaSource.h"
 #include "SceneAsset.h"
+#include "MCP/Core/Application/Application.h"
 #include "MCP/Debug/Log.h"
 #include "MCP/Graphics/Graphics.h"
 
 namespace mcp
 {
-    SceneManager::SceneManager()
-        : m_pActiveScene(nullptr)
-        , m_sceneToTransitionTo{}
-        , m_transitionQueued(false)
+    MCP_DEFINE_STATIC_SYSTEM_GETTER(SceneManager)
+
+    SceneManager::SceneManager(SceneList&& sceneList, const SceneIdentifier startScene)
+        : m_sceneList(std::move(sceneList))
+        , m_startScene(startScene)
     {
         //
     }
 
     bool SceneManager::Init()
     {
+        // Transition to the default scene:
+        const auto result = m_sceneList.find(m_startScene);
+        if (result == m_sceneList.end())
+        {
+            MCP_ERROR("SceneManager", "Failed to initialize SceneManager! Failed to find the start scene in the scene list! StartScene id: ", m_startScene.GetCStr());
+            Close();
+            return false;
+        }
+
+        /*m_sceneToTransitionTo = m_startScene;
+        if (!TransitionToScene())
+        {
+            MCP_ERROR("SceneManager", "Failed to initialize SceneManager! Failed to transition to the start scene!");
+            Close();
+            return false;
+        }*/
+
         return true;
     }
 
@@ -36,6 +55,18 @@ namespace mcp
         }
 
         m_pActiveScene = nullptr;
+    }
+
+    bool SceneManager::EnterStartScene()
+    {
+        m_sceneToTransitionTo = m_startScene;
+        if (!TransitionToScene())
+        {
+            MCP_ERROR("SceneManager", "Failed to transition to the start scene!");
+            return false;
+        }
+
+        return true;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -182,7 +213,6 @@ namespace mcp
         MCP_CHECK(m_pActiveScene);
 
         // Load the Scene
-        //MCP_LOG("SceneManager", "Loading Scene: ", m_sceneToTransitionTo.GetCStr());
         if (!m_pActiveScene->Load(sceneData.dataPath.c_str()))
         {
             MCP_ERROR("SceneManager", "Failed to Load Scene: ", m_sceneToTransitionTo.GetCStr());
@@ -198,6 +228,75 @@ namespace mcp
         m_transitionQueued = false;
 
         return true;
+    }
+
+    SceneManager* SceneManager::AddFromData(const XMLElement element)
+    {
+        SceneList sceneList;
+
+        const XMLElement sceneData = element.GetChildElement("SceneData");
+        if (!sceneData.IsValid())
+        {
+            MCP_ERROR("SceneManager", "Failed to load scene data! Failed to find Scene Data element!");
+            return nullptr;
+        }
+
+        // Get the Scene List.
+        const XMLElement sceneListElement = sceneData.GetChildElement("SceneList");
+        if (!sceneListElement.IsValid())
+        {
+            MCP_ERROR("SceneManager", "Failed to load scene data! Couldn't find SceneList element!");
+            return nullptr;
+        }
+
+        // Create the SceneData for each scene.
+        XMLElement scene = sceneListElement.GetChildElement("Scene");
+        while (scene.IsValid())
+        {
+#ifndef _DEBUG
+            if (AssetIsDebugOnly(scene))
+            {
+                scene = scene.GetSiblingElement("Scene");
+                continue;
+            }
+#endif
+
+            const SceneIdentifier id = scene.GetAttributeValue<const char*>("sceneId");
+            if (!id.IsValid())
+            {
+                MCP_ERROR("SceneManager", "Failed to create Scene! No SceneId found!");
+                return nullptr;
+            }
+
+            auto* path = scene.GetAttributeValue<const char*>("sceneDataPath");
+            if (!path)
+            {
+                MCP_ERROR("SceneManager", "Failed to create Scene! No SceneId found!");
+                return nullptr;
+            }
+
+            auto* pScene = BLEACH_NEW(Scene); // Create a new scene.
+            sceneList.emplace(id, SceneData(path, pScene));
+
+            scene = scene.GetSiblingElement("Scene");
+        }
+
+        // Get the start start Scene
+        const XMLElement startSceneElement = sceneData.GetChildElement("StartScene");
+        if (!startSceneElement.IsValid())
+        {
+            MCP_ERROR("SceneManager", "Failed to find Start Scene!");
+            return nullptr;
+        }
+
+        auto* startScene = startSceneElement.GetAttributeValue<const char*>("sceneId");
+        if (!startScene)
+        {
+            MCP_ERROR("SceneManager", "Failed to find Start!");
+            return nullptr;
+        }
+
+        return BLEACH_NEW(SceneManager(std::move(sceneList), startScene));
     }
 
     static int ScriptTransitionToScene(lua_State* pState)

@@ -6,23 +6,20 @@
 #include "AudioData.h"
 #include "AudioResource.h"
 #include "AudioTrack.h"
-#include "MCP/Core/GlobalManager.h"
+#include "MCP/Core/System.h"
 
 namespace mcp
 {
     class AudioResource;
 
-    class AudioManager final : public IProcess
+    class AudioManager final : public System
     {
-        DEFINE_GLOBAL_MANAGER(AudioManager)
+        MCP_DEFINE_SYSTEM(AudioManager)
 
         std::unordered_map<AudioGroup::Id, AudioGroup*> m_audioGroups;
         bool m_isMuted = false;
 
     public:
-        virtual bool Init() override;
-        virtual void Close() override;
-
         void Mute();
         void UnMute();
         [[nodiscard]] bool IsMuted() const;
@@ -31,6 +28,11 @@ namespace mcp
         AudioGroup* GetGroup(const char* pAudioGroupName);
         AudioHardwareChannel PlayAudio(const AudioResource& resource, const AudioSourceComponent* pAudioSource);
 
+        static AudioManager* Get();
+        static AudioManager* AddFromData(const XMLElement) { return BLEACH_NEW(AudioManager); }
+    private:
+        virtual bool Init() override;
+        virtual void Close() override;
         /*void PlayClip(const AudioClip& clip, AudioData& data) const;
         void PlayTrack(const AudioTrack& track, AudioData& data) const;*/
     };

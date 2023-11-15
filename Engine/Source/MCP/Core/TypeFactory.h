@@ -22,15 +22,16 @@ namespace mcp
     class TypeFactory
     {
         using CreateFromData = std::function<BaseType*(const XMLElement)>;
+        using CreateDefault = std::function<BaseType*()>;
         //using RegisterScriptFunctions = std::function<void(ScriptingContext&)>;
 
-        //struct TypeFunctions
-        //{
-        //    CreateFromData createFromData;
-        //    //RegisterScriptFunctions registerScriptFunctions;
-        //};
+        struct TypeCreationData
+        {
+            CreateFromData createFromData;
+            CreateDefault createDefault = nullptr;
+        };
 
-        using FactoryFunctionContainer = std::unordered_map<TypeId, CreateFromData>;
+        using FactoryFunctionContainer = std::unordered_map<TypeId, TypeCreationData>;
 
     public:
         static BaseType* CreateTypeFromData(const char* pTypename, const XMLElement element)
@@ -45,7 +46,30 @@ namespace mcp
                 return nullptr;
             }
 
-            return result->second(element);
+            return result->second.createFromData(element);
+        }
+
+        static BaseType* CreateDefaultType(const char* pTypename)
+        {
+            const TypeId id = HashString64(pTypename);
+            auto& factoryFunctions = GetFactoryContainer();
+
+            const auto result = factoryFunctions.find(id);
+            if (result == factoryFunctions.end())
+            {
+                MCP_ERROR("TypeFactory", "Failed to create default ", pTypename, "! No matching type id found!");
+                return nullptr;
+            }
+
+            // If there was no default constructor available, then return nullptr
+            if (!result->second.createDefault)
+            {
+                MCP_ERROR("TypeFactory", "Failed to create default ", pTypename, "! Type is not default constructible!");
+                return nullptr;
+            }
+
+            // Otherwise, return the a new default constructed type
+            return result->second.createDefault();
         }
 
         template<typename DerivedType>
@@ -56,12 +80,21 @@ namespace mcp
 
             // Check to see if we already have that id in our map:
             const auto result = factoryFunctions.find(id);
+
+            // TODO: I should probably throw a critical failure here:
             MCP_CHECK_MSG(result == factoryFunctions.end(), "Failed to register Type: '", pDerivedTypename, "'! We already had a Type by that id registered. This could mean that we have two of the same name!");
 
-            //TypeFunctions functions;
-            //functions.createFromData = [](const XMLElement element) -> DerivedType* { return DerivedType::AddFromData(element); };
-            //functions.registerScriptFunctions = [](ScriptingContext& context) -> void { return DerivedType::RegisterScriptFunctions(context); };
-            factoryFunctions.emplace(id, [](const XMLElement element) -> DerivedType* { return DerivedType::AddFromData(element); });
+            // Register the creation functions:
+            TypeCreationData functions;
+            functions.createFromData = [](const XMLElement element) -> DerivedType* { return DerivedType::AddFromData(element); };
+
+            // If the type is default constructable, add a functor to be able to create the derived type. 
+            if constexpr (std::is_default_constructible_v<DerivedType>)
+            {
+                functions.createDefault = []() -> DerivedType* { return BLEACH_NEW(DerivedType); };
+            }
+
+            factoryFunctions.emplace(id, functions);
 
             return id;
         }

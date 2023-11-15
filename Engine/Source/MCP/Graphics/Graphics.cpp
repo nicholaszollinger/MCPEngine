@@ -5,6 +5,7 @@
 #include "MCP/Core/Config.h"
 #include "MCP/Debug/Log.h"
 #include "MCP/Core/Application/Window/WindowBase.h"
+#include "MCP/Core/Application/Application.h"
 
 #if MCP_RENDERER_API == MCP_RENDERER_API_SDL
 
@@ -18,6 +19,14 @@
 
 namespace mcp
 {
+    MCP_DEFINE_STATIC_SYSTEM_GETTER(GraphicsManager)
+
+    GraphicsManager::GraphicsManager(WindowConstructionData&& data)
+        : m_mainWindowData(std::move(data))
+    {
+        //
+    }
+
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //
@@ -33,6 +42,23 @@ namespace mcp
         if (!Renderer::Init())
         {
             MCP_ERROR("Renderer", "Failed to initialize GraphicsManager! Failed to initialize Renderer!");
+            Close();
+            return false;
+        }
+
+        // Create/Initialize the main window:
+        if (!m_pWindow->Init(m_mainWindowData.windowName.c_str(), m_mainWindowData.dimensions.x, m_mainWindowData.dimensions.y))
+        {
+            MCP_ERROR("Renderer", "Failed to initialize GraphicsManager! Failed to initialize MainWindow!");
+            Close();
+            return false;
+        }
+
+        // Set the Render Target to the main window
+        if (!SetRenderTarget(m_pWindow))
+        {
+            MCP_ERROR("Renderer", "Failed to initialize GraphicsManager! Failed to set the window as the RenderTarget!");
+            Close();
             return false;
         }
 
@@ -72,9 +98,9 @@ namespace mcp
         Renderer::Display();
     }
 
-    bool GraphicsManager::SetRenderTarget() const
+    bool GraphicsManager::SetRenderTarget(WindowBase* pTarget) const
     {
-        if (!Renderer::SetRenderTarget(m_pWindow))
+        if (!Renderer::SetRenderTarget(pTarget))
         {
             MCP_ERROR("Renderer", "Failed to SetRenderTarget!");
             return false;
@@ -83,6 +109,33 @@ namespace mcp
         return true;
     }
 
+    GraphicsManager* GraphicsManager::AddFromData(const XMLElement element)
+    {
+        // Get the Window Data:
+        const auto windowElement = element.GetChildElement("Window");
+        if (!windowElement.IsValid())
+        {
+            MCP_CRITICAL("GraphicsManager", "Failed to create GraphicsManager from data! Failed to find Window Element!");
+            return nullptr;
+        }
+
+        WindowConstructionData data;
+
+        auto windowChildElement = windowElement.GetChildElement("Dimensions");
+        if (windowElement.IsValid())
+        {
+            data.dimensions.x = windowChildElement.GetAttributeValue<int>("width", 1600);
+            data.dimensions.y = windowChildElement.GetAttributeValue<int>("height", 900);
+        }
+
+        windowChildElement = windowElement.GetChildElement("Style");
+        if (windowChildElement.IsValid())
+        {
+            data.windowName = windowChildElement.GetAttributeValue<const char*>("name", "Game");
+        }
+
+        return BLEACH_NEW(GraphicsManager(std::move(data)));
+    }
 
     //-----------------------------------------------------------------------------------------------------------------------------
     ///		@brief : Set the draw color for primitive draw calls.

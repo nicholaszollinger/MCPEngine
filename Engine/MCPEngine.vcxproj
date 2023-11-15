@@ -262,8 +262,8 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Core\Event\Message.h" />
     <ClInclude Include="Source\MCP\Core\Event\MessageManager.h" />
     <ClInclude Include="Source\MCP\Core\Event\MulticastDelegate.h" />
+    <ClInclude Include="Source\MCP\Core\System.h" />
     <ClInclude Include="Source\MCP\Core\TypeFactory.h" />
-    <ClInclude Include="Source\MCP\Core\GlobalManager.h" />
     <ClInclude Include="Source\MCP\Core\Macros.h" />
     <ClInclude Include="Source\MCP\Core\Process.h" />
     <ClInclude Include="Source\MCP\Core\Resource\AssetPackage.h" />

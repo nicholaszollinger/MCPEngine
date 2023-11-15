@@ -1,9 +1,12 @@
 // Lua.cpp
 
 #include "Lua.h"
+#include "MCP/Core/Application/Application.h"
 
 namespace mcp::lua
 {
+    MCP_DEFINE_STATIC_SYSTEM_GETTER(LuaLayer)
+
     //-----------------------------------------------------------------------------------------------------------------------------
     ///     @brief : Initializes the internal LuaSystem.
     //-----------------------------------------------------------------------------------------------------------------------------

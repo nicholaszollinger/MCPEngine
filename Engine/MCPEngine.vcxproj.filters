@@ -246,9 +246,6 @@
     <ClInclude Include="Source\MCP\Core\Config.h">
       <Filter>MCP\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MCP\Core\GlobalManager.h">
-      <Filter>MCP\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Source\MCP\Core\Macros.h">
       <Filter>MCP\Core</Filter>
     </ClInclude>
@@ -389,6 +386,9 @@
     </ClInclude>
     <ClInclude Include="Source\MCP\Audio\AudioResource.h">
       <Filter>MCP\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\System.h">
+      <Filter>MCP\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
