@@ -192,6 +192,14 @@ namespace mcp
     {
         while(element.IsValid())
         {
+#ifndef _DEBUG
+        if (AssetIsDebugOnly(element))
+        {
+            element = element.GetSiblingElement();
+            continue;
+        }
+#endif
+
             // If we hit another Scene Data Asset, load that asset
             if (HashString32(element.GetName()) == kSceneLayerAssetId)
             {
@@ -217,14 +225,6 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void SceneLayer::LoadSceneLayerAsset(const XMLElement sceneLayerAssetElement)
     {
-        // In release, we check to see if the Asset is only for debug.
-#ifndef _DEBUG
-        if (AssetIsDebugOnly(sceneLayerAssetElement))
-        {
-            return;
-        }
-#endif
-
         // Get the Path
         const char* pPath = sceneLayerAssetElement.GetAttributeValue<const char*>("path");
         MCP_CHECK_MSG(pPath, "Failed to load SceneDataAsset! No path was found!");

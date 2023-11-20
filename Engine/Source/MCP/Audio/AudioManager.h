@@ -14,10 +14,28 @@ namespace mcp
 
     class AudioManager final : public System
     {
+
+    private:
+        struct PlayingAudioData
+        {
+            AudioGroup::Id groupId = AudioGroup::kInvalidId;
+            AudioHardwareChannel channel = AudioGroup::kNoChannel;
+            float volume = 0.f;
+        };
+
+        using AudioGroupContainer = std::unordered_map<AudioGroup::Id, AudioGroup*>;
+        using ActiveChannelContainer = std::vector<PlayingAudioData>;
+
+    private:
         MCP_DEFINE_SYSTEM(AudioManager)
 
-        std::unordered_map<AudioGroup::Id, AudioGroup*> m_audioGroups;
+        static constexpr const char* kMasterVolumeName = "Master";
+        AudioGroupContainer m_audioGroups;
+        ActiveChannelContainer m_activeChannels;
         bool m_isMuted = false;
+
+        // Private Ctor
+        AudioManager(AudioGroupContainer&& audioGroups);
 
     public:
         void Mute();
@@ -26,14 +44,19 @@ namespace mcp
 
         AudioGroup* GetGroup(const AudioGroup::Id id);
         AudioGroup* GetGroup(const char* pAudioGroupName);
-        AudioHardwareChannel PlayAudio(const AudioResource& resource, const AudioSourceComponent* pAudioSource);
+        AudioGroup::Id GetGroupId(const char* pAudioGroupName);
+        AudioHardwareChannel PlayAudio(const AudioSourceComponent* pSource, const AudioResource& resource, const AudioGroup::Id groupId, const float volume);
+
+        // Internal:
+        void Internal_OnChannelFinished(const AudioHardwareChannel channel);
 
         static AudioManager* Get();
-        static AudioManager* AddFromData(const XMLElement) { return BLEACH_NEW(AudioManager); }
+        static AudioManager* AddFromData(const XMLElement);
+
     private:
+        static void CreateChildAudioGroupFromData(AudioGroupContainer& container, AudioGroup* pParent, const XMLElement groupElement);
+
         virtual bool Init() override;
         virtual void Close() override;
-        /*void PlayClip(const AudioClip& clip, AudioData& data) const;
-        void PlayTrack(const AudioTrack& track, AudioData& data) const;*/
     };
 }

@@ -3,10 +3,8 @@
 #include "AudioGroup.h"
 
 #include <algorithm>
-#include "Utility/Generic/Hash.h"
-
-#include "MCP/Core/Config.h"
 #include "MCP/Debug/Log.h"
+#include "Utility/Generic/Hash.h"
 
 #if MCP_AUDIO_PLATFORM == MCP_AUDIO_PLATFORM_SDL
 
@@ -18,10 +16,9 @@ using AudioPlatform = SDLAudioManager;
 
 #endif
 
-
 namespace mcp
 {
-    AudioGroup::AudioGroup(const char* pName, const int defaultVolume, const bool isMuted, AudioGroup* pParent)
+    AudioGroup::AudioGroup(const char* pName, const float defaultVolume, const bool isMuted, AudioGroup* pParent)
         : m_pParent(pParent)
         , m_id(HashString32(pName))
         , m_volume(defaultVolume)
@@ -36,16 +33,38 @@ namespace mcp
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
+    //      TODO: Potentially need to remove this:
+    //		
+    ///		@brief : 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool AudioGroup::Init()
+    {
+        return true;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Set the volume of this Group.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void AudioGroup::SetVolume(const float volume)
+    {
+        m_volume = std::clamp(volume, 0.f, 1.f);
+
+        // TODO: I need to update any audio resource channels that are currently being played on this group.
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
     //		
     ///		@brief : Get the final volume of this group. The volume of a group is dependent on a parent.
     //-----------------------------------------------------------------------------------------------------------------------------
-    int AudioGroup::GetVolume() const
+    float AudioGroup::GetVolume() const
     {
         // Our final volume is dependent on our parents volume.
         if (m_pParent)
         {
-            const auto parentVolume = m_pParent->GetVolume();
-            return static_cast<int>(GetNormalizedVolume() * static_cast<float>(parentVolume));
+            return m_volume * m_pParent->GetVolume();
         }
         
         return m_volume;
@@ -54,6 +73,11 @@ namespace mcp
     void AudioGroup::Mute()
     {
         m_isMuted = true;
+
+        for (const auto channel : m_channels)
+        {
+            AudioPlatform::MuteChannel(channel);
+        }
 
         for (auto* pChild : m_children)
         {
@@ -64,6 +88,11 @@ namespace mcp
     void AudioGroup::UnMute()
     {
         m_isMuted = false;
+
+        for (const auto channel : m_channels)
+        {
+            //AudioPlatform::UnMuteChannel(channel, );
+        }
 
         for (auto* pChild : m_children)
         {
@@ -84,19 +113,60 @@ namespace mcp
         return m_isMuted;
     }
 
+    void AudioGroup::AddChannel(const AudioHardwareChannel channel)
+    {
+        // TODO: Make sure that we don't have the channel already.
+
+        m_channels.emplace_back(channel);
+    }
+
+    void AudioGroup::RemoveChannel(const AudioHardwareChannel channel)
+    {
+        for (size_t i = 0; i < m_channels.size(); ++i)
+        {
+            if (channel == m_channels[i])
+            {
+                std::swap(m_channels[i], m_channels.back());
+                m_channels.pop_back();
+                break;
+            }
+        }
+    }
+
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Set the volume of this Group.
+    ///		@brief : Pauses all audio sources running on this AudioGroup, and pauses any child AudioGroups
     //-----------------------------------------------------------------------------------------------------------------------------
-    void AudioGroup::SetVolume(const int volume)
+    void AudioGroup::Pause() const
     {
-        m_volume = std::clamp(volume, kMinVolume, kMaxVolume);
+        for (auto channel : m_channels)
+        {
+            AudioPlatform::PauseChannel(channel);
+        }
+
+        for (auto* pChild : m_children)
+        {
+            pChild->Pause();
+        }
     }
 
-    float AudioGroup::GetNormalizedVolume() const
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Resumes all audio sources running on this AudioGroup, and resumes all child AudioGroups.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void AudioGroup::Resume() const
     {
-        return static_cast<float>(m_volume) / static_cast<float>(kMaxVolume);
+        for (auto channel : m_channels)
+        {
+            AudioPlatform::ResumeChannel(channel);
+        }
+
+        for (auto* pChild : m_children)
+        {
+            pChild->Resume();
+        }
     }
 
     // TODO:

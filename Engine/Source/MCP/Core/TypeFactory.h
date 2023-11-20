@@ -107,13 +107,13 @@ namespace mcp
         }
     };
 
-#define MCP_REGISTER_TYPE(factory, typename)                                                               \
-    private:                                                                                               \
-        static inline const mcp::TypeId kTypeId = mcp::factory::RegisterDerivedType<typename>(#typename);  \
-                                                                                                           \
-    public:                                                                                                \
-        static mcp::TypeId GetStaticTypeId() { return kTypeId; }                                           \
-        virtual mcp::TypeId GetTypeId() const override { return kTypeId; }                                 \
-    private:  
+#define MCP_REGISTER_TYPE(factory, typename)                                                           \
+private:                                                                                               \
+    static inline const mcp::TypeId kTypeId = mcp::factory::RegisterDerivedType<typename>(#typename);  \
+                                                                                                       \
+public:                                                                                                \
+    static mcp::TypeId GetStaticTypeId() { return kTypeId; }                                           \
+    virtual mcp::TypeId GetTypeId() const override { return kTypeId; }                                 \
+private:  
 
 }

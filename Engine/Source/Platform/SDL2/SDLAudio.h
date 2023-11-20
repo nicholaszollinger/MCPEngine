@@ -1,7 +1,7 @@
 #pragma once
+// SDLAudio.h
 #include <cstdint>
 #include <vector>
-// SDLAudio.h
 
 namespace mcp
 {
@@ -15,9 +15,35 @@ class SDLAudioManager
     static inline int s_masterVolume = 0;
     static inline int s_musicVolume = 0;
 
+    // In SDL, there is a single music channel. This value represents the music channel.
+    static constexpr int kMusicChannel = -2;
+    static constexpr int kInvalidChannel = -1;
+    static constexpr float kMaxVolume = 128.f;
+
+    static inline void* pCurrentMusicResource = nullptr;
+
 public:
     static bool Init();
     static void Close();
+
+    // Start of the new interface:
+    // General:
+    static void MuteChannel(const int channel);
+    static void UnMuteChannel(const int channel, const float resumeVolume);
+    static void PauseChannel(const int channel);
+    static void ResumeChannel(const int channel);
+
+    // Music:
+    static int PlayMusic(void* pResource, const float volume, const bool isLooping);
+
+    // Clips:
+    static int PlayClip(void* pResource, const float volume, const bool isLooping);
+
+    // End of the new interface:
+
+
+
+
 
     // General Audio
     static void Mute();
@@ -45,5 +71,5 @@ public:
 
 private:
     static void PauseChannels();
-    static void ExpireChannel(const int channel);
+    static void OnChannelFinished(const int channel);
 };

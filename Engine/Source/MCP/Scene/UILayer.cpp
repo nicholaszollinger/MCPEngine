@@ -183,6 +183,14 @@ namespace mcp
         XMLElement childWidgetElement = parentElement.GetChildElement("Widget");
         while(childWidgetElement.IsValid())
         {
+#ifndef _DEBUG
+            if (AssetIsDebugOnly(childWidgetElement))
+            {
+                childWidgetElement = childWidgetElement.GetSiblingElement("Widget");
+                continue;
+            }
+#endif
+
             const char* widgetTypename = childWidgetElement.GetAttributeValue<const char*>("type");
 
             Widget* pChild = WidgetFactory::CreateWidgetFromData(widgetTypename, childWidgetElement);

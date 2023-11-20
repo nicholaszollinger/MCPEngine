@@ -9,11 +9,13 @@ namespace mcp
 {
     struct AudioSourceConstructionData
     {
-        const char* pAudioGroupName = "Master";
-        const float volume = 1.0f;
-        const bool isLooping = false;
-        const bool isMuted = false;
-        const bool playOnActive = false;
+        const char* pResourcePath = nullptr;
+        const char* pAudioGroupName = nullptr;
+        float volume = 1.0f;
+        bool isLooping = false;
+        bool isMuted = false;
+        bool playOnActive = false;
+        bool isMusicResource = false;
     };
 
     class AudioSourceComponent final : public Component
@@ -49,8 +51,8 @@ namespace mcp
         static AudioSourceComponent* AddFromData(const XMLElement element);
 
     private:
-        //virtual void OnActive() override;
-        //virtual void OnInactive() override;
+        virtual void OnActive() override;
+        virtual void OnInactive() override;
     };
 
 }

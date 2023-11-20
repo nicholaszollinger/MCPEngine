@@ -9,6 +9,7 @@
 
 #include "MCP/Audio/AudioClip.h"
 #include "MCP/Audio/AudioData.h"
+#include "MCP/Audio/AudioManager.h"
 #include "MCP/Audio/AudioTrack.h"
 #include "MCP/Debug/Log.h"
 
@@ -35,7 +36,7 @@ bool SDLAudioManager::Init()
     }
 
     // Set our channels to expire when they finish.
-    Mix_ChannelFinished(&SDLAudioManager::ExpireChannel);
+    Mix_ChannelFinished(&SDLAudioManager::OnChannelFinished);
 
     return true;
 }
@@ -43,6 +44,95 @@ bool SDLAudioManager::Init()
 void SDLAudioManager::Close()
 {
     Mix_CloseAudio();
+}
+
+void SDLAudioManager::PauseChannel(const int channel)
+{
+    if (channel == kMusicChannel)
+    {
+        Mix_PauseMusic();
+    }
+
+    else
+        Mix_Pause(channel);
+}
+
+void SDLAudioManager::ResumeChannel(const int channel)
+{
+    if (channel == kMusicChannel)
+    {
+        Mix_ResumeMusic();
+    }
+
+    else
+        Mix_Resume(channel);
+}
+
+void SDLAudioManager::MuteChannel(const int channel)
+{
+    if (channel == kMusicChannel)
+    {
+        Mix_VolumeMusic(0);
+    }
+
+    else
+    {
+        Mix_Volume(channel, 0);
+    }
+}
+
+void SDLAudioManager::UnMuteChannel(const int channel, const float resumeVolume)
+{
+    if (channel == kMusicChannel)
+    {
+        Mix_VolumeMusic(static_cast<int>(resumeVolume * kMaxVolume));
+    }
+
+    else
+    {
+        Mix_Volume(channel, static_cast<int>(resumeVolume * kMaxVolume));
+    }
+}
+
+int SDLAudioManager::PlayMusic(void* pResource, const float volume, const bool isLooping)
+{
+    auto* pMusic = static_cast<Mix_Music*>(pResource);
+
+    // For now, just play the music.
+    if (Mix_PlayMusic(pMusic, isLooping? -1 : 0) != 0)
+    {
+        return kInvalidChannel;    
+    }
+
+    Mix_VolumeMusic(static_cast<int>(volume * kMaxVolume));
+
+    // TODO: Set up the fades:
+    // If there is music playing, we need to fade out the current music and set the hook to play
+    // this next track.
+    //if (Mix_FadingMusic() != MIX_NO_FADING)
+    //{
+
+    //    
+    //    //Mix_HookMusicFinished()
+    //}
+
+    //// If there is no playing music, we can begin playing our next track
+    //else
+    //{
+    //}
+
+    return kMusicChannel;
+}
+
+int SDLAudioManager::PlayClip(void* pResource, const float volume, const bool isLooping)
+{
+    auto* pChunk = static_cast<Mix_Chunk*>(pResource);
+
+    Mix_VolumeChunk(pChunk, static_cast<int>(volume * kMaxVolume));
+
+    const auto channel = Mix_PlayChannel(-1, pChunk, isLooping? -1 : 0);
+
+    return channel;
 }
 
 void SDLAudioManager::Mute()
@@ -119,7 +209,7 @@ void SDLAudioManager::ReleaseChannel(const int channel)
     // If nothing is playing right now, then expire the channel immediately.
     else
     {
-        ExpireChannel(channel);   
+        OnChannelFinished(channel);   
     }
 }
 
@@ -171,8 +261,12 @@ void SDLAudioManager::PauseMusic()
     Mix_PauseMusic();
 }
 
-void SDLAudioManager::ExpireChannel(const int channel)
+//-----------------------------------------------------------------------------------------------------------------------------
+//		NOTES:
+//		
+///		@brief : Callback for when a Channel completes.
+//-----------------------------------------------------------------------------------------------------------------------------
+void SDLAudioManager::OnChannelFinished(const int channel)
 {
-    // Remove the tag from the channel.
-    SetHardwareChannelTag(channel, -1);
+    mcp::AudioManager::Get()->Internal_OnChannelFinished(channel);
 }

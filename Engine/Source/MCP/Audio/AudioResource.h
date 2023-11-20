@@ -6,8 +6,6 @@
 
 namespace mcp
 {
-    using AudioHardwareChannel = int;
-    constexpr static AudioHardwareChannel kNoChannel = -1;
 
     struct AudioResourceRequest : public DiskResourceRequest
     {
