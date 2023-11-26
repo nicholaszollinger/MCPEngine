@@ -38,15 +38,35 @@ namespace mcp
 
     void ImageWidget::Render() const
     {
-        const auto rect = GetRectTopLeft();
+        const auto visibleRect = GetVisibleRect();
+
+        if (!visibleRect.HasValidDimensions())
+            return;
+
+        const auto topLeft = GetRectTopLeft();
+        const auto finalCropX = m_crop.x + static_cast<int>((visibleRect.x - topLeft.x));
+        const auto finalCropY = m_crop.y + static_cast<int>((visibleRect.y - topLeft.y));
+
+        const float normalizedWidth = visibleRect.width / topLeft.width;
+        const float normalizedHeight = visibleRect.height / topLeft.height;
+        const int finalCropWidth = std::clamp(static_cast<int>(normalizedWidth * static_cast<float>(m_crop.width)), 0, m_crop.width);
+        const int finalCropHeight = std::clamp(static_cast<int>(normalizedHeight * static_cast<float>(m_crop.height)), 0, m_crop.height);
+
+        const RectInt finalCrop = 
+        {
+            finalCropX,
+            finalCropY,
+            finalCropWidth,
+            finalCropHeight
+        };
 
         TextureRenderData renderData;
         renderData.pTexture = m_texture.Get();
         renderData.angle = m_renderAngle;
-        renderData.crop = m_crop;
+        renderData.crop = finalCrop;
         renderData.tint = m_tint;
         renderData.anglePivot = m_anglePivot;
-        renderData.destinationRect = rect;
+        renderData.destinationRect = visibleRect;
         renderData.flip = m_flip;
 
         DrawTexture(renderData);

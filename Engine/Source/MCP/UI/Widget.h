@@ -41,6 +41,7 @@ namespace mcp
         int zOffset = 1;                         // z-Axis difference from the parent.
         bool isInteractable = false;             // Whether this Widget is interactable or not.
         bool sizedToContent = false;             // Whether the Widget's dimensions is based on the size of its content.
+        bool isMask = false;                     // Whether the rect is used as a mask for child widgets.
     };
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -55,23 +56,25 @@ namespace mcp
 
     protected:
         LuaResourcePtr m_enableBehaviorScript;  // Optional Script that defines behavior when this script is enabled or disabled.
-        Vec2 m_localPos;                    // Offset from the origin position
-        Vec2 m_pivot;                       // The alignment of the center point of the Widget.
-        Vec2 m_anchor;                      // Determines the position of Widget based on the Parent's position. An anchor can have values from [0, 1]
-        Vec2 m_scale;                       // Scale of the two axes.
-        float m_width;                      // Width of the Widget.
-        float m_height;                     // Height of the Widget.
-        int m_zOffset;                      // The z-Depth of this widget
-        bool m_isInteractable;              // Whether this Widget able to be interacted with or not. Ex: Can I hit this button?
-        bool m_isVisible;                   // Whether this Widget is being rendered or not.
-        bool m_sizedToContent;              // Whether the size of this widget is based on its content and its children.
+        Widget* m_pMaskingWidget;                        // If a parent has been set as a mask, this will point to that parent Widget. We use this to calculate our final dimensions.
+        Vec2 m_localPos;                        // Offset from the origin position
+        Vec2 m_pivot;                           // The alignment of the center point of the Widget.
+        Vec2 m_anchor;                          // Determines the position of Widget based on the Parent's position. An anchor can have values from [0, 1]
+        Vec2 m_scale;                           // Scale of the two axes.
+        float m_width;                          // Width of the Widget.
+        float m_height;                         // Height of the Widget.
+        int m_zOffset;                          // The z-Depth of this widget
+        bool m_isInteractable;                  // Whether this Widget able to be interacted with or not. Ex: Can I hit this button?
+        bool m_isVisible;                       // Whether this Widget is being rendered or not.
+        bool m_sizedToContent;                  // Whether the size of this widget is based on its content and its children.
+        bool m_isMask;                          // Whether the rect is used as a mask for child widgets.
 
     public: 
         Widget(const WidgetConstructionData& data);
         virtual ~Widget() override = default;
 
         //-----------------------------------------------------------------------------------------------------------------------------
-        ///		@brief : Called right after construction, no Potential parent is set and child widgets will not be created or set yet!
+        ///		@brief : Called right after construction, no parent or child widgets will set or created yet!
         //-----------------------------------------------------------------------------------------------------------------------------
         virtual bool Init() override { return true; }
 
@@ -107,19 +110,26 @@ namespace mcp
         void SetHeight(const float height);
         void SetScale(const float xScale, const float yScale);
         void SetScale(const float uniformScale);
+        void SetIsMask(const bool isMask);
 
         // Getters
         [[nodiscard]] virtual float GetRectWidth() const;
         [[nodiscard]] virtual float GetRectHeight() const;
+        [[nodiscard]] float GetMaxChildWidth() const;
+        [[nodiscard]] float GetMaxChildHeight() const;
+        [[nodiscard]] float GetTotalRectWidthOfChildren() const;
+        [[nodiscard]] float GetTotalRectHeightOfChildren() const;
         [[nodiscard]] Vec2 GetOrigin() const;
+        [[nodiscard]] RectF GetRectTopLeft() const;
         [[nodiscard]] Vec2 GetRectCenter() const;
         [[nodiscard]] Vec2 GetLocalPosition() const { return m_localPos; }
         [[nodiscard]] Vec2 GetScale() const;
         [[nodiscard]] RectF GetRect() const;
-        [[nodiscard]] RectF GetRectTopLeft() const;
+        [[nodiscard]] RectF GetVisibleRect() const;
         [[nodiscard]] int GetMaxZ() const;
         [[nodiscard]] int GetZOffset() const;
-        [[nodiscard]] bool HasChildren() const { return !m_children.empty(); }
+        [[nodiscard]] bool IsMask() const;
+        [[nodiscard]] bool IsClipped() const;
         [[nodiscard]] bool IsInteractable() const;
         [[nodiscard]] bool IsVisible() const;
         [[nodiscard]] bool IsFocused() const;
@@ -157,7 +167,9 @@ namespace mcp
         
         virtual void OnActive() override;
         virtual void OnInactive() override;
+        virtual void OnMove() {}
         virtual void OnParentSet() override;
+        void UpdateMaskingWidget(Widget* pMaskingWidget);
         virtual void OnZChanged() {}
         virtual void OnDestroy() override {}
 
@@ -165,6 +177,7 @@ namespace mcp
         virtual void OnChildRemoved(SceneEntity* pChild) override;
         virtual void OnChildAdded([[maybe_unused]] Widget* pChild);
         virtual void OnChildRemoved([[maybe_unused]] Widget* pChild) {}
+        [[nodiscard]] Widget* GetParentMask() const;
         [[nodiscard]] bool PointIntersectsRect(const Vec2 screenPos) const;
         [[nodiscard]] bool GetPointRelativeToRect(const Vec2 screenPos, Vec2& relativePos) const;
 

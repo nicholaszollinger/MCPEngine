@@ -36,6 +36,18 @@ namespace mcp
         //
     }
 
+    ButtonWidget::ButtonWidget(const WidgetConstructionData& data, const ButtonBehavior& behavior)
+        : Widget(data)
+#if MCP_DEBUG_RENDER_BUTTON_BOUNDS
+        , IRenderable(RenderLayer::kDebugOverlay, 200)
+#endif
+        , m_pOnExecuteScript(behavior.onExecuteScript)
+        , m_pHighlightBehaviorScript(behavior.highlightBehaviorScript)
+        , m_pPressReleaseBehaviorScript(behavior.pressReleaseBehaviorScript)
+    {
+        //
+    }
+
     bool ButtonWidget::PostLoadInit()
     {
         // Initialize our script behavior.
@@ -146,6 +158,25 @@ namespace mcp
             if (!m_isHovered)
                 return;
 
+            OnHoverExit();
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //      TODO: We need to figure out what to do for if the keyboard is focused or not.
+    //		
+    ///		@brief : When a button is moving, we potentially need to update our hovered state:
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void ButtonWidget::OnMove()
+    {
+        if (!m_isHovered || !IsActive())
+            return;
+
+        const auto mousePos = GraphicsManager::Get()->GetWindow()->GetMousePosition();
+
+        if (!PointIntersectsRect(mousePos))
+        {
             OnHoverExit();
         }
     }

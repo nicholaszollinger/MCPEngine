@@ -93,8 +93,8 @@ struct Rect
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Calculates the intersect of this and another Rect as another rect. If no collision was
-    ///             made, then the width and height would be 0.
+    ///		@brief : Calculates the intersect of this and another Rect as another rect. If there is no intersection,
+    ///              then the width and height would be 0.
     //-----------------------------------------------------------------------------------------------------------------------------
     [[nodiscard]] constexpr Rect GetIntersectionAsRect(const Rect& other) const
     {

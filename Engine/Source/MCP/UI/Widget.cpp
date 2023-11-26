@@ -16,6 +16,7 @@ namespace mcp
     Widget::Widget(const WidgetConstructionData& data)
         : SceneEntity(data.entityConstructionData)
         , m_enableBehaviorScript(data.enableBehaviorScript)
+        , m_pMaskingWidget(nullptr)
         , m_localPos(data.rect.GetPosition())
         , m_pivot(data.pivot)
         , m_anchor(data.anchor)
@@ -26,6 +27,7 @@ namespace mcp
         , m_isInteractable(data.isInteractable)
         , m_isVisible(false)
         , m_sizedToContent(data.sizedToContent)
+        , m_isMask(data.isMask)
     {
         SetZOffset(data.zOffset);
 
@@ -145,6 +147,16 @@ namespace mcp
     {
         m_localPos.x = x;
         m_localPos.y = y;
+
+        // Let the Widget Respond to the movement:
+        OnMove();
+
+        // Let our children respond as well:
+        for (auto* pChild : m_children)
+        {
+            auto* pWidget = SafeCastEntity<Widget>(pChild);
+            pWidget->OnMove();
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -179,6 +191,82 @@ namespace mcp
     float Widget::GetRectHeight() const
     {
         return GetScale().y * m_height;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Returns the greatest width among this Widget's children.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    float Widget::GetMaxChildWidth() const
+    {
+        float maxWidth = 0.f;
+        for (const auto* pChild : m_children)
+        {
+            const auto* pWidget = SafeCastEntity<Widget>(pChild);
+            const float widgetWidth = pWidget->GetRectWidth();
+            if (widgetWidth > maxWidth)
+                maxWidth = widgetWidth;
+        }
+
+        return maxWidth;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Returns the greatest height among this Widget's children.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    float Widget::GetMaxChildHeight() const
+    {
+        float maxHeight = 0.f;
+        for (const auto* pChild : m_children)
+        {
+            const auto* pWidget = SafeCastEntity<Widget>(pChild);
+            const float widgetHeight = pWidget->GetRectHeight();
+            if (widgetHeight > maxHeight)
+                maxHeight = widgetHeight;
+        }
+
+        return maxHeight;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Get the total width of all of this Widget's children. NOTE: This isn't the total width including spaces between
+    ///             child widgets, just each Widget's width added together.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    float Widget::GetTotalRectWidthOfChildren() const
+    {
+        float totalWidth = 0.f;
+        for (const auto* pChild : m_children)
+        {
+            const auto* pWidget = SafeCastEntity<Widget>(pChild);
+
+            totalWidth += pWidget->GetRectWidth();
+        }
+
+        return totalWidth;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Get the total height of all of this Widget's children. NOTE: This isn't the total height including spaces between
+    ///             child widgets, just each Widget's height added together.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    float Widget::GetTotalRectHeightOfChildren() const
+    {
+        float totalWidth = 0.f;
+        for (const auto* pChild : m_children)
+        {
+            const auto* pWidget = SafeCastEntity<Widget>(pChild);
+
+            totalWidth += pWidget->GetRectWidth();
+        }
+
+        return totalWidth;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -231,6 +319,17 @@ namespace mcp
         return parentCenter;
     }
 
+    RectF Widget::GetRectTopLeft() const
+    {
+        auto rect = GetRect();
+
+        // Adjust the position to be at the top left corner, instead of at the origin.
+        rect.x -= m_pivot.x * rect.width;
+        rect.y -= m_pivot.y * rect.height;
+
+        return rect;
+    }
+
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
@@ -246,15 +345,25 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Returns the RectF whose position is at the top left of the rect. This is useful for rendering and collision.
+    ///		@brief : Returns the RectF whose position is at the top left of the rect. If this Widget is being masked to a parent,
+    ///         then this returns the intersection of the Parent's Rect and this Widget's Rect.
     //-----------------------------------------------------------------------------------------------------------------------------
-    RectF Widget::GetRectTopLeft() const
+    RectF Widget::GetVisibleRect() const
     {
         auto rect = GetRect();
 
         // Adjust the position to be at the top left corner, instead of at the origin.
         rect.x -= m_pivot.x * rect.width;
         rect.y -= m_pivot.y * rect.height;
+
+        // If this rect is being masked, we need to adjust based on that mask.
+        if (m_pMaskingWidget)
+        {
+            const auto maskRect = m_pMaskingWidget->GetVisibleRect();
+
+            // Get the rect as an intersection of the mask and the rect.
+            rect = rect.GetIntersectionAsRect(maskRect);
+        }
 
         return rect;
     }
@@ -341,7 +450,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     bool Widget::PointIntersectsRect(const Vec2 screenPos) const
     {
-        const auto rect = GetRectTopLeft();
+        const auto rect = GetVisibleRect();
         return rect.Intersects(screenPos);
     }
 
@@ -356,7 +465,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     bool Widget::GetPointRelativeToRect(const Vec2 screenPos, Vec2& relativePos) const
     {
-        const auto rect = GetRectTopLeft();
+        const auto rect = GetVisibleRect();
 
         relativePos = screenPos;
         relativePos.x -= rect.x;
@@ -393,7 +502,6 @@ namespace mcp
     {
         return SceneLayer::SafeCastLayer<UILayer>(GetLayer());
     }
-
 
     void Widget::SetInteractable(const bool isInteractable)
     {
@@ -502,6 +610,105 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
+    ///		@brief : Set whether the rect dimensions of this Widget should be used as a mask for its children.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::SetIsMask(const bool isMask)
+    {
+        if (isMask == m_isMask)
+            return;
+
+        m_isMask = isMask;
+        Widget* pMask = m_isMask ? this : nullptr;
+
+        for (auto* pChild : m_children)
+        {
+            auto* pWidget = SafeCastEntity<Widget>(pChild);
+            pWidget->UpdateMaskingWidget(pMask);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Returns whether this Widget is being used as a mask for its children.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool Widget::IsMask() const
+    {
+        return m_isMask;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Returns whether the 'visible rect' (the rect with any applied mask) is different from it's full rect.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool Widget::IsClipped() const
+    {
+        const auto rect = GetRect();
+        auto visibleRect = rect;
+
+        // If this rect is being masked, we need to adjust based on that mask.
+        if (m_pMaskingWidget)
+        {
+            // Adjust the position to be at the top left corner, instead of at the origin.
+            visibleRect.x -= m_pivot.x * visibleRect.width;
+            visibleRect.y -= m_pivot.y * visibleRect.height;
+
+            const auto maskRect = m_pMaskingWidget->GetVisibleRect();
+
+            // Get the rect as an intersection of the mask and the rect.
+            visibleRect = visibleRect.GetIntersectionAsRect(maskRect);
+
+            // Return whether the two rect dimensions are equal.
+            return CheckEqualFloats(visibleRect.width, rect.width)
+                && CheckEqualFloats(visibleRect.height, rect.height);
+        }
+
+        // If we don't have a clipping mask, then we aren't clipped.
+        return false;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Get the mask that the parent is using. This can be nullptr if no masking widget is present.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    Widget* Widget::GetParentMask() const
+    {
+        if (m_pParent)
+        {
+            auto* pWidget = SafeCastEntity<Widget>(m_pParent);
+            if (pWidget->IsMask())
+                return pWidget;
+
+            return pWidget->m_pMaskingWidget;
+        }
+
+        return nullptr;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Update the m_pMaskingWidget variable for each child, recursively.
+    ///		@param pMaskingWidget : The Widget who we are going to use as the mask, or, if nullptr, we are removing it as a mask.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::UpdateMaskingWidget(Widget* pMaskingWidget)
+    {
+        m_pMaskingWidget = pMaskingWidget;
+
+        // If this Widget is a mask, we don't need to update our children, they are already using us as a mask.
+        if (m_isMask)
+            return;
+
+        for (auto* pChild : m_children)
+        {
+            auto* pWidget = SafeCastEntity<Widget>(pChild);
+            pWidget->UpdateMaskingWidget(pMaskingWidget);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
     ///		@brief : By default, when a Widget is set Active, if we have an EnableBehavior script, it will call the OnEnable function
     //-----------------------------------------------------------------------------------------------------------------------------
     void Widget::OnActive()
@@ -528,6 +735,9 @@ namespace mcp
     {
         // Update our zOffset
         SetZOffset(m_zOffset);
+
+        // Update our masking behavior
+        UpdateMaskingWidget(GetParentMask());
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -579,6 +789,8 @@ namespace mcp
 
         data.isInteractable = widgetElement.GetAttributeValue<bool>("isInteractable", false);
         data.zOffset = widgetElement.GetAttributeValue<int>("zOffset", 1);
+        data.isMask = widgetElement.GetAttributeValue<bool>("isMask", false);
+
         //data.startEnabled = widgetElement.GetAttributeValue<bool>("startEnabled", true);
 
         // Tag. Optional element.

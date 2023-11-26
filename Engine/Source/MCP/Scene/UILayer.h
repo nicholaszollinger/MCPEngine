@@ -21,6 +21,9 @@ namespace mcp
 
     public:
         // Entity Management
+        template<typename WidgetType, typename...CArgs>
+        WidgetType* CreateWidgetOfType(CArgs&&...args);
+
         virtual Widget* CreateEntityFromPrefab(const XMLElement root) override;
         template<typename WidgetType> WidgetType* GetWidgetByTag(const StringId tag);
         [[nodiscard]] Widget* GetWidgetByTag(const StringId tag) const;
@@ -52,6 +55,31 @@ namespace mcp
         void DumpUITree();
         void PrintWidgetType(Widget* pWidget, int tabCount);
     };
+
+    template <typename WidgetType, typename... CArgs>
+    WidgetType* UILayer::CreateWidgetOfType(CArgs&&...args)
+    {
+        if (WidgetType::GetStaticLayerId() != GetLayerId())
+        {
+            MCP_WARN("UILayer", "Attempted to create a type that does not belong on the UILayer!");
+            return nullptr;
+        }
+
+
+        auto* pWidget = BLEACH_NEW(WidgetType(std::forward<CArgs>(args)...));
+
+        // Add the Entity to this layer.
+        m_entities.emplace(pWidget->GetId(), pWidget);
+
+        // Set their layer.
+        pWidget->SetLayer(this);
+
+        // Initialize the Widget
+        pWidget->Init();
+
+        return pWidget;
+    }
+
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:

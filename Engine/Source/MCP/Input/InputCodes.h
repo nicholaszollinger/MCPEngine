@@ -58,6 +58,16 @@ enum class MCPKey : int
     LeftParen = '(',
     RightParen = ')',
 
+    // Navigation
+    // Arrows
+    Up = 200,
+    Down,
+    Left,
+    Right,
+    PageUp,
+    PageDown,
+
+
     // Special Keys
     Escape = 27,
     Space = 32,

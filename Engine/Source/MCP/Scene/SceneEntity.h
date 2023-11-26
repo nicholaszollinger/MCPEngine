@@ -80,6 +80,7 @@ private:
         virtual SceneEntity* GetChildByTag(const StringId tag) const;
         virtual SceneEntity* GetChildByTag(const StringId tag);
         [[nodiscard]] bool HasAParent() const { return m_pParent; }
+        [[nodiscard]] bool HasChildren() const { return !m_children.empty(); }
 
         // Lifetime
         virtual bool Init() = 0;

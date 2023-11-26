@@ -204,6 +204,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\UI\HorizontalLayoutWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\ImageWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\Layout.cpp" />
+    <ClCompile Include="Source\MCP\UI\ScrollWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\SelectionWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\SliderWidget.cpp" />
     <ClCompile Include="Source\MCP\UI\TextFieldWidget.cpp" />
@@ -309,6 +310,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\UI\CanvasWidget.h" />
     <ClInclude Include="Source\MCP\UI\HorizontalLayoutWidget.h" />
     <ClInclude Include="Source\MCP\UI\Layout.h" />
+    <ClInclude Include="Source\MCP\UI\ScrollWidget.h" />
     <ClInclude Include="Source\MCP\UI\SelectionWidget.h" />
     <ClInclude Include="Source\MCP\UI\SliderWidget.h" />
     <ClInclude Include="Source\MCP\UI\TextFieldWidget.h" />

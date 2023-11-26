@@ -54,6 +54,14 @@ namespace mcp
             case SDL_SCANCODE_8: return MCPKey::Num8;
             case SDL_SCANCODE_9: return MCPKey::Num9;
 
+            // Navigation
+            case SDL_SCANCODE_UP: return MCPKey::Up;
+            case SDL_SCANCODE_DOWN: return MCPKey::Down;
+            case SDL_SCANCODE_LEFT: return MCPKey::Left;
+            case SDL_SCANCODE_RIGHT: return MCPKey::Right;
+            case SDL_SCANCODE_PAGEUP: return MCPKey::PageUp;
+            case SDL_SCANCODE_PAGEDOWN: return MCPKey::PageDown;
+
             // Special
             case SDL_SCANCODE_ESCAPE: return MCPKey::Escape;
             case SDL_SCANCODE_SPACE: return MCPKey::Space;
@@ -109,6 +117,14 @@ namespace mcp
             case MCPKey::Num7: return SDL_SCANCODE_7;
             case MCPKey::Num8: return SDL_SCANCODE_8;
             case MCPKey::Num9: return SDL_SCANCODE_9;
+
+            // Navigation
+            case MCPKey::Up: return SDL_SCANCODE_UP;
+            case MCPKey::Down: return SDL_SCANCODE_DOWN;
+            case MCPKey::Left: return SDL_SCANCODE_LEFT;
+            case MCPKey::Right: return SDL_SCANCODE_RIGHT;
+            case MCPKey::PageUp: return SDL_SCANCODE_PAGEUP;
+            case MCPKey::PageDown: return SDL_SCANCODE_PAGEDOWN;
 
             // Special
             case MCPKey::Escape:   return SDL_SCANCODE_ESCAPE;

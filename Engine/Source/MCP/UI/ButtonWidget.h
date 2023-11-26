@@ -51,9 +51,15 @@ namespace mcp
     public:
         ButtonWidget(const WidgetConstructionData& data, LuaResourcePtr&& onExecuteScript, LuaResourcePtr&& highlightBehaviorScript, LuaResourcePtr&& pressReleaseBehaviorScript);
         ButtonWidget(const WidgetConstructionData& data, ButtonBehavior&& behavior);
+        ButtonWidget(const WidgetConstructionData& data, const ButtonBehavior& behavior);
         virtual bool PostLoadInit() override;
 
+        //void SetButtonBehavior(const ButtonBehavior&);
+        [[nodiscard]] virtual float GetRectWidth() const override;
+        [[nodiscard]] virtual float GetRectHeight() const override;
+
         static ButtonWidget* AddFromData( const XMLElement element);
+        static ButtonBehavior GetButtonBehavior(const XMLElement element);
 
     protected:
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -82,7 +88,8 @@ namespace mcp
         //-----------------------------------------------------------------------------------------------------------------------------
         virtual void OnHoverExit();
 
-        static ButtonBehavior GetButtonBehavior(const XMLElement element);
+        virtual void OnMove() override;
+
     private:
         virtual void OnChildAdded(Widget* pChild) override;
         virtual void HandleEvent(ApplicationEvent& event) override;
@@ -90,8 +97,6 @@ namespace mcp
         void HandleMouseMotion(MouseMoveEvent& event);
         virtual void HandleKeyPress(KeyEvent& event);
 
-        [[nodiscard]] virtual float GetRectWidth() const override;
-        [[nodiscard]] virtual float GetRectHeight() const override;
         virtual void OnInactive() override;
         virtual void OnFocus() override;
         virtual void OnFocusLost() override;

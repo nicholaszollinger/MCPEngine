@@ -25,6 +25,7 @@
 #include "MCP/UI/CanvasWidget.h"
 #include "MCP/UI/HorizontalLayoutWidget.h"
 #include "MCP/UI/ImageWidget.h"
+#include "MCP/UI/ScrollWidget.h"
 #include "MCP/UI/SelectionWidget.h"
 #include "MCP/UI/SliderWidget.h"
 #include "MCP/UI/TextFieldWidget.h"

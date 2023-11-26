@@ -52,7 +52,11 @@ namespace mcp
         MCP_CHECK(m_font.IsValid());
 
         // Get the rect we are going to be in.
-        RectF rect = GetRect();
+        const auto visibleRect = GetVisibleRect();
+        auto rect = visibleRect;
+
+        if (!rect.HasValidDimensions())
+            return;
 
         const auto center = GetRectCenter();
         rect.x = center.x;
@@ -60,7 +64,7 @@ namespace mcp
 
 #ifdef _DEBUG
         // Debug Render the text Boundaries:
-        //DrawRect( GetRectTopLeft(), Color::Black());
+        //DrawRect( visibleRect, Color::Black());
 #endif
         
         const float startPosY = GetTextStartYPos(rect);
@@ -87,11 +91,23 @@ namespace mcp
                     static_cast<float>(glyphData.pTextureData->height)
                 };
 
+                // Calculate the crop of the glyph, accounting for any masking:
+                // This is the rect that is visible for this glyph, the intersection of this glyph's rect and and the visible rect.
+                const auto topLeftVisible = visibleRect.GetIntersectionAsRect(glyphDestRect);
+
+                const auto finalCropX = static_cast<int>((topLeftVisible.x - glyphDestRect.x));
+                const auto finalCropY = static_cast<int>((topLeftVisible.y - glyphDestRect.y));
+
+                const float normalizedWidth = topLeftVisible.width / glyphDestRect.width;
+                const float normalizedHeight = topLeftVisible.height / glyphDestRect.height;
+                const int finalCropWidth = std::clamp(static_cast<int>(normalizedWidth * static_cast<float>(glyphData.pTextureData->width)), 0, glyphData.pTextureData->width);
+                const int finalCropHeight = std::clamp(static_cast<int>(normalizedHeight * static_cast<float>(glyphData.pTextureData->height)), 0, glyphData.pTextureData->height);
+
                 TextureRenderData data;
                 data.tint = {0,0,0};
                 data.pTexture = glyphData.pTextureData->pTexture;
-                data.destinationRect = glyphDestRect;
-                data.crop = {0, 0, glyphData.pTextureData->width, glyphData.pTextureData->height};
+                data.destinationRect = topLeftVisible;
+                data.crop = {finalCropX, finalCropY, finalCropWidth, finalCropHeight};
 
                 DrawTexture(data);
 
@@ -333,7 +349,7 @@ namespace mcp
     {
         if (m_sizedToContent)
         {
-            return GetScale().x * static_cast<float>(m_textDimensions.x);
+            return static_cast<float>(m_textDimensions.x);
         }
 
         return GetScale().x * m_width;
@@ -343,7 +359,7 @@ namespace mcp
     {
         if (m_sizedToContent)
         {
-            return GetScale().y * static_cast<float>(m_textDimensions.y);
+            return static_cast<float>(m_textDimensions.y);
         }
 
         return GetScale().y * m_height;

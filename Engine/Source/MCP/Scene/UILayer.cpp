@@ -194,6 +194,11 @@ namespace mcp
             const char* widgetTypename = childWidgetElement.GetAttributeValue<const char*>("type");
 
             Widget* pChild = WidgetFactory::CreateWidgetFromData(widgetTypename, childWidgetElement);
+            if (!pChild)
+            {
+                childWidgetElement = childWidgetElement.GetSiblingElement("Widget");
+                continue;
+            }
 
             // Add the child to our Layer
             AddEntity(pChild);

@@ -228,6 +228,12 @@ struct Vector2
         *this = *this / scalar;
         return *this;
     }
+
+    template<typename ToType>
+    Vector2<ToType> GetAs() const
+    {
+        return Vector2<ToType>( static_cast<ToType>(x), static_cast<ToType>(y));
+    }
     
     std::string ToString() const
     {
@@ -244,6 +250,7 @@ struct Vector2
 
 using Vec2 = Vector2<float>;
 using Vec2Int = Vector2<int>;
+
 
 template<typename Type, typename ScalarType>
 Vector2<Type> operator*(const float scalar, const Vector2<Type>& vec)

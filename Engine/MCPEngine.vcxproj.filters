@@ -390,6 +390,9 @@
     <ClInclude Include="Source\MCP\Core\System.h">
       <Filter>MCP\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MCP\UI\ScrollWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
@@ -631,6 +634,9 @@
     </ClCompile>
     <ClCompile Include="Source\MCP\Audio\AudioResource.cpp">
       <Filter>MCP\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\ScrollWidget.cpp">
+      <Filter>MCP\UI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
