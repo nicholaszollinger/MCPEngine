@@ -143,6 +143,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ExternalLib\BleachLeakDetector\include\BleachNew.cpp" />
+    <ClCompile Include="Source\MCP\Accessibility\Localization.cpp" />
     <ClCompile Include="Source\MCP\Audio\AudioClip.cpp" />
     <ClCompile Include="Source\MCP\Audio\AudioGroup.cpp" />
     <ClCompile Include="Source\MCP\Audio\AudioManager.cpp" />
@@ -227,6 +228,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
   <ItemGroup>
     <ClInclude Include="ExternalLib\BleachLeakDetector\include\BleachNew.h" />
     <ClInclude Include="ExternalLib\BleachLeakDetector\include\BleachNewConfig.h" />
+    <ClInclude Include="Source\MCP\Accessibility\Localization.h" />
     <ClInclude Include="Source\MCP\Audio\AudioClip.h" />
     <ClInclude Include="Source\MCP\Audio\AudioData.h" />
     <ClInclude Include="Source\MCP\Audio\AudioGroup.h" />
@@ -253,7 +255,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Components\TextComponent.h" />
     <ClInclude Include="Source\MCP\Components\TransformComponent.h" />
     <ClInclude Include="Source\MCP\Core\Application\Application.h" />
-    <ClInclude Include="Source\MCP\Core\Application\GameInstance.h" />
     <ClInclude Include="Source\MCP\Core\Application\Window\WindowBase.h" />
     <ClInclude Include="Source\MCP\Core\Config.h" />
     <ClInclude Include="Source\MCP\Core\EntryPoint.h" />

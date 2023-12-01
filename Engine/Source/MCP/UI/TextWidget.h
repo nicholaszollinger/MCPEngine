@@ -2,6 +2,7 @@
 // TextWidget.h
 
 #include "Widget.h"
+#include "MCP/Accessibility/Localization.h"
 #include "MCP/Core/Resource/Font.h"
 #include "MCP/Scene/IRenderable.h"
 #include "Utility/Types/Color.h"
@@ -50,7 +51,7 @@ namespace mcp
         TextFormatData m_format;            // Data about the Text styling
         std::vector<GlyphData> m_glyphs;    // The textures that make up our string.
         std::vector<LineData> m_lines;      // Data regarding each line in our TextBox.
-        std::string m_text;                 // Text that will be rendered.
+        LocalizedString m_text;             // Text that will be rendered.
         Font m_font;                        // The font resource that we are using.
         Vec2Int m_textDimensions;           // The total width and height of Text we are rendering.
 
@@ -69,8 +70,7 @@ namespace mcp
 
         [[nodiscard]] size_t IsEmpty() const { return m_text.empty(); }
         [[nodiscard]] size_t GetTextLength() const { return m_text.size(); }
-        [[nodiscard]] std::string& GetText() { return m_text; }
-        [[nodiscard]] const std::string& GetText() const { return m_text; }
+        [[nodiscard]] const std::string& GetText() const { return m_text.Get(); }
         [[nodiscard]] const Font& GetFont() const { return m_font; }
         [[nodiscard]] Vec2 GetCursorPosAtEnd() const;
         [[nodiscard]] virtual float GetRectWidth() const override;

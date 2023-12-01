@@ -3,6 +3,7 @@
 #include "TextWidget.h"
 
 #include "LuaSource.h"
+#include "MCP/Core/Event/Event.h"
 #include "MCP/Graphics/Graphics.h"
 #include "MCP/Scene/UILayer.h"
 
@@ -18,13 +19,15 @@ namespace mcp
         , m_format(textData)
         , m_text(pText)
     {
-        //
+        m_text.m_onStringUpdated.AddListener(this, [this]() { this->SetGlyphData(); });
     }
 
     TextWidget::~TextWidget()
     {
         if (IsActive())
             GetUILayer()->RemoveRenderable(this);
+
+        m_text.m_onStringUpdated.RemoveListener(this);
     }
 
     bool TextWidget::Init()
@@ -499,7 +502,7 @@ namespace mcp
         m_glyphs.clear();
         m_lines.clear();
         m_textDimensions = {};
-        if (m_text.empty())
+        if (m_text.Get().empty())
             return;
 
         // Create our starting line.

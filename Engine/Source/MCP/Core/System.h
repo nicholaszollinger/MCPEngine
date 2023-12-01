@@ -24,12 +24,12 @@ public:                                                             \
 
 
 #define MCP_DEFINE_STATIC_SYSTEM_GETTER(typename)                           \
-    typename* typename::Get()                                               \
-    {                                                                       \
-        auto* pSystem = mcp::Application::Get()->GetSystem<typename>();     \
-        MCP_CHECK(pSystem);                                                 \
-        return pSystem;                                                     \
-    }
+typename* typename::Get()                                               \
+{                                                                       \
+    auto* pSystem = mcp::Application::Get()->GetSystem<typename>();     \
+    MCP_CHECK(pSystem);                                                 \
+    return pSystem;                                                     \
+}
     
 
     //-----------------------------------------------------------------------------------------------------------------------------

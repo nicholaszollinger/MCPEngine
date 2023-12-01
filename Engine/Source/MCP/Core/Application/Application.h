@@ -5,8 +5,11 @@
 #include <unordered_set>
 #include <vector>
 #include "MCP/Core/System.h"
+#include "MCP/Core/Event/ApplicationEvent.h"
+#include "MCP/Graphics/Graphics.h"
 
 struct lua_State;
+
 namespace mcp
 {
     class KeyEvent;

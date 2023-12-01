@@ -12,6 +12,7 @@
 #include "MCP/Graphics/Graphics.h"
 #include "MCP/Lua/Lua.h"
 #include "LuaSource.h"
+#include "MCP/Accessibility/Localization.h"
 #include "MCP/Scene/SceneManager.h"
 #include "MCP/Core/Resource/ResourceManager.h"
 #include "Utility/Time/FrameTimer.h"
@@ -98,6 +99,7 @@ namespace mcp
         const auto settingsRoot = projectSettingsFile.GetElement();
 
         // Add the Engine Systems using the project settings:
+        m_systems.emplace_back(LocalizationSystem::AddFromData(settingsRoot));
         m_systems.emplace_back(lua::LuaLayer::AddFromData(settingsRoot));
         m_systems.emplace_back(GraphicsManager::AddFromData(settingsRoot));
         m_systems.emplace_back(AudioManager::AddFromData(settingsRoot));
@@ -256,7 +258,6 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Application::Quit()
     {
-        // I need to post an event to the Window, so that systems safely close.
         ApplicationQuitEvent event;
         GraphicsManager::Get()->GetWindow()->PostApplicationEvent(event);
     }
@@ -297,11 +298,22 @@ namespace mcp
         return 0;
     }
 
+    static int SetLanguage(lua_State* pState)
+    {
+        const char* pLanguageToken = lua_tostring(pState, -1);
+        lua_pop(pState, 1);
+
+        LocalizationSystem::Get()->SetLanguage(pLanguageToken);
+
+        return 0;
+    }
+
     void Application::RegisterLuaFunctions(lua_State* pState)
     {
         static constexpr luaL_Reg kFuncs[]
         {
             {"QuitGame", QuitGame }
+            ,{"SetLanguage", SetLanguage }
             ,{nullptr, nullptr}
         };
 
