@@ -280,7 +280,14 @@ namespace mcp
 
     XMLParser::~XMLParser()
     {
-        //MCP_LOG("XML", "Parser Destructor");
+        // Debug check for viewing the lifetime of the XMLParser.
+//#if _DEBUG
+//        if (m_loadedFile.IsValid())
+//        {
+//            MCP_LOG("XML", "Parser Destructor for file: ", m_loadedFile.GetRequest().path.GetCStr());
+//        }
+//#endif
+        
         CloseCurrentFile();
     }
 

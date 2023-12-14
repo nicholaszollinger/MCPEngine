@@ -57,9 +57,16 @@ namespace mcp
 
             else
             {
-                MCP_WARN("SceneManager", "CommandLineArgument[1] is not a path to an xml file. Opening StartScene...");
-                m_sceneToTransitionTo = m_startScene;
+                MCP_ERROR("SceneManager", "CommandLineArgument[1] is not a path to an xml file. Opening StartScene...");
+                //m_sceneToTransitionTo = m_startScene;
+                return false;
             }
+        }
+
+        else
+        {
+            MCP_ERROR("SceneManager", "No Command Line argument was passed into the Editor! Closing the Application...");
+            return false;
         }
 #endif
 
