@@ -8,6 +8,8 @@
 #include <SDL_render.h>
 #pragma warning(pop)
 
+#include <SDL_timer.h>
+
 #include "SDLHelpers.h"
 #include "MCP/Core/Event/ApplicationEvent.h"
 #include "MCP/Core/Event/Event.h"
@@ -91,6 +93,8 @@ namespace mcp
 
         auto dispatchFunc = GlobalEventDispatcher::InvokeNow<ApplicationEvent>;
 
+        static MouseButtonEvent lastButtonEvent;
+
         while (SDL_PollEvent(&sdlEvent) != 0)
         {
             switch(sdlEvent.type)
@@ -126,9 +130,8 @@ namespace mcp
                     const bool ctrl = sdlEvent.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL);
                     const bool shift = sdlEvent.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT);
                     const bool alt = sdlEvent.key.keysym.mod & (KMOD_LALT | KMOD_RALT);
-                    const ButtonState state = ButtonState::kReleased;
 
-                    KeyEvent keyEvent(keycode, state, ctrl, alt, shift);
+                    KeyEvent keyEvent(keycode, ButtonState::kReleased, ctrl, alt, shift);
                     // Dispatch the event.
                     dispatchFunc(keyEvent);
                     break;
@@ -145,14 +148,33 @@ namespace mcp
                 }
 
                 case SDL_MOUSEBUTTONDOWN:
-                case SDL_MOUSEBUTTONUP:
                 {
-                    const ButtonState state = sdlEvent.button.type == SDL_MOUSEBUTTONDOWN ? ButtonState::kPressed : ButtonState::kReleased;
+                    m_mouseDown = true;
+                    m_mouseDownTimeStamp = sdlEvent.button.timestamp;
+
+                    const ButtonState state = ButtonState::kPressed;
+
                     const auto x = static_cast<float>(sdlEvent.button.x);
                     const auto y = static_cast<float>(sdlEvent.button.y);
                     const auto button = ToMouseButton(sdlEvent.button.button);
                     const int clicks = sdlEvent.button.clicks;
-                    MouseButtonEvent buttonEvent(button, state, clicks, x, y);
+
+                    lastButtonEvent = MouseButtonEvent(button, state, clicks, x, y);
+                    dispatchFunc(lastButtonEvent);
+
+                    break;
+                }
+
+                case SDL_MOUSEBUTTONUP:
+                {
+                    m_mouseDown = false;
+                    
+                    const auto x = static_cast<float>(sdlEvent.button.x);
+                    const auto y = static_cast<float>(sdlEvent.button.y);
+                    const auto button = ToMouseButton(sdlEvent.button.button);
+                    const int clicks = sdlEvent.button.clicks;
+                    
+                    MouseButtonEvent buttonEvent(button, ButtonState::kReleased, clicks, x, y);
                     dispatchFunc(buttonEvent);
                     break;
                 }
@@ -168,6 +190,24 @@ namespace mcp
                 // TODO: Controller Events.
 
                 default: break;
+            }
+        }
+
+        // TODO: This logic should be moved to an Input System.
+        if (m_mouseDown)
+        {
+            // Calculate the time the mouse has been down for.
+            const auto current = SDL_GetTicks();
+            const float mouseDownDeltaTime = (static_cast<float>(std::max(current, m_mouseDownTimeStamp) - std::min(current, m_mouseDownTimeStamp))) / 1000.f;
+
+            static constexpr float kHoldThresholdS = 0.1f;
+
+            if (mouseDownDeltaTime > kHoldThresholdS)
+            {
+                const auto mousePos = GetMousePosition();
+
+                MouseButtonEvent heldEvent = MouseButtonEvent(lastButtonEvent.Button(), ButtonState::kHeld, lastButtonEvent.NumClicks(), mousePos.x, mousePos.y, mouseDownDeltaTime);
+                dispatchFunc(heldEvent);
             }
         }
 

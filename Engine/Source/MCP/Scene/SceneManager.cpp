@@ -8,6 +8,7 @@
 #include "MCP/Core/Application/Application.h"
 #include "MCP/Debug/Log.h"
 #include "MCP/Graphics/Graphics.h"
+#include "Utility/String/Path.h"
 
 namespace mcp
 {
@@ -22,7 +23,7 @@ namespace mcp
 
     bool SceneManager::Init()
     {
-        // Transition to the default scene:
+        // Make sure that our start scene is valid.
         const auto result = m_sceneList.find(m_startScene);
         if (result == m_sceneList.end())
         {
@@ -31,13 +32,36 @@ namespace mcp
             return false;
         }
 
-        /*m_sceneToTransitionTo = m_startScene;
-        if (!TransitionToScene())
+        // Create the Scenes.
+        for (auto&[id, sceneData] : m_sceneList)
         {
-            MCP_ERROR("SceneManager", "Failed to initialize SceneManager! Failed to transition to the start scene!");
-            Close();
-            return false;
-        }*/
+            sceneData.pScene = BLEACH_NEW(Scene);
+        }
+
+#if MCP_EDITOR
+        // Check to see if a scene asset path has been passed into the executable:
+        auto& args = Application::Get()->GetContext().args;
+
+        // If a path has been passed into the executable, load that scene asset into an empty scene.
+        if (args.count > 1)
+        {
+            const Path path = args.args[1];
+
+            // If this is a valid xml file, load the scene asset into an empty scene..
+            if (path.ExtensionMatches(".xml"))
+            {
+                // Create an empty scene.
+                const auto val = m_sceneList.emplace(m_editorScene, SceneData("InvalidPath", BLEACH_NEW(Scene)));
+                m_startScene = val.first->first;
+            }
+
+            else
+            {
+                MCP_WARN("SceneManager", "CommandLineArgument[1] is not a path to an xml file. Opening StartScene...");
+                m_sceneToTransitionTo = m_startScene;
+            }
+        }
+#endif
 
         return true;
     }
@@ -59,108 +83,33 @@ namespace mcp
 
     bool SceneManager::EnterStartScene()
     {
+#if MCP_EDITOR
+        if (m_startScene == m_editorScene)
+        {
+            LoadEditorScene();
+        }
+
+        else
+        {
+            m_sceneToTransitionTo = m_startScene;
+
+            if (!TransitionToScene())
+            {
+                MCP_ERROR("SceneManager", "Failed to transition to the start scene!");
+                return false;
+            }
+        }
+
+#else
         m_sceneToTransitionTo = m_startScene;
+
         if (!TransitionToScene())
         {
             MCP_ERROR("SceneManager", "Failed to transition to the start scene!");
             return false;
         }
 
-        return true;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Load the scene data, 
-    ///		@param pSceneDataFilepath : 
-    ///		@returns : 
-    //-----------------------------------------------------------------------------------------------------------------------------
-    bool SceneManager::LoadSceneData(const char* pSceneDataFilepath)
-    {
-        XMLParser parser;
-        if (!parser.LoadFile(pSceneDataFilepath))
-        {
-            MCP_ERROR("SceneManager", "Failed to load scene data! Failed to load SceneData at filepath: ", pSceneDataFilepath);
-            return false;
-        }
-
-        const XMLElement sceneData = parser.GetElement("SceneData");
-        if (!sceneData.IsValid())
-        {
-            MCP_ERROR("SceneManager", "Failed to load scene data! Failed to find Scene Data element. Filepath: ", pSceneDataFilepath);
-            return false;
-        }
-
-        // Get the Scene List.
-        const XMLElement sceneList = sceneData.GetChildElement("SceneList");
-        if (!sceneList.IsValid())
-        {
-            MCP_ERROR("SceneManager", "Failed to load scene data! Couldn't find SceneList element!");
-            return false;
-        }
-
-        // Create the SceneData for each scene.
-        XMLElement scene = sceneList.GetChildElement("Scene");
-        while (scene.IsValid())
-        {
-#ifndef _DEBUG
-            if (AssetIsDebugOnly(scene))
-            {
-                scene = scene.GetSiblingElement("Scene");
-                continue;
-            }
 #endif
-
-            const SceneIdentifier id = scene.GetAttributeValue<const char*>("sceneId");
-            if (!id.IsValid())
-            {
-                MCP_ERROR("SceneManager", "Failed to create Scene! No SceneId found!");
-                Close();
-                return false;
-            }
-
-            auto* path = scene.GetAttributeValue<const char*>("sceneDataPath");
-            if (!path)
-            {
-                MCP_ERROR("SceneManager", "Failed to create Scene! No SceneId found!");
-                Close();
-                return false;
-            }
-
-            auto* pScene = BLEACH_NEW(Scene); // Create a new scene.
-            m_sceneList.emplace(id, SceneData(path, pScene));
-
-            scene = scene.GetSiblingElement("Scene");
-        }
-
-        // Load the default Scene
-        const XMLElement defaultScene = sceneData.GetChildElement("StartScene");
-        if (!defaultScene.IsValid())
-        {
-            MCP_ERROR("SceneManager", "Failed to find Start Scene!");
-            // Should I close here? Or just use the start scene as the default?
-            Close();
-            return false;
-        }
-
-        const SceneIdentifier sceneId = defaultScene.GetAttributeValue<const char*>("sceneId");
-
-        const auto result = m_sceneList.find(sceneId);
-        if (result == m_sceneList.end())
-        {
-            MCP_ERROR("SceneManager", "Failed to find Start Scene in SceneList! StartScene id: ", sceneId.GetCStr());
-            Close();
-            return false;
-        }
-
-        m_sceneToTransitionTo = sceneId;
-        if (!TransitionToScene())
-        {
-            MCP_ERROR("SceneManager", "Failed to load the Start Scene!");
-            return false;
-        }
-
         return true;
     }
 
@@ -227,8 +176,48 @@ namespace mcp
 
         m_transitionQueued = false;
 
+        m_pActiveScene->Begin();
+
         return true;
     }
+
+#if MCP_EDITOR
+    bool SceneManager::LoadEditorScene()
+    {
+        m_pActiveScene = m_sceneList[m_editorScene].pScene;
+
+        const auto& context = Application::Get()->GetContext();
+        std::string absolutePath = context.args[1];
+        const auto requestPath = absolutePath.erase(0, context.workingDirectory.size());
+        //XMLParser m_loadedAsset;
+        if (!m_pActiveScene->m_sceneFile.LoadFile(requestPath.c_str()))
+        {
+            MCP_ERROR("SceneManager", "Failed to load editor scene!");
+            return false;
+        }
+
+        // HACK:
+        // Right now, I am fulfilling the requirements of the assignment. In editor mode,
+        // I would want to be loading a scene, but the assignment wants to load a specific UI menu
+        // for editing. So I am just doing that.
+        const auto root = m_pActiveScene->m_sceneFile.GetElement();
+        m_pActiveScene->InitEmpty();
+        m_pActiveScene->GetUILayer()->LoadLayerAssetsAndEntities(root);
+        //m_pActiveScene->m_sceneFile = m_loadedAsset;
+        if (!m_pActiveScene->OnSceneLoad())
+        {
+            MCP_ERROR("SceneManager", "Failed to load EditorScene! Failed OnSceneLoad!");
+            return false;
+        }
+
+        m_transitionQueued = false;
+
+        m_pActiveScene->Begin();
+
+        return true;
+    }
+
+#endif
 
     SceneManager* SceneManager::AddFromData(const XMLElement element)
     {
@@ -275,13 +264,13 @@ namespace mcp
                 return nullptr;
             }
 
-            auto* pScene = BLEACH_NEW(Scene); // Create a new scene.
-            sceneList.emplace(id, SceneData(path, pScene));
+            //auto* pScene = BLEACH_NEW(Scene); // Create a new scene.
+            sceneList.emplace(id, SceneData(path, nullptr));
 
             scene = scene.GetSiblingElement("Scene");
         }
 
-        // Get the start start Scene
+        // Get the Start Scene
         const XMLElement startSceneElement = sceneData.GetChildElement("StartScene");
         if (!startSceneElement.IsValid())
         {
@@ -289,7 +278,11 @@ namespace mcp
             return nullptr;
         }
 
-        auto* startScene = startSceneElement.GetAttributeValue<const char*>("sceneId");
+#if MCP_EDITOR
+        auto* startScene = startSceneElement.GetAttributeValue<const char*>("editor");
+#else
+        auto* startScene = startSceneElement.GetAttributeValue<const char*>("default");
+#endif
         if (!startScene)
         {
             MCP_ERROR("SceneManager", "Failed to find Start!");
@@ -298,6 +291,100 @@ namespace mcp
 
         return BLEACH_NEW(SceneManager(std::move(sceneList), startScene));
     }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Load the scene data, 
+    ///		@param pSceneDataFilepath : 
+    ///		@returns : 
+    //-----------------------------------------------------------------------------------------------------------------------------
+//    bool SceneManager::LoadSceneData(const char* pSceneDataFilepath)
+//    {
+//        XMLParser parser;
+//        if (!parser.LoadFile(pSceneDataFilepath))
+//        {
+//            MCP_ERROR("SceneManager", "Failed to load scene data! Failed to load SceneData at filepath: ", pSceneDataFilepath);
+//            return false;
+//        }
+//
+//        const XMLElement sceneData = parser.GetElement("SceneData");
+//        if (!sceneData.IsValid())
+//        {
+//            MCP_ERROR("SceneManager", "Failed to load scene data! Failed to find Scene Data element. Filepath: ", pSceneDataFilepath);
+//            return false;
+//        }
+//
+//        // Get the Scene List.
+//        const XMLElement sceneList = sceneData.GetChildElement("SceneList");
+//        if (!sceneList.IsValid())
+//        {
+//            MCP_ERROR("SceneManager", "Failed to load scene data! Couldn't find SceneList element!");
+//            return false;
+//        }
+//
+//        // Create the SceneData for each scene.
+//        XMLElement scene = sceneList.GetChildElement("Scene");
+//        while (scene.IsValid())
+//        {
+//#ifndef _DEBUG
+//            if (AssetIsDebugOnly(scene))
+//            {
+//                scene = scene.GetSiblingElement("Scene");
+//                continue;
+//            }
+//#endif
+//
+//            const SceneIdentifier id = scene.GetAttributeValue<const char*>("sceneId");
+//            if (!id.IsValid())
+//            {
+//                MCP_ERROR("SceneManager", "Failed to create Scene! No SceneId found!");
+//                Close();
+//                return false;
+//            }
+//
+//            auto* path = scene.GetAttributeValue<const char*>("sceneDataPath");
+//            if (!path)
+//            {
+//                MCP_ERROR("SceneManager", "Failed to create Scene! No SceneId found!");
+//                Close();
+//                return false;
+//            }
+//
+//            m_sceneList.emplace(id, SceneData(path, nullptr));
+//
+//            scene = scene.GetSiblingElement("Scene");
+//        }
+//
+//        // Get the default Scene
+//        const XMLElement defaultScene = sceneData.GetChildElement("StartScene");
+//        if (!defaultScene.IsValid())
+//        {
+//            MCP_ERROR("SceneManager", "Failed to find Start Scene!");
+//            // Should I close here? Or just use the start scene as the default?
+//            Close();
+//            return false;
+//        }
+//
+//        const SceneIdentifier sceneId = defaultScene.GetAttributeValue<const char*>("sceneId");
+//
+//        const auto result = m_sceneList.find(sceneId);
+//        if (result == m_sceneList.end())
+//        {
+//            MCP_ERROR("SceneManager", "Failed to find Start Scene in SceneList! StartScene id: ", sceneId.GetCStr());
+//            Close();
+//            return false;
+//        }
+//
+//        m_sceneToTransitionTo = sceneId;
+//        if (!TransitionToScene())
+//        {
+//            MCP_ERROR("SceneManager", "Failed to load the Start Scene!");
+//            return false;
+//        }
+//
+//        return true;
+//    }
 
     static int ScriptTransitionToScene(lua_State* pState)
     {

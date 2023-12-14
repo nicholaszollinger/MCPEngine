@@ -18,14 +18,9 @@ namespace mcp
     bool ToggleWidget::PostLoadInit()
     {
         // Initialize our script behavior.
-        if (m_pOnExecuteScript.IsValid())
-            lua::CallMemberFunction(m_pOnExecuteScript, "Init", this, m_value);
-
-        if (m_pHighlightBehaviorScript.IsValid())
-            lua::CallMemberFunction(m_pHighlightBehaviorScript, "Init", this, m_value);
-
-        if (m_pPressReleaseBehaviorScript.IsValid())
-            lua::CallMemberFunction(m_pPressReleaseBehaviorScript, "Init", this, m_value);
+        m_onExecuteScript.Run("Init", this, m_value);
+        m_highlightScript.Run("Init", this, m_value);
+        m_pressReleaseScript.Run("Init", this, m_value);
 
         return true;
     }
@@ -35,10 +30,7 @@ namespace mcp
         m_value = !m_value;
 
         m_onValueChanged.Broadcast(this, m_value);
-        if (m_pOnExecuteScript.IsValid())
-        {
-            lua::CallMemberFunction(m_pOnExecuteScript, "OnExecute", m_value);
-        }
+        m_onExecuteScript.Run("OnExecute", m_value);
     }
 
     void ToggleWidget::SetValue(const bool value)
@@ -48,11 +40,7 @@ namespace mcp
 
         m_value = value;
         m_onValueChanged.Broadcast(this, m_value);
-
-        if (m_pOnExecuteScript.IsValid())
-        {
-            lua::CallMemberFunction(m_pOnExecuteScript, "OnExecute", m_value);
-        }
+        m_onExecuteScript.Run("OnExecute", m_value);
 
         // If our value was set outside of an input event, we need to exit our hover state.
         const auto mousePos = GraphicsManager::Get()->GetWindow()->GetMousePosition();

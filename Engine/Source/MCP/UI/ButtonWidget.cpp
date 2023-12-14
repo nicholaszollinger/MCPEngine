@@ -17,9 +17,9 @@ namespace mcp
 #if MCP_DEBUG_RENDER_BUTTON_BOUNDS
         , IRenderable(RenderLayer::kDebugOverlay, 200)
 #endif
-        , m_pOnExecuteScript(std::move(onExecuteScript))
-        , m_pHighlightBehaviorScript(std::move(highlightBehaviorScript))
-        , m_pPressReleaseBehaviorScript(std::move(pressReleaseBehaviorScript))
+        , m_onExecuteScript(std::move(onExecuteScript))
+        , m_highlightScript(std::move(highlightBehaviorScript))
+        , m_pressReleaseScript(std::move(pressReleaseBehaviorScript))
     {
         //
     }
@@ -29,9 +29,9 @@ namespace mcp
 #if MCP_DEBUG_RENDER_BUTTON_BOUNDS
         , IRenderable(RenderLayer::kDebugOverlay, 200)
 #endif
-        , m_pOnExecuteScript(std::move(behavior.onExecuteScript))
-        , m_pHighlightBehaviorScript(std::move(behavior.highlightBehaviorScript))
-        , m_pPressReleaseBehaviorScript(std::move(behavior.pressReleaseBehaviorScript))
+        , m_onExecuteScript(std::move(behavior.onExecuteScript))
+        , m_highlightScript(std::move(behavior.highlightBehaviorScript))
+        , m_pressReleaseScript(std::move(behavior.pressReleaseBehaviorScript))
     {
         //
     }
@@ -41,9 +41,9 @@ namespace mcp
 #if MCP_DEBUG_RENDER_BUTTON_BOUNDS
         , IRenderable(RenderLayer::kDebugOverlay, 200)
 #endif
-        , m_pOnExecuteScript(behavior.onExecuteScript)
-        , m_pHighlightBehaviorScript(behavior.highlightBehaviorScript)
-        , m_pPressReleaseBehaviorScript(behavior.pressReleaseBehaviorScript)
+        , m_onExecuteScript(behavior.onExecuteScript)
+        , m_highlightScript(behavior.highlightBehaviorScript)
+        , m_pressReleaseScript(behavior.pressReleaseBehaviorScript)
     {
         //
     }
@@ -51,14 +51,9 @@ namespace mcp
     bool ButtonWidget::PostLoadInit()
     {
         // Initialize our script behavior.
-        if (m_pOnExecuteScript.IsValid())
-            lua::CallMemberFunction(m_pOnExecuteScript, "Init", this);
-
-        if (m_pHighlightBehaviorScript.IsValid())
-            lua::CallMemberFunction(m_pHighlightBehaviorScript, "Init", this);
-
-        if (m_pPressReleaseBehaviorScript.IsValid())
-            lua::CallMemberFunction(m_pPressReleaseBehaviorScript, "Init", this);
+        m_onExecuteScript.Run("Init", this);
+        m_highlightScript.Run("Init", this);
+        m_pressReleaseScript.Run("Init", this);
         return true;
     }
 
@@ -170,6 +165,8 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void ButtonWidget::OnMove()
     {
+        Widget::OnMove();
+
         if (!m_isHovered || !IsActive())
             return;
 
@@ -268,37 +265,30 @@ namespace mcp
 
     void ButtonWidget::OnExecute([[maybe_unused]] const Vec2 relativeClickPosition)
     {
-        // MCP_LOG("ButtonWidget", "Calling OnPress");
-        MCP_CHECK(m_pOnExecuteScript.IsValid());
-        lua::CallMemberFunction(m_pOnExecuteScript, "OnExecute");
+        MCP_CHECK(m_onExecuteScript.IsValid());
+        m_onExecuteScript.Run("OnExecute");
     }
 
     void ButtonWidget::OnPress([[maybe_unused]] const Vec2 relativeClickPosition)
     {
-        if (m_pPressReleaseBehaviorScript.IsValid())
-            lua::CallMemberFunction(m_pPressReleaseBehaviorScript, "OnPress");
+        m_pressReleaseScript.Run("OnPress");
     }
 
     void ButtonWidget::OnRelease([[maybe_unused]] const Vec2 relativeClickPosition)
     {
-        if (m_pPressReleaseBehaviorScript.IsValid())
-            lua::CallMemberFunction(m_pPressReleaseBehaviorScript, "OnRelease");
+        m_pressReleaseScript.Run("OnRelease");
     }
 
     void ButtonWidget::OnHoverEnter()
     {
         m_isHovered = true;
-
-        if (m_pHighlightBehaviorScript.IsValid())
-            lua::CallMemberFunction(m_pHighlightBehaviorScript, "OnHoverEnter");
+        m_highlightScript.Run("OnHoverEnter");
     }
 
     void ButtonWidget::OnHoverExit()
     {
         m_isHovered = false;
-
-        if (m_pHighlightBehaviorScript.IsValid())
-            lua::CallMemberFunction(m_pHighlightBehaviorScript, "OnHoverExit");
+        m_highlightScript.Run("OnHoverExit");
     }
 
     ButtonWidget* ButtonWidget::AddFromData(const XMLElement element)

@@ -19,6 +19,10 @@ namespace mcp
         std::vector<WidgetStackElement> m_stack;        // Stack of Widgets that define Menu navigation, render order, etc.
         Widget* m_pFocusedWidget;                       // The active Widget tree that is responding to ApplicationEvents
 
+#if MCP_EDITOR
+        Widget* m_pSelectedWidget = nullptr;
+#endif
+
     public:
         // Entity Management
         template<typename WidgetType, typename...CArgs>
@@ -34,6 +38,10 @@ namespace mcp
 
         void FocusWidget(Widget* pWidget);
         [[nodiscard]] Widget* GetFocused() const { return m_pFocusedWidget; }
+
+#if MCP_EDITOR
+        void SetSelected(Widget* pWidget) { m_pSelectedWidget = pWidget; }
+#endif
 
     private:
         // Private Ctor

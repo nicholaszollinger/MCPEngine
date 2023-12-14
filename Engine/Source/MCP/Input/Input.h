@@ -5,7 +5,11 @@
 
 namespace mcp
 {
-    bool IsKeyPressed(const MCPKey& key);
-    bool IsKeyReleased(const MCPKey& key);
+    class Input
+    {
+    public:
+        static bool IsKeyPressed(const MCPKey& key);
+        static bool IsKeyReleased(const MCPKey& key);
+    };
 
 }

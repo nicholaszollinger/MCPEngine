@@ -82,6 +82,12 @@
     <Filter Include="MCP\Accessibility">
       <UniqueIdentifier>{9d6fc5d8-bf76-47c1-8186-c1acdafdccf3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MCP\Scripting">
+      <UniqueIdentifier>{a754d706-c0c5-44b1-9df1-ba9396497432}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Editor">
+      <UniqueIdentifier>{713b3303-b02e-4793-87bd-55726f6e6c19}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Platform\SDL2\SDL2Window.h">
@@ -396,6 +402,12 @@
     <ClInclude Include="Source\MCP\Accessibility\Localization.h">
       <Filter>MCP\Accessibility</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MCP\Scripting\Script.h">
+      <Filter>MCP\Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Editor\EditorEntity.h">
+      <Filter>MCP\Editor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
@@ -643,6 +655,12 @@
     </ClCompile>
     <ClCompile Include="Source\MCP\Accessibility\Localization.cpp">
       <Filter>MCP\Accessibility</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Resource\Resource.cpp">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scripting\Script.cpp">
+      <Filter>MCP\Scripting</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

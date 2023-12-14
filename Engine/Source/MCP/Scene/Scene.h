@@ -13,10 +13,16 @@ namespace mcp
 
     class Scene
     {
+        friend SceneManager;
+
     private:
         static constexpr const char* kPackageElementName = "Package";
         static constexpr const char* kSceneElementName = "Scene";
         static constexpr float kFixedUpdateTimeSeconds = 1.f / 60.f;
+
+#if MCP_EDITOR
+        XMLParser m_sceneFile; // <= This is the data file used to load the scene.
+#endif
 
         MessageManager m_messageManager;
         WorldLayer* m_pWorldLayer;
@@ -28,6 +34,10 @@ namespace mcp
     public:
         Scene();
         ~Scene();
+
+#if MCP_EDITOR
+        bool InitEmpty();
+#endif
 
         bool Load(const char* pFilePath);
         bool OnSceneLoad();
@@ -43,6 +53,11 @@ namespace mcp
 
     private:
         bool Init();
-        void OnEvent(ApplicationEvent& event) const;
+        void Begin();
+        void OnEvent(ApplicationEvent& event);
+
+#if MCP_EDITOR
+        void Save();
+#endif
     };
 }

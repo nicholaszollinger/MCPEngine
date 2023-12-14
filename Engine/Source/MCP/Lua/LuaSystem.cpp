@@ -58,9 +58,25 @@ namespace mcp
 
         // Add the Engine scripts path to the package search path.
         AddSearchPath(m_pState, "..\\MCPEngine\\?.lua");
+        AddSearchPath(m_pState, "Engine\\Scripts\\?.lua");
+
+        std::string scriptsPath = Application::Get()->GetContext().workingDirectory;
+
+#if MCP_EDITOR
+        const std::string projectSearchPath = scriptsPath + "?.lua";
+        AddSearchPath(m_pState, projectSearchPath.c_str());
+#endif
+
+        scriptsPath += R"(Engine\Scripts\Core\MCP.lua)";
 
         // Sets the initial require for each of our modules.
-        luaL_dofile(m_pState, "../MCPEngine/Engine/Scripts/Core/MCP.lua");
+        if (luaL_dofile(m_pState, scriptsPath.c_str()) != 0)
+        {
+            [[maybe_unused]] const auto errorMsg = lua_tostring(m_pState, -1);
+            lua_pop(m_pState, 1); // Pop the error message off the stack.
+            MCP_ERROR("LuaSystem", "Failed to initialize LuaContext! Core MCP script not found!\nLua Error: ", errorMsg);
+            return false;
+        }
 
 #if _DEBUG
         // Register Debug functions.
@@ -115,8 +131,11 @@ namespace mcp
     {
         MCP_CHECK(functionArray);
 
+        std::string scriptsPath = Application::Get()->GetContext().workingDirectory;
+        scriptsPath += pScriptFilepath;
+
         // HACK: I am assuming that this class is going to have a global table named 'pTypename'.
-        if (luaL_dofile(m_pState, pScriptFilepath) != 0)
+        if (luaL_dofile(m_pState, scriptsPath.c_str()) != 0)
         {
             lua_pop(m_pState, 1);
             MCP_ERROR("Lua", "Failed to run Script lib! Filepath: ", pScriptFilepath);
@@ -145,13 +164,14 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     bool LuaSystem::LoadScript(const char* pFilepath) const
     {
-        if (luaL_dofile(m_pState, pFilepath) != 0)
+        std::string scriptsPath = Application::Get()->GetContext().workingDirectory;
+        scriptsPath += pFilepath;
+        if (luaL_dofile(m_pState, scriptsPath.c_str()) != 0)
         {
             lua_pop(m_pState, 1); // Pop the error message off the stack.
             MCP_ERROR("Lua", "Failed to load Lua Script! Filepath: ", pFilepath);
             return false;
         }
-
 
         return true;
     }
@@ -166,10 +186,12 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     LuaResourcePtr LuaSystem::LoadScriptInstance(const char* pFilepath) const
     {
-        if (luaL_dofile(m_pState, pFilepath) != 0)
+        std::string scriptsPath = Application::Get()->GetContext().workingDirectory;
+        scriptsPath += pFilepath;
+        if (luaL_dofile(m_pState, scriptsPath.c_str()) != 0)
         {
             lua_pop(m_pState, 1); // Pop the error message off the stack.
-            MCP_ERROR("Lua", "Failed to load Lua Script! Filepath: ", pFilepath);
+            MCP_ERROR("Lua", "Failed to load Lua Script! Filepath: ", scriptsPath);
             return LuaResourcePtr();
         }
 

@@ -14,6 +14,10 @@
 #include "MCP/UI/ToggleWidget.h"
 #include "MCP/Scene/Scene.h"
 
+#if MCP_EDITOR
+#include "MCP/Core/Application/Application.h"
+#endif
+
 namespace mcp
 {
     UILayer::UILayer(Scene* pScene)
@@ -41,6 +45,8 @@ namespace mcp
             // Initialize the parent.
             pWidget->PostLoadInit();
         }
+
+        m_state = LayerState::kPostLoad;
 
         return true;
     }
@@ -160,6 +166,17 @@ namespace mcp
             // Initialize
             pWidget->Init();
 
+#if MCP_EDITOR
+            // HACK FOR THE ASSIGNMENT - REMOVE THIS LATER:
+            // Set the root to active if we are being opening in the 'tool' version of the app.
+            if (Application::Get()->GetContext().args.count > 1)
+            {
+                pWidget->SetActive(true);
+                //m_pFocusedWidget = pWidget;
+            }
+            
+#endif
+
             // Recursively load each child widget.
             LoadChildWidget(pWidget, rootElement);
 
@@ -260,6 +277,16 @@ namespace mcp
         {
             pRenderable->Render();
         }
+
+#if MCP_EDITOR
+        // If we have a selected Widget, render its bounding box.
+        if (m_pSelectedWidget)
+        {
+            const auto rect = m_pSelectedWidget->GetRectTopLeft();
+            DrawRect(rect, Color::White());
+        }
+
+#endif
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -271,12 +298,44 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void UILayer::OnEvent(ApplicationEvent& event)
     {
+#if MCP_EDITOR
+        if (event.GetEventId() != MouseButtonEvent::GetStaticId())
+            return;
+
+        auto& mouseEvent = static_cast<MouseButtonEvent&>(event);
+
+         // If there is no focused Widget and we are clicking on the screen, attempt to find a widget.
+        if (!m_pFocusedWidget) // && event.GetEventId() == MouseButtonEvent::GetStaticId())
+        {
+            if (mouseEvent.State() != ButtonState::kPressed)
+                return;
+
+            for (auto it = m_stack.rbegin(); it != m_stack.rend(); ++it)
+            {
+                if (it->pBaseWidget->PointIntersectsRect(mouseEvent.GetWindowPosition()))
+                {
+                    m_pFocusedWidget = it->pBaseWidget;
+
+                    //const auto tag = m_pFocusedWidget->GetTag();
+                    //MCP_LOG("UILayer", "Focused: ", *tag);
+                    break;
+                }
+            }
+        }
+
+        // Send the event down to the widgets.
+        if (m_pFocusedWidget)
+            m_pFocusedWidget->OnEvent(event);
+
+#else
+
         // If there is no focused Widget, then return
         if (!m_pFocusedWidget)
             return;
 
         // Send the event down to the widgets.
         m_pFocusedWidget->OnEvent(event);
+#endif
     }
     
     Widget* UILayer::GetWidgetByTag(const StringId tag) const

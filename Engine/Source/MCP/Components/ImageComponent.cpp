@@ -38,7 +38,7 @@ namespace mcp
             return;
         }
 
-        if (!m_texture.Load({pTextureFilepath, nullptr, false}))
+        if (!m_texture.Load(DiskResourceRequest(pTextureFilepath)))
         {
             MCP_WARN("ImageComponent", "Failed to load texture!");
         }
@@ -59,7 +59,7 @@ namespace mcp
             return;
         }
 
-        if (!m_texture.Load({data.pImagePath, nullptr, false}))
+        if (!m_texture.Load(DiskResourceRequest(data.pImagePath)))
         {
             MCP_WARN("ImageComponent", "Failed to load texture! Path: ", data.pImagePath);
             return;

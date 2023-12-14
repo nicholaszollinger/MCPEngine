@@ -13,6 +13,9 @@ namespace mcp
         : m_pParent(nullptr)
         , m_id(s_idCounter++)
         , m_isActive(true)
+#if MCP_EDITOR
+        , m_dirty(false)
+#endif
     {
         //
     }
@@ -22,8 +25,13 @@ namespace mcp
         , m_id(s_idCounter++)
         , m_tag(data.tag)
         , m_isActive(data.startActive)
+#if MCP_EDITOR
+        , m_dirty(false)
+#endif
     {
-        //
+#if MCP_EDITOR
+        m_entityRoot = data.root;
+#endif
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -319,7 +327,10 @@ namespace mcp
         // Tag
         data.tag = element.GetAttributeValue<const char*>("tag", nullptr);
 
+#if MCP_EDITOR
+        data.root = element;
+#endif
+
         return data;
     }
-
 }

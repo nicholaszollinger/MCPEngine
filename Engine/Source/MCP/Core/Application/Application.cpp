@@ -1,6 +1,7 @@
 // Application.cpp
 #include "Application.h"
 
+#include <filesystem>
 #include <fstream>
 #include "BleachNew.h"
 #include "MCP/Debug/Log.h"
@@ -20,11 +21,11 @@
 
 namespace mcp
 {
-    void Application::Create()
+    void Application::Create(const ApplicationContext& context)
     {
         if (!s_pInstance)
         {
-            s_pInstance = BLEACH_NEW(Application);
+            s_pInstance = BLEACH_NEW(Application(context));
         }
     }
 
@@ -34,10 +35,37 @@ namespace mcp
         s_pInstance = nullptr;
     }
 
-    Application::Application()
-        : m_isRunning(false)
+    Application::Application(const ApplicationContext& context)
+        : m_context(context)
+        , m_isRunning(false)
     {
-        //
+#if MCP_EDITOR
+        // If the working directory is empty, set it to the current folder.
+        if (m_context.workingDirectory.empty())
+        {
+            if (m_context.args.count == 1)
+            {
+                m_context.workingDirectory = std::filesystem::current_path().string() + "\\";
+            }
+
+            // If we have been sent a path in the executable, std::filesystem::current_path().string() will be incorrect.
+            else
+            {
+                const std::string executablePath = m_context.args[0];
+                const auto lastSlash = executablePath.find_last_of('\\');
+                m_context.workingDirectory = executablePath.substr(0, lastSlash + 1);
+            }
+
+            MCP_LOG("Application", "Working Directory: ", m_context.workingDirectory);
+
+        }
+#else
+        // If the working directory is empty, set it to the current folder.
+        if (m_context.workingDirectory.empty())
+        {
+            m_context.workingDirectory = std::filesystem::current_path().string() + "\\";
+        }
+#endif
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -53,22 +81,22 @@ namespace mcp
 
 #if MCP_LOGGING_ENABLED
         // Initialize the Logger
-        if (!Logger::Init("Log/"))
+        if (!Logger::Init((m_context.workingDirectory + std::string("Log\\")).c_str()))
         {
             Close();
             return false;
         }
 
         // Load the Engine log categories.
-        if (!Logger::LoadCategories("../MCPEngine/Engine/Config/EngineLogs.config"))
+        if (!Logger::LoadCategories((m_context.workingDirectory + std::string(R"(Config\Engine\Logs.config)")).c_str()))
         {
-            MCP_ERROR("Application", "Failed to load EngineLog Categories!");
+            MCP_ERROR("Application", "Failed to load Engine Log Categories!");
             Close();
             return false;
         }
 
         // Load the Game log categories.
-        if (!Logger::LoadCategories("Config/GameLogs.config"))
+        if (!Logger::LoadCategories((m_context.workingDirectory + std::string(R"(Config\GameLogs.config)")).c_str()))
         {
             MCP_ERROR("Application", "Failed to load Game log categories!");
             Close();
@@ -86,24 +114,27 @@ namespace mcp
             return false;
         }
 
-        // Load the project settings:
-        XMLParser projectSettingsFile;
-        // TODO: This file path could be a parameter:
-        if (!projectSettingsFile.LoadFile("Config/ProjectSettings.xml"))
+        // Opening a block to control the lifetime of the project settings file.
         {
-            MCP_CRITICAL("Application", "Failed to load project settings!");
-            Close();
-            return false;
+            // Load the project settings:
+            XMLParser projectSettingsFile;
+            // TODO: This file path could be a parameter:
+            if (!projectSettingsFile.LoadFile("Config\\ProjectSettings.xml"))
+            {
+                MCP_CRITICAL("Application", "Failed to load project settings!");
+                Close();
+                return false;
+            }
+
+            const auto settingsRoot = projectSettingsFile.GetElement();
+
+            // Add the Engine Systems using the project settings:
+            m_systems.emplace_back(LocalizationSystem::AddFromData(settingsRoot));
+            m_systems.emplace_back(lua::LuaLayer::AddFromData(settingsRoot));
+            m_systems.emplace_back(GraphicsManager::AddFromData(settingsRoot));
+            m_systems.emplace_back(AudioManager::AddFromData(settingsRoot));
+            m_systems.emplace_back(SceneManager::AddFromData(settingsRoot));
         }
-
-        const auto settingsRoot = projectSettingsFile.GetElement();
-
-        // Add the Engine Systems using the project settings:
-        m_systems.emplace_back(LocalizationSystem::AddFromData(settingsRoot));
-        m_systems.emplace_back(lua::LuaLayer::AddFromData(settingsRoot));
-        m_systems.emplace_back(GraphicsManager::AddFromData(settingsRoot));
-        m_systems.emplace_back(AudioManager::AddFromData(settingsRoot));
-        m_systems.emplace_back(SceneManager::AddFromData(settingsRoot));
 
         // Initialize each engine system in order. (skipping the ResourceManager)
         for (size_t i = 1; i < m_systems.size(); ++i)
@@ -123,6 +154,7 @@ namespace mcp
         if (!LoadGameSystems(pGameSystemsFilepath))
         {
             MCP_ERROR("Application", "Failed to load GameSystems!");
+            Close();
             return false;
         }
 
@@ -161,13 +193,15 @@ namespace mcp
 
         while (m_isRunning)
         {
-            const float deltaTimeMs = static_cast<float>(timer.NewFrame());
+            [[maybe_unused]] const float deltaTimeMs = static_cast<float>(timer.NewFrame());
 
             m_isRunning = pWindow->ProcessEvents();
 
             if (m_isRunning)
             {
+#ifndef MCP_EDITOR
                 SceneManager::Get()->Update(deltaTimeMs);
+#endif
                 SceneManager::Get()->Render();
                 GraphicsManager::Get()->Display();
             }

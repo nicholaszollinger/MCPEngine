@@ -16,6 +16,8 @@ namespace mcp
         SDL_Window* m_pWindow;      // Pointer to the window instance.
         SDL_Renderer* m_pRenderer;  // Pointer to the renderer for this window.
         RectInt m_dimensions;       // Position and size data for this window.
+        uint32_t m_mouseDownTimeStamp = 0;
+        bool m_mouseDown = false;
 
     public:
         SDL2Window();

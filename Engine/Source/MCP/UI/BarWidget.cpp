@@ -23,8 +23,7 @@ namespace mcp
     {
         const float percentage = GetValueNormalized();
 
-        if (m_onValueChangedScript.IsValid())
-            lua::CallMemberFunction(m_onValueChangedScript, "Init", this, percentage);
+        m_onValueChangedScript.Run("Init", this, percentage);
 
         return true;
     }
@@ -40,8 +39,7 @@ namespace mcp
         m_value = value;
 
         // Let our script know.
-        if (m_onValueChangedScript.IsValid())
-            lua::CallMemberFunction(m_onValueChangedScript, "OnValueChanged", m_value, GetValueNormalized());
+        m_onValueChangedScript.Run("OnValueChanged", m_value, GetValueNormalized());
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------

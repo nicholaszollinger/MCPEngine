@@ -32,6 +32,9 @@ private:
     //-----------------------------------------------------------------------------------------------------------------------------
     struct SceneEntityConstructionData
     {
+#if MCP_EDITOR
+        XMLElement root;  
+#endif
         StringId tag;
         bool startActive = true;
     };
@@ -50,6 +53,12 @@ private:
 
         std::vector<SceneEntity*> m_children;
         SceneEntity* m_pParent;
+
+#if MCP_EDITOR
+        // This is the element in the scene or scene asset file that we were loaded from.
+        XMLElement m_entityRoot;
+        bool m_dirty;
+#endif
 
     private:
         EntityId m_id;
@@ -107,10 +116,18 @@ private:
         [[nodiscard]] StringId GetTag() const { return m_tag; }
         [[nodiscard]] virtual SceneEntity* GetParent() const { return m_pParent; }
 
+        // Utils
         static SceneEntityConstructionData GetEntityConstructionData(const XMLElement element);
         template<typename EntityType> static EntityType* SafeCastEntity(SceneEntity* pEntity);
         template<typename EntityType> static const EntityType* SafeCastEntity(const SceneEntity* pEntity);
 
+#if MCP_EDITOR
+        // Saving
+        virtual void Save() {}
+        void MarkDirty() { m_dirty = true; }
+        [[nodiscard]] bool IsDirty() const { return m_dirty; }
+
+#endif
     protected:
         virtual void OnDestroy() = 0;
         virtual void OnActive() = 0;
@@ -123,6 +140,11 @@ private:
         /*void SendMessage(const MessageId messageId);
         void ListenForMessage(const MessageId messageId);
         void StopListeningToMessage(const MessageId messageId);*/
+
+#if MCP_EDITOR
+        // Saving
+        //void MarkDirty();
+#endif
 
     private:
         void OnParentActiveChanged(const bool parentActiveState);

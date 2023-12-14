@@ -36,7 +36,7 @@ namespace mcp
             GetUILayer()->AddRenderable(this);
 
         // Load the font.
-        if (!m_font.Load({{m_format.fontFilepath, nullptr, false } , m_format.fontSize }))
+        if (!m_font.Load({ DiskResourceRequest(m_format.fontFilepath), m_format.fontSize }))
         {
             MCP_ERROR("TextWidget", "Failed to load font!");
             return false;

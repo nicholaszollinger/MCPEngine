@@ -28,6 +28,9 @@ namespace mcp
         , m_isVisible(false)
         , m_sizedToContent(data.sizedToContent)
         , m_isMask(data.isMask)
+#if MCP_EDITOR
+        , m_held(false)
+#endif
     {
         SetZOffset(data.zOffset);
 
@@ -35,8 +38,7 @@ namespace mcp
         SetLayer(SceneManager::Get()->GetActiveScene()->GetUILayer());
 
         // HACK. I need to have an early step dedicated to initializing the 'this' pointer in Script behavior.
-        if (m_enableBehaviorScript.IsValid())
-            lua::CallMemberFunction(m_enableBehaviorScript, "Init", this);
+        m_enableBehaviorScript.Run("Init", this);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -129,12 +131,51 @@ namespace mcp
                 return;
         }
 
+#if MCP_EDITOR
+        // In the editor, we only respond to MouseEvents...
+        if (event.GetEventId() == MouseButtonEvent::GetStaticId())
+        {
+            auto& mouseButtonEvent = static_cast<MouseButtonEvent&>(event);
+            Vec2 relativeClickPos;
+
+            if (mouseButtonEvent.State() == ButtonState::kPressed && GetPointRelativeToRect(mouseButtonEvent.GetWindowPosition(), relativeClickPos))
+            {
+                m_held = true;
+
+                GetUILayer()->SetSelected(this);
+
+                relativeClickPos.x -= m_pivot.x * GetRectWidth();
+                relativeClickPos.y -= m_pivot.y * GetRectHeight();
+
+                m_grabbedOffset = relativeClickPos;
+
+                //MCP_LOG("Widget", "Mouse Pos On Click: ", mouseButtonEvent.GetWindowPosition().ToString());
+                //MCP_LOG("Widget", "Grabbed Pos: ", m_grabbedOffset.ToString());
+                event.SetHandled();
+            }
+
+            else if (mouseButtonEvent.State() == ButtonState::kReleased)
+            {
+                // "Let go" of the Widget.
+                m_held = false;
+            }
+
+            else if (mouseButtonEvent.State() == ButtonState::kHeld && m_held)
+            {
+                SetPosition(mouseButtonEvent.GetWindowPosition() - m_grabbedOffset);
+                event.SetHandled();
+            }
+        }
+
+#else
         // If the event was not handled by any of our children and we are interactable,
         // then handle the event.
         if (!event.IsHandled() && m_isInteractable)
         {
             HandleEvent(event);
         }
+#endif
+        
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -147,6 +188,42 @@ namespace mcp
     {
         m_localPos.x = x;
         m_localPos.y = y;
+
+        // Let the Widget Respond to the movement:
+        OnMove();
+
+        // Let our children respond as well:
+        for (auto* pChild : m_children)
+        {
+            auto* pWidget = SafeCastEntity<Widget>(pChild);
+            pWidget->OnMove();
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Set the position of the origin at the screen space coordinates (x,y).
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::SetPosition(const float x, const float y)
+    {
+        SetPosition(Vec2(x, y));
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Set the position of the origin at the screen position.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::SetPosition(const Vec2 screenPos)
+    {
+        if (m_pParent)
+        {
+            const auto pParent = GetParent();
+            m_localPos = screenPos - pParent->GetOrigin();
+
+            // Adjust to our anchored position.
+            m_localPos.x -= (m_anchor.x - 0.5f) * pParent->GetRectWidth();
+            m_localPos.y -= (m_anchor.y - 0.5f) * pParent->GetRectHeight();
+        }
 
         // Let the Widget Respond to the movement:
         OnMove();
@@ -317,6 +394,16 @@ namespace mcp
         parentCenter += m_localPos;
 
         return parentCenter;
+    }
+
+    Vec2 Widget::GetScreenSpacePos() const
+    {
+        if (!m_pParent)
+        {
+            return m_localPos;
+        }
+
+        return m_localPos + GetParent()->GetScreenSpacePos();
     }
 
     RectF Widget::GetRectTopLeft() const
@@ -512,16 +599,14 @@ namespace mcp
         if (m_isInteractable)
         {
             OnDisable();
-            if (m_enableBehaviorScript.IsValid())
-                    lua::CallMemberFunction(m_enableBehaviorScript, "OnEnable");
+            m_enableBehaviorScript.Run("OnEnable");
         }
 
         // If I was previously NOT interactable, we need to enable it.
         else
         {
             OnEnable();
-            if (m_enableBehaviorScript.IsValid())
-                    lua::CallMemberFunction(m_enableBehaviorScript, "OnDisable");
+            m_enableBehaviorScript.Run("OnDisable");
         }
 
         m_isInteractable = false;
@@ -713,8 +798,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Widget::OnActive()
     {
-        if (m_enableBehaviorScript.IsValid())
-            lua::CallMemberFunction(m_enableBehaviorScript, "OnEnable");
+        m_enableBehaviorScript.Run("OnEnable");
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -724,8 +808,24 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void Widget::OnInactive()
     {
-        if (m_enableBehaviorScript.IsValid())
-            lua::CallMemberFunction(m_enableBehaviorScript, "OnDisable");
+        m_enableBehaviorScript.Run("OnDisable");
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Function to respond to the Widget's position changing. Runtime: Base method is empty. Editor: Base method adds
+    ///         the widget to the save buffer.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Widget::OnMove()
+    {
+#if MCP_EDITOR
+        if (!m_dirty && GetLayer()->GetState() == SceneLayer::LayerState::kRunning)
+        {
+            m_dirty = true;
+            GetLayer()->AddToSaveBuffer(GetId());
+        }
+#endif
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -775,6 +875,20 @@ namespace mcp
     {
         pChild->OnZChanged();
     }
+
+#if MCP_EDITOR
+    void Widget::Save()
+    {
+        MCP_CHECK(m_entityRoot.IsValid());
+
+        // Save our positional data:
+        auto rectElement = m_entityRoot.GetChildElement("Rect");
+        MCP_CHECK(rectElement.IsValid());
+
+        rectElement.SetAttribute("x", m_localPos.x);
+        rectElement.SetAttribute("y", m_localPos.y);
+    }
+#endif
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:

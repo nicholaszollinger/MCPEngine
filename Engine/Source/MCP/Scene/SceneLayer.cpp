@@ -158,6 +158,7 @@ namespace mcp
         const XMLElement element = layer.GetChildElement();
         LoadLayerAssetsAndEntities(element);
 
+        m_state = LayerState::kLoaded;
         return true;
     }
 
@@ -168,6 +169,8 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void SceneLayer::DestroyLayer()
     {
+        m_state = LayerState::kDestroying;
+
         // Delete any entities that were scheduled to be cleaned up.
         DeleteQueuedEntities();
 
@@ -259,5 +262,43 @@ namespace mcp
 
         m_queuedEntitiesToDelete.clear();
     }
+
+#if MCP_EDITOR
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Add the entity with this id to the array of Entities that need to be saved.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void SceneLayer::AddToSaveBuffer(const EntityId id)
+    {
+        // Do not allow adding to the save buffer when the layer is being loaded.
+        if (!IsRunning())
+            return;
+
+        MCP_LOG("SceneLayer", "Adding to save buffer: " , id);
+        // Make sure that the id makes sense:
+        if (const auto result = m_entities.find(id); result == m_entities.end())
+        {
+            MCP_ERROR("SceneLayer", "Failed to add entity to save buffer! No matching entity id found in the Layer!");
+            return;
+        }
+
+        // Otherwise, add it to the buffer.
+        m_editedEntities.emplace_back(id);
+    }
+
+    void SceneLayer::Save()
+    {
+        // Save each of the entities that having pending changes.
+        for (auto id : m_editedEntities)
+        {
+            m_entities[id]->Save();
+        }
+
+        // Clear our buffer.
+        m_editedEntities.clear();
+    }
+
+#endif
 
 }

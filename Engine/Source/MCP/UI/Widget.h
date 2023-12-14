@@ -5,7 +5,7 @@
 
 #include "WidgetFactory.h"
 #include "MCP/Scene/SceneEntity.h"
-#include "MCP/Lua/LuaResource.h"
+#include "MCP/Scripting/Script.h"
 #include "Utility/String/StringId.h"
 #include "Utility/Types/Rect.h"
 
@@ -55,9 +55,13 @@ namespace mcp
         MCP_DEFINE_SCENE_ENTITY(Widget)
 
     protected:
-        LuaResourcePtr m_enableBehaviorScript;  // Optional Script that defines behavior when this script is enabled or disabled.
+        Script m_enableBehaviorScript;  // Optional Script that defines behavior when this script is enabled or disabled.
         Widget* m_pMaskingWidget;                        // If a parent has been set as a mask, this will point to that parent Widget. We use this to calculate our final dimensions.
         Vec2 m_localPos;                        // Offset from the origin position
+#if MCP_EDITOR
+        Vec2 m_grabbedOffset;                   // The offset the mouse has clicked this widget from the origin.
+        bool m_held;
+#endif
         Vec2 m_pivot;                           // The alignment of the center point of the Widget.
         Vec2 m_anchor;                          // Determines the position of Widget based on the Parent's position. An anchor can have values from [0, 1]
         Vec2 m_scale;                           // Scale of the two axes.
@@ -101,6 +105,8 @@ namespace mcp
 
         // Setters
         virtual void SetLocalPosition(const float x, const float y);
+        void SetPosition(const float x, const float y);
+        void SetPosition(const Vec2 screenPos);
         void SetAnchor(const float x, const float y);
         void SetZOffset(const int zOffset);
         void SetInteractable(const bool isInteractable);
@@ -112,6 +118,11 @@ namespace mcp
         void SetScale(const float uniformScale);
         void SetIsMask(const bool isMask);
 
+#if MCP_EDITOR
+        // Saving
+        virtual void Save() override;
+#endif
+
         // Getters
         [[nodiscard]] virtual float GetRectWidth() const;
         [[nodiscard]] virtual float GetRectHeight() const;
@@ -120,6 +131,7 @@ namespace mcp
         [[nodiscard]] float GetTotalRectWidthOfChildren() const;
         [[nodiscard]] float GetTotalRectHeightOfChildren() const;
         [[nodiscard]] Vec2 GetOrigin() const;
+        [[nodiscard]] Vec2 GetScreenSpacePos() const;
         [[nodiscard]] RectF GetRectTopLeft() const;
         [[nodiscard]] Vec2 GetRectCenter() const;
         [[nodiscard]] Vec2 GetLocalPosition() const { return m_localPos; }
@@ -128,6 +140,7 @@ namespace mcp
         [[nodiscard]] RectF GetVisibleRect() const;
         [[nodiscard]] int GetMaxZ() const;
         [[nodiscard]] int GetZOffset() const;
+        [[nodiscard]] bool PointIntersectsRect(const Vec2 screenPos) const;
         [[nodiscard]] bool IsMask() const;
         [[nodiscard]] bool IsClipped() const;
         [[nodiscard]] bool IsInteractable() const;
@@ -167,7 +180,7 @@ namespace mcp
         
         virtual void OnActive() override;
         virtual void OnInactive() override;
-        virtual void OnMove() {}
+        virtual void OnMove();
         virtual void OnParentSet() override;
         void UpdateMaskingWidget(Widget* pMaskingWidget);
         virtual void OnZChanged() {}
@@ -178,7 +191,6 @@ namespace mcp
         virtual void OnChildAdded([[maybe_unused]] Widget* pChild);
         virtual void OnChildRemoved([[maybe_unused]] Widget* pChild) {}
         [[nodiscard]] Widget* GetParentMask() const;
-        [[nodiscard]] bool PointIntersectsRect(const Vec2 screenPos) const;
         [[nodiscard]] bool GetPointRelativeToRect(const Vec2 screenPos, Vec2& relativePos) const;
 
     private:

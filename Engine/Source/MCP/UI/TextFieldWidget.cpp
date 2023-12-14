@@ -72,8 +72,7 @@ namespace mcp
         }
 
         // Call into the script implementation with the updated value.
-        if (m_pOnExecuteScript.IsValid())
-            lua::CallMemberFunction(m_pOnExecuteScript, "OnExecute");
+        m_onExecuteScript.Run("OnExecute");
     }
 
     void TextFieldWidget::OnHoverEnter()
@@ -170,7 +169,7 @@ namespace mcp
         // Call the OnValueChangedFunction in the ExecuteScript
         else
         {
-            lua::CallMemberFunction(m_pOnExecuteScript, "OnValueChanged", m_pTextWidget->GetText().c_str());
+            m_onExecuteScript.Run("OnValueChanged", m_pTextWidget->GetText().c_str());
             m_defaultText = m_pTextWidget->GetText();
         }
 

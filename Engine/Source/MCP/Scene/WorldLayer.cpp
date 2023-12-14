@@ -202,6 +202,8 @@ namespace mcp
             }
         }
 
+        m_state = LayerState::kPostLoad;
+
         return true;
     }
 

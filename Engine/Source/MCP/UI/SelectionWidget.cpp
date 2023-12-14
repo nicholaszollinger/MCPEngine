@@ -39,16 +39,12 @@ namespace mcp
         }
 
         // Initialize our script:
-        if (m_onValueChangedScript.IsValid())
-        {
-            lua::CallMemberFunction(m_onValueChangedScript, "Init", this);
-        }
+        m_onValueChangedScript.Run("Init", this);
 
         // If we have a start value, set it.
         if (m_selection == kInvalidSelection)
         {
-            if (m_onValueChangedScript.IsValid())
-                lua::CallMemberFunction(m_onValueChangedScript, "OnValueNull");
+            m_onValueChangedScript.Run("OnValueNull");
         }
 
         else
@@ -96,8 +92,7 @@ namespace mcp
                 if (m_canBeNull)
                 {
                     m_selection = kInvalidSelection;
-                    if (m_onValueChangedScript.IsValid())
-                        lua::CallMemberFunction(m_onValueChangedScript, "OnValueNull");
+                    m_onValueChangedScript.Run("OnValueNull");
                 }
 
                 // If we can't be null, then re-toggle it.
@@ -148,10 +143,7 @@ namespace mcp
         }
 
         // Have the script respond to the change.
-        if (m_onValueChangedScript.IsValid())
-        {
-            lua::CallMemberFunction(m_onValueChangedScript, "OnValueChanged", m_selection);
-        }
+        m_onValueChangedScript.Run("OnValueChanged", m_selection);
     }
 
     void SelectionWidget::PrintChildRect([[maybe_unused]] const Widget* pWidget)

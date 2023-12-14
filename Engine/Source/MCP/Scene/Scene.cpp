@@ -98,8 +98,30 @@ namespace mcp
         // Initialize the Scene.
         m_isLoaded = Init();
 
+        if (m_isLoaded)
+        {
+            m_pUILayer->SetState(SceneLayer::LayerState::kLoaded);
+            m_pWorldLayer->SetState(SceneLayer::LayerState::kLoaded);
+        }
+
         return m_isLoaded;
     }
+
+#if MCP_EDITOR
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Initializes the scene with empty, default SceneLayers.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool Scene::InitEmpty()
+    {
+        m_pUILayer = BLEACH_NEW(UILayer(this));
+        m_pWorldLayer = BLEACH_NEW(WorldLayer(this));
+
+        m_isLoaded = Init();
+        return m_isLoaded;
+    }
+#endif
 
     bool Scene::Init()
     {
@@ -129,6 +151,17 @@ namespace mcp
         }
 
         return true;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Signals to the SceneLayers that the Scene is now running.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Scene::Begin()
+    {
+        m_pUILayer->SetState(SceneLayer::LayerState::kRunning);
+        m_pWorldLayer->SetState(SceneLayer::LayerState::kRunning);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -204,8 +237,24 @@ namespace mcp
         }
     }
 
-    void Scene::OnEvent(ApplicationEvent& event) const
+    void Scene::OnEvent(ApplicationEvent& event)
     {
+#if MCP_EDITOR
+        if (event.GetEventId() == KeyEvent::GetStaticId())
+        {
+            auto keyEvent = static_cast<KeyEvent&>(event);
+
+            // Ctrl + S for Saving the Scene.
+            if (keyEvent.Ctrl() && keyEvent.Key() == MCPKey::S && keyEvent.State() == ButtonState::kPressed)
+            {
+                Save();
+                keyEvent.SetHandled();
+                return;
+            }
+        }
+
+#endif
+
         // For each layer in reverse, send the event. If the event is handled, then return.
         // Right now I have two hard coded layers, so we are going to do UI and then the World
         m_pUILayer->OnEvent(event);
@@ -215,4 +264,22 @@ namespace mcp
 
         m_pWorldLayer->OnEvent(event);
     }
+
+#if MCP_EDITOR
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Saves the Scene data in each layer.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void Scene::Save()
+    {
+        MCP_LOG("Scene", "Saving Scene");
+
+        // For now, I am just going to save the UILayer. I should be saving each scene layer.
+        m_pUILayer->Save();
+
+        // Save the contents of the loaded XMLFile to disk.
+        m_sceneFile.SaveToFile();
+    }
+#endif
 }

@@ -64,6 +64,9 @@ const std::string* StringId::GetConstPtr() const
 
 const char* StringId::GetCStr() const
 {
+    if (!IsValid())
+        return nullptr;
+
     return m_pStrRef->c_str();
 }
 

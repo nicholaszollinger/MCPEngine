@@ -23,14 +23,9 @@ namespace mcp
         const float percentage = GetValueNormalized();
 
         // Initialize our script behavior.
-        if (m_pOnExecuteScript.IsValid())
-            lua::CallMemberFunction(m_pOnExecuteScript, "Init", this, percentage);
-
-        if (m_pHighlightBehaviorScript.IsValid())
-            lua::CallMemberFunction(m_pHighlightBehaviorScript, "Init", this, percentage);
-
-        if (m_pPressReleaseBehaviorScript.IsValid())
-            lua::CallMemberFunction(m_pPressReleaseBehaviorScript, "Init", this, percentage);
+        m_onExecuteScript.Run("Init", this, percentage);
+        m_highlightScript.Run("Init", this, percentage);
+        m_pressReleaseScript.Run("Init", this, percentage);
 
         return true;
     }
@@ -44,8 +39,7 @@ namespace mcp
         m_value = m_min + (percentage * (m_max - m_min));
 
         // Call into the script implementation with the updated value.
-        if (m_pOnExecuteScript.IsValid())
-            lua::CallMemberFunction(m_pOnExecuteScript, "OnExecute", percentage);
+        m_onExecuteScript.Run("OnExecute", percentage);
     }
 
     float SliderWidget::GetValueNormalized() const

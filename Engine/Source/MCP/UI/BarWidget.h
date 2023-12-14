@@ -15,7 +15,7 @@ namespace mcp
         ValueChangedDelegate m_onValueChanged;
 
     private:
-        LuaResourcePtr m_onValueChangedScript;
+        Script m_onValueChangedScript;
         int m_min;
         int m_max;
         int m_step; // TODO: Set this up.

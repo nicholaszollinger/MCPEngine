@@ -28,6 +28,10 @@ namespace mcp
         StringId packagePath {};
         bool isPersistent = false;
 
+        DiskResourceRequest() = default;
+        DiskResourceRequest(const char* path, const char* packagePath = nullptr, const bool isPersistent = false);
+        DiskResourceRequest(const std::string& path, const char* packagePath = nullptr, const bool isPersistent = false);
+
         //-----------------------------------------------------------------------------------------------------------------------------
         ///		@brief : Hash function.
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -70,6 +74,7 @@ namespace mcp
         [[nodiscard]] bool Load(const ResourceRequestType& request);
         [[nodiscard]] virtual void* Get() const { return m_pResource; }
         [[nodiscard]] virtual bool IsValid() const { return m_pResource; }
+        [[nodiscard]] ResourceRequestType GetRequest();
 
     protected:
         virtual void* LoadResourceType() = 0;
@@ -93,6 +98,22 @@ namespace mcp
         m_pResource = LoadResourceType();
         return m_pResource;
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Get the resource request that was used to load the resource. If the resource is invalid, this will return
+    ///         a default constructed ResourceRequestType.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template <typename ResourceRequestType>
+    ResourceRequestType Resource<ResourceRequestType>::GetRequest()
+    {
+        if (!IsValid())
+            return ResourceRequestType{};
+
+        return m_request;
+    }
+
 
     using DiskResource = Resource<DiskResourceRequest>;
 }

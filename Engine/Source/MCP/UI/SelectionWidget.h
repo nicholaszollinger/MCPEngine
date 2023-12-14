@@ -23,8 +23,8 @@ namespace mcp
 
         std::string m_prefabPath;
         std::vector<ToggleWidget*> m_options;
-        LuaResourcePtr m_initializationScript;
-        LuaResourcePtr m_onValueChangedScript;
+        Script m_initializationScript;
+        Script m_onValueChangedScript;
         size_t m_selection;
         bool m_canBeNull;
 

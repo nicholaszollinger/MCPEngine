@@ -18,7 +18,7 @@ namespace mcp
             return;
         }
 
-        if (!m_texture.Load({pImageFilePath, nullptr, false}))
+        if (!m_texture.Load(DiskResourceRequest(pImageFilePath)))
         {
             MCP_ERROR("ImageWidget", "Failed to load texture!");
             return;

@@ -15,7 +15,7 @@ namespace mcp
     enum class VerticalAlignment : uint32_t
     {
         kTop = HashString32("top")
-        , kCenter = HorizontalAlignment::kCenter
+        , kCenter = static_cast<uint32_t>(HorizontalAlignment::kCenter)
         , kBottom = HashString32("bottom")
     };
 

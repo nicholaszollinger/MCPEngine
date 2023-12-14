@@ -39,6 +39,7 @@ namespace mcp
         MCP_CHECK_MSG(IsValid(), "Failed to get Child Element! XMLElement not connected to valid file!");
 
         auto* pChild = CAST_TO_ELEMENT_TYPE(m_pHandle)->FirstChildElement(pChildName);
+
         return XMLElement(pChild);
     }
 
@@ -222,7 +223,7 @@ namespace mcp
     void XMLElement::SetBoolAttribute(const char* pAttributeName, const bool val) const
     {
         MCP_CHECK(IsValid());
-        CAST_TO_ELEMENT_TYPE(m_pHandle)->SetAttribute(pAttributeName, val);
+        CAST_TO_ELEMENT_TYPE(m_pHandle)->SetAttribute(pAttributeName, val? "true" : "false");
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -279,6 +280,7 @@ namespace mcp
 
     XMLParser::~XMLParser()
     {
+        //MCP_LOG("XML", "Parser Destructor");
         CloseCurrentFile();
     }
 
@@ -290,7 +292,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     bool XMLParser::LoadFile(const char* pFilepath)
     {
-        return m_loadedFile.Load({pFilepath, nullptr, false});
+        return m_loadedFile.Load(DiskResourceRequest(pFilepath));
     }
 
     void* XMLParser::XMLFile::LoadResourceType()
@@ -348,4 +350,25 @@ namespace mcp
 
         return XMLElement(pHandle);
     }
+
+    void XMLParser::SaveToFile()
+    {
+        MCP_CHECK_MSG(m_loadedFile.IsValid(), "Failed to get XML Element! No valid file loaded!");
+
+        auto* pOwner = CAST_TO_FILE_TYPE(m_loadedFile.Get());
+        pOwner->SaveFile(m_loadedFile.GetRequest().path.GetCStr());
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Returns whether the XMLElement belongs to the Loaded file of the parser.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool XMLParser::ElementIsInFile(const XMLElement element) const
+    {
+        //auto* pOwner = CAST_TO_FILE_TYPE(m_loadedFile.Get());
+
+        return element.GetHandle() == m_loadedFile.Get();
+    }
+
 }

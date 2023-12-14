@@ -40,9 +40,9 @@ namespace mcp
         MCP_DEFINE_WIDGET(ButtonWidget)
 
     protected:
-        LuaResourcePtr m_pOnExecuteScript;  
-        LuaResourcePtr m_pHighlightBehaviorScript;
-        LuaResourcePtr m_pPressReleaseBehaviorScript;
+        Script m_onExecuteScript;  
+        Script m_highlightScript;
+        Script m_pressReleaseScript;
 
     private:
         bool m_isPressed = false;

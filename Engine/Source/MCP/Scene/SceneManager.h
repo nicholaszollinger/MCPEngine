@@ -36,11 +36,22 @@ namespace mcp
         Scene* m_pActiveScene = nullptr;
         SceneIdentifier m_startScene;
         SceneIdentifier m_sceneToTransitionTo;
+
+#if MCP_EDITOR
+        const SceneIdentifier m_editorScene = "EditorScene";
+        XMLParser m_loadedAsset;
+#endif
+
         bool m_transitionQueued = false;
         
     public:
         void QueueTransition(const SceneIdentifier& identifier);
         [[nodiscard]] Scene* GetActiveScene() const { return m_pActiveScene; }
+
+#if MCP_EDITOR
+        // TODO:
+        //void MarkSceneDirty() {}
+#endif
 
         static SceneManager* Get();
         static SceneManager* AddFromData(const XMLElement element);
@@ -50,9 +61,15 @@ namespace mcp
         virtual bool Init() override;
         virtual void Close() override;
         bool EnterStartScene();
-        bool LoadSceneData(const char* pSceneDataFilepath);
+        //bool LoadSceneData(const char* pSceneDataFilepath);
         void Update(const float deltaTimeMs);
         void Render() const;
         bool TransitionToScene();
+
+#if MCP_EDITOR
+        bool LoadEditorScene();
+#endif
+
+#
     };
 }

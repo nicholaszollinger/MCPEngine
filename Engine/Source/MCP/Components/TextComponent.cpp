@@ -39,7 +39,7 @@ namespace mcp
         MCP_CHECK(m_pTransform);
 
         // Load the font.
-        if (!m_font.Load({ { m_data.pFontFilepath, nullptr, false }, m_data.fontSize}))
+        if (!m_font.Load({ DiskResourceRequest( m_data.pFontFilepath), m_data.fontSize}))
         {
             MCP_ERROR("TextWidget", "Failed to load font!");
             return false;

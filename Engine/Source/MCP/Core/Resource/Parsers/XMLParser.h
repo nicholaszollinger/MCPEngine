@@ -13,6 +13,7 @@ namespace mcp
         void* m_pHandle = nullptr;
 
     public:
+        XMLElement() = default;
         XMLElement(void* pHandle);
 
         // Get connected Elements
@@ -30,6 +31,7 @@ namespace mcp
         [[nodiscard]] const char* GetText() const;
         [[nodiscard]] const char* GetName() const;
         [[nodiscard]] bool IsValid() const;
+        [[nodiscard]] const void* GetHandle() const { return m_pHandle; }
 
     private:
         // Attributes
@@ -152,6 +154,13 @@ namespace mcp
 
 #pragma warning (pop)
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //      TODO: This is stupid that the parser owns the XMLFile. The XMLFile should be created by a static function on the parser.
+    //      I need to change this when I get a chance over break.
+    //		
+    ///		@brief : Class for loading XMLFiles from data.
+    //-----------------------------------------------------------------------------------------------------------------------------
     class XMLParser
     {
     private:
@@ -175,7 +184,11 @@ namespace mcp
         [[nodiscard]] bool LoadFile(const char* pFilepath);
         [[nodiscard]] bool HasFileLoaded() const;
         void CloseCurrentFile();
+        void SaveToFile();
 
+        // Elements
         XMLElement GetElement(const char* pElementName = nullptr) const;
+        [[nodiscard]] bool ElementIsInFile(const XMLElement element) const;
+
     };
 }

@@ -32,18 +32,35 @@ public:                                                                         
     //-----------------------------------------------------------------------------------------------------------------------------
     class SceneLayer
     {
+    public:
+        enum class LayerState
+        {
+            kUnloaded,  // The Layer doesn't have any useful data. It is being set up.
+            kLoaded,    // The Layer has been loaded with all of the assets from data.
+            kPostLoad,  // The Layer has finished the post load initialization.
+            kRunning,   // The Layer is up and running.
+            // kPaused?
+            kDestroying,// The layer is being destroyed, and no data access on this Layer is dangerous.
+        };
+
+    private:
+        friend class SceneManager;
         friend class Scene;
     protected:
         static constexpr uint32_t kSceneLayerAssetId = HashString32("SceneLayerAsset");
 
         std::unordered_map<EntityId, SceneEntity*> m_entities;                  // Container of all of the Entities in the scene.
-        std::vector<EntityId> m_queuedEntitiesToDelete;                     // Entities that will be deleted at the end of the update.
+        std::vector<EntityId> m_queuedEntitiesToDelete;                         // Entities that will be deleted at the end of the update.
+
+#if MCP_EDITOR
+        std::vector<EntityId> m_editedEntities;                                 // Array of entities that have been marked as having changes to be saved.
+#endif
 
         UnorderedDenseArray<UpdateableId, IUpdateable*> m_updateables;          // Anything that is updating on this layer.
         UnorderedDenseArray<UpdateableId, IUpdateable*> m_fixedUpdateables;     // Any physics based updateables that need to be updated in a fixed time.
         UnorderedDenseArray<RenderableId, IRenderable*> m_renderables;          // Anything that we need to render on this layer.
         Scene* m_pScene;                                                        // Reference to the Scene we are in.
-
+        LayerState m_state;                                                     // The current State of the Layer.
     public:
         // Scene Layers cannot be copied or moved.
         SceneLayer(const SceneLayer&) = delete;
@@ -77,12 +94,20 @@ public:                                                                         
 
         [[nodiscard]] virtual LayerId GetLayerId() const = 0;
         [[nodiscard]] Scene* GetScene() const { return m_pScene; }
+        [[nodiscard]] LayerState GetState() const { return m_state; }
+        [[nodiscard]] bool IsRunning() const { return m_state == LayerState::kRunning; }
 
         template<typename LayerType>
         static LayerType* SafeCastLayer(SceneLayer* pLayer);
 
         template<typename LayerType>
         static const LayerType* SafeCastLayer(const SceneLayer* pLayer);
+
+        // Editor
+#if MCP_EDITOR
+        void AddToSaveBuffer(const EntityId id);
+#endif
+
 
     protected:
         // Private Constructor and Destructor
@@ -103,8 +128,15 @@ public:                                                                         
         virtual void Render() = 0;
         virtual void OnEvent(ApplicationEvent& pEvent) = 0;
         void DeleteQueuedEntities();
+        
+#if MCP_EDITOR
+        void Save();
+#endif
 
         [[nodiscard]] virtual const char* GetEntityElementTag() const = 0;
+
+    private:
+        void SetState(const LayerState state) { m_state = state; }
     };
 
     //-----------------------------------------------------------------------------------------------------------------------------

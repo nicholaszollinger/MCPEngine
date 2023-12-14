@@ -90,20 +90,25 @@ namespace mcp
         MCP_DEFINE_EVENT_ID(MouseButtonEvent)
 
         Vec2 m_windowPosition;
-        int m_clicks;
-        MCPMouseButton m_button;
+        int m_clicks = 0;
+        float m_deltaTimeHeld = 0.f;
+        MCPMouseButton m_button = MCPMouseButton::Invalid;
         ButtonState m_state  = ButtonState::kInvalid;
 
     public:
-        MouseButtonEvent(const MCPMouseButton button, const ButtonState state, const int clicks, const float x, const float y)
+        MouseButtonEvent() = default;
+
+        MouseButtonEvent(const MCPMouseButton button, const ButtonState state, const int clicks, const float x, const float y, const float deltaTimeHeld = 0.f)
             : m_windowPosition(x, y)
             , m_clicks(clicks)
+            , m_deltaTimeHeld(deltaTimeHeld)
             , m_button(button)
             , m_state(state)
         {
             //
         }
 
+        [[nodiscard]] float GetDeltaTimeHeld() const { return m_deltaTimeHeld; }
         [[nodiscard]] MCPMouseButton Button() const { return m_button; }
         [[nodiscard]] ButtonState State() const { return m_state; }
         [[nodiscard]] int NumClicks() const { return m_clicks; }

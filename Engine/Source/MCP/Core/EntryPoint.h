@@ -7,7 +7,7 @@
 // TODO:
 //namespace mcp
 //{
-//    extern Application* CreateApp();
+//    extern mcp::Application* CreateApp();
 //
 //#ifdef MCP_PLATFORM_WINDOWS
 //    int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
