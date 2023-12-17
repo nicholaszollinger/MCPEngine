@@ -2,7 +2,6 @@
 // TinyXML2Resource.cpp
 
 #include "MCP/Core/Resource/ResourceManager.h"
-
 #include "tinyxml2.h"
 
 namespace mcp

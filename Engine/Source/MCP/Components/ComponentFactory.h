@@ -1,5 +1,6 @@
 #pragma once
 // ComponentFactory.h
+// TODO: This should be refactored to use my TypeFactory
 
 #include <cassert>
 #include <functional>

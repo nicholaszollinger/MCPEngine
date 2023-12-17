@@ -10,10 +10,7 @@ namespace mcp
 
 #if MCP_AUDIO_PLATFORM == MCP_AUDIO_PLATFORM_SDL
     using AudioHardwareChannel = int;
-
 #endif
-
-
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:

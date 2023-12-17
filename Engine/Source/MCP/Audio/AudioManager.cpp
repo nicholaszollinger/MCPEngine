@@ -8,13 +8,11 @@
 #include "MCP/Core/Application/Application.h"
 
 #if MCP_AUDIO_PLATFORM == MCP_AUDIO_PLATFORM_SDL
-
+// Disable SDL Warnings.
 #pragma warning(push, 0)
 #include "Platform/SDL2/SDLAudio.h"
 #pragma warning(pop)
-
 using AudioPlatform = SDLAudioManager;
-
 #endif
 
 namespace mcp
@@ -236,11 +234,4 @@ namespace mcp
             childGroup = childGroup.GetSiblingElement("Group");
         }
     }
-
-    namespace AudioInternal
-    {
-        
-
-    }
-
 }

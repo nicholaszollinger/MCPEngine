@@ -1,7 +1,7 @@
 #pragma once
 // Lua.h
 
-#include "LuaSystem.h"
+#include "LuaContext.h"
 #include "MCP/Core/System.h"
 
 namespace mcp::lua
@@ -49,17 +49,17 @@ namespace mcp::lua
     ///		@brief : Internal class to hold onto the Engine-wide LuaSystem. You don't need to interact with this at, just call
     ///         the functions provided.
     //-----------------------------------------------------------------------------------------------------------------------------
-    class LuaLayer final : public System
+    class LuaSystem final : public System
     {
-        MCP_DEFINE_SYSTEM(LuaLayer)
+        MCP_DEFINE_SYSTEM(LuaSystem)
 
-        LuaSystem m_system;
+        LuaContext m_system;
 
     public:
-        [[nodiscard]] LuaSystem& GetSystem() { return m_system; }
+        [[nodiscard]] LuaContext& GetSystem() { return m_system; }
 
-        static LuaLayer* Get();
-        static LuaLayer* AddFromData(const XMLElement) { return BLEACH_NEW(LuaLayer); }
+        static LuaSystem* Get();
+        static LuaSystem* AddFromData(const XMLElement) { return BLEACH_NEW(LuaSystem); }
 
     private:
         virtual bool Init() override;
@@ -82,7 +82,7 @@ namespace mcp::lua
     template <typename ElementType>
     std::optional<ElementType> GetElementInTable(const char* tableName, const char* elementName)
     {
-        return LuaLayer::Get()->GetSystem().GetElementInTable<ElementType>(tableName, elementName);
+        return LuaSystem::Get()->GetSystem().GetElementInTable<ElementType>(tableName, elementName);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ namespace mcp::lua
     template <typename Type>
     void SetElementInTable(const char* tableName, const char* elementName, Type&& val)
     {
-        LuaLayer::Get()->GetSystem().SetElementInTable<Type>(tableName, elementName, std::forward<Type>(val));
+        LuaSystem::Get()->GetSystem().SetElementInTable<Type>(tableName, elementName, std::forward<Type>(val));
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ namespace mcp::lua
     template<typename ElementType>
     void SetElementInTable(const LuaResourcePtr& tableResource, const char* elementName, ElementType&& val)
     {
-        LuaLayer::Get()->GetSystem().SetElementInTable<ElementType>(tableResource, elementName, std::forward<ElementType>(val));
+        LuaSystem::Get()->GetSystem().SetElementInTable<ElementType>(tableResource, elementName, std::forward<ElementType>(val));
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -162,7 +162,7 @@ namespace mcp::lua
     template<typename...Args>
     void CallFunction(const char* pFunctionName, Args&&...args)
     {
-        LuaLayer::Get()->GetSystem().CallFunction(pFunctionName, args...);
+        LuaSystem::Get()->GetSystem().CallFunction(pFunctionName, args...);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -177,6 +177,6 @@ namespace mcp::lua
     template <typename... Args>
     void CallMemberFunction(const LuaResourcePtr resource, const char* pMemberFunctionName, Args&&... args)
     {
-        LuaLayer::Get()->GetSystem().CallMemberFunction(resource, pMemberFunctionName, args...);
+        LuaSystem::Get()->GetSystem().CallMemberFunction(resource, pMemberFunctionName, args...);
     }
 }

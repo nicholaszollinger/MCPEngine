@@ -51,7 +51,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     class Widget : public SceneEntity
     {
-        friend class LuaSystem;
+        friend class LuaContext;
         MCP_DEFINE_SCENE_ENTITY(Widget)
 
     protected:

@@ -223,7 +223,6 @@ namespace mcp
 
         return true;
     }
-
 #endif
 
     SceneManager* SceneManager::AddFromData(const XMLElement element)
@@ -299,100 +298,6 @@ namespace mcp
         return BLEACH_NEW(SceneManager(std::move(sceneList), startScene));
     }
 
-        //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Load the scene data, 
-    ///		@param pSceneDataFilepath : 
-    ///		@returns : 
-    //-----------------------------------------------------------------------------------------------------------------------------
-//    bool SceneManager::LoadSceneData(const char* pSceneDataFilepath)
-//    {
-//        XMLParser parser;
-//        if (!parser.LoadFile(pSceneDataFilepath))
-//        {
-//            MCP_ERROR("SceneManager", "Failed to load scene data! Failed to load SceneData at filepath: ", pSceneDataFilepath);
-//            return false;
-//        }
-//
-//        const XMLElement sceneData = parser.GetElement("SceneData");
-//        if (!sceneData.IsValid())
-//        {
-//            MCP_ERROR("SceneManager", "Failed to load scene data! Failed to find Scene Data element. Filepath: ", pSceneDataFilepath);
-//            return false;
-//        }
-//
-//        // Get the Scene List.
-//        const XMLElement sceneList = sceneData.GetChildElement("SceneList");
-//        if (!sceneList.IsValid())
-//        {
-//            MCP_ERROR("SceneManager", "Failed to load scene data! Couldn't find SceneList element!");
-//            return false;
-//        }
-//
-//        // Create the SceneData for each scene.
-//        XMLElement scene = sceneList.GetChildElement("Scene");
-//        while (scene.IsValid())
-//        {
-//#ifndef _DEBUG
-//            if (AssetIsDebugOnly(scene))
-//            {
-//                scene = scene.GetSiblingElement("Scene");
-//                continue;
-//            }
-//#endif
-//
-//            const SceneIdentifier id = scene.GetAttributeValue<const char*>("sceneId");
-//            if (!id.IsValid())
-//            {
-//                MCP_ERROR("SceneManager", "Failed to create Scene! No SceneId found!");
-//                Close();
-//                return false;
-//            }
-//
-//            auto* path = scene.GetAttributeValue<const char*>("sceneDataPath");
-//            if (!path)
-//            {
-//                MCP_ERROR("SceneManager", "Failed to create Scene! No SceneId found!");
-//                Close();
-//                return false;
-//            }
-//
-//            m_sceneList.emplace(id, SceneData(path, nullptr));
-//
-//            scene = scene.GetSiblingElement("Scene");
-//        }
-//
-//        // Get the default Scene
-//        const XMLElement defaultScene = sceneData.GetChildElement("StartScene");
-//        if (!defaultScene.IsValid())
-//        {
-//            MCP_ERROR("SceneManager", "Failed to find Start Scene!");
-//            // Should I close here? Or just use the start scene as the default?
-//            Close();
-//            return false;
-//        }
-//
-//        const SceneIdentifier sceneId = defaultScene.GetAttributeValue<const char*>("sceneId");
-//
-//        const auto result = m_sceneList.find(sceneId);
-//        if (result == m_sceneList.end())
-//        {
-//            MCP_ERROR("SceneManager", "Failed to find Start Scene in SceneList! StartScene id: ", sceneId.GetCStr());
-//            Close();
-//            return false;
-//        }
-//
-//        m_sceneToTransitionTo = sceneId;
-//        if (!TransitionToScene())
-//        {
-//            MCP_ERROR("SceneManager", "Failed to load the Start Scene!");
-//            return false;
-//        }
-//
-//        return true;
-//    }
-
     static int ScriptTransitionToScene(lua_State* pState)
     {
         auto* pSceneId = lua_tostring(pState, -1);
@@ -438,7 +343,5 @@ namespace mcp
         // Pop the table off the stack.
         lua_pop(pState, 1);
     }
-
-
 }
 

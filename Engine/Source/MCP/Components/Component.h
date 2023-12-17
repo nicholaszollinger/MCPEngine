@@ -29,7 +29,8 @@ private:                                                                        
 public:                                                                                                                                                 \
     static mcp::ComponentTypeId GetStaticTypeId() { return kComponentTypeId; }                                                                          \
     virtual mcp::ComponentTypeId GetTypeId() const override { return kComponentTypeId; }                                                                \
-private:                                                                                                                                                \
+private:                                                                                                                                                
+    //-----------------------------------------------------------------------------------------------------------------------------
 
     struct ComponentConstructionData
     {
@@ -48,10 +49,13 @@ private:                                                                        
         Component(const bool startActive);
         Component(const ComponentConstructionData& data);
 
-        // TODO: Figure out what you want to do with copying and moving components.
-        //      - The crucial part of the components is that they operate on
-        //        a unique entity. So we can't copy the entity id over.
-
+        // TODO: I defaulted to just removing the ability to copy/move/assign components.
+        // There wasn't a need for now. But this is definitely something I want to be able to do in the future.
+        
+        Component(const Component& right) = delete;
+        Component& operator=(const Component& right) = delete;
+        Component(Component&& right) = delete;
+        Component& operator=(Component&& right) = delete;
         virtual ~Component() = default;
 
         //-----------------------------------------------------------------------------------------------------------------------------

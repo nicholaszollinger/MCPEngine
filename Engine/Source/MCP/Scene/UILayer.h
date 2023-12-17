@@ -12,12 +12,12 @@ namespace mcp
 
         struct WidgetStackElement
         {
-            Widget* pBaseWidget = nullptr; // The BaseWidget for this stack element. Ex: The base CanvasWidget of a Menu.
-            Widget* pPreviouslyFocused = nullptr; // The Widget on the previous menu that was focused. This can be nullptr.
+            Widget* pBaseWidget = nullptr;          // The BaseWidget for this stack element. Ex: The base CanvasWidget of a Menu.
+            Widget* pPreviouslyFocused = nullptr;   // The Widget on the previous menu that was focused. This can be nullptr.
         };
 
-        std::vector<WidgetStackElement> m_stack;        // Stack of Widgets that define Menu navigation, render order, etc.
-        Widget* m_pFocusedWidget;                       // The active Widget tree that is responding to ApplicationEvents
+        std::vector<WidgetStackElement> m_stack;    // Stack of Widgets that define Menu navigation, render order, etc.
+        Widget* m_pFocusedWidget;                   // The active Widget tree that is responding to ApplicationEvents
 
 #if MCP_EDITOR
         Widget* m_pSelectedWidget = nullptr;
@@ -58,10 +58,6 @@ namespace mcp
         virtual Widget* CreateEntity() override;
         virtual void LoadEntity(XMLElement element) override;
         void LoadChildWidget(Widget* pParent, XMLElement parentElement);
-        
-        // DEBUG
-        void DumpUITree();
-        void PrintWidgetType(Widget* pWidget, int tabCount);
     };
 
     template <typename WidgetType, typename... CArgs>
@@ -87,7 +83,6 @@ namespace mcp
 
         return pWidget;
     }
-
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:

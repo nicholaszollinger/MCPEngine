@@ -6,6 +6,11 @@
 
 namespace mcp
 {
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : [NOT IMPLEMENTED YET]. This is going to be my 'Monobehavior' class.
+    //-----------------------------------------------------------------------------------------------------------------------------
     class ScriptComponent : public Component, public IUpdateable
     {
         MCP_DEFINE_COMPONENT_ID(ScriptComponent)

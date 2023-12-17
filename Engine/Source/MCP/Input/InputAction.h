@@ -1,5 +1,6 @@
 #pragma once
 // InputAction.h
+// TODO: I didn't have time to complete the InputSystem the way I wanted.
 
 #include "InputModifier.h"
 #include "MCP/Core/Event/MulticastDelegate.h"
@@ -45,8 +46,5 @@ namespace mcp
 
     public:
         InputActionInstance() = default;
-
-
-
     };
 }

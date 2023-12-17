@@ -9,7 +9,7 @@
 //		NOTES:
 //      This is an interned string implementation. The strings themselves are stored in a static container.
 //
-//      It would be cool if I could have a 'scope' to the StringIds. Instead of one unifying static container, it could have a
+//      It would be cool if I could have a 'scope' to the StringIds. Instead of one unified static container, it could have a
 //      pointer to a container. The only reason this would be nice is for dealing with Threads. I could setup a StringId scope
 //      to work on a single thread, for instance. Then we wouldn't have to lock. I am pretty sure I am going to have to make
 //      this thread safe.

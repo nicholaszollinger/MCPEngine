@@ -15,7 +15,6 @@ namespace mcp
     //      but that breaks down when resources like Fonts are introduced, not to mention other resources like Hardware resources.
     //      THIS SHOULD DEFINITELY BE A CONCEPT FOR WHEN WE UPDATE TO C++20!
     //
-    //
     //      For DiskResources, the StringId system will have to be local to the Resource System, over using the global StringIds in the future.
     //		
     ///		@brief : Data required to load a resource of a specific type from disk. For most resources, this is just a filepath. If you need
@@ -65,10 +64,6 @@ namespace mcp
 
     public:
         Resource() = default;
-        /*Resource(const Resource& right) = default;
-        Resource(Resource&& right) noexcept = default;
-        Resource& operator=(const Resource& right) = default;
-        Resource& operator=(Resource&& right) noexcept = default;*/
         virtual ~Resource();
         
         [[nodiscard]] bool Load(const ResourceRequestType& request);
@@ -113,7 +108,6 @@ namespace mcp
 
         return m_request;
     }
-
 
     using DiskResource = Resource<DiskResourceRequest>;
 }

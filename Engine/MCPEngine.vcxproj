@@ -301,7 +301,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Core\Resource\Parsers\XML\XMLAttribute.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\Resource.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\ResourceManager.cpp" />
-    <ClCompile Include="Source\MCP\Core\Resource\TextFile.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\Zip.cpp" />
     <ClCompile Include="Source\MCP\Graphics\Graphics.cpp" />
     <ClCompile Include="Source\MCP\Graphics\Texture.cpp" />
@@ -313,7 +312,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\MCP\Lua\Lua.cpp" />
     <ClCompile Include="Source\MCP\Lua\LuaDebug.cpp" />
     <ClCompile Include="Source\MCP\Lua\LuaResource.cpp" />
-    <ClCompile Include="Source\MCP\Lua\LuaSystem.cpp" />
+    <ClCompile Include="Source\MCP\Lua\LuaContext.cpp" />
     <ClCompile Include="Source\MCP\Scene\IRenderable.cpp" />
     <ClCompile Include="Source\MCP\Scene\IUpdateable.cpp" />
     <ClCompile Include="Source\MCP\Scene\Object.cpp" />
@@ -346,8 +345,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClCompile Include="Source\Platform\SDL2\SDLInput.cpp" />
     <ClCompile Include="Source\Platform\SDL2\SDLResources.cpp" />
     <ClCompile Include="Source\Platform\SDL2\SDLText.cpp" />
-    <ClCompile Include="Source\Platform\Tiled\TiledMapComponent.cpp" />
-    <ClCompile Include="Source\Platform\Tiled\TiledTileSet.cpp" />
     <ClCompile Include="Source\Platform\TinyXML2\tinyxml2.cpp" />
     <ClCompile Include="Source\Platform\TinyXML2\TinyXML2Resource.cpp" />
   </ItemGroup>
@@ -356,7 +353,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="ExternalLib\BleachLeakDetector\include\BleachNewConfig.h" />
     <ClInclude Include="Source\MCP\Accessibility\Localization.h" />
     <ClInclude Include="Source\MCP\Audio\AudioClip.h" />
-    <ClInclude Include="Source\MCP\Audio\AudioData.h" />
     <ClInclude Include="Source\MCP\Audio\AudioGroup.h" />
     <ClInclude Include="Source\MCP\Audio\AudioManager.h" />
     <ClInclude Include="Source\MCP\Audio\AudioResource.h" />
@@ -386,7 +382,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Core\EntryPoint.h" />
     <ClInclude Include="Source\MCP\Core\Event\ApplicationEvent.h" />
     <ClInclude Include="Source\MCP\Core\Event\Event.h" />
-    <ClInclude Include="Source\MCP\Core\Event\KeyEvent.h" />
     <ClInclude Include="Source\MCP\Core\Event\Message.h" />
     <ClInclude Include="Source\MCP\Core\Event\MessageManager.h" />
     <ClInclude Include="Source\MCP\Core\Event\MulticastDelegate.h" />
@@ -402,11 +397,9 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Core\Resource\Parsers\XML\XMLAttribute.h" />
     <ClInclude Include="Source\MCP\Core\Resource\Resource.h" />
     <ClInclude Include="Source\MCP\Core\Resource\ResourceManager.h" />
-    <ClInclude Include="Source\MCP\Core\Resource\TextFile.h" />
     <ClInclude Include="Source\MCP\Core\Resource\Zip.h" />
     <ClInclude Include="Source\MCP\Debug\Assert.h" />
     <ClInclude Include="Source\MCP\Debug\Log.h" />
-    <ClInclude Include="Source\MCP\Editor\EditorEntity.h" />
     <ClInclude Include="Source\MCP\Graphics\Graphics.h" />
     <ClInclude Include="Source\MCP\Graphics\RenderData\BaseRenderData.h" />
     <ClInclude Include="Source\MCP\Graphics\Texture.h" />
@@ -421,7 +414,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Lua\Lua.h" />
     <ClInclude Include="Source\MCP\Lua\LuaDebug.h" />
     <ClInclude Include="Source\MCP\Lua\LuaResource.h" />
-    <ClInclude Include="Source\MCP\Lua\LuaSystem.h" />
+    <ClInclude Include="Source\MCP\Lua\LuaContext.h" />
     <ClInclude Include="Source\MCP\Scene\SceneEntity.h" />
     <ClInclude Include="Source\MCP\Scene\IRenderable.h" />
     <ClInclude Include="Source\MCP\Scene\IUpdateable.h" />
@@ -455,8 +448,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\Platform\SDL2\SDLHelpers.h" />
     <ClInclude Include="Source\Platform\SDL2\SDLInput.h" />
     <ClInclude Include="Source\Platform\SDL2\SDLText.h" />
-    <ClInclude Include="Source\Platform\Tiled\TiledMapComponent.h" />
-    <ClInclude Include="Source\Platform\Tiled\TiledTileSet.h" />
     <ClInclude Include="Source\Platform\TinyXML2\tinyxml2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

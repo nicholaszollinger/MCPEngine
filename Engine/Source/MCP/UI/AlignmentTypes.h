@@ -18,5 +18,4 @@ namespace mcp
         , kCenter = static_cast<uint32_t>(HorizontalAlignment::kCenter)
         , kBottom = HashString32("bottom")
     };
-
 }

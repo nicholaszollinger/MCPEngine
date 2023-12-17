@@ -10,12 +10,11 @@
     #define DEBUG_LUA 1
 #endif
 
-// Hack:
 struct luaL_Reg;
 
 namespace mcp
 {
-    class LuaSystem
+    class LuaContext
     {
         lua_State* m_pState = nullptr;
 
@@ -24,15 +23,13 @@ namespace mcp
         bool Init();
         void Close();
 
-        // HACK:
-        bool RegisterScriptFunctions(const char* pTypename, const char* pScriptFilepath, const luaL_Reg* functionArray) const;
-
-        // Load Lua Scripts
+        // Lua Script Management
         bool LoadScript(const char* pFilepath) const;
         LuaResourcePtr LoadScriptInstance(const char* pFilepath) const;
         LuaResourcePtr LoadScriptInstance(const char* pFilepath, const char* pConstructionDataFilepath) const;
         [[nodiscard]] LuaResourcePtr CreateTable() const;
         void FreeScriptInstance(const LuaResourceId ref) const;
+        bool RegisterScriptFunctions(const char* pTypename, const char* pScriptFilepath, const luaL_Reg* functionArray) const;
 
         // Get Global Variables
         std::optional<bool> GetBoolean(const char* varName) const;
@@ -119,7 +116,7 @@ namespace mcp
     ///		@param params : Any parameters that need to be passed to the function. NOTE: This can be empty!
     //-----------------------------------------------------------------------------------------------------------------------------
     template <typename... ParamTypes>
-    void LuaSystem::CallFunction(const char* pFunctionName, ParamTypes&&... params) const
+    void LuaContext::CallFunction(const char* pFunctionName, ParamTypes&&... params) const
     {
         if (!PushFunction(pFunctionName))
         {
@@ -151,7 +148,7 @@ namespace mcp
     ///		@param params : 
     //-----------------------------------------------------------------------------------------------------------------------------
     template <typename... Args>
-    void LuaSystem::CallMemberFunction(const LuaResourcePtr resource, const char* pMemberFunctionName,  Args&&... params) const
+    void LuaContext::CallMemberFunction(const LuaResourcePtr resource, const char* pMemberFunctionName,  Args&&... params) const
     {
         if (!resource.IsValid())
         {
@@ -204,7 +201,7 @@ namespace mcp
     ///		@returns : std::optional<Type> that either has value or does not.
     //-----------------------------------------------------------------------------------------------------------------------------
     template <typename Type>
-    std::optional<Type> LuaSystem::GetElementInTable(const char* tableName, const char* elementName) const
+    std::optional<Type> LuaContext::GetElementInTable(const char* tableName, const char* elementName) const
     {
         // If the table does not exist,
         if (!GetTable(tableName))
@@ -283,7 +280,7 @@ namespace mcp
     ///		@param val : Value we want to set.
     //-----------------------------------------------------------------------------------------------------------------------------
     template <typename Type>
-    void LuaSystem::SetElementInTable(const char* tableName, const char* elementName, Type&& val) const
+    void LuaContext::SetElementInTable(const char* tableName, const char* elementName, Type&& val) const
     {
         using BaseType = std::remove_cv_t<Type>;
         using NonRefType = std::remove_reference_t<BaseType>;
@@ -357,7 +354,7 @@ namespace mcp
     }
 
     template <typename Type>
-    void LuaSystem::SetElementInTable(const LuaResourcePtr& tableResource, const char* elementName, Type&& val)
+    void LuaContext::SetElementInTable(const LuaResourcePtr& tableResource, const char* elementName, Type&& val)
     {
         using BaseType = std::remove_cv_t<Type>;
         using NonRefType = std::remove_reference_t<BaseType>;
@@ -393,7 +390,7 @@ namespace mcp
     ///		@param val : Value of the argument.
     //-----------------------------------------------------------------------------------------------------------------------------
     template <typename Type>
-    bool LuaSystem::Push(Type&& val) const
+    bool LuaContext::Push(Type&& val) const
     {
         using BaseType = std::remove_cv_t<Type>;
         using NonRefType = std::remove_reference_t<BaseType>;
@@ -456,7 +453,7 @@ namespace mcp
     ///		@returns : If there was an issue pushing the parameters, then it returns false. Otherwise true.
     //-----------------------------------------------------------------------------------------------------------------------------
     template <typename Param, typename... OtherParamTypes>
-    bool LuaSystem::PushParams(int& paramCount, Param&& param, OtherParamTypes&&... otherParams) const
+    bool LuaContext::PushParams(int& paramCount, Param&& param, OtherParamTypes&&... otherParams) const
     {
         if (!Push(std::forward<Param>(param)))
         {

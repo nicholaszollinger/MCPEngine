@@ -1,6 +1,6 @@
 // LuaSystem.cpp
 
-#include "LuaSystem.h"
+#include "LuaContext.h"
 #include "LuaSource.h"
 #include "MCP/Core/Application/Application.h"
 
@@ -51,7 +51,7 @@ namespace mcp
     ///             available in the mcp engine.
     ///		@returns : True if successful, false otherwise.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool LuaSystem::Init()
+    bool LuaContext::Init()
     {
         m_pState = luaL_newstate();
         luaL_openlibs(m_pState);
@@ -104,7 +104,7 @@ namespace mcp
     ///		@brief : Close the lua system. If the stack is not empty (meaning things were not cleaned up correctly),
     ///             this will post an error.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaSystem::Close()
+    void LuaContext::Close()
     {
 #if defined(DEBUG_LUA) && DEBUG_LUA
         if (!IStackEmpty())
@@ -127,7 +127,7 @@ namespace mcp
     ///     @param pScriptFilepath : Filepath to the lua file that contains the global table named 'pTypename'
     ///		@param functionArray : Array of functions that are going to be added to the global table.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool LuaSystem::RegisterScriptFunctions(const char* pTypename, const char* pScriptFilepath, const luaL_Reg* functionArray) const
+    bool LuaContext::RegisterScriptFunctions(const char* pTypename, const char* pScriptFilepath, const luaL_Reg* functionArray) const
     {
         MCP_CHECK(functionArray);
 
@@ -162,7 +162,7 @@ namespace mcp
     ///		@param pFilepath : Path to the script on disk.
     ///		@returns : True if the file successfully loaded, otherwise false.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool LuaSystem::LoadScript(const char* pFilepath) const
+    bool LuaContext::LoadScript(const char* pFilepath) const
     {
         std::string scriptsPath = Application::Get()->GetContext().workingDirectory;
         scriptsPath += pFilepath;
@@ -184,7 +184,7 @@ namespace mcp
     ///		@param pFilepath : File path to the script.
     ///		@returns : A integer value that serves as our reference key. If we failed to get the instance, it returns LuaSystem::kInvalidRef.
     //-----------------------------------------------------------------------------------------------------------------------------
-    LuaResourcePtr LuaSystem::LoadScriptInstance(const char* pFilepath) const
+    LuaResourcePtr LuaContext::LoadScriptInstance(const char* pFilepath) const
     {
         std::string scriptsPath = Application::Get()->GetContext().workingDirectory;
         scriptsPath += pFilepath;
@@ -214,7 +214,7 @@ namespace mcp
     ///		@param pConstructionDataFilepath : Filepath to the Construction data resource.
     ///		@returns : Resource id associated with the script instance.
     //-----------------------------------------------------------------------------------------------------------------------------
-    LuaResourcePtr LuaSystem::LoadScriptInstance(const char* pFilepath, const char* pConstructionDataFilepath) const
+    LuaResourcePtr LuaContext::LoadScriptInstance(const char* pFilepath, const char* pConstructionDataFilepath) const
     {
         LuaResourcePtr script = LoadScriptInstance(pFilepath);
         if (!script.IsValid())
@@ -246,7 +246,7 @@ namespace mcp
     //		
     ///		@brief : Frees the Object reference in memory.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaSystem::FreeScriptInstance(const LuaResourceId ref) const
+    void LuaContext::FreeScriptInstance(const LuaResourceId ref) const
     {
         luaL_unref(m_pState, LUA_REGISTRYINDEX, ref);
     }
@@ -256,7 +256,7 @@ namespace mcp
     //		
     ///		@brief : Create a new table and return a reference to it.
     //-----------------------------------------------------------------------------------------------------------------------------
-    LuaResourcePtr LuaSystem::CreateTable() const
+    LuaResourcePtr LuaContext::CreateTable() const
     {
         lua_newtable(m_pState);
 
@@ -270,7 +270,6 @@ namespace mcp
         return LuaResourcePtr(m_pState, result);
     }
 
-
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
@@ -278,7 +277,7 @@ namespace mcp
     ///		@param varName : Name of the global variable you are trying to find.
     ///		@returns : The value of the string, or nullptr if it fails.
     //-----------------------------------------------------------------------------------------------------------------------------
-    const char* LuaSystem::GetString(const char* varName) const
+    const char* LuaContext::GetString(const char* varName) const
     {
         if (!lua_getglobal(m_pState, varName))
         {
@@ -296,7 +295,7 @@ namespace mcp
     //		
     ///		@brief : Returns the top element of the stack as a string value.
     //-----------------------------------------------------------------------------------------------------------------------------
-    const char* LuaSystem::GetString() const
+    const char* LuaContext::GetString() const
     {
         const char* value = lua_tostring(m_pState, -1);
 
@@ -313,7 +312,7 @@ namespace mcp
     ///		@param varName : Name of the global variable you are trying to find.
     ///		@returns : std::optional<bool> that either contains the value or does not.
     //-----------------------------------------------------------------------------------------------------------------------------
-    std::optional<bool> LuaSystem::GetBoolean(const char* varName) const
+    std::optional<bool> LuaContext::GetBoolean(const char* varName) const
     {
         if (!lua_getglobal(m_pState, varName))
         {
@@ -331,7 +330,7 @@ namespace mcp
     //		
     ///		@brief : Returns the top element of the stack as a boolean value.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool LuaSystem::GetBoolean() const
+    bool LuaContext::GetBoolean() const
     {
         const bool value = lua_toboolean(m_pState, -1);
 
@@ -348,7 +347,7 @@ namespace mcp
     ///		@param varName : Name of the global variable you are trying to find.
     ///		@returns : std::optional<int64_t> that either contains the value or does not.
     //-----------------------------------------------------------------------------------------------------------------------------
-    std::optional<int64_t> LuaSystem::GetInteger(const char* varName) const
+    std::optional<int64_t> LuaContext::GetInteger(const char* varName) const
     {
         if (!lua_getglobal(m_pState, varName))
         {
@@ -366,7 +365,7 @@ namespace mcp
     //		
     ///		@brief : Returns the top element of the stack as an integer value.
     //-----------------------------------------------------------------------------------------------------------------------------
-    int64_t LuaSystem::GetInteger() const
+    int64_t LuaContext::GetInteger() const
     {
         const int64_t value = lua_tointeger(m_pState, -1);
 
@@ -382,7 +381,7 @@ namespace mcp
     ///		@param varName : Name of the global variable you are trying to find.
     ///		@returns : std::optional<double> that either contains the value or does not.
     //-----------------------------------------------------------------------------------------------------------------------------
-    std::optional<double> LuaSystem::GetNumber(const char* varName) const
+    std::optional<double> LuaContext::GetNumber(const char* varName) const
     {
         if (!lua_getglobal(m_pState, varName))
         {
@@ -400,7 +399,7 @@ namespace mcp
     //		
     ///		@brief : Returns the top element of the stack as a boolean value.
     //-----------------------------------------------------------------------------------------------------------------------------
-    double LuaSystem::GetNumber() const
+    double LuaContext::GetNumber() const
     {
         const double value = lua_tonumber(m_pState, -1);
 
@@ -418,7 +417,7 @@ namespace mcp
     ///		@returns : 
     //-----------------------------------------------------------------------------------------------------------------------------
     template<typename LuaType>
-    LuaType* LuaSystem::GetGlobal(const char* globalName)
+    LuaType* LuaContext::GetGlobal(const char* globalName)
     {
         // TODO: Not fully implemented yet. This is going to be for userData. I just don't know enough
         // about it yet.
@@ -445,7 +444,7 @@ namespace mcp
     ///		@param varName : Name of the variable you want to set.
     ///		@param value : Value you want to set it to.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaSystem::SetString(const char* varName, const char* value) const
+    void LuaContext::SetString(const char* varName, const char* value) const
     {
 #if defined(DEBUG_LUA) && DEBUG_LUA
         // Check to see if the variable exists.
@@ -475,7 +474,7 @@ namespace mcp
     ///		@param varName : Name of the variable you want to set.
     ///		@param value : Value you want to set it to.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaSystem::SetBoolean(const char* varName, const bool value) const
+    void LuaContext::SetBoolean(const char* varName, const bool value) const
     {
 #if defined(DEBUG_LUA) && DEBUG_LUA
         // Check to see if the variable exists.
@@ -503,7 +502,7 @@ namespace mcp
     ///		@param varName : Name of the variable you want to set.
     ///		@param value : Value you want to set it to.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaSystem::SetInteger(const char* varName, const int64_t& value) const
+    void LuaContext::SetInteger(const char* varName, const int64_t& value) const
     {
 #if defined(DEBUG_LUA) && DEBUG_LUA
         // Check to see if the variable exists.
@@ -531,7 +530,7 @@ namespace mcp
     ///		@param varName : Name of the variable you want to set.
     ///		@param value : Value you want to set it to.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaSystem::SetNumber(const char* varName, const double value) const
+    void LuaContext::SetNumber(const char* varName, const double value) const
     {
 #if defined(DEBUG_LUA) && DEBUG_LUA
         // Check to see if the variable exists.
@@ -561,7 +560,7 @@ namespace mcp
     ///		@param pFunctionName : Name of the function.
     ///		@returns : True if the push succeeds, false otherwise.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool LuaSystem::PushFunction(const char* pFunctionName) const
+    bool LuaContext::PushFunction(const char* pFunctionName) const
     {
         // Get the global function
         if (!lua_getglobal(m_pState, pFunctionName))
@@ -587,7 +586,7 @@ namespace mcp
     ///		@brief : Actually calls the lua function, popping it and its parameters off the stack.
     ///		@param paramCount : Number of parameters that are on the stack.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaSystem::CallFunctionImpl(const int paramCount) const
+    void LuaContext::CallFunctionImpl(const int paramCount) const
     {
         // TODO: Create an error function to pass in.
         lua_pcall(m_pState, paramCount, 0, 0);
@@ -598,7 +597,7 @@ namespace mcp
     //		
     ///		@brief : Pushes an integer onto the stack.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaSystem::PushInteger(const int64_t& val) const
+    void LuaContext::PushInteger(const int64_t& val) const
     {
         lua_pushinteger(m_pState, val);
     }
@@ -608,7 +607,7 @@ namespace mcp
     //		
     ///		@brief : Pushes a double onto the stack.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaSystem::PushFloat(const double val) const
+    void LuaContext::PushFloat(const double val) const
     {
         lua_pushnumber(m_pState, val);
     }
@@ -618,7 +617,7 @@ namespace mcp
     //		
     ///		@brief : Pushes and c-string onto the stack.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaSystem::PushString(const char* val) const
+    void LuaContext::PushString(const char* val) const
     {
         lua_pushstring(m_pState, val);
     }
@@ -628,12 +627,12 @@ namespace mcp
     //		
     ///		@brief : Pushes a boolean onto the stack.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaSystem::PushBool(const bool val) const
+    void LuaContext::PushBool(const bool val) const
     {
         lua_pushboolean(m_pState, val);
     }
 
-    void LuaSystem::PushUserData(void* val) const
+    void LuaContext::PushUserData(void* val) const
     {
         lua_pushlightuserdata(m_pState, val);
     }
@@ -644,7 +643,7 @@ namespace mcp
     ///		@brief : Push a lua resource onto the stack.
     ///		@returns : False if the resource id did not return a table.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool LuaSystem::PushResource(const LuaResourcePtr resource) const
+    bool LuaContext::PushResource(const LuaResourcePtr resource) const
     {
         MCP_CHECK(resource.IsValid());
 
@@ -661,8 +660,6 @@ namespace mcp
         return true;
     }
 
-
-
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
@@ -670,7 +667,7 @@ namespace mcp
     ///		@param tableName : Name of the table.
     ///		@returns : True if the table is on the stack, false otherwise.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool LuaSystem::GetTable(const char* tableName) const
+    bool LuaContext::GetTable(const char* tableName) const
     {
         if (!lua_getglobal(m_pState, tableName))
         {
@@ -691,7 +688,7 @@ namespace mcp
     ///		@param elementName : Name of the element you are trying to get.
     ///		@returns : True if successful, false if no element was found with that name.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool LuaSystem::GetElement(const char* elementName) const
+    bool LuaContext::GetElement(const char* elementName) const
     {
         // Push the name of the element that we want onto the stack.
         lua_pushstring(m_pState, elementName);
@@ -711,7 +708,7 @@ namespace mcp
     ///		@brief : Sets the element in the table. This assumes that we have pushed the table, value and the name of the
     ///             element onto the stack already. This will also pop the table from the stack.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaSystem::SetElement() const
+    void LuaContext::SetElement() const
     {
         lua_settable(m_pState, -3);
 
@@ -726,7 +723,7 @@ namespace mcp
     ///             be popped.
     ///		@param count : Number of values to pop. If you want to pop all of them, leave it as the default of zero.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaSystem::PopStack(const int count) const
+    void LuaContext::PopStack(const int count) const
     {
         // If we are passing a specific number in, pop that many values off the stack.
         if (count > 0)
@@ -749,7 +746,7 @@ namespace mcp
     //
     ///		@brief : Check to see if the stack in our internal state is empty or not.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool LuaSystem::IStackEmpty() const
+    bool LuaContext::IStackEmpty() const
     {
         if (lua_gettop(m_pState) != 0)
             return false;
@@ -763,7 +760,7 @@ namespace mcp
     ///		@brief : Check to see if the size (number of elements) of the stack matches the 'size' value.
     ///		@param size : Size you think the stack should be.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool LuaSystem::VerifyStackSize(const int size) const
+    bool LuaContext::VerifyStackSize(const int size) const
     {
         if (lua_gettop(m_pState) != size)
             return false;
@@ -776,7 +773,7 @@ namespace mcp
     //
     ///		@brief : Prints out the stack in the LuaState into the log window.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaSystem::DumpStack() const
+    void LuaContext::DumpStack() const
     {
         if (IStackEmpty())
         {

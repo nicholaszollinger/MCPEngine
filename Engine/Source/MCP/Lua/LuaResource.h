@@ -31,7 +31,7 @@ namespace mcp
 
     class LuaResourcePtr
     {
-        friend class LuaSystem;
+        friend class LuaContext;
     private:
         LuaResource* m_pResource;
 

@@ -92,6 +92,4 @@ namespace mcp
 
         return pRect2DComponent;
     }
-
-
 }

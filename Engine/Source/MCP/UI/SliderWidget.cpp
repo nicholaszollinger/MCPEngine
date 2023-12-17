@@ -4,7 +4,6 @@
 
 #include "MCP/Lua/Lua.h"
 
-
 namespace mcp
 {
     SliderWidget::SliderWidget(const WidgetConstructionData& data, const float min, const float max, const float step, const float startVal, ButtonBehavior&& behavior)

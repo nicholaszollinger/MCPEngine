@@ -1,7 +1,6 @@
 // SceneLayer.cpp
 
 #include "SceneLayer.h"
-
 #include "SceneAsset.h"
 
 namespace mcp
@@ -12,6 +11,7 @@ namespace mcp
         , m_fixedUpdateables(64)
         , m_renderables(64)
         , m_pScene(pScene)
+        , m_state(LayerState::kUnloaded)
     {
         //
     }

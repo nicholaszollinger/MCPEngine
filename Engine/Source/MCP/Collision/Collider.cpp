@@ -76,7 +76,6 @@ namespace mcp
         }
     }
 
-
     Vec2 Collider::GetWorldCenter() const
     {
         const Vec2 ownerPos = m_pOwner->GetTransformComponent()->GetPosition();
@@ -112,7 +111,7 @@ namespace mcp
     void Collider::SetCollisionResponseToChannel(const CollisionChannel channel, const CollisionResponse response)
     {
         const size_t channelIndex = static_cast<size_t>(channel);
-        MCP_CHECK(channelIndex < Internal::kMaxChannels);
+        MCP_CHECK(channelIndex < Internal::CollisionChannelManager::kMaxChannels);
 
         m_profile.collisionResponses[channelIndex] = response;
     }
@@ -149,7 +148,7 @@ namespace mcp
     CollisionResponse Collider::GetResponseToChannel(const CollisionChannel channel) const
     {
         const size_t channelIndex = static_cast<size_t>(channel);
-        MCP_CHECK(channelIndex < Internal::kMaxChannels);
+        MCP_CHECK(channelIndex < Internal::CollisionChannelManager::kMaxChannels);
         return m_profile.collisionResponses[channelIndex];
     }
 

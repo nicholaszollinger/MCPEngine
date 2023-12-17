@@ -29,8 +29,6 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     static int GetChildCanvasWidgetByTag(lua_State* pState)
     {
-        //MCP_LOG("Lua", "Calling GetChildCanvasWidgetByTag() from lua...");
-
         // Get the Widget and string parameters off the stack.
         auto* pWidget = static_cast<Widget*>(lua_touserdata(pState, -2));
         MCP_CHECK(pWidget);
@@ -63,8 +61,6 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     static int GetCanvasWidgetByTag(lua_State* pState)
     {
-        //MCP_LOG("Lua", "Calling GetChildCanvasWidgetByTag() from lua...");
-
         // Get the Widget and string parameters off the stack.
         auto* pWidget = static_cast<Widget*>(lua_touserdata(pState, -2));
         MCP_CHECK(pWidget);

@@ -972,11 +972,8 @@ namespace mcp
         // Pop the two parameters
         lua_pop(pState, 2);
 
-        //MCP_LOG("Lua", "Setting ", *pWidget->GetTag(), " to ", isActive);
         // Set the active state of the Widget.
         pWidget->SetActive(isActive);
-
-        //MCP_LOG("Lua", "Stack Size = ", lua_gettop(pState));
 
         return 0;
     }
@@ -991,8 +988,6 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     static int FocusWidget(lua_State* pState)
     {
-        //MCP_LOG("Lua", "Calling FocusWidget() from lua...");
-
         // Get the Widget
         auto* pWidget = static_cast<Widget*>(lua_touserdata(pState, -1));
         MCP_CHECK(pWidget);
@@ -1002,8 +997,6 @@ namespace mcp
 
         // Focus this widget.
         pWidget->Focus();
-
-        //MCP_LOG("Lua", "Stack Size = ", lua_gettop(pState));
 
         return 0;
     }
@@ -1054,7 +1047,6 @@ namespace mcp
 
         return 2;
     }
-
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -1194,7 +1186,5 @@ namespace mcp
 
         // Pop the table off the stack.
         lua_pop(pState, 1);
-
-        //MCP_LOG("Lua", "Stack Size = ", lua_gettop(pState));
     }
 }

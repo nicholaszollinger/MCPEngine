@@ -12,7 +12,7 @@ namespace mcp
 {
     WorldLayer::WorldLayer(Scene* pScene)
         : SceneLayer(pScene)
-        , m_collisionSystem(QuadtreeBehaviorData{ 4, 4, 1600.f, 900.f }) // Load this from data
+        , m_collisionSystem(QuadtreeBehaviorData{ 4, 4, 1600.f, 900.f }) // Some Default data...
         , m_activeInput(nullptr)
         , m_isPaused(false)
     {

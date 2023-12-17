@@ -6,9 +6,6 @@
 
 namespace mcp
 {
-    //struct lua_State;
-    //using ScriptingContext = lua_State*;
-
     using TypeId = uint64_t;
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -23,7 +20,6 @@ namespace mcp
     {
         using CreateFromData = std::function<BaseType*(const XMLElement)>;
         using CreateDefault = std::function<BaseType*()>;
-        //using RegisterScriptFunctions = std::function<void(ScriptingContext&)>;
 
         struct TypeCreationData
         {

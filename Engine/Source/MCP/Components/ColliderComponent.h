@@ -15,7 +15,7 @@
 namespace mcp
 {
     class ColliderComponent final : public Component , public IUpdateable
-    #if RENDER_COLLIDER_VISUALS 
+#if RENDER_COLLIDER_VISUALS 
         , public IRenderable    // Only inherit from this class defined.
 #endif
     {

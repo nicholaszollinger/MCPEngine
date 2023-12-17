@@ -1,11 +1,13 @@
 #pragma once
-
 // ResourceManager.h
 
 //-----------------------------------------------------------------------------------------------------------------------------
-// Goal: This is going to be a singleton instance class, which holds references to each of the loaded
-//      assets. In my 275 project, I had the GraphicsManager hold onto graphics assets. Here, I want to
-//      have an interface for just loading and unloading any kind of asset.
+//      NOTES:
+//      This is going to be one of the main focuses of my refactoring over the Winter break. I want to get this on it's own
+//      thread, where the vague flow is:
+//              - Object puts in a request for an asset, sending the request to the resource thread.
+//              - The Resource thread processes any open requests, completing immediately if the resource is already loaded.
+//              - Part of the main thread is notify all Object resource requests of their completion.
 //
 //-----------------------------------------------------------------------------------------------------------------------------
 
@@ -69,8 +71,8 @@ namespace mcp
     private:
         //-----------------------------------------------------------------------------------------------------------------------------
         //		NOTES:
-        //      Interestingly enough, I can not have the function definition here, I can use declare and then in a
-        //      cpp somewhere, I can define it. I get the underline saying that it is mad, but 
+        //      Interestingly enough, I can not have the function definition here, I just declare it here and then in a it is on
+        //      the Resource type to define how it works in a cpp file.
         //
         ///		@brief : Load an asset of a certain ResourceType.
         ///         \n Example of Definition for an SDL_Texture:
@@ -103,10 +105,15 @@ namespace mcp
         ResourcePtr<ResourceType>* GetResourcePtr(const RequestType& key);
     };
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Resource Manager responsible for loading/freeing resources.
+    //-----------------------------------------------------------------------------------------------------------------------------
     class ResourceManager final : public System
     {
     private:
-        // This is the asset zip file. In the future, this may look different. This is purpose build right now.
+        // This is the asset zip file. In the future, this may look different. This is purpose built right now.
         static constexpr const char* kAssetDirectory = "AssetsPkg.zip";
 
         MCP_DEFINE_SYSTEM(ResourceManager)
@@ -128,6 +135,10 @@ namespace mcp
         template<typename ResourceType, typename RequestType>
         ResourceContainer<ResourceType, RequestType>& GetResourceContainer();
     };
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		    TEMPLATE IMPLEMENTATIONS BELOW
+    //-----------------------------------------------------------------------------------------------------------------------------
 
     template<typename ResourceType, typename RequestType>
     ResourceContainer<ResourceType, RequestType>::~ResourceContainer()

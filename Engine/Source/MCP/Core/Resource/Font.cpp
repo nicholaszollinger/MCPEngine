@@ -26,8 +26,6 @@ namespace mcp
         }
 
         const auto* pFontData = static_cast<FontData*>(m_pResource);
-        //MCP_CHECK(glyphIndex < pFontData->m_glyphTextures.size());
-
         return pFontData->m_glyphTextures[glyph];
     }
 
@@ -69,7 +67,6 @@ namespace mcp
         const auto* pFontData = static_cast<FontData*>(m_pResource);
         return GetCursorDistance(static_cast<_TTF_Font*>(pFontData->pFontResource), glyph);
     }
-
 
     void* Font::LoadResourceType()
     {

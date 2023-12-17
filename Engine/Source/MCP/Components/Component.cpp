@@ -21,7 +21,6 @@ namespace mcp
         //
     }
 
-
     MessageManager* Component::GetMessageManager() const
     {
         return m_pOwner->GetScene()->GetMessageManager();
@@ -117,6 +116,4 @@ namespace mcp
         data.startActive = element.GetAttributeValue<bool>("startActive", true);
         return data;
     }
-
-
 }

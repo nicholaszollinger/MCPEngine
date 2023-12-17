@@ -2,9 +2,7 @@
 // Collider.h
 
 #include <unordered_set>
-
 #include "ColliderFactory.h"
-
 #include "CollisionProfile.h"
 #include "MCP/Core/Event/MulticastDelegate.h"
 #include "Utility/Types/Rect.h"
@@ -16,7 +14,7 @@
 //		
 ///		@brief : Macro toggle to render the outlines of the colliders in the game.
 //-----------------------------------------------------------------------------------------------------------------------------
-#define RENDER_COLLIDER_VISUALS 1
+#define RENDER_COLLIDER_VISUALS 0
 
 #if RENDER_COLLIDER_VISUALS
     #include "MCP/Graphics/Graphics.h"

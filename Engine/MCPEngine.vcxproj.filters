@@ -10,9 +10,6 @@
     <Filter Include="Platform\SDL2">
       <UniqueIdentifier>{f648ef7e-2c73-4c19-a6f1-da7494c63f55}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Platform\Tiled">
-      <UniqueIdentifier>{1aa8e0c0-409f-467a-9ec2-74b2d65f269e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Platform\TinyXML2">
       <UniqueIdentifier>{852214f2-58db-43e2-ac54-560abca36975}</UniqueIdentifier>
     </Filter>
@@ -85,9 +82,6 @@
     <Filter Include="MCP\Scripting">
       <UniqueIdentifier>{a754d706-c0c5-44b1-9df1-ba9396497432}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MCP\Editor">
-      <UniqueIdentifier>{713b3303-b02e-4793-87bd-55726f6e6c19}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Platform\SDL2\SDL2Window.h">
@@ -105,19 +99,10 @@
     <ClInclude Include="Source\Platform\SDL2\SDLRenderer.h">
       <Filter>Platform\SDL2</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Platform\Tiled\TiledMapComponent.h">
-      <Filter>Platform\Tiled</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Platform\Tiled\TiledTileSet.h">
-      <Filter>Platform\Tiled</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Platform\TinyXML2\tinyxml2.h">
       <Filter>Platform\TinyXML2</Filter>
     </ClInclude>
     <ClInclude Include="Source\MCP\Audio\AudioClip.h">
-      <Filter>MCP\Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MCP\Audio\AudioData.h">
       <Filter>MCP\Audio</Filter>
     </ClInclude>
     <ClInclude Include="Source\MCP\Audio\AudioManager.h">
@@ -192,7 +177,7 @@
     <ClInclude Include="Source\MCP\Lua\LuaDebug.h">
       <Filter>MCP\Lua</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MCP\Lua\LuaSystem.h">
+    <ClInclude Include="Source\MCP\Lua\LuaContext.h">
       <Filter>MCP\Lua</Filter>
     </ClInclude>
     <ClInclude Include="Source\MCP\Scene\SceneManager.h">
@@ -222,9 +207,6 @@
     <ClInclude Include="Source\MCP\Core\Event\Event.h">
       <Filter>MCP\Core\Event</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MCP\Core\Event\KeyEvent.h">
-      <Filter>MCP\Core\Event</Filter>
-    </ClInclude>
     <ClInclude Include="Source\MCP\Core\Event\Message.h">
       <Filter>MCP\Core\Event</Filter>
     </ClInclude>
@@ -244,9 +226,6 @@
       <Filter>MCP\Core\Resource</Filter>
     </ClInclude>
     <ClInclude Include="Source\MCP\Core\Resource\ResourceManager.h">
-      <Filter>MCP\Core\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MCP\Core\Resource\TextFile.h">
       <Filter>MCP\Core\Resource</Filter>
     </ClInclude>
     <ClInclude Include="Source\MCP\Core\Resource\Zip.h">
@@ -405,9 +384,6 @@
     <ClInclude Include="Source\MCP\Scripting\Script.h">
       <Filter>MCP\Scripting</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MCP\Editor\EditorEntity.h">
-      <Filter>MCP\Editor</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
@@ -427,12 +403,6 @@
     </ClCompile>
     <ClCompile Include="Source\Platform\SDL2\SDLResources.cpp">
       <Filter>Platform\SDL2</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Platform\Tiled\TiledMapComponent.cpp">
-      <Filter>Platform\Tiled</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Platform\Tiled\TiledTileSet.cpp">
-      <Filter>Platform\Tiled</Filter>
     </ClCompile>
     <ClCompile Include="Source\Platform\TinyXML2\tinyxml2.cpp">
       <Filter>Platform\TinyXML2</Filter>
@@ -500,7 +470,7 @@
     <ClCompile Include="Source\MCP\Lua\LuaDebug.cpp">
       <Filter>MCP\Lua</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MCP\Lua\LuaSystem.cpp">
+    <ClCompile Include="Source\MCP\Lua\LuaContext.cpp">
       <Filter>MCP\Lua</Filter>
     </ClCompile>
     <ClCompile Include="Source\MCP\Scene\SceneManager.cpp">
@@ -537,9 +507,6 @@
       <Filter>MCP\Core\Resource</Filter>
     </ClCompile>
     <ClCompile Include="Source\MCP\Core\Resource\ResourceManager.cpp">
-      <Filter>MCP\Core\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MCP\Core\Resource\TextFile.cpp">
       <Filter>MCP\Core\Resource</Filter>
     </ClCompile>
     <ClCompile Include="Source\MCP\Core\Resource\Zip.cpp">

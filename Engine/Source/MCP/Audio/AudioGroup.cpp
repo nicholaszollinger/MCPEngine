@@ -7,13 +7,12 @@
 #include "Utility/Generic/Hash.h"
 
 #if MCP_AUDIO_PLATFORM == MCP_AUDIO_PLATFORM_SDL
-
-#pragma warning(push, 0)
+// Disable SDL Warnings.
+#pragma warning(push, 0)    
 #include "Platform/SDL2/SDLAudio.h"
 #pragma warning(pop)
 
 using AudioPlatform = SDLAudioManager;
-
 #endif
 
 namespace mcp
@@ -89,10 +88,11 @@ namespace mcp
     {
         m_isMuted = false;
 
-        for (const auto channel : m_channels)
-        {
-            //AudioPlatform::UnMuteChannel(channel, );
-        }
+        // TODO: Un-mute every channel that this group owns.
+        //for (const auto channel : m_channels)
+        //{
+        //    //AudioPlatform::UnMuteChannel(channel, );
+        //}
 
         for (auto* pChild : m_children)
         {

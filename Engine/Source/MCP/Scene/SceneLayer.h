@@ -23,6 +23,7 @@ protected:                                                                      
 public:                                                                                                     \
     [[nodiscard]] static constexpr mcp::LayerId GetStaticLayerId() { return kLayerId; }                     \
     [[nodiscard]] virtual mcp::LayerId GetLayerId() const { return kLayerId; }                              \
+private:
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -46,6 +47,7 @@ public:                                                                         
     private:
         friend class SceneManager;
         friend class Scene;
+
     protected:
         static constexpr uint32_t kSceneLayerAssetId = HashString32("SceneLayerAsset");
 
@@ -61,6 +63,7 @@ public:                                                                         
         UnorderedDenseArray<RenderableId, IRenderable*> m_renderables;          // Anything that we need to render on this layer.
         Scene* m_pScene;                                                        // Reference to the Scene we are in.
         LayerState m_state;                                                     // The current State of the Layer.
+
     public:
         // Scene Layers cannot be copied or moved.
         SceneLayer(const SceneLayer&) = delete;
@@ -107,7 +110,6 @@ public:                                                                         
 #if MCP_EDITOR
         void AddToSaveBuffer(const EntityId id);
 #endif
-
 
     protected:
         // Private Constructor and Destructor

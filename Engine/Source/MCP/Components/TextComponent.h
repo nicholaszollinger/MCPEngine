@@ -25,7 +25,7 @@ namespace mcp
             Color foreground;
             Color background;
 
-            // Any kind of styling?
+            // TODO: Any kind of styling?
         };
 
     private:

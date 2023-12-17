@@ -28,5 +28,4 @@ namespace mcp
     {
         ResourceManager::Get()->FreeResource<AudioTrackType>(m_request);
     }
-
 }

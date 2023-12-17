@@ -7,9 +7,9 @@
 #include "Utility/Logging/Log.h"
 
 //-----------------------------------------------------------------------------------------------------------------------------
-//		NOTES:
+//		NOTES
 //
-///		@brief : A packed array is a std::vector whose order does not matter, and whose values are accessed through a keyValue.
+///		@brief : A Dense array is a std::vector whose order does not matter, and whose values are accessed through a keyValue.
 ///             Under the hood we have 2 std::unordered_maps that take care of mapping the values to indexes in the array and
 ///             vice versa. On removing an item from the array, the last element is swapped into the place of the removal
 ///             and the mappings are updated accordingly.

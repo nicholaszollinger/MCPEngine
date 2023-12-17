@@ -3,7 +3,6 @@
 #include "AudioSourceComponent.h"
 
 #include <algorithm>
-
 #include "MCP/Audio/AudioManager.h"
 
 namespace mcp

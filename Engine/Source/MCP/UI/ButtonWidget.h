@@ -2,7 +2,7 @@
 // ButtonWidget.h
 
 #include "Widget.h"
-#include "MCP/Lua/LuaSystem.h"
+#include "MCP/Lua/LuaContext.h"
 
 #define MCP_DEBUG_RENDER_BUTTON_BOUNDS 0
 

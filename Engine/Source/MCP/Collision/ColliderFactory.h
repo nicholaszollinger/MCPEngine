@@ -1,5 +1,6 @@
 #pragma once
 // ColliderFactory.h
+// TODO: When I get a chance, this should be refactored with my new TypeFactory.
 
 #include <cassert>
 #include <functional>

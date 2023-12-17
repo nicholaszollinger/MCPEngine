@@ -1,5 +1,6 @@
 #pragma once
 // WidgetFactory.h
+// TODO: This should be refactored to use my TypeFactory
 
 #include <functional>
 #include <unordered_map>

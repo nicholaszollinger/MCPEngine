@@ -174,7 +174,6 @@ namespace mcp
                 pWidget->SetActive(true);
                 //m_pFocusedWidget = pWidget;
             }
-            
 #endif
 
             // Recursively load each child widget.
@@ -315,9 +314,6 @@ namespace mcp
                 if (it->pBaseWidget->PointIntersectsRect(mouseEvent.GetWindowPosition()))
                 {
                     m_pFocusedWidget = it->pBaseWidget;
-
-                    //const auto tag = m_pFocusedWidget->GetTag();
-                    //MCP_LOG("UILayer", "Focused: ", *tag);
                     break;
                 }
             }
@@ -386,75 +382,5 @@ namespace mcp
         // If our widget is not nullptr, have it respond to the change.
         if (m_pFocusedWidget)
             m_pFocusedWidget->OnFocusChanged(true);
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Debug function to visualize the UI tree
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void UILayer::DumpUITree()
-    {
-        /*for (auto* pWidget : m_widgets)
-        {
-            PrintWidgetType(pWidget, 0);
-        }*/
-    }
-
-    void UILayer::PrintWidgetType(Widget* pWidget, int tabCount)
-    {
-        std::string line = "";
-        for (int i = 0; i < tabCount; ++i)
-        {
-            line += '\t';
-        }
-
-        const auto id = pWidget->GetTypeId();
-
-        if (id == CanvasWidget::GetStaticTypeId())
-        {
-            MCP_LOG("UILayer", line, "CanvasWidget: ", *pWidget->GetTag());
-        }
-
-        else if (id == ImageWidget::GetStaticTypeId())
-        {
-            MCP_LOG("UILayer", line, "ImageWidget");
-        }
-
-        else if (id == ButtonWidget::GetStaticTypeId())
-        {
-            MCP_LOG("UILayer", line, "ButtonWidget");
-        }
-
-        else if (id == ToggleWidget::GetStaticTypeId())
-        {
-            MCP_LOG("UILayer", line, "ToggleWidget");
-        }
-
-        else if (id == SliderWidget::GetStaticTypeId())
-        {
-            MCP_LOG("UILayer", line, "SliderWidget");
-        }
-
-        else if (id == TextWidget::GetStaticTypeId())
-        {
-            MCP_LOG("UILayer", line, "TextWidget");
-        }
-
-        else if (id == SelectionWidget::GetStaticTypeId())
-        {
-            MCP_LOG("UILayer", line, "SelectionWidget");
-        }
-
-        else
-        {
-            MCP_LOG("UILayer", line, "Uknown Widget");
-        }
-
-        if (pWidget->HasChildren())
-        {
-            ++tabCount;
-            pWidget->ForAllChildren([this, tabCount](Widget* pWidget){ this->PrintWidgetType(pWidget, tabCount); });
-        }
     }
 }

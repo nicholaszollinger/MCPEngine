@@ -25,10 +25,10 @@ namespace mcp
         Scene* pScene = nullptr;        // The Scene resource.
     };
 
-    using SceneList = std::unordered_map<SceneIdentifier, SceneData, StringIdHasher>;
-
     class SceneManager final : public System
     {
+        using SceneList = std::unordered_map<SceneIdentifier, SceneData, StringIdHasher>;
+
         MCP_DEFINE_SYSTEM(SceneManager)
         SceneManager(SceneList&& sceneList, const SceneIdentifier startScene);
 
@@ -61,7 +61,6 @@ namespace mcp
         virtual bool Init() override;
         virtual void Close() override;
         bool EnterStartScene();
-        //bool LoadSceneData(const char* pSceneDataFilepath);
         void Update(const float deltaTimeMs);
         void Render() const;
         bool TransitionToScene();
@@ -69,7 +68,5 @@ namespace mcp
 #if MCP_EDITOR
         bool LoadEditorScene();
 #endif
-
-#
     };
 }

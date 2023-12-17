@@ -1,6 +1,8 @@
 #pragma once
-#include <vector>
+// InputControl.h
+// TODO: I didn't have time to complete the InputSystem the way I wanted.
 
+#include <vector>
 #include "InputCodes.h"
 
 namespace mcp
@@ -47,7 +49,6 @@ namespace mcp
 
     class InputControlManager
     {
-
     public:
         bool Initialize();
 

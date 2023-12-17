@@ -2,23 +2,14 @@
 // TransformComponent.h
 
 #include "Component.h"
-#include "MCP/Core/Event/MulticastDelegate.h"
-#include "MCP/Core/Event/Message.h"
 #include "Utility/Types/Vector2.h"
 
 namespace mcp
 {
-    using OnLocationUpdated = MulticastDelegate<const Vec2>;
-    //using OnRotationUpdated = MulticastDelegate<>; // To add later.
-
     class TransformComponent final : public Component
     {
         MCP_DEFINE_COMPONENT_ID(TransformComponent)
 
-    public:
-        OnLocationUpdated m_onLocationUpdated;
-
-    private:
         TransformComponent* m_pParentTransform;
         Vec2 m_position;
         Vec2 m_scale;
@@ -31,10 +22,9 @@ namespace mcp
 
         // Position
         void SetPosition(const Vec2 position);
-        // TODO: SetPosition vs SetLocalLocation()
+        // TODO: SetPosition vs SetLocalPosition()
         void AddToPosition(const Vec2 deltaPosition);
         void AddToPosition(const float deltaX, const float deltaY);
-        void AddToPositionNoUpdate(const Vec2 deltaPosition);
         [[nodiscard]] Vec2 GetPosition() const;
         [[nodiscard]] Vec2 GetLocalPosition() const { return m_position; }
 

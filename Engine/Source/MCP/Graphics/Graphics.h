@@ -42,9 +42,11 @@ namespace mcp
         void Display();
     };
 
+    // TODO: I have these as global functions for an easy API, but I would rather they
+    // were more closely associated with the Graphics system as static functions.
+    
     void SetDrawColor(const Color& color);
     void FillScreen(const Color& color);
-
     void DrawLine(const Vec2Int& a, const Vec2Int& b, const Color& color);
     void DrawFillRect(const RectInt& rect, const Color& color);
     void DrawFillRect(const RectF& rect, const Color& color);

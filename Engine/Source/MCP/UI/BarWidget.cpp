@@ -92,27 +92,11 @@ namespace mcp
 
     void BarWidget::RegisterLuaFunctions(lua_State* pState)
     {
-        /*static constexpr luaL_Reg kFuncs[]
-        {
-            {"SetTint", &SetImageWidgetTint}
-             ,{"GetChildBarWidget", &GetChildImageWidgetByTag}
-             ,{"GetFirstChildImageWidget", &GetFirstChildImageWidget}
-            ,{nullptr, nullptr}
-        };*/
-
         static constexpr luaL_Reg kBarWidgetFuncs[]
         {
              {"GetMax", &GetBarWidgetMax}
             ,{nullptr, nullptr}
         };
-
-        // Set the Widget Functions:
-        //lua_getglobal(pState, "Widget");
-        //MCP_CHECK(lua_type(pState, -1) == LUA_TTABLE);
-        //luaL_setfuncs(pState, kFuncs, 0);
-
-        //// Pop the table off the stack.
-        //lua_pop(pState, 1);
 
         // Set the ImageWidget Functions:
         lua_getglobal(pState, "BarWidget");

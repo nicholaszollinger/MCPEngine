@@ -21,7 +21,7 @@ namespace mcp
         static constexpr float kFixedUpdateTimeSeconds = 1.f / 60.f;
 
 #if MCP_EDITOR
-        XMLParser m_sceneFile; // <= This is the data file used to load the scene.
+        XMLParser m_sceneFile; // This is the data file used to load the scene.
 #endif
 
         MessageManager m_messageManager;

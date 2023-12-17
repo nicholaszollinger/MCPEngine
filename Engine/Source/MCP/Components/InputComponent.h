@@ -1,5 +1,6 @@
 #pragma once
 // InputComponent.h
+// TODO: I didn't have time to complete the InputSystem the way I wanted.
 
 #include "Component.h"
 #include "MCP/Input/InputCodes.h"
@@ -7,7 +8,6 @@
 
 namespace mcp
 {
-
     class InputComponent final : public Component, public InputListener
     {
         friend class WorldLayer;
@@ -18,7 +18,6 @@ namespace mcp
 
     private:
         MCP_DEFINE_COMPONENT_ID(InputComponent)
-
         //std::unordered_map<InputControl, InputAction*> m_controls;
 
     public:

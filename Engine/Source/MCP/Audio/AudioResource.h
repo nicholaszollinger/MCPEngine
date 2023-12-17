@@ -6,7 +6,6 @@
 
 namespace mcp
 {
-
     struct AudioResourceRequest : public DiskResourceRequest
     {
         bool isMusicResource = false;
@@ -30,11 +29,6 @@ namespace mcp
 
     class AudioResource final : public Resource<AudioResourceRequest>
     {
-    public:
-#if MCP_AUDIO_PLATFORM == MCP_AUDIO_PLATFORM_SDL
-        
-#endif
-        
     public:
         MCP_DEFINE_RESOURCE_DESTRUCTOR(AudioResource)
 

@@ -22,11 +22,6 @@ namespace mcp
         Component* const pSender;   // Which Component sent the message.
         const MessageId id;         // Id of the message type
 
-        Message(const StringId id, Component* pSender)
-            : pSender(pSender)
-            , id(id)
-        {
-            //
-        }
+        Message(const StringId id, Component* pSender);
     };
 }

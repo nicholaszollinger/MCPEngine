@@ -5,7 +5,6 @@
 
 namespace mcp
 {
-    struct AudioData;
     class AudioClip;
     class AudioTrack;
 }
@@ -38,13 +37,9 @@ public:
 
     // Clips:
     static int PlayClip(void* pResource, const float volume, const bool isLooping);
-
     // End of the new interface:
 
-
-
-
-
+    // TODO: Delete all below:
     // General Audio
     static void Mute();
     static void UnMute();
@@ -56,8 +51,6 @@ public:
     static void SetHardwareChannelTag(const int channel, const int tag);
     static void SetChannelVolume(const int channel, const int volume);
     static void ReleaseChannel(const int channel);
-    static void PauseGroup(const int tag);
-    static void ResumeGroup(const int tag);
     static void MuteGroup(const int tag);
     static void UnMuteGroup(const int tag, const int volume);
 
@@ -65,7 +58,6 @@ public:
     static int PlayMusic(void* pResource, const int volume, const bool isLooping, const int tag);
     static void SetMusicVolume(const int volume);
     static void PauseMusic();
-    static void ResumeMusic();
     static bool MusicPlayingOrPaused();
     static bool ChannelPlayingOrPaused(const int channel);
 

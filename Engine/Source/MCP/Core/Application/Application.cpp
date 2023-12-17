@@ -130,7 +130,7 @@ namespace mcp
 
             // Add the Engine Systems using the project settings:
             m_systems.emplace_back(LocalizationSystem::AddFromData(settingsRoot));
-            m_systems.emplace_back(lua::LuaLayer::AddFromData(settingsRoot));
+            m_systems.emplace_back(lua::LuaSystem::AddFromData(settingsRoot));
             m_systems.emplace_back(GraphicsManager::AddFromData(settingsRoot));
             m_systems.emplace_back(AudioManager::AddFromData(settingsRoot));
             m_systems.emplace_back(SceneManager::AddFromData(settingsRoot));

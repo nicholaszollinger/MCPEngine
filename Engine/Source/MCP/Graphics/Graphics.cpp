@@ -214,6 +214,4 @@ namespace mcp
     {
         Renderer::DrawTexture(context);
     }
-
 }
-

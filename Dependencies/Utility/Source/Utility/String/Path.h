@@ -5,7 +5,7 @@
 //		NOTES:
 //      Do I want this to be a StringId instead of a std::string? Probably?
 //		
-///		@brief : A string wrapped in to have path specific functionality.
+///		@brief : A string wrapped in an API to have path specific functionality.
 //-----------------------------------------------------------------------------------------------------------------------------
 class Path
 {

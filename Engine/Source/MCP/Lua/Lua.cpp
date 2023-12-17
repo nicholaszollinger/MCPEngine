@@ -5,12 +5,12 @@
 
 namespace mcp::lua
 {
-    MCP_DEFINE_STATIC_SYSTEM_GETTER(LuaLayer)
+    MCP_DEFINE_STATIC_SYSTEM_GETTER(LuaSystem)
 
     //-----------------------------------------------------------------------------------------------------------------------------
     ///     @brief : Initializes the internal LuaSystem.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool LuaLayer::Init()
+    bool LuaSystem::Init()
     {
         return m_system.Init();
     }
@@ -18,7 +18,7 @@ namespace mcp::lua
     //-----------------------------------------------------------------------------------------------------------------------------
     ///		@brief : Closes the internal LuaSystem.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void LuaLayer::Close()
+    void LuaSystem::Close()
     {
         m_system.Close();
     }
@@ -32,7 +32,7 @@ namespace mcp::lua
     //-----------------------------------------------------------------------------------------------------------------------------
     bool LoadScript(const char* pFilepath)
     {
-        return LuaLayer::Get()->GetSystem().LoadScript(pFilepath);
+        return LuaSystem::Get()->GetSystem().LoadScript(pFilepath);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ namespace mcp::lua
     //-----------------------------------------------------------------------------------------------------------------------------
     LuaResourcePtr LoadScriptInstance(const char* pScriptFilepath)
     {
-        return LuaLayer::Get()->GetSystem().LoadScriptInstance(pScriptFilepath);
+        return LuaSystem::Get()->GetSystem().LoadScriptInstance(pScriptFilepath);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ namespace mcp::lua
     //-----------------------------------------------------------------------------------------------------------------------------
     LuaResourcePtr LoadScriptInstance(const char* pScriptFilepath, const char* pScriptDataPath)
     {
-        return LuaLayer::Get()->GetSystem().LoadScriptInstance(pScriptFilepath, pScriptDataPath);
+        return LuaSystem::Get()->GetSystem().LoadScriptInstance(pScriptFilepath, pScriptDataPath);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -67,9 +67,8 @@ namespace mcp::lua
     //-----------------------------------------------------------------------------------------------------------------------------
     LuaResourcePtr CreateTable()
     {
-        return LuaLayer::Get()->GetSystem().CreateTable();
+        return LuaSystem::Get()->GetSystem().CreateTable();
     }
-
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -81,7 +80,7 @@ namespace mcp::lua
     //-----------------------------------------------------------------------------------------------------------------------------
     std::optional<bool> GetBoolean(const char* varName)
     {
-        return LuaLayer::Get()->GetSystem().GetBoolean(varName);
+        return LuaSystem::Get()->GetSystem().GetBoolean(varName);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -94,7 +93,7 @@ namespace mcp::lua
     //-----------------------------------------------------------------------------------------------------------------------------
     std::optional<int64_t> GetInteger(const char* varName)
     {
-        return LuaLayer::Get()->GetSystem().GetInteger(varName);
+        return LuaSystem::Get()->GetSystem().GetInteger(varName);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -107,7 +106,7 @@ namespace mcp::lua
     //-----------------------------------------------------------------------------------------------------------------------------
     std::optional<double> GetNumber(const char* varName)
     {
-        return LuaLayer::Get()->GetSystem().GetNumber(varName);
+        return LuaSystem::Get()->GetSystem().GetNumber(varName);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -120,7 +119,7 @@ namespace mcp::lua
     //-----------------------------------------------------------------------------------------------------------------------------
     const char* GetString(const char* varName)
     {
-        return LuaLayer::Get()->GetSystem().GetString(varName);
+        return LuaSystem::Get()->GetSystem().GetString(varName);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -132,7 +131,7 @@ namespace mcp::lua
     //-----------------------------------------------------------------------------------------------------------------------------
     void SetBoolean(const char* varName, const bool value)
     {
-        LuaLayer::Get()->GetSystem().SetBoolean(varName, value);
+        LuaSystem::Get()->GetSystem().SetBoolean(varName, value);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -144,7 +143,7 @@ namespace mcp::lua
     //-----------------------------------------------------------------------------------------------------------------------------
     void SetInteger(const char* varName, const int64_t& value)
     {
-        LuaLayer::Get()->GetSystem().SetInteger(varName, value);
+        LuaSystem::Get()->GetSystem().SetInteger(varName, value);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -156,7 +155,7 @@ namespace mcp::lua
     //-----------------------------------------------------------------------------------------------------------------------------
     void SetNumber(const char* varName, const double value)
     {
-        LuaLayer::Get()->GetSystem().SetNumber(varName, value);
+        LuaSystem::Get()->GetSystem().SetNumber(varName, value);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -168,6 +167,6 @@ namespace mcp::lua
     //-----------------------------------------------------------------------------------------------------------------------------
     void SetString(const char* varName, const char* value)
     {
-        LuaLayer::Get()->GetSystem().SetString(varName, value);
+        LuaSystem::Get()->GetSystem().SetString(varName, value);
     }
 }

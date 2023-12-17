@@ -3,7 +3,6 @@
 
 #include "AudioGroup.h"
 #include "AudioClip.h"
-#include "AudioData.h"
 #include "AudioResource.h"
 #include "AudioTrack.h"
 #include "MCP/Core/System.h"
@@ -14,7 +13,6 @@ namespace mcp
 
     class AudioManager final : public System
     {
-
     private:
         struct PlayingAudioData
         {

@@ -1,10 +1,11 @@
 #pragma once
 // Config.h
 
-// Goal: I want all of my global macros to be defined here.
-//  This includes things like Platform (Windows), RenderLibrary (Ex : SDL2)
-//  I want to have a MPC prefix on all of these macros so that I can easily identify the engine code
-
+//--------------------------------------------------------------------------------------------------------------
+//  GOAL: I want all of my global macros to be defined here.
+//      This includes things like Platform (Windows), RenderLibrary (Ex : SDL2)
+//      I want to have a MPC prefix on all of these macros so that I can easily identify the engine code
+//--------------------------------------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------------------------------------
 //      OS PLATFORM DEFINITIONS

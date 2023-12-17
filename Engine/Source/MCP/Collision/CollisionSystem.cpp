@@ -146,6 +146,7 @@ namespace mcp
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
+    //      TODO: This function should be broken into smaller functions.
     //		
     ///		@brief : Takes in the cells that the Collider Component is in and Checks for collisions in each cell.
     ///		@param pColliderComponent : Component we are testing.
@@ -240,7 +241,7 @@ namespace mcp
 
                                 const Vec2 deltaPos = significantFaceIsWidth ? Vec2{0, distanceScalar * intersectionRect.height} : Vec2 { distanceScalar * intersectionRect.width, 0.f};
 
-                                pColliderComponent->GetTransformComponent()->AddToPositionNoUpdate(deltaPos);
+                                pColliderComponent->GetTransformComponent()->AddToPosition(deltaPos);
                                 pColliderComponent->SetVelocity(significantFaceNormal * distanceOnFaceNormal);
 
                                 // Broadcast the events.
@@ -388,7 +389,6 @@ namespace mcp
     //      HACK.
     //		
     ///		@brief : Remove a collider from overlapping updates.
-    ///		@param pCollider : 
     //-----------------------------------------------------------------------------------------------------------------------------
     void CollisionSystem::RemoveOverlappingCollider(Collider* pCollider)
     {
@@ -407,7 +407,8 @@ namespace mcp
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
-    //      TODO: I want to use this at some point. I would rather calculate the grid once up front.
+    //      TODO: I want to use this at some point. I would rather calculate the grid once up front. I started with this, but I moved away
+    //      from it.
     //		
     ///		@brief : [NOT IMPLEMENTED YET] Calculate the Quadtree divisions for the world.
     //-----------------------------------------------------------------------------------------------------------------------------

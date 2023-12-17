@@ -16,10 +16,14 @@ namespace mcp
 
         CollisionSystem m_collisionSystem;
         MessageManager m_messageManager;
-        InputComponent* m_activeInput; // Only 1 active input receiver is active at a time.
+        InputComponent* m_activeInput; // TODO: Only 1 active input receiver is active at a time.
         bool m_isPaused;
 
     public:
+        // Entity Management
+        virtual Object* CreateEntity() override;
+        virtual Object* CreateEntityFromPrefab(const XMLElement root) override;
+
         // Time
         void Pause();
         void Resume();
@@ -29,8 +33,6 @@ namespace mcp
         void AddInputListener(InputComponent* pInputComponent);
         void RemoveInputListener(InputComponent* pInputComponent);
 
-        virtual Object* CreateEntity() override;
-        virtual Object* CreateEntityFromPrefab(const XMLElement root) override;
 
         // World Systems
         [[nodiscard]] MessageManager* GetMessageManager() { return &m_messageManager;}

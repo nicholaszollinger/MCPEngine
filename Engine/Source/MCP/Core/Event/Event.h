@@ -1,6 +1,5 @@
 #pragma once
 // EventType.h
-// I want to set up my own event structure, with simple flags to denote types.
 
 #include <functional>
 #include <unordered_map>
@@ -32,21 +31,6 @@ GENERATE_DEPENDENT_TYPE_CHECK(CanCallEvent, EventType, FuncType, std::declval<Fu
 
 namespace mcp
 {
-    /*enum class EventType
-    {
-        kInvalid =  0,
-        KQuit       = MCP_BIT(1),
-        kWindow     = MCP_BIT(2),
-        kKey        = MCP_BIT(3),
-        kMouse      = MCP_BIT(4),
-        kUser       = MCP_BIT(5),
-    };
-
-    #define MCP_DEFINE_EVENT_TYPE(type)                                             \
-        static EventType GetStaticType() { return EventType::type; }                \
-        virtual EventType GetEventType() const override { return GetStaticType(); } \
-        virtual const char* GetName() const override { return #type; }*/
-
     using EventId = uint32_t;
 
 #define MCP_DEFINE_EVENT_ID(type)                                               \

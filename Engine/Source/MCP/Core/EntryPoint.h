@@ -4,7 +4,16 @@
 #include "Config.h"
 #include "Application/Application.h"
 
-// TODO:
+//--------------------------------------------------------------------------------------------------------------------------
+//      NOTES:
+//      This is an interesting idea where I would define the main function for the game project; they would just have to
+//      include this file, and define certain functions like creating the Application.
+//
+//      I like this approach because I need to some specific things in the main function, but I didn't have time to make this
+//      work. Something for the future. Maybe.
+//
+//--------------------------------------------------------------------------------------------------------------------------
+
 //namespace mcp
 //{
 //    extern mcp::Application* CreateApp();

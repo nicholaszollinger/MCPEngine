@@ -107,23 +107,6 @@ namespace mcp
 
     void VerticalLayoutWidget::SetPositionAndMoveToNext(Widget* pChild, float& lastYPos) const
     {
-        //float localXPos = 0.f;
-        /*switch (m_horizontalAlignment)
-        {
-            case HorizontalAlignment::kCenter: break;
-            case HorizontalAlignment::kLeft:
-            {
-                localXPos = pChild->GetRectWidth() / 2.f;
-                break;
-            }
-
-            case HorizontalAlignment::kRight:
-            {
-                localXPos = -(pChild->GetRectWidth() / 2.f);
-                break;
-            }
-        }*/
-
         switch (m_verticalAlignment)
         {
             case VerticalAlignment::kCenter:

@@ -30,7 +30,7 @@ namespace mcp
 
     void LocalizationSystem::Close()
     {
-        
+        //
     }
 
     void LocalizationSystem::LoadLocalizedScript(const char* pFilepath)
@@ -85,7 +85,6 @@ namespace mcp
         
         return &stringContainer[index];
     }
-
 
     LocalizationSystem* LocalizationSystem::AddFromData(const XMLElement element)
     {

@@ -4,9 +4,6 @@
     <ClInclude Include="LuaConfig.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\LuaState.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="Source\LuaSource\lapi.h">
       <Filter>lua</Filter>
     </ClInclude>
@@ -104,9 +101,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\LuaState.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\LuaSource\lapi.c">
       <Filter>lua</Filter>
     </ClCompile>

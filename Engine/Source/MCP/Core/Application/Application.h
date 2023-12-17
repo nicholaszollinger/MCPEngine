@@ -20,8 +20,8 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     struct CommandLineArgs
     {
-	    size_t count = 0;
-	    char** args = nullptr;
+        size_t count = 0;
+        char** args = nullptr;
 
 	    const char* operator[](const size_t index) const
 	    {
@@ -41,8 +41,6 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     struct ApplicationContext
     {
-        //ApplicationContext(CommandLineArgs&& args, std::string&& workingDirectory);
-        
         // The arguments passed into the Application's executable
         CommandLineArgs args;
 
@@ -50,6 +48,11 @@ namespace mcp
         std::string workingDirectory;
     };
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : The Application class manages the runtime of the program and all of the Systems.
+    //-----------------------------------------------------------------------------------------------------------------------------
     class Application
     {
         static inline Application* s_pInstance = nullptr;

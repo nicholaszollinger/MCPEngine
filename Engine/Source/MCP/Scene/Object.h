@@ -9,16 +9,16 @@
 #include "MCP/Debug/Log.h"
 #include "MCP/Components/Component.h"
 
-// TODO: Need to create a type for the ComponentType that checks to make sure it follows the necessary requirements.
-
 namespace mcp
 {
     class Scene;
     class WorldLayer;
-
     using ObjectId = uint32_t;
+
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
+    //      TODO: In Engine v2, I realized that having only Objects have components kind of sucks, so this functionality is likely
+    //      going to be merged up into SceneEntity.
     //
     ///		@brief : An Object is a SceneEntity that can store components.
     //-----------------------------------------------------------------------------------------------------------------------------

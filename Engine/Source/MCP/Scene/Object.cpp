@@ -147,5 +147,4 @@ namespace mcp
             pComponent->OnOwnerParentSet(static_cast<Object*>(GetParent()));
         }
     }
-    
 }
