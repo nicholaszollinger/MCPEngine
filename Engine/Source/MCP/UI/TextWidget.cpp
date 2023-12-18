@@ -81,7 +81,7 @@ namespace mcp
             const float startPosX = GetLineStartXPos(rect, i);
 
             // Debug:
-            //DrawRect(RectF{startPosX, startPosY, static_cast<float>(line.lineWidth), static_cast<float>(line.lineHeight)}, Color::Black());
+            //DrawRect(RectF{startPosX, startPosY + static_cast<float>(m_font.GetNewlineDistance() * i), static_cast<float>(line.lineWidth), static_cast<float>(line.lineHeight)}, Color{255,0,0});
 
             for (size_t ii = 0; ii < line.glyphCount; ++ii)
             {
@@ -509,7 +509,8 @@ namespace mcp
         m_lines.emplace_back();
         m_lines.back().lineHeight = m_font.GetFontHeight();
 
-        const float rectWidth = GetScale().x * m_width;
+        const float rectWidth = GetRectWidth();
+
         Vec2Int glyphPos {};
         size_t lineStart = 0;
         size_t wordStart = 0;
@@ -535,20 +536,28 @@ namespace mcp
                 const auto distanceToPlaceGlyph = i == 0 ? 0 : m_font.GetNextCharDistance(m_glyphs.back().glyph, glyph);
 
                 // If this glyph would put us on a new line,
-                if (!m_sizedToContent && static_cast<float>(glyphPos.x + distanceToPlaceGlyph) > rectWidth)
+                if (!m_sizedToContent && static_cast<float>(glyphPos.x + distanceToPlaceGlyph + pGlyphTexture->width) > rectWidth)
                 {
-                    // If we have a space on the current line to go back to,
+                    // If we have a space on the current line to go back to, this means we can break off the current word
+                    // and put it on a new line.
                     if (wordStart != lineStart)
                     {
                         m_lines.emplace_back();
                         auto& newLine = m_lines.back();
+                        auto& previousLine = m_lines[m_lines.size() - 2];
 
                         // Set our lineHeight
                         newLine.lineHeight = m_font.GetFontHeight();
 
                         // Set the new line start.
                         lineStart = wordStart - 1;
-                        
+
+                        // The previous line width is equal to the x position of the space.
+                        previousLine.lineWidth = m_glyphs[wordStart - 1].localPos.x;
+
+                        // The next line width is equal to the position the new glyph would be place minus wordStart's position 
+                        newLine.lineWidth = (glyphPos.x + distanceToPlaceGlyph) - (previousLine.lineWidth + spaceGlyph->width);
+
                         // Set the position of the beginning of our new line.
                         glyphPos.y += newLineDistance;
                         glyphPos.x = 0;
@@ -557,6 +566,7 @@ namespace mcp
                         // be at the new line.
                         for (size_t ii = wordStart - 1; ii < m_glyphs.size() - 1; ++ii)
                         {
+                            // Move the space down one position:
                             std::swap(m_glyphs[ii], m_glyphs[ii + 1]);
 
                             // Update the position of the swapped character to start on the new line.
@@ -565,24 +575,28 @@ namespace mcp
                             // Move the xPos over by the distance of the 'next' character, which is located after the
                             // space following the swap. 
                             if (ii < m_glyphs.size() - 2)
+                            {
                                 glyphPos.x += m_font.GetNextCharDistance(m_glyphs[ii].glyph, m_glyphs[ii + 2].glyph);
+                            }
                         }
+
+                        // Update the previous line's glyph count and line width.
+                        const size_t glyphsRemovedFromLine = m_glyphs.size() - (wordStart - 1);
+                        previousLine.glyphCount -= glyphsRemovedFromLine;
 
                         wordStart -= 1;
 
                         // Remove the space.
                         m_glyphs.pop_back();
 
-                        const size_t glyphsRemovedFromLine = m_glyphs.size() - wordStart + 1;
-                        m_lines[m_lines.size() - 2].glyphCount -= glyphsRemovedFromLine;
-
-                        // Update the new line's glyph count.
+                        // Update the new line's glyph count. The glyphs removed minus the space we are discarding.
                         newLine.glyphCount = glyphsRemovedFromLine - 1;
                     }
                 }
 
                 // Update our glyph position:
-                glyphPos.x += distanceToPlaceGlyph;
+                if (m_lines.back().glyphCount > 0)
+                    glyphPos.x += distanceToPlaceGlyph;
                 
                 // Add the new glyph to the array.
                 m_glyphs.emplace_back(pGlyphTexture, glyphPos, glyph);
@@ -609,11 +623,11 @@ namespace mcp
                 break;
             }
 
-            // Add the space:
+            // Once we complete a word, we need to add the space:
             const auto distanceToPlaceGlyph = i == 0 ? 0 : m_font.GetNextCharDistance(m_glyphs.back().glyph, ' ');
 
-            // If adding the space will start a new line, update the positions but don't add it.
-            if (!m_sizedToContent && static_cast<float>(glyphPos.x + distanceToPlaceGlyph) > rectWidth)
+            // If adding the space will start a new line or if we have just started a new line, update the positions but don't add it.
+            if (!m_sizedToContent && static_cast<float>(glyphPos.x + distanceToPlaceGlyph + spaceGlyph->width) > rectWidth ) //|| m_lines.back().glyphCount == 0)
             {
                 // Start a new line
                 m_lines.emplace_back();
@@ -641,6 +655,7 @@ namespace mcp
             m_lines.back().lineWidth = glyphPos.x + spaceGlyph->width;
             m_lines.back().glyphCount += 1;
 
+            // The next word is at the 'next character'.
             wordStart = m_glyphs.size();
         }
     }

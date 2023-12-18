@@ -50,6 +50,7 @@ namespace mcp
     //		NOTES:
     //		
     ///		@brief : Get the distance horizontally to place the 'nextGlyph' next to the 'lastGlyph'.
+    ///             This is the width of the 'lastGlyph' + the kerning distance.
     //-----------------------------------------------------------------------------------------------------------------------------
     int Font::GetNextCharDistance(const uint32_t lastGlyph, const uint32_t nextGlyph) const
     {
