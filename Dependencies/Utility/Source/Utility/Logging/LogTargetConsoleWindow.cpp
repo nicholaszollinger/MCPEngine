@@ -18,11 +18,6 @@ bool LogTargetConsoleWindowImpl::Init()
 
 void LogTargetConsoleWindowImpl::Close()
 {
-    PrePost(LogType::kLog);
-
-    // A pause before exiting the program.
-    Post("Press any key to close...\n");
-    _getch();
     FreeConsole();
 }
 

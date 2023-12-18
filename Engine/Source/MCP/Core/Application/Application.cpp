@@ -318,12 +318,12 @@ namespace mcp
             pSystem = nullptr;
         }
 
+        m_systems.clear();
+
 #if MCP_LOGGING_ENABLED
         // Close the Logger
         Logger::Close();
 #endif
-
-        //BLEACH_DUMP_AND_DESTROY_LEAK_DETECTOR();
     }
 
     static int QuitGame([[maybe_unused]] lua_State* pState)
