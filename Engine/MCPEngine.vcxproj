@@ -107,7 +107,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libtiff-5.d
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libwebp-7.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\zlib1.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"  /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\SDL2_ttf.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
-xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\libfreetype-6.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\SDL2_mixer.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y</Command>
     </PostBuildEvent>
@@ -150,7 +149,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libtiff-5.d
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libwebp-7.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\zlib1.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"  /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\SDL2_ttf.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
-xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\libfreetype-6.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\SDL2_mixer.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y</Command>
     </PostBuildEvent>
@@ -197,7 +195,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libtiff-5.d
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libwebp-7.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\zlib1.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"  /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\SDL2_ttf.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
-xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\libfreetype-6.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\SDL2_mixer.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y</Command>
     </PostBuildEvent>
@@ -244,7 +241,6 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libtiff-5.d
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libwebp-7.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\zlib1.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"  /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\SDL2_ttf.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
-xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\libfreetype-6.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\SDL2_mixer.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y</Command>
     </PostBuildEvent>
