@@ -14,7 +14,7 @@ namespace mcp
     class Scene
     {
         friend SceneManager;
-
+      
     private:
         static constexpr const char* kPackageElementName = "Package";
         static constexpr const char* kSceneElementName = "Scene";
@@ -23,7 +23,6 @@ namespace mcp
 #if MCP_EDITOR
         XMLParser m_sceneFile; // This is the data file used to load the scene.
 #endif
-
         MessageManager m_messageManager;
         WorldLayer* m_pWorldLayer;
         UILayer* m_pUILayer;

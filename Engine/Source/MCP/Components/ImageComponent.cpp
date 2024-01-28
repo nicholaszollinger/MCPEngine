@@ -132,7 +132,7 @@ namespace mcp
         const Vec2 location = m_pTransformComponent->GetPosition();
         const float renderXPos = location.x - (width / 2.f);
         const float renderYPos = location.y - (height / 2.f);
-
+      
         const RectF destinationRect
         {
             renderXPos
@@ -249,6 +249,7 @@ namespace mcp
         }
         
         const XMLElement tintElement = element.GetChildElement("Color");
+
         if (tintElement.IsValid())
         {
             data.tint.r = tintElement.GetAttributeValue<uint8_t>("r");

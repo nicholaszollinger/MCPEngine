@@ -281,5 +281,5 @@ namespace mcp
         // Save the contents of the loaded XMLFile to disk.
         m_sceneFile.SaveToFile();
     }
+
 #endif
-}

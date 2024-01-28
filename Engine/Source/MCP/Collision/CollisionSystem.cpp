@@ -52,7 +52,7 @@ namespace mcp
     void CollisionSystem::AddCollideable(ColliderComponent* pColliderComponent)
     {
         UpdateMembership(pColliderComponent);
-
+      
         // If we are an active collider, add it to our list of active colliders.
         if (!pColliderComponent->m_isStatic)
             AddActiveCollider(pColliderComponent);
@@ -529,18 +529,19 @@ namespace mcp
     {
         if (pCell->m_colliderComponents.empty())
             return;
-
+      
         //MCP_CHECK(IsLeaf(pCell));
         for (size_t i = 0; i < pCell->m_colliderComponents.size(); ++i)
         {
             if (pCell->m_colliderComponents[i]->GetOwner() == pComponent->GetOwner())
             {
+                //MCP_LOG("Collision", "Removing Component from cell");
                 std::swap(pCell->m_colliderComponents[i], pCell->m_colliderComponents.back());
                 pCell->m_colliderComponents.pop_back();
                 return;
             }
         }
-
+      
         MCP_WARN("Collision", "Failed to remove ColliderComponent from Cell!");
     }
 
@@ -633,7 +634,7 @@ namespace mcp
         // If our collision is no longer enabled or we have been queued for deletion return.
         if (pColliderComponent->GetOwner()->IsQueuedForDeletion() || !pColliderComponent->CollisionEnabled())
             return;
-
+      
         TryInsert(m_pRoot, pColliderComponent, rect);
     }
 

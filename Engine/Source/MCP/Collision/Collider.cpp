@@ -47,7 +47,7 @@ namespace mcp
 
             m_pSystem->RemoveOverlappingCollider(this);
         }
-
+      
         // TODO: This needs to be changed!
         // Notify the Owner that we have changed.
         m_pOwner->ColliderCollisionChanged(m_colliderName);
