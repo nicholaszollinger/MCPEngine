@@ -94,7 +94,7 @@ std::string ConvertCharToTimeInfo(const char key, const tm& info)
 std::string FormatCurrentTime(const char* pFormat)
 {
     std::string output;
-    const auto tmInfo = GetCurrentTimeInfo();
+    const auto tmInfo = Time::GetCurrentTimeInfo();
 
     // Move through the const char* by each character.
     for (; *pFormat != '\0'; pFormat++)

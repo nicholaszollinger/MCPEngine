@@ -7,7 +7,6 @@
 #include <functional>
 
 #include "Logging/Log.h"
-// #include Logger
 
 //-----------------------------------------------------------------------------------------------------------------------------
 //		NOTES:
@@ -121,7 +120,7 @@ void WorkerThread<InstructionType>::Terminate()
         // Signal to any waiting external threads that this thread is done.
         m_idleEvent.Signal();
 
-        // Notify the worker therad.
+        // Notify the worker thread.
         m_wakeCondition.notify_all();
 
         // Join with the main thread.

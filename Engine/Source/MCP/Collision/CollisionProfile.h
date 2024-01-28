@@ -24,7 +24,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     struct CollisionProfile
     {
-        CollisionResponse collisionResponses[Internal::kMaxChannels];
+        CollisionResponse collisionResponses[Internal::CollisionChannelManager::kMaxChannels];
         CollisionChannel myCollisionChannel;
 
         CollisionProfile();

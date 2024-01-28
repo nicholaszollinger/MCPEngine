@@ -18,31 +18,93 @@ namespace mcp
 
 namespace mcp
 {
-    Texture::~Texture()
+    TextureData::TextureData(void* pTexture, const int width, const int height)
+        : pTexture(pTexture)
+        , width(width)
+        , height(height)
     {
-        if (m_pResource)
-        {
-            Free();
-        }
+        //
     }
 
-    void Texture::Load(const char* pFilePath, const char* pPackageName, const bool isPersistent)
+    Texture::Texture(const Texture& right)
     {
-        if (m_pResource)
+        m_request = right.m_request;
+
+        if (m_request.path.IsValid())
+            m_pResource = LoadResourceType();
+    }
+
+    Texture::Texture(Texture&& right) noexcept
+    {
+        m_request = right.m_request;
+        m_pResource = right.m_pResource;
+
+        right.m_pResource = nullptr;
+    }
+
+    Texture& Texture::operator=(const Texture& right)
+    {
+        if (&right != this)
         {
-            Free();
+            if (m_pResource)
+                Free();
+
+            m_request = right.m_request;
+
+            if (m_request.path.IsValid())
+                m_pResource = LoadResourceType();
         }
 
-        m_loadData.pFilePath = pFilePath;
-        m_loadData.isPersistent = isPersistent;
-        m_loadData.pPackageName = pPackageName;
+        return *this;
+    }
 
-        m_pResource = ResourceManager::Get()->Load<TextureAssetType>(m_loadData, m_baseSize);
+    Texture& Texture::operator=(Texture&& right) noexcept
+    {
+        if (&right != this)
+        {
+            if (m_pResource)
+                Free();
+
+            m_request = right.m_request;
+            m_pResource = right.m_pResource;
+
+            right.m_pResource = nullptr;
+        }
+        
+        return *this;
+    }
+
+    void* Texture::LoadResourceType()
+    {
+        return ResourceManager::Get()->LoadFromDisk<TextureData>(m_request);
     }
 
     void Texture::Free()
     {
-        ResourceManager::Get()->FreeResource<TextureAssetType>(m_loadData.pFilePath);
+        if (m_request.path.IsValid())
+            ResourceManager::Get()->FreeResource<TextureData>(m_request);
     }
 
+    void* Texture::Get() const
+    {
+        return static_cast<TextureData*>(m_pResource)->pTexture;
+    }
+
+    Vec2Int Texture::GetTextureSize() const
+    {
+        if (!m_pResource)
+        {
+            MCP_WARN("Texutre", "Attempting to get size of invalid texture resource.");
+            return {};
+        }
+
+        auto* pTextureData = static_cast<TextureData*>(m_pResource);
+        return {pTextureData->width, pTextureData->height};
+    }
+
+    Vec2 Texture::GetTextureSizeAsVec2() const
+    {
+        const auto vec = GetTextureSize();
+        return {static_cast<float>(vec.x), static_cast<float>(vec.y)};
+    }
 }

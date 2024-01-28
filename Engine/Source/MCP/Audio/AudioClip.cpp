@@ -4,6 +4,8 @@
 
 #include "MCP/Core/Resource/ResourceManager.h"
 
+using KeyType = const char*;
+
 #if MCP_AUDIO_PLATFORM == MCP_AUDIO_PLATFORM_SDL
 struct Mix_Chunk;
 
@@ -17,30 +19,13 @@ namespace mcp
 
 namespace mcp
 {
-    AudioClip::~AudioClip()
+    void* AudioClip::LoadResourceType()
     {
-        if (m_pResource)
-        {
-            Free();
-        }
-    }
-
-    void AudioClip::Load(const char* pFilePath, const char* pPackageName, const bool isPersistent)
-    {
-        if (m_pResource)
-        {
-            Free();
-        }
-
-        m_loadData.pFilePath = pFilePath;
-        m_loadData.pPackageName = pPackageName;
-        m_loadData.isPersistent = isPersistent;
-
-        m_pResource = ResourceManager::Get()->Load<AudioClipType>(m_loadData);
+        return ResourceManager::Get()->LoadFromDisk<AudioClipType>(m_request);
     }
 
     void AudioClip::Free()
     {
-        ResourceManager::Get()->FreeResource<AudioClipType>(m_loadData.pFilePath);
+        ResourceManager::Get()->FreeResource<AudioClipType>(m_request);
     }
 }

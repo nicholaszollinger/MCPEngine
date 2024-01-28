@@ -3,9 +3,12 @@
 
 #include <string>
 
-using TimeStamp = long long;
+namespace Time
+{
+    using TimeStamp = long long;
 
-TimeStamp GetCurrentDateAndTime();
-tm GetCurrentTimeInfo();
+    TimeStamp GetCurrentDateAndTime();
+    tm GetCurrentTimeInfo();
 
-float GetDeltaTime(const TimeStamp lastTimeRecorded);
+    float GetDeltaTime(const TimeStamp lastTimeRecorded);
+}

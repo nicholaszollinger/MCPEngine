@@ -29,7 +29,10 @@ namespace mcp
         AssetPackage() = default;
         ~AssetPackage();
 
-        // TODO: Delete all copy and move constructors and assignment operators.
+        AssetPackage(const AssetPackage&) = delete;
+        AssetPackage(AssetPackage&&) = delete;
+        AssetPackage& operator=(const AssetPackage&) = delete;
+        AssetPackage& operator=(AssetPackage&&) = delete;
 
         bool LoadPackage(const char* pZipFileName);
         RawData* GetRawData(const char* pFileName);

@@ -1,9 +1,11 @@
 #pragma once
 // Config.h
 
-// Goal: I want all of my global macros to be defined here.
-//  This includes things like Platform (Windows), RenderLibrary (Ex : SDL2)
-//  I want to have a MPC prefix on all of these macros so that I can easily identify the engine code
+//--------------------------------------------------------------------------------------------------------------
+//  GOAL: I want all of my global macros to be defined here.
+//      This includes things like Platform (Windows), RenderLibrary (Ex : SDL2)
+//      I want to have a MPC prefix on all of these macros so that I can easily identify the engine code
+//--------------------------------------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------------------------------------
 //      OS PLATFORM DEFINITIONS
@@ -12,6 +14,17 @@
     #define MCP_PLATFORM_WINDOWS
 #else
     #error "MCP Engine does not support this platform!"
+#endif
+
+//--------------------------------------------------------------------------------------------------------------
+//      EDITOR MACROS
+//--------------------------------------------------------------------------------------------------------------
+#ifdef _EDITOR
+    #define MCP_EDITOR 1
+#endif
+
+#ifdef _EDITOR_DEBUG
+    #define MCP_EDITOR_DEBUG 1
 #endif
 
 //--------------------------------------------------------------------------------------------------------------

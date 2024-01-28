@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include "LuaSource.h"
+#include "MCP/Debug/Assert.h"
 
 #include "MCP/Debug/Log.h"
 
@@ -20,7 +21,7 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void AssertIsLuaType([[maybe_unused]] lua_State* pState, [[maybe_unused]] const int luaType, [[maybe_unused]] const int stackIndex)
     {
-        assert(lua_type(pState, stackIndex) == luaType);
+        MCP_CHECK(lua_type(pState, stackIndex) == luaType);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -38,22 +39,36 @@ namespace mcp
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
+    //		
+    ///		@brief : Asserts that a condition in a script is true.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    int LuaCheck(lua_State* pState)
+    {
+        [[maybe_unused]] const bool condition = lua_toboolean(pState, -1);
+        lua_pop(pState, 1);
+
+        MCP_CHECK(condition);
+        return 0;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
     //
     ///		@brief : Log a message using the MCP Logging system. Unlike the logging system in the engine, LuaLogs are
     ///             restricted to a single string.
     ///
-    ///             \n LUA PARAMS: const char* Message
+    ///             \n LUA PARAMS: const char* ScriptName, const char* Message, 
     ///             \n NO RETURN
     //-----------------------------------------------------------------------------------------------------------------------------
     int LuaLog(lua_State* pState)
     {
+        [[maybe_unused]] const char* category = lua_tostring(pState, -2);
         [[maybe_unused]] const char* msg = lua_tostring(pState, -1);
 
-        // TODO: This log category needs to be changed to know what the lua script is. I need to add another param.
-        MCP_LOG("Script", msg);
+        MCP_LOG(category, msg);
 
         // Pop the parameter.
-        lua_pop(pState, 1);
+        lua_pop(pState, 2);
 
         return 0;
     }
@@ -64,18 +79,18 @@ namespace mcp
     ///		@brief : Log a Warning message using the MCP Logging system. Unlike the logging system in the engine, LuaLogs are
     ///             restricted to a single string. 
     ///
-    ///             \n LUA PARAMS: const char* Message
+    ///             \n LUA PARAMS: const char* ScriptName, const char* Message, 
     ///             \n NO RETURN
     //-----------------------------------------------------------------------------------------------------------------------------
     int LuaLogWarning(lua_State* pState)
     {
+        [[maybe_unused]] const char* category = lua_tostring(pState, -2);
         [[maybe_unused]] const char* msg = lua_tostring(pState, -1);
-
-        // TODO: I need to be able to add the script name to this warning message.
-        MCP_WARN("Script", msg);
+        
+        MCP_WARN(category, msg);
 
         // Pop the parameter.
-        lua_pop(pState, 1);
+        lua_pop(pState, 2);
 
         return 0;
     }
@@ -86,18 +101,18 @@ namespace mcp
     ///		@brief : Log an Error message using the MCP Logging system. Unlike the logging system in the engine, LuaLogs are
     ///             restricted to a single string. 
     ///
-    ///             \n LUA PARAMS: const char* Message
+    ///             \n LUA PARAMS: const char* ScriptName, const char* Message, 
     ///             \n NO RETURN
     //-----------------------------------------------------------------------------------------------------------------------------
     int LuaLogError(lua_State* pState)
     {
+        [[maybe_unused]] const char* category = lua_tostring(pState, -2);
         [[maybe_unused]] const char* msg = lua_tostring(pState, -1);
-
-        // TODO: I need to be able to add the script name to this warning message.
-        MCP_ERROR("Script", msg);
+        
+        MCP_ERROR(category, msg);
 
         // Pop the parameter.
-        lua_pop(pState, 1);
+        lua_pop(pState, 2);
 
         return 0;
     }
@@ -258,6 +273,21 @@ namespace mcp
         return 1;
     }
 
+    static int OpenDebug(lua_State* pState)
+    {
+        static constexpr luaL_Reg kDebugFuncs[]
+        {
+            {"LOG", LuaLog}
+             ,{"WARN", LuaLogWarning}
+            , {"ERROR", LuaLogError}
+            , {"CHECK", LuaCheck}
+            ,{nullptr, nullptr}
+        };
+
+        luaL_newlib(pState, kDebugFuncs);
+        return 1;
+    }
+
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //
@@ -266,52 +296,10 @@ namespace mcp
     //-----------------------------------------------------------------------------------------------------------------------------
     void RegisterDebugFunctions(lua_State* pState)
     {
-        // Register Log Functions.
-        lua_pushcfunction(pState, &LuaLog);
-        lua_setglobal(pState, "Log");
+        static constexpr const char* kScriptPath = "../MCPEngine/Engine/Scripts/Core/Debug.lua";
 
-        lua_pushcfunction(pState, &LuaLogWarning);
-        lua_setglobal(pState, "LogWarning");
-
-        lua_pushcfunction(pState, &LuaLogError);
-        lua_setglobal(pState, "LogError");
-
-        // Register Type Asserts:
-        lua_pushcfunction(pState, &AssertIsLuaString);
-        lua_setglobal(pState, "AssertIsString");
-
-        lua_pushcfunction(pState, &AssertIsLuaBoolean);
-        lua_setglobal(pState, "AssertIsBoolean");
-
-        lua_pushcfunction(pState, &AssertIsLuaNumber);
-        lua_setglobal(pState, "AssertIsNumber");
-
-        lua_pushcfunction(pState, &AssertIsLuaFunction);
-        lua_setglobal(pState, "AssertIsFunction");
-
-        lua_pushcfunction(pState, &AssertIsLuaTable);
-        lua_setglobal(pState, "AssertIsTable");
-
-        lua_pushcfunction(pState, &AssertIsLuaUserData);
-        lua_setglobal(pState, "AssertIsUserData");
-
-        // Register Type Checks
-        lua_pushcfunction(pState, &CheckIsLuaString);
-        lua_setglobal(pState, "CheckIsString");
-
-        lua_pushcfunction(pState, &CheckIsLuaNumber);
-        lua_setglobal(pState, "CheckIsNumber");
-
-        lua_pushcfunction(pState, &CheckIsLuaBoolean);
-        lua_setglobal(pState, "CheckIsBoolean");
-
-        lua_pushcfunction(pState, &CheckIsLuaTable);
-        lua_setglobal(pState, "CheckIsTable");
-
-        lua_pushcfunction(pState, &CheckIsLuaFunction);
-        lua_setglobal(pState, "CheckIsFunction");
-
-        lua_pushcfunction(pState, &CheckIsLuaUserData);
-        lua_setglobal(pState, "CheckIsUserData");
+        // Load the debug module, placing the debug lib table on the stack.
+        luaL_requiref(pState, "MCP_DEBUG", &OpenDebug, 1);
+        lua_pop(pState, 1);
     }
 }

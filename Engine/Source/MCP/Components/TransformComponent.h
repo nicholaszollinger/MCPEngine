@@ -2,38 +2,42 @@
 // TransformComponent.h
 
 #include "Component.h"
-#include "MCP/Core/Event/MulticastDelegate.h"
-#include "MCP/Core/Event/Message.h"
 #include "Utility/Types/Vector2.h"
 
 namespace mcp
 {
-    using OnLocationUpdated = MulticastDelegate<const Vec2>;
-    //using OnRotationUpdated = MulticastDelegate<>; // To add later.
-
     class TransformComponent final : public Component
     {
         MCP_DEFINE_COMPONENT_ID(TransformComponent)
 
-    public:
-        OnLocationUpdated m_onLocationUpdated;
-
-    private:
+        TransformComponent* m_pParentTransform;
         Vec2 m_position;
+        Vec2 m_scale;
 
     public:
-        MCP_DEFINE_COMPONENT_DEFAULT_CONSTRUCTOR(TransformComponent)
-        TransformComponent(Object* pOwner, const Vec2& position);
-        TransformComponent(Object* pOwner, const float xPos, const float yPos);
+        TransformComponent();
+        TransformComponent(const Vec2 position);
+        TransformComponent(const float xPos, const float yPos);
+        TransformComponent(const Vec2 position, const Vec2 scale);
 
-        void SetLocation(const Vec2 position);
-        void AddToLocation(const Vec2 deltaPosition);
-        void AddToLocation(const float deltaX, const float deltaY);
-        void AddToLocationNoUpdate(const Vec2 deltaPosition);
-        [[nodiscard]] Vec2 GetLocation() const { return m_position; }
-            
-    public:
-        static bool AddFromData(const XMLElement component, Object* pOwner);
+        // Position
+        void SetPosition(const Vec2 position);
+        // TODO: SetPosition vs SetLocalPosition()
+        void AddToPosition(const Vec2 deltaPosition);
+        void AddToPosition(const float deltaX, const float deltaY);
+        [[nodiscard]] Vec2 GetPosition() const;
+        [[nodiscard]] Vec2 GetLocalPosition() const { return m_position; }
 
+        // Scale
+        void SetScale(const float xAxis, const float yAxis);
+        void SetScale(const Vec2 scale);
+
+        [[nodiscard]] Vec2 GetScale() const;
+        [[nodiscard]] Vec2 GetLocalScale() const { return m_scale; }
+        
+        static TransformComponent* AddFromData(const XMLElement element);
+
+    protected:
+        virtual void OnOwnerParentSet(Object* pParent) override;
     };
 }

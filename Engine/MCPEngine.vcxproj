@@ -5,6 +5,14 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="EditorDebug|x64">
+      <Configuration>EditorDebug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Editor|x64">
+      <Configuration>Editor</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
@@ -24,11 +32,23 @@
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='EditorDebug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Editor|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -39,7 +59,13 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='EditorDebug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Editor|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -47,7 +73,15 @@
     <OutDir>$(SolutionDir)Build\Lib\Engine\$(ProjectName)\$(PlatformTarget)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Build\Intermediate\Engine\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='EditorDebug|x64'">
+    <OutDir>$(SolutionDir)Build\Lib\Engine\$(ProjectName)\$(PlatformTarget)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Build\Intermediate\Engine\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Build\Lib\Engine\$(ProjectName)\$(PlatformTarget)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Build\Intermediate\Engine\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Editor|x64'">
     <OutDir>$(SolutionDir)Build\Lib\Engine\$(ProjectName)\$(PlatformTarget)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Build\Intermediate\Engine\$(ProjectName)\$(Configuration)\$(PlatformTarget)\</IntDir>
   </PropertyGroup>
@@ -72,8 +106,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libpng16-16
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libtiff-5.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libwebp-7.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\zlib1.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"  /i /d /y
-xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\SDL2_ttf.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
-xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\libfreetype-6.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\SDL2_ttf.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\SDL2_mixer.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y</Command>
     </PostBuildEvent>
@@ -81,10 +114,52 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
       <Message>Copying .dll's...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>Utility.lib;SDL2.lib;SDL2main.lib;SDL2_Image.lib;SDL2_ttf.lib;SDL2_mixer.lib;zlibstat.lib;Lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Utility.lib;SDL2.lib;SDL2main.lib;SDL2_Image.lib;SDL2_mixer.lib;SDL2_ttf.lib;zlibstat.lib;Lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)Build\Lib\Engine\Utility\$(PlatformTarget)\$(Configuration)\;$(ProjectDir)ExternalLib\SDL2\SDL\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_image\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\zlib\contrib\vstudio\vc14\x64\ZlibStat$(Configuration);$(SolutionDir)Build\Lib\Engine\Lua\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Build\Lib\Engine\Utility\$(PlatformTarget)\$(Configuration)\;$(ProjectDir)ExternalLib\SDL2\SDL\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_image\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\zlib\contrib\vstudio\vc14\x64\ZlibStat$(Configuration);$(SolutionDir)Build\Lib\Engine\Lua\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4006 /LTCG</AdditionalOptions>
+    </Lib>
+    <PreBuildEvent>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='EditorDebug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_EDITOR;_EDITOR_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)MCPEngine\Dependencies\Utility\Source\;$(ProjectDir)ExternalLib\SDL2\SDL\include;$(ProjectDir)ExternalLib\SDL2\SDL_image\include;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\include;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\include;$(ProjectDir)Source\;$(ProjectDir)ExternalLib\BleachLeakDetector\include;$(ProjectDir)ExternalLib\zlib\;$(SolutionDir)MCPEngine\Dependencies\Lua\Source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)ExternalLib\SDL2\SDL\lib\$(PlatformTarget)\SDL2.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\SDL2_Image.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libjpeg-9.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libpng16-16.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libtiff-5.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libwebp-7.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\zlib1.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"  /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\SDL2_ttf.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\SDL2_mixer.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying .dll's...</Message>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>Utility.lib;SDL2.lib;SDL2main.lib;SDL2_Image.lib;SDL2_mixer.lib;SDL2_ttf.lib;zlibstat.lib;Lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Build\Lib\Engine\Utility\$(PlatformTarget)\$(Configuration)\;$(ProjectDir)ExternalLib\SDL2\SDL\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_image\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\zlib\contrib\vstudio\vc14\x64\ZlibStatDebug\;$(SolutionDir)Build\Lib\Engine\Lua\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 /LTCG</AdditionalOptions>
     </Lib>
     <PreBuildEvent>
@@ -119,8 +194,7 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libpng16-16
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libtiff-5.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libwebp-7.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\zlib1.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"  /i /d /y
-xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\SDL2_ttf.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
-xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\libfreetype-6.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\SDL2_ttf.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\SDL2_mixer.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
 xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y</Command>
     </PostBuildEvent>
@@ -128,10 +202,56 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
       <Message>Copying .dll's...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>Utility.lib;SDL2.lib;SDL2main.lib;SDL2_Image.lib;SDL2_ttf.lib;SDL2_mixer.lib;zlibstat.lib;Lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Utility.lib;SDL2.lib;SDL2main.lib;SDL2_Image.lib;SDL2_mixer.lib;SDL2_ttf.lib;zlibstat.lib;Lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)Build\Lib\Engine\Utility\$(PlatformTarget)\$(Configuration)\;$(ProjectDir)ExternalLib\SDL2\SDL\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_image\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\zlib\contrib\vstudio\vc14\x64\ZlibStat$(Configuration);$(SolutionDir)Build\Lib\Engine\Lua\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Build\Lib\Engine\Utility\$(PlatformTarget)\$(Configuration)\;$(ProjectDir)ExternalLib\SDL2\SDL\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_image\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\zlib\contrib\vstudio\vc14\x64\ZlibStat$(Configuration);$(SolutionDir)Build\Lib\Engine\Lua\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4006 /LTCG /ignore:4099</AdditionalOptions>
+    </Lib>
+    <PreBuildEvent>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Editor|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)MCPEngine\Dependencies\Utility\Source\;$(ProjectDir)ExternalLib\SDL2\SDL\include;$(ProjectDir)ExternalLib\SDL2\SDL_image\include;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\include;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\include;$(ProjectDir)Source\;$(ProjectDir)ExternalLib\BleachLeakDetector\include;$(ProjectDir)ExternalLib\zlib\;$(SolutionDir)MCPEngine\Dependencies\Lua\Source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)ExternalLib\SDL2\SDL\lib\$(PlatformTarget)\SDL2.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\SDL2_Image.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libjpeg-9.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libpng16-16.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libtiff-5.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\libwebp-7.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_Image\lib\$(PlatformTarget)\zlib1.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\"  /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\SDL2_ttf.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\SDL2_mixer.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y
+xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0.dll" "$(SolutionDir)Build\Bin\$(PlatformTarget)\$(Configuration)\" /i /d /y</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying .dll's...</Message>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>Utility.lib;SDL2.lib;SDL2main.lib;SDL2_Image.lib;SDL2_mixer.lib;SDL2_ttf.lib;zlibstat.lib;Lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Build\Lib\Engine\Utility\$(PlatformTarget)\$(Configuration)\;$(ProjectDir)ExternalLib\SDL2\SDL\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_image\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\SDL2\SDL_ttf\lib\;$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\;$(ProjectDir)ExternalLib\zlib\contrib\vstudio\vc14\x64\ZlibStatDebug\;$(SolutionDir)Build\Lib\Engine\Lua\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 /LTCG /ignore:4099</AdditionalOptions>
     </Lib>
     <PreBuildEvent>
@@ -143,60 +263,95 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ExternalLib\BleachLeakDetector\include\BleachNew.cpp" />
+    <ClCompile Include="Source\MCP\Accessibility\Localization.cpp" />
     <ClCompile Include="Source\MCP\Audio\AudioClip.cpp" />
+    <ClCompile Include="Source\MCP\Audio\AudioGroup.cpp" />
     <ClCompile Include="Source\MCP\Audio\AudioManager.cpp" />
+    <ClCompile Include="Source\MCP\Audio\AudioResource.cpp" />
     <ClCompile Include="Source\MCP\Audio\AudioTrack.cpp" />
     <ClCompile Include="Source\MCP\Collision\Box2DCollider.cpp" />
     <ClCompile Include="Source\MCP\Collision\Collider.cpp" />
     <ClCompile Include="Source\MCP\Collision\CollisionChannels.cpp" />
     <ClCompile Include="Source\MCP\Collision\CollisionProfile.cpp" />
     <ClCompile Include="Source\MCP\Collision\CollisionSystem.cpp" />
+    <ClCompile Include="Source\MCP\Components\AudioSourceComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\ColliderComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\Component.cpp" />
     <ClCompile Include="Source\MCP\Components\ComponentId.cpp" />
     <ClCompile Include="Source\MCP\Components\ImageComponent.cpp" />
+    <ClCompile Include="Source\MCP\Components\InputComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\PrimitiveComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\Rect2DComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\ScriptComponent.cpp" />
+    <ClCompile Include="Source\MCP\Components\TextComponent.cpp" />
     <ClCompile Include="Source\MCP\Components\TransformComponent.cpp" />
     <ClCompile Include="Source\MCP\Core\Application\Application.cpp" />
     <ClCompile Include="Source\MCP\Core\Application\Window\WindowBase.cpp" />
+    <ClCompile Include="Source\MCP\Core\Event\ApplicationEvent.cpp" />
     <ClCompile Include="Source\MCP\Core\Event\Message.cpp" />
     <ClCompile Include="Source\MCP\Core\Event\MessageManager.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\AssetPackage.cpp" />
+    <ClCompile Include="Source\MCP\Core\Resource\Font.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\PackageManager.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\Parsers\XMLParser.cpp" />
+    <ClCompile Include="Source\MCP\Core\Resource\Parsers\XML\XMLAttribute.cpp" />
+    <ClCompile Include="Source\MCP\Core\Resource\Resource.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\ResourceManager.cpp" />
-    <ClCompile Include="Source\MCP\Core\Resource\TextFile.cpp" />
     <ClCompile Include="Source\MCP\Core\Resource\Zip.cpp" />
     <ClCompile Include="Source\MCP\Graphics\Graphics.cpp" />
     <ClCompile Include="Source\MCP\Graphics\Texture.cpp" />
     <ClCompile Include="Source\MCP\Input\Input.cpp" />
+    <ClCompile Include="Source\MCP\Input\InputActionValue.cpp" />
+    <ClCompile Include="Source\MCP\Input\InputCodes.cpp" />
+    <ClCompile Include="Source\MCP\Input\InputControl.cpp" />
+    <ClCompile Include="Source\MCP\Input\InputModifier.cpp" />
     <ClCompile Include="Source\MCP\Lua\Lua.cpp" />
     <ClCompile Include="Source\MCP\Lua\LuaDebug.cpp" />
-    <ClCompile Include="Source\MCP\Lua\LuaSystem.cpp" />
+    <ClCompile Include="Source\MCP\Lua\LuaResource.cpp" />
+    <ClCompile Include="Source\MCP\Lua\LuaContext.cpp" />
     <ClCompile Include="Source\MCP\Scene\IRenderable.cpp" />
     <ClCompile Include="Source\MCP\Scene\IUpdateable.cpp" />
     <ClCompile Include="Source\MCP\Scene\Object.cpp" />
     <ClCompile Include="Source\MCP\Scene\Scene.cpp" />
+    <ClCompile Include="Source\MCP\Scene\SceneAsset.cpp" />
+    <ClCompile Include="Source\MCP\Scene\SceneEntity.cpp" />
+    <ClCompile Include="Source\MCP\Scene\SceneLayer.cpp" />
     <ClCompile Include="Source\MCP\Scene\SceneManager.cpp" />
+    <ClCompile Include="Source\MCP\Scene\UILayer.cpp" />
+    <ClCompile Include="Source\MCP\Scene\WorldLayer.cpp" />
+    <ClCompile Include="Source\MCP\Scripting\Script.cpp" />
+    <ClCompile Include="Source\MCP\UI\BarWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\ButtonWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\CanvasWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\HorizontalLayoutWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\ImageWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\Layout.cpp" />
+    <ClCompile Include="Source\MCP\UI\ScrollWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\SelectionWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\SliderWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\TextFieldWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\TextWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\ToggleWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\VerticalLayoutWidget.cpp" />
+    <ClCompile Include="Source\MCP\UI\Widget.cpp" />
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp" />
     <ClCompile Include="Source\Platform\SDL2\SDLAudio.cpp" />
     <ClCompile Include="Source\Platform\SDL2\SDLRenderer.cpp" />
     <ClCompile Include="Source\Platform\SDL2\SDLHelpers.cpp" />
     <ClCompile Include="Source\Platform\SDL2\SDLInput.cpp" />
     <ClCompile Include="Source\Platform\SDL2\SDLResources.cpp" />
-    <ClCompile Include="Source\Platform\Tiled\TiledMapComponent.cpp" />
-    <ClCompile Include="Source\Platform\Tiled\TiledTileSet.cpp" />
+    <ClCompile Include="Source\Platform\SDL2\SDLText.cpp" />
     <ClCompile Include="Source\Platform\TinyXML2\tinyxml2.cpp" />
     <ClCompile Include="Source\Platform\TinyXML2\TinyXML2Resource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExternalLib\BleachLeakDetector\include\BleachNew.h" />
     <ClInclude Include="ExternalLib\BleachLeakDetector\include\BleachNewConfig.h" />
+    <ClInclude Include="Source\MCP\Accessibility\Localization.h" />
     <ClInclude Include="Source\MCP\Audio\AudioClip.h" />
-    <ClInclude Include="Source\MCP\Audio\AudioData.h" />
+    <ClInclude Include="Source\MCP\Audio\AudioGroup.h" />
     <ClInclude Include="Source\MCP\Audio\AudioManager.h" />
+    <ClInclude Include="Source\MCP\Audio\AudioResource.h" />
     <ClInclude Include="Source\MCP\Audio\AudioTrack.h" />
     <ClInclude Include="Source\MCP\Collision\Box2DCollider.h" />
     <ClInclude Include="Source\MCP\Collision\Collider.h" />
@@ -204,34 +359,40 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Collision\CollisionChannels.h" />
     <ClInclude Include="Source\MCP\Collision\CollisionProfile.h" />
     <ClInclude Include="Source\MCP\Collision\CollisionSystem.h" />
+    <ClInclude Include="Source\MCP\Components\AudioSourceComponent.h" />
     <ClInclude Include="Source\MCP\Components\ColliderComponent.h" />
     <ClInclude Include="Source\MCP\Components\Component.h" />
     <ClInclude Include="Source\MCP\Components\ComponentFactory.h" />
     <ClInclude Include="Source\MCP\Components\ComponentId.h" />
     <ClInclude Include="Source\MCP\Components\EngineComponents.h" />
     <ClInclude Include="Source\MCP\Components\ImageComponent.h" />
+    <ClInclude Include="Source\MCP\Components\InputComponent.h" />
     <ClInclude Include="Source\MCP\Components\Rect2DComponent.h" />
     <ClInclude Include="Source\MCP\Components\ScriptComponent.h" />
     <ClInclude Include="Source\MCP\Components\PrimitiveComponent.h" />
+    <ClInclude Include="Source\MCP\Components\TextComponent.h" />
     <ClInclude Include="Source\MCP\Components\TransformComponent.h" />
     <ClInclude Include="Source\MCP\Core\Application\Application.h" />
     <ClInclude Include="Source\MCP\Core\Application\Window\WindowBase.h" />
     <ClInclude Include="Source\MCP\Core\Config.h" />
+    <ClInclude Include="Source\MCP\Core\EntryPoint.h" />
+    <ClInclude Include="Source\MCP\Core\Event\ApplicationEvent.h" />
     <ClInclude Include="Source\MCP\Core\Event\Event.h" />
-    <ClInclude Include="Source\MCP\Core\Event\KeyEvent.h" />
     <ClInclude Include="Source\MCP\Core\Event\Message.h" />
     <ClInclude Include="Source\MCP\Core\Event\MessageManager.h" />
     <ClInclude Include="Source\MCP\Core\Event\MulticastDelegate.h" />
-    <ClInclude Include="Source\MCP\Core\GlobalManager.h" />
+    <ClInclude Include="Source\MCP\Core\System.h" />
+    <ClInclude Include="Source\MCP\Core\TypeFactory.h" />
     <ClInclude Include="Source\MCP\Core\Macros.h" />
     <ClInclude Include="Source\MCP\Core\Process.h" />
     <ClInclude Include="Source\MCP\Core\Resource\AssetPackage.h" />
+    <ClInclude Include="Source\MCP\Core\Resource\Font.h" />
     <ClInclude Include="Source\MCP\Core\Resource\PackageManager.h" />
     <ClInclude Include="Source\MCP\Core\Resource\Parser.h" />
     <ClInclude Include="Source\MCP\Core\Resource\Parsers\XMLParser.h" />
+    <ClInclude Include="Source\MCP\Core\Resource\Parsers\XML\XMLAttribute.h" />
     <ClInclude Include="Source\MCP\Core\Resource\Resource.h" />
     <ClInclude Include="Source\MCP\Core\Resource\ResourceManager.h" />
-    <ClInclude Include="Source\MCP\Core\Resource\TextFile.h" />
     <ClInclude Include="Source\MCP\Core\Resource\Zip.h" />
     <ClInclude Include="Source\MCP\Debug\Assert.h" />
     <ClInclude Include="Source\MCP\Debug\Log.h" />
@@ -239,22 +400,50 @@ xcopy "$(ProjectDir)ExternalLib\SDL2\SDL_mixer\lib\$(PlatformTarget)\libmpg123-0
     <ClInclude Include="Source\MCP\Graphics\RenderData\BaseRenderData.h" />
     <ClInclude Include="Source\MCP\Graphics\Texture.h" />
     <ClInclude Include="Source\MCP\Input\Input.h" />
+    <ClInclude Include="Source\MCP\Input\InputAction.h" />
+    <ClInclude Include="Source\MCP\Input\InputActionValue.h" />
     <ClInclude Include="Source\MCP\Input\InputCodes.h" />
+    <ClInclude Include="Source\MCP\Input\InputControl.h" />
+    <ClInclude Include="Source\MCP\Input\InputListener.h" />
+    <ClInclude Include="Source\MCP\Input\InputControlScheme.h" />
+    <ClInclude Include="Source\MCP\Input\InputModifier.h" />
     <ClInclude Include="Source\MCP\Lua\Lua.h" />
     <ClInclude Include="Source\MCP\Lua\LuaDebug.h" />
-    <ClInclude Include="Source\MCP\Lua\LuaSystem.h" />
+    <ClInclude Include="Source\MCP\Lua\LuaResource.h" />
+    <ClInclude Include="Source\MCP\Lua\LuaContext.h" />
+    <ClInclude Include="Source\MCP\Scene\SceneEntity.h" />
     <ClInclude Include="Source\MCP\Scene\IRenderable.h" />
     <ClInclude Include="Source\MCP\Scene\IUpdateable.h" />
+    <ClInclude Include="Source\MCP\Scene\SceneAsset.h" />
+    <ClInclude Include="Source\MCP\Scene\SceneLayer.h" />
     <ClInclude Include="Source\MCP\Scene\Object.h" />
     <ClInclude Include="Source\MCP\Scene\Scene.h" />
     <ClInclude Include="Source\MCP\Scene\SceneManager.h" />
+    <ClInclude Include="Source\MCP\Scene\UILayer.h" />
+    <ClInclude Include="Source\MCP\Scene\WorldLayer.h" />
+    <ClInclude Include="Source\MCP\Scripting\Script.h" />
+    <ClInclude Include="Source\MCP\UI\AlignmentTypes.h" />
+    <ClInclude Include="Source\MCP\UI\BarWidget.h" />
+    <ClInclude Include="Source\MCP\UI\ButtonWidget.h" />
+    <ClInclude Include="Source\MCP\UI\CanvasWidget.h" />
+    <ClInclude Include="Source\MCP\UI\HorizontalLayoutWidget.h" />
+    <ClInclude Include="Source\MCP\UI\Layout.h" />
+    <ClInclude Include="Source\MCP\UI\ScrollWidget.h" />
+    <ClInclude Include="Source\MCP\UI\SelectionWidget.h" />
+    <ClInclude Include="Source\MCP\UI\SliderWidget.h" />
+    <ClInclude Include="Source\MCP\UI\TextFieldWidget.h" />
+    <ClInclude Include="Source\MCP\UI\TextWidget.h" />
+    <ClInclude Include="Source\MCP\UI\ImageWidget.h" />
+    <ClInclude Include="Source\MCP\UI\ToggleWidget.h" />
+    <ClInclude Include="Source\MCP\UI\VerticalLayoutWidget.h" />
+    <ClInclude Include="Source\MCP\UI\Widget.h" />
+    <ClInclude Include="Source\MCP\UI\WidgetFactory.h" />
     <ClInclude Include="Source\Platform\SDL2\SDL2Window.h" />
     <ClInclude Include="Source\Platform\SDL2\SDLAudio.h" />
     <ClInclude Include="Source\Platform\SDL2\SDLRenderer.h" />
     <ClInclude Include="Source\Platform\SDL2\SDLHelpers.h" />
     <ClInclude Include="Source\Platform\SDL2\SDLInput.h" />
-    <ClInclude Include="Source\Platform\Tiled\TiledMapComponent.h" />
-    <ClInclude Include="Source\Platform\Tiled\TiledTileSet.h" />
+    <ClInclude Include="Source\Platform\SDL2\SDLText.h" />
     <ClInclude Include="Source\Platform\TinyXML2\tinyxml2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

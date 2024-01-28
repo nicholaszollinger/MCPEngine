@@ -33,7 +33,7 @@ namespace mcp
 
     RectF Box2DCollider::GetEstimateRectWorld() const
     {
-        Vec2 worldPos = m_relativePosition + m_pOwner->GetTransformComponent()->GetLocation();
+        Vec2 worldPos = m_relativePosition + m_pOwner->GetTransformComponent()->GetPosition();
         worldPos.x -= m_width / 2.f;
         worldPos.y -= m_height / 2.f;
 
@@ -43,19 +43,19 @@ namespace mcp
     bool Box2DCollider::AddFromData(const XMLElement colliderData, ColliderComponent* pComponent)
     {
         // Name
-        const char* name = colliderData.GetAttribute<const char*>("name");
+        const char* name = colliderData.GetAttributeValue<const char*>("name");
 
         // CollisionEnabled
-        const bool isEnabled = colliderData.GetAttribute<bool>("collisionEnabled");
+        const bool isEnabled = colliderData.GetAttributeValue<bool>("collisionEnabled");
 
         // Position, Relative to the Transform component.
         Vec2 position;
-        position.x = colliderData.GetAttribute<float>("x");
-        position.y = colliderData.GetAttribute<float>("y");
+        position.x = colliderData.GetAttributeValue<float>("x");
+        position.y = colliderData.GetAttributeValue<float>("y");
 
         // Dimensions
-        const auto width = colliderData.GetAttribute<float>("width");
-        const auto height = colliderData.GetAttribute<float>("height");
+        const auto width = colliderData.GetAttributeValue<float>("width");
+        const auto height = colliderData.GetAttributeValue<float>("height");
 
         // Create the Collider
         auto* pCollider = BLEACH_NEW(Box2DCollider(name, isEnabled, position, width, height));

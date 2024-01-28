@@ -8,8 +8,7 @@ namespace mcp
     void MessageManager::ProcessMessages()
     {
         // I make a copy of the queue so that if other messages are spawned as a result of a message, those
-        // will be handled on the next call to ProcessMessages().
-        //  - I don't know if I should be handling them immediately or not.
+        // will be handled on the next call to ProcessMessages(). This was the simple thing to do.
         const auto queue = m_messageQueue;
         m_messageQueue.clear();
 

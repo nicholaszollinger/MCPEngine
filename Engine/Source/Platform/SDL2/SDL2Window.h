@@ -8,13 +8,16 @@ struct SDL_Renderer;
 
 namespace mcp
 {
-    struct Event;
+    class ApplicationEvent;
+    class Event;
 
     class SDL2Window
     {
         SDL_Window* m_pWindow;      // Pointer to the window instance.
         SDL_Renderer* m_pRenderer;  // Pointer to the renderer for this window.
         RectInt m_dimensions;       // Position and size data for this window.
+        uint32_t m_mouseDownTimeStamp = 0;
+        bool m_mouseDown = false;
 
     public:
         SDL2Window();
@@ -24,8 +27,10 @@ namespace mcp
 
         bool ProcessEvents();
 
+        void PostApplicationEvent(ApplicationEvent& event);
         void Close() const;
 
+        [[nodiscard]] Vec2 GetMousePosition() const;
         [[nodiscard]] const RectInt& GetDimensions() const { return m_dimensions; }
         [[nodiscard]] SDL_Renderer* GetRenderer() const { return m_pRenderer; }
     };

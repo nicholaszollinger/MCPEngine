@@ -47,14 +47,38 @@ namespace mcp
 
             m_pSystem->RemoveOverlappingCollider(this);
         }
-
+      
+        // TODO: This needs to be changed!
         // Notify the Owner that we have changed.
         m_pOwner->ColliderCollisionChanged(m_colliderName);
     }
 
+    void Collider::OnComponentActiveChanged(const bool isActive)
+    {
+        if (m_isEnabled)
+        {
+            // If our Component is setting to inactive and we were overlapping with other colliders,
+            // then we need to remove ourselves from the system and send the exit overlap events.
+            if (!isActive && !m_overlappingColliders.empty())
+            {
+                for (auto* pOverlappedCollider : m_overlappingColliders)
+                {
+                    // Send out the overlap exit events.
+                    pOverlappedCollider->m_onExitOverlap.Broadcast(this, m_pOwner->GetOwner());
+                    m_onExitOverlap.Broadcast(pOverlappedCollider, pOverlappedCollider->m_pOwner->GetOwner());
+                }
+
+                // Clear our set of overlapping colliders.
+                m_overlappingColliders.clear();
+
+                m_pSystem->RemoveOverlappingCollider(this);
+            }
+        }
+    }
+
     Vec2 Collider::GetWorldCenter() const
     {
-        const Vec2 ownerPos = m_pOwner->GetTransformComponent()->GetLocation();
+        const Vec2 ownerPos = m_pOwner->GetTransformComponent()->GetPosition();
         return ownerPos + m_relativePosition;
     }
 
@@ -87,7 +111,7 @@ namespace mcp
     void Collider::SetCollisionResponseToChannel(const CollisionChannel channel, const CollisionResponse response)
     {
         const size_t channelIndex = static_cast<size_t>(channel);
-        assert(channelIndex < Internal::kMaxChannels);
+        MCP_CHECK(channelIndex < Internal::CollisionChannelManager::kMaxChannels);
 
         m_profile.collisionResponses[channelIndex] = response;
     }
@@ -124,7 +148,7 @@ namespace mcp
     CollisionResponse Collider::GetResponseToChannel(const CollisionChannel channel) const
     {
         const size_t channelIndex = static_cast<size_t>(channel);
-        assert(channelIndex < Internal::kMaxChannels);
+        MCP_CHECK(channelIndex < Internal::CollisionChannelManager::kMaxChannels);
         return m_profile.collisionResponses[channelIndex];
     }
 

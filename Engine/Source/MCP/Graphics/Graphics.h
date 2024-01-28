@@ -1,10 +1,10 @@
 #pragma once
 // Graphics.h
 
-#include "MCP/Core/GlobalManager.h"
 #include "MCP/Core/Application/Window/WindowBase.h"
 #include "RenderData/BaseRenderData.h"
 #include "Utility/Types/Color.h"
+#include "MCP/Core/System.h"
 
 namespace mcp
 {
@@ -14,25 +14,39 @@ namespace mcp
         Color tint = {255,255,255, 255};   // Tint color including alpha value.
     };
 
-    class GraphicsManager final : public IProcess
+    struct WindowConstructionData
     {
-        DEFINE_GLOBAL_MANAGER(GraphicsManager)
+        std::string windowName = "Game";
+        Vec2Int dimensions = {1600, 900};
+    };
+
+    class GraphicsManager final : public System
+    {
+        MCP_DEFINE_SYSTEM(GraphicsManager)
+
+        WindowConstructionData m_mainWindowData;
         WindowBase* m_pWindow = nullptr;
 
+        GraphicsManager(WindowConstructionData&& data);
+
     public:
+        static GraphicsManager* Get();
         [[nodiscard]] WindowBase* GetWindow() const { return m_pWindow; }
         [[nodiscard]] void* GetRenderer() const;
 
+        static GraphicsManager* AddFromData(const XMLElement element);
     private:
         virtual bool Init() override;
         virtual void Close() override;
-        [[nodiscard]] bool SetRenderTarget() const;
+        [[nodiscard]] bool SetRenderTarget(WindowBase* pTarget) const;
         void Display();
     };
 
+    // TODO: I have these as global functions for an easy API, but I would rather they
+    // were more closely associated with the Graphics system as static functions.
+    
     void SetDrawColor(const Color& color);
     void FillScreen(const Color& color);
-
     void DrawLine(const Vec2Int& a, const Vec2Int& b, const Color& color);
     void DrawFillRect(const RectInt& rect, const Color& color);
     void DrawFillRect(const RectF& rect, const Color& color);

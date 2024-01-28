@@ -7,8 +7,8 @@
 
 namespace mcp
 {
-    PrimitiveComponent::PrimitiveComponent(Object* pObject, const RenderLayer layer, const int zOrder)
-        : Component(pObject)
+    PrimitiveComponent::PrimitiveComponent(const RenderLayer layer, const int zOrder)
+        : Component(true)
         , IRenderable(layer, zOrder)
         , m_pTransformComponent(nullptr)
         , m_color(kDefaultColor)
@@ -20,46 +20,32 @@ namespace mcp
     PrimitiveComponent::~PrimitiveComponent()
     {
         // Remove the renderable from the scene.
-        if (m_isActive)
-        {
-            auto* pScene = m_pOwner->GetScene();
-            assert(pScene);
-            pScene->RemoveRenderable(this);
-        }
+        auto* pWorld = GetOwner()->GetWorld();
+        MCP_CHECK(pWorld);
+        pWorld->RemoveRenderable(this);
     }
     
     bool PrimitiveComponent::Init()
     {
         // Add the renderable to the scene.
-        auto* pScene = m_pOwner->GetScene();
-        assert(pScene);
-        pScene->AddRenderable(this);
+        auto* pWorld = GetOwner()->GetWorld();
+        MCP_CHECK(pWorld);
+        pWorld->AddRenderable(this);
 
         // TransformComponent is required.
-        m_pTransformComponent = m_pOwner->GetComponent<mcp::TransformComponent>();
+        m_pTransformComponent = GetOwner()->GetComponent<mcp::TransformComponent>();
         assert(m_pTransformComponent);
 
         return true;
     }
 
-    void PrimitiveComponent::SetIsActive(const bool isActive)
+    void PrimitiveComponent::OnActive()
     {
-        if (isActive == m_isActive)
-            return;
-
-        // If we are being set to active:
-        if (isActive)
-        {
-            m_pOwner->GetScene()->AddRenderable(this);
-        }
-
-        // If we are being set to inactive.
-        else
-        {
-            m_pOwner->GetScene()->RemoveRenderable(this);
-        }
-
-        m_isActive = isActive;
+        GetOwner()->GetWorld()->AddRenderable(this);
     }
 
+    void PrimitiveComponent::OnInactive()
+    {
+        GetOwner()->GetWorld()->RemoveRenderable(this);
+    }
 }

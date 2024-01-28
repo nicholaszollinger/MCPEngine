@@ -77,8 +77,24 @@ struct Rect
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
-    ///		@brief : Calculates the intersect of this and another Rect as another rect. If no collision was
-    ///             made, then the width and height would be 0.
+    ///		@brief : Returns true if the point is inside our rect.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template<typename Vec2Type>
+    [[nodiscard]] constexpr bool Intersects(const Vector2<Vec2Type> point) const
+    {
+        // TODO: I need to make sure that I cast appropriately.
+
+        return x < point.x
+            && x + width > point.x
+            && y < point.y
+            && y + height > point.y;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Calculates the intersect of this and another Rect as another rect. If there is no intersection,
+    ///              then the width and height would be 0.
     //-----------------------------------------------------------------------------------------------------------------------------
     [[nodiscard]] constexpr Rect GetIntersectionAsRect(const Rect& other) const
     {
@@ -140,7 +156,7 @@ struct Rect
 
     std::string ToString() const
     {
-        return CombineIntoString("(", x, ", " , y, ", ", width, ", ", height, ")");
+        return CombineIntoString("(x=", x, ", y=" , y, ", width=", width, ", height=", height, ")");
     }
 };
 

@@ -37,6 +37,9 @@
     <ClCompile Include="Source\Utility\Logging\Logger.cpp">
       <Filter>Logging</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Utility\String\Path.cpp">
+      <Filter>String</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\utility\Random\RNG.h">
@@ -116,6 +119,9 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\Debug\Assert.h">
       <Filter>Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\String\Path.h">
+      <Filter>String</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

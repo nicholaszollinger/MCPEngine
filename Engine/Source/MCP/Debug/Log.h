@@ -17,9 +17,9 @@
 //
 //-----------------------------------------------------------------------------------------------------------------------------
 
+#include <BleachNew.h>
 #include <string>
 #include "MCP/Core/Config.h"
-#include "MCP/Core/GlobalManager.h"
 #include "MCP/Core/Macros.h"
 #include "Utility/String/FormatString.h"
 

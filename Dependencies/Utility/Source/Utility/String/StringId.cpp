@@ -12,7 +12,7 @@ StringId::StringId(const char* str)
 StringId::StringId(const std::string& str)
     : m_pStrRef(GetStringPtr(str))
 {
-    //    
+    //
 }
 
 StringId::StringId(StringId&& right) noexcept
@@ -62,8 +62,21 @@ const std::string* StringId::GetConstPtr() const
     return m_pStrRef;
 }
 
+const char* StringId::GetCStr() const
+{
+    if (!IsValid())
+        return nullptr;
+
+    return m_pStrRef->c_str();
+}
+
+
 std::string* StringId::GetStringPtr(const char* str)
 {
+    // If we are being set to nullptr, then return the address of the invalid string.
+    if (!str)
+        return &s_invalidStringId;
+
     const uint32_t hash = HashString32(str);
 
     std::lock_guard lock(s_stringMutex);
@@ -79,6 +92,9 @@ std::string* StringId::GetStringPtr(const char* str)
 
 std::string* StringId::GetStringPtr(const std::string& str)
 {
+    if (str.empty())
+        return &s_invalidStringId;
+
     return GetStringPtr(str.c_str());
 }
 

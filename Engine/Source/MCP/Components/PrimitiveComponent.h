@@ -30,7 +30,7 @@ namespace mcp
         RenderType m_renderType;
 
     public:
-        PrimitiveComponent(Object* pObject, const RenderLayer layer, const int zOrder);
+        PrimitiveComponent(const RenderLayer layer, const int zOrder);
         virtual ~PrimitiveComponent() override;
 
         virtual bool Init() override;
@@ -39,9 +39,11 @@ namespace mcp
         void SetColor(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t alpha = 255) { m_color = {r,g,b,alpha}; }
         void SetColor(const Color color) { m_color = color; }
         void SetRenderType(const RenderType type) { m_renderType = type;}
-        virtual void SetIsActive(const bool isActive) override;
-
-        static bool AddFromData(const XMLElement, Object*) { return false; }
+        
+        static PrimitiveComponent* AddFromData(const XMLElement) { return nullptr; }
+    protected:
+        virtual void OnActive() override;
+        virtual void OnInactive() override;
     };
     
 }

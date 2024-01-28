@@ -1,12 +1,18 @@
 #pragma once
 // Lua.h
 
-#include "LuaSystem.h"
+#include "LuaContext.h"
+#include "MCP/Core/System.h"
 
 namespace mcp::lua
 {
     // Load Lua Scripts
     bool LoadScript(const char* pFilepath);
+    LuaResourcePtr LoadScriptInstance(const char* pScriptFilepath);
+    LuaResourcePtr LoadScriptInstance(const char* pScriptFilepath, const char* pScriptDataPath);
+
+    // Creating a Table
+    LuaResourcePtr CreateTable();
 
     // Get Global Variables
     std::optional<bool> GetBoolean(const char* varName);
@@ -17,6 +23,8 @@ namespace mcp::lua
     // Accessing Tables
     template <typename ElementType> std::optional<ElementType> GetElementInTable(const char* tableName, const char* elementName);
     template<typename Type> void SetElementInTable(const char* tableName, const char* elementName, Type&& val);
+
+    template<typename ElementType> void SetElementInTable(LuaResourcePtr&& tableResource, const char* elementName, ElementType&& val);
 
     // Get Global Helpers
     template<typename IntegralType> std::optional<IntegralType> GetIntegerAs(const char* varName);
@@ -32,19 +40,26 @@ namespace mcp::lua
     template<typename...Args>
     void CallFunction(const char* pFunctionName, Args&&...args);
 
+    template<typename...Args>
+    void CallMemberFunction(const LuaResourcePtr resource, const char* pMemberFunctionName, Args&&...args);
+
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //
     ///		@brief : Internal class to hold onto the Engine-wide LuaSystem. You don't need to interact with this at, just call
     ///         the functions provided.
     //-----------------------------------------------------------------------------------------------------------------------------
-    class LuaLayer final : public IProcess
+    class LuaSystem final : public System
     {
-        DEFINE_GLOBAL_MANAGER(LuaLayer)
-        LuaSystem m_system;
+        MCP_DEFINE_SYSTEM(LuaSystem)
+
+        LuaContext m_system;
 
     public:
-        [[nodiscard]] LuaSystem& GetSystem() { return m_system; }
+        [[nodiscard]] LuaContext& GetSystem() { return m_system; }
+
+        static LuaSystem* Get();
+        static LuaSystem* AddFromData(const XMLElement) { return BLEACH_NEW(LuaSystem); }
 
     private:
         virtual bool Init() override;
@@ -67,7 +82,7 @@ namespace mcp::lua
     template <typename ElementType>
     std::optional<ElementType> GetElementInTable(const char* tableName, const char* elementName)
     {
-        return LuaLayer::Get()->GetSystem().GetElementInTable<ElementType>(tableName, elementName);
+        return LuaSystem::Get()->GetSystem().GetElementInTable<ElementType>(tableName, elementName);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -82,7 +97,22 @@ namespace mcp::lua
     template <typename Type>
     void SetElementInTable(const char* tableName, const char* elementName, Type&& val)
     {
-        LuaLayer::Get()->GetSystem().SetElementInTable<Type>(tableName, elementName, std::forward<Type>(val));
+        LuaSystem::Get()->GetSystem().SetElementInTable<Type>(tableName, elementName, std::forward<Type>(val));
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Set an element in a table resource.
+    ///		@tparam ElementType : Type of value we are going to set an element to.
+    ///		@param tableResource : Resource that we are editing. 
+    ///		@param elementName : Name of the element you want to set.
+    ///		@param val : Value you want to set it to.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template<typename ElementType>
+    void SetElementInTable(const LuaResourcePtr& tableResource, const char* elementName, ElementType&& val)
+    {
+        LuaSystem::Get()->GetSystem().SetElementInTable<ElementType>(tableResource, elementName, std::forward<ElementType>(val));
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
@@ -132,6 +162,21 @@ namespace mcp::lua
     template<typename...Args>
     void CallFunction(const char* pFunctionName, Args&&...args)
     {
-        LuaLayer::Get()->GetSystem().CallFunction(pFunctionName, args...);
+        LuaSystem::Get()->GetSystem().CallFunction(pFunctionName, args...);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Call a member function of a loaded lua Object.
+    ///		@tparam Args : Parameter types required for the function.
+    ///		@param resource : Pointer to the resource that we are using.
+    ///		@param pMemberFunctionName : Name of the member function
+    ///		@param args : Parameter value passed into the function.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template <typename... Args>
+    void CallMemberFunction(const LuaResourcePtr resource, const char* pMemberFunctionName, Args&&... args)
+    {
+        LuaSystem::Get()->GetSystem().CallMemberFunction(resource, pMemberFunctionName, args...);
     }
 }

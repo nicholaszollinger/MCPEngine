@@ -19,18 +19,18 @@ namespace mcp
 namespace mcp
 {
     //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //
     ///		@brief : Returns true if the key is currently down, false otherwise.
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool IsKeyPressed(const MCPKey& key)
+    bool Input::IsKeyPressed(const MCPKey& key)
     {
         return InputStateImplementation::IsKeyPressed(key);
     }
 
-    bool IsKeyReleased(const MCPKey& key)
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Returns whether the key is *not* down.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    bool Input::IsKeyReleased(const MCPKey& key)
     {
         return InputStateImplementation::IsKeyReleased(key);
     }
-
 }

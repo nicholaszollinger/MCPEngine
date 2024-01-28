@@ -15,7 +15,7 @@
 namespace mcp
 {
     class ColliderComponent final : public Component , public IUpdateable
-    #if RENDER_COLLIDER_VISUALS 
+#if RENDER_COLLIDER_VISUALS 
         , public IRenderable    // Only inherit from this class defined.
 #endif
     {
@@ -29,7 +29,7 @@ namespace mcp
         ColliderContainer m_colliders;              // Colliders that we own.
         CollisionSystem* m_pSystem;                 // CollisionSystem reference.
         std::vector<void*> m_cells;
-        void* m_pCell;
+        void* m_pReferenceCell;                     // Highest cell in the collision tree that completely encapsulated our rect.
         TransformComponent* m_pTransformComponent;  // The transform component we are attached to.
         RectF m_myRelativeEstimationRect;           // This is a collider that encompasses all of the child colliders. Used as a quick filter.
         Vec2 m_lastLocation;                        // The old location we have before any move.
@@ -39,7 +39,7 @@ namespace mcp
         bool m_collisionEnabled;                    // Whether the collision for this component is enabled or not.
 
     public:
-        ColliderComponent(Object* pObject, const bool collisionEnabled, const bool isStatic);
+        ColliderComponent(const bool collisionEnabled, const bool isStatic);
         virtual ~ColliderComponent() override;
 
     public:
@@ -64,11 +64,14 @@ namespace mcp
         [[nodiscard]] RectF GetEstimationRect() const;
         [[nodiscard]] TransformComponent* GetTransformComponent() const { return m_pTransformComponent; }
         [[nodiscard]] Vec2 GetVelocity() const { return m_velocity; }
-        [[nodiscard]] bool CollisionEnabled() const { return m_collisionEnabled; }
+        [[nodiscard]] bool CollisionEnabled() const;
         [[nodiscard]] size_t GetActiveColliderCount() const { return m_activeColliderCount; }
+        
+        static ColliderComponent* AddFromData(const XMLElement element);
 
-        static bool AddFromData(const XMLElement component, Object* pOwner);
     private:
+        virtual void OnActive() override;
+        virtual void OnInactive() override;
         void TestCollisionNow(const Vec2 newPosition);
         void UpdateEstimationRect();
 
@@ -76,10 +79,11 @@ namespace mcp
 //  DEBUG INTERFACE
 //-----------------------------------------------------------------------------------------------------------------------------
 #if RENDER_COLLIDER_VISUALS 
-protected:
-    static constexpr Color kColliderDebugColor = { 255,0,255,150 };     // Color for colliders to use to draw to the screen.
-public:
-    virtual void Render() const override;
+    protected:
+        // Color for colliders to use to draw to the screen.
+        static constexpr Color kColliderDebugColor = { 255,0,255,150 };
+    public:
+        virtual void Render() const override;
 #endif
     };
 

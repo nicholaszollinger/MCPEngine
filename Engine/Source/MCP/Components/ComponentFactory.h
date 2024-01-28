@@ -1,5 +1,6 @@
 #pragma once
 // ComponentFactory.h
+// TODO: This should be refactored to use my TypeFactory
 
 #include <cassert>
 #include <functional>
@@ -11,16 +12,16 @@
 namespace mcp
 {
     class Object;
-
+    class Component;
     using ComponentTypeId = uint64_t;
 
     class ComponentFactory
     {
-        using FactoryFunction = std::function<bool(XMLElement, Object*)>;
+        using FactoryFunction = std::function<Component*(XMLElement)>;
         using FactoryFuncContainer = std::unordered_map<ComponentTypeId, FactoryFunction>;
 
     public:
-        static bool AddToObjectFromData(const char* pComponentName, const XMLElement component, Object* pOwner)
+        static Component* CreateFromData(const char* pComponentName, const XMLElement element)
         {
             const ComponentTypeId id = HashString32(pComponentName);
 
@@ -30,10 +31,11 @@ namespace mcp
             if (result == factoryFunctions.end())
             {
                 MCP_ERROR("ComponentFactory", "Failed to add '", pComponentName, "' to object! No matching ComponentId was found!");
-                return false;
+                return nullptr;
             }
-
-            return result->second(component, pOwner);
+            
+            // Return the result of the AddFromData function registered to the factory.
+            return result->second(element);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -54,11 +56,10 @@ namespace mcp
             // Check to see if we already have that id in our map:
             if (const auto result = factoryFunctions.find(id); result != factoryFunctions.end())
             {
-                //LogError("Failed to register Component! Id from the name '%' was already registered! This could mean that you have two components with the same name!", pComponentName);
-                assert(false && "Failed to register Component! This could mean that you have two components with the same name!"); // I don't know how to handle this error.
+                MCP_CHECK_MSG(false, "Failed to register Component! This could mean that you have two components with the same name!"); // I don't know how to handle this error.
             }
 
-            factoryFunctions.emplace(id, [](const XMLElement component, class Object* pOwner) { return ComponentType::AddFromData(component, pOwner); });
+            factoryFunctions.emplace(id, [](const XMLElement component) -> Component* { return ComponentType::AddFromData(component); });
 
             return id;
         }

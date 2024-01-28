@@ -1,14 +1,14 @@
 #pragma once
 // EventType.h
-// I want to set up my own event structure, with simple flags to denote types.
 
 #include <functional>
 #include <unordered_map>
 #include "MCP/Core/Macros.h"
 #include "MCP/Debug/Log.h"
 #include "Utility/Generic/ConceptTypes.h"
+#include "Utility/Generic/Hash.h"
 
-GENERATE_DEPENDENT_TYPE_CHECK(CanCallEvent, EventType, FuncType, std::declval<FuncType>()(std::declval<const EventType&>()));
+GENERATE_DEPENDENT_TYPE_CHECK(CanCallEvent, EventType, FuncType, std::declval<FuncType>()(std::declval<EventType&>()));
 
 //-----------------------------------------------------------------------------------------------------------------------------
 //		NOTES:
@@ -18,36 +18,45 @@ GENERATE_DEPENDENT_TYPE_CHECK(CanCallEvent, EventType, FuncType, std::declval<Fu
 ///		@param functionName : Name of the function that you want to bind to the event.
 //-----------------------------------------------------------------------------------------------------------------------------
 #define MCP_ADD_MEMBER_FUNC_EVENT_LISTENER(eventType, functionName) \
-    mcp::EventDispatcher::AddListener<eventType>(this, [this](const eventType& e) { this->functionName(e); })
+    mcp::GlobalEventDispatcher::AddListener<eventType>(this, [this](eventType& e) { this->functionName(e); })
+
+//-----------------------------------------------------------------------------------------------------------------------------
+//		NOTES:
+//		
+///		@brief : Helper macro that removes a listener from the global EventDispatcher.
+///		@param eventType : Name of the EventType.
+//-----------------------------------------------------------------------------------------------------------------------------
+#define MCP_REMOVE_MEMBER_FUNC_EVENT_LISTENER(eventType)        \
+    mcp::GlobalEventDispatcher::RemoveListener<eventType>(this)
 
 namespace mcp
 {
-    enum class EventType
-    {
-        kInvalid =  0,
-        KQuit       = MCP_BIT(1),
-        kWindow     = MCP_BIT(2),
-        kKey        = MCP_BIT(3),
-        kMouse      = MCP_BIT(4),
-        kUser       = MCP_BIT(5),
-    };
+    using EventId = uint32_t;
 
-    #define MCP_DEFINE_EVENT_TYPE(type)                                             \
-        static EventType GetStaticType() { return EventType::type; }                \
-        virtual EventType GetEventType() const override { return GetStaticType(); }
-
+#define MCP_DEFINE_EVENT_ID(type)                                               \
+    private:                                                                    \
+        static constexpr mcp::EventId kEventId = HashString32(#type);           \
+    public:                                                                     \
+        static mcp::EventId GetStaticId() { return kEventId; }                  \
+        virtual mcp::EventId GetEventId() const override { return kEventId; }   \
+        virtual const char* GetName() const override { return #type; }          \
+    private:
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //      Events are required to have a single virtual function, but I still view the construct as a
-    ///     container of data. Getting it's underlying type is generally the only thing we are concerned about.
+    //      container of data. Getting it's underlying type is generally the only thing we are concerned about.
     //
     ///		@brief : EventType base struct. Structs that inherit from this should use the macro 'MCP_DEFINE_EVENT_TYPE' to have the
     ///             structure set up correctly. Simply pass one of the EventType from the enumeration and the EventType is ready to go.
     ///             Events should just be containers for data. Nothing more.
     //-----------------------------------------------------------------------------------------------------------------------------
-    struct Event
+    class Event
     {
+    private:
+        bool m_isHandled = false;
+
+    public:
         Event() = default;
         Event(const Event& right) = default;
         Event(Event&& right) = default;
@@ -55,22 +64,36 @@ namespace mcp
         Event& operator=(Event&& right) = default;
         virtual ~Event() = default;
 
-        [[nodiscard]] virtual EventType GetEventType() const = 0;
+        //-----------------------------------------------------------------------------------------------------------------------------
+        //		NOTES:
+        //		
+        ///		@brief : By setting this event as Handled, the Event will not be processed by other listeners.
+        //-----------------------------------------------------------------------------------------------------------------------------
+        void SetHandled() { m_isHandled = true; }
 
-        // TODO: virtual Debug ToString function.
+        //-----------------------------------------------------------------------------------------------------------------------------
+        //		NOTES:
+        //		
+        ///		@brief : If an event is 'handled' it means a listener has marked it as complete.
+        ///		@returns : True if the event has been handled.
+        //-----------------------------------------------------------------------------------------------------------------------------
+        [[nodiscard]] bool IsHandled() const { return m_isHandled; }
+        [[nodiscard]] virtual const char* GetName() const = 0;
+        [[nodiscard]] virtual EventId GetEventId() const = 0;
     };
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
+    //      I may make this an instance of this dispatcher, so that I can 
     //
     ///		@brief : This is our global way for managing events. Each static function is templated so that this single class
     ///         can handle any kind of EventType that we want to have global in the engine. This can be useful for events like
     ///         Input.
     //-----------------------------------------------------------------------------------------------------------------------------
-    class EventDispatcher
+    class GlobalEventDispatcher
     {
         template<typename EventType>
-        using Listeners = std::unordered_map<void*, std::function<void(const EventType&)>>;
+        using Listeners = std::unordered_map<void*, std::function<void(EventType&)>>;
 
     public:
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -81,7 +104,7 @@ namespace mcp
         ///		@param e : EventType parameter.
         //-----------------------------------------------------------------------------------------------------------------------------
         template<typename EventType>
-        static void InvokeNow(const EventType& e)
+        static void InvokeNow(EventType& e)
         {
             Invoke(e);
         }
@@ -144,7 +167,7 @@ namespace mcp
         ///		@param e : EventType parameter.
         //-----------------------------------------------------------------------------------------------------------------------------
         template<typename EventType>
-        static void Invoke(const EventType& e)
+        static void Invoke(EventType& e)
         {
             auto& listeners = GetListeners<EventType>();
             // This isn't necessarily that quick to plow through, since it is an unordered map.

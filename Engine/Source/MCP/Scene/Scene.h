@@ -1,80 +1,62 @@
 #pragma once
 // Scene.h
-
 #include "IRenderable.h"
 #include "IUpdateable.h"
 #include "MCP/Collision/CollisionSystem.h"
 #include "MCP/Core/Event/MessageManager.h"
-#include "MCP/Scene/Object.h"
-#include "Utility/Types/Containers/UnorderedDenseArray.h"
+#include "MCP/Scene/UILayer.h"
+#include "MCP/Scene/WorldLayer.h"
 
 namespace mcp
 {
+    class SceneEntity;
+
     class Scene
     {
+        friend SceneManager;
+      
     private:
-        using RenderableContainer = UnorderedDenseArray<RenderableId, IRenderable*>;
-
         static constexpr const char* kPackageElementName = "Package";
         static constexpr const char* kSceneElementName = "Scene";
-        static constexpr const char* kSceneAssetName = "SceneAsset";
-        static constexpr const char* kObjectElementName = "Object";
-        static constexpr uint32_t kSceneAssetNameHash = HashString32(kSceneAssetName);
-        static constexpr uint32_t kObjectNameHash = HashString32(kObjectElementName);
         static constexpr float kFixedUpdateTimeSeconds = 1.f / 60.f;
-        //static constexpr size_t kRenderLayerSize = static_cast<size_t>(RenderLayer::kRenderCount);
 
-        // TODO: This isn't going to work for renderables. I need to be able to sort them.
-        UnorderedDenseArray<IUpdateableId, IUpdateable*> m_updateables; // Anything that is updating in our scene.
-        UnorderedDenseArray<IUpdateableId, IUpdateable*> m_fixedUpdateables;    // Any physics based updateables that need to be updated in a fixed time.
-
-        // Hard coded Render layers???? Doesn't feel great.
-        RenderableContainer m_worldRenderables;
-        RenderableContainer m_objectRenderables;
-        RenderableContainer m_debugOverlayRenderables;
-
-        std::unordered_map<ObjectId, Object*> m_objects;            // Container of all of the Object's in the scene.
-        std::vector<IUpdateableId> m_updateablesToRemove;           // Updateables that we need to remove after the update finishes.
-        std::vector<ObjectId> m_queuedObjectsToDelete;              // Objects that will be deleted at the end of the update.
-        CollisionSystem m_collisionSystem;
+#if MCP_EDITOR
+        XMLParser m_sceneFile; // This is the data file used to load the scene.
+#endif
         MessageManager m_messageManager;
-        float m_accumulatedTime;                                    // Amount of time before we perform a fixed update.
-        bool m_transitionQueued;                                    // Whether a scene transition has been queued or not.
+        WorldLayer* m_pWorldLayer;
+        UILayer* m_pUILayer;
+        float m_accumulatedTime;                         // Amount of time before we perform a fixed update.
+        bool m_transitionQueued;                         // Whether a scene transition has been queued or not.
+        bool m_isLoaded;
 
     public:
         Scene();
         ~Scene();
 
-        bool Init();
+#if MCP_EDITOR
+        bool InitEmpty();
+#endif
+
         bool Load(const char* pFilePath);
-        void Unload() {}
         bool OnSceneLoad();
+        void Destroy();
         void Update(const float deltaTime);
         void Render() const;
 
-        Object* CreateObject();
-        void DestroyObject(const ObjectId id);
-        [[nodiscard]] bool IsValidId(const ObjectId id);
-
-        void AddRenderable(IRenderable* pRenderable);
-        void RemoveRenderable(const IRenderable* pRenderable);
-
-        void AddUpdateable(const IUpdateableId id, IUpdateable* pUpdateable);
-        void RemoveUpdateable(const IUpdateableId id);
-
-        void AddPhysicsUpdateable(IUpdateable* pUpdateable);
-        void RemovePhysicsUpdateable(const IUpdateable* pUpdateable);
-
-        [[nodiscard]] MessageManager* GetMessageManager() { return &m_messageManager;}
-        [[nodiscard]] CollisionSystem* GetCollisionSystem() { return &m_collisionSystem;}
+        [[nodiscard]] MessageManager* GetMessageManager();
+        [[nodiscard]] SceneLayer* GetLayer(const LayerId id) const;
+        [[nodiscard]] WorldLayer* GetWorldLayer() const { return m_pWorldLayer; }
+        [[nodiscard]] UILayer* GetUILayer() const { return m_pUILayer; }
+        [[nodiscard]] bool TransitionQueued() const { return m_transitionQueued; }
 
     private:
-        void LoadSceneAsset(const XMLElement sceneAsset);
-        void LoadWorldObject(const XMLElement object);
-        void RenderLayer(const RenderableContainer& renderables) const;
-        void DeleteQueuedObjects();
-        void RemoveQueuedUpdateables();
-        void ClearScene();
-        void SetCollisionSettings(const QuadtreeBehaviorData& data);
+        bool Init();
+        void Begin();
+        void OnEvent(ApplicationEvent& event);
+
+#if MCP_EDITOR
+        void Save();
+#endif
     };
 }

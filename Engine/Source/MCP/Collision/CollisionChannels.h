@@ -47,8 +47,6 @@ namespace mcp
 
     namespace Internal
     {
-        static constexpr size_t kMaxChannels = 32;
-
         //-----------------------------------------------------------------------------------------------------------------------------
         //		NOTES:
         //		
@@ -62,6 +60,9 @@ namespace mcp
         {
             static inline std::unordered_map<uint32_t, size_t> m_hashedNamesToEnumIndex;
             static inline size_t m_channelsDefined = 1;
+
+        public:
+            static constexpr size_t kMaxChannels = 32;
 
         public:
             static CollisionChannel GetOrAssignCollisionChannel(const char* pChannelName);

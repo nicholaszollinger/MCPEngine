@@ -14,8 +14,6 @@ namespace mcp
     // This should take in what? The name of the components? Or their static Ids? <- That feels better.
     //#define MCP_REQUIRE_COMPONENTS(...)
 
-    #define MCP_DEFINE_COMPONENT_DEFAULT_CONSTRUCTOR(ComponentName) ComponentName(Object* pObject) : Component(pObject) {}
-
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //
@@ -31,21 +29,33 @@ private:                                                                        
 public:                                                                                                                                                 \
     static mcp::ComponentTypeId GetStaticTypeId() { return kComponentTypeId; }                                                                          \
     virtual mcp::ComponentTypeId GetTypeId() const override { return kComponentTypeId; }                                                                \
-private:                                                                                                                                                \
+private:                                                                                                                                                
+    //-----------------------------------------------------------------------------------------------------------------------------
+
+    struct ComponentConstructionData
+    {
+        bool startActive = true;
+    };
 
     class Component
     {
-    protected:
+        friend class Object;
         Object* m_pOwner;
+
+    protected:
         bool m_isActive;
 
     public:
-        Component(Object* pObject);
+        Component(const bool startActive);
+        Component(const ComponentConstructionData& data);
 
-        // TODO: Figure out what you want to do with copying and moving components.
-        //      - The crucial part of the components is that they operate on
-        //        a unique entity. So we can't copy the entity id over.
-
+        // TODO: I defaulted to just removing the ability to copy/move/assign components.
+        // There wasn't a need for now. But this is definitely something I want to be able to do in the future.
+        
+        Component(const Component& right) = delete;
+        Component& operator=(const Component& right) = delete;
+        Component(Component&& right) = delete;
+        Component& operator=(Component&& right) = delete;
         virtual ~Component() = default;
 
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -74,16 +84,24 @@ private:                                                                        
         //-----------------------------------------------------------------------------------------------------------------------------
         virtual void OnDestroy() {}
 
-        virtual void SetIsActive(const bool isActive) { m_isActive = isActive; }
+        void SetActive(const bool isActive);
 
         [[nodiscard]] virtual ComponentTypeId GetTypeId() const = 0;
         [[nodiscard]] Object* GetOwner() const { return m_pOwner; }
         [[nodiscard]] MessageManager* GetMessageManager() const;
-        [[nodiscard]] bool IsActive() const { return m_isActive; }
+        [[nodiscard]] bool IsActive() const;
 
     protected:
         void SendMessage(const MessageId messageId);
         void ListenForMessage(const MessageId messageId);
         void StopListeningToMessage(const MessageId messageId) const;
+        virtual void OnActive() {}
+        virtual void OnInactive() {}
+        virtual void OnOwnerParentSet([[maybe_unused]] Object* pParent) {}
+
+        static ComponentConstructionData GetComponentConstructionData(const XMLElement element);
+
+    private:
+        void OnOwnerActiveChanged(const bool objectActive);
     };
 }

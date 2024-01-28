@@ -7,60 +7,42 @@
 #include <SDL_image.h>
 #include <SDL_mixer.h>
 #include <SDL_render.h>
+#include <SDL_ttf.h>
 #pragma warning(pop)
 
 #include "MCP/Core/Application/Window/WindowBase.h"
+#include "Platform/SDL2/SDLHelpers.h"
 #include "MCP/Graphics/Graphics.h"
+#include "MCP/Graphics/Texture.h"
+#include "MCP/Core/Resource/Font.h"
+#include "MCP/Audio/AudioResource.h"
 
 namespace mcp
 {
+#if MCP_RENDERER_API == MCP_RENDERER_API_SDL
     //--------------------------------------------------------------------------------------------------------
     //      SDL_TEXTURES
     //--------------------------------------------------------------------------------------------------------
 
-    SDL_Texture* CreateTextureFromSurface(SDL_Surface* pSurface, Vec2Int& sizeOut)
-    {
-        // Set the size of the Sprite based on the image's size.
-        sizeOut.x = pSurface->w;
-        sizeOut.y = pSurface->h;
-
-        // Get the renderer.
-        auto* pRenderer = GraphicsManager::Get()->GetRenderer();
-
-        // Create a SDL_Texture from the surface:
-        SDL_Texture* pTexture = SDL_CreateTextureFromSurface(static_cast<SDL_Renderer*>(pRenderer), pSurface);
-        if (!pTexture)
-        {
-            MCP_ERROR("SDL", "Failed to Create SDL_Texture from SDL_Surface! SDL_Error: ", SDL_GetError());
-            SDL_FreeSurface(pSurface);
-            return nullptr;
-        }
-
-        // Free the surface.
-        SDL_FreeSurface(pSurface);
-        SDL_SetTextureBlendMode(pTexture, SDL_BLENDMODE_BLEND);
-
-        return pTexture;
-    }
-
     template <>
-    template <>
-    SDL_Texture* ResourceContainer<SDL_Texture>::LoadFromDiskImpl(const char* pFilePath, Vec2Int& sizeOut)
+    TextureData* ResourceContainer<TextureData, DiskResourceRequest>::LoadFromDiskImpl(const DiskResourceRequest& request)
     {
-        SDL_Surface* pSurface = IMG_Load(pFilePath);
+        SDL_Surface* pSurface = IMG_Load(request.path.GetCStr());
 
         if (!pSurface)
         {
-            MCP_ERROR("SDL", "Failed to Load SDL_Surface at filepath: ", pFilePath, ". SDL_Error: ", SDL_GetError());
+            MCP_ERROR("SDL", "Failed to Load SDL_Surface at filepath: ", request.path.GetCStr(), ". SDL_Error: ", SDL_GetError());
             return nullptr;
         }
 
-        return CreateTextureFromSurface(pSurface, sizeOut);
+        Vec2Int sizeOut = {};
+        auto* pTexture = CreateTextureFromSurface(pSurface, sizeOut);
+
+        return BLEACH_NEW(TextureData(pTexture, sizeOut.x, sizeOut.y));
     }
 
     template <>
-    template <>
-    SDL_Texture* ResourceContainer<SDL_Texture>::LoadFromRawDataImpl(char* pRawData, const int dataSize, Vec2Int& sizeOut)
+    TextureData* ResourceContainer<TextureData, DiskResourceRequest>::LoadFromRawDataImpl(char* pRawData, const int dataSize, [[maybe_unused]] const DiskResourceRequest& request)
     {
         SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
         // TODO: Check for nullptr.
@@ -73,36 +55,38 @@ namespace mcp
             return nullptr;
         }
 
-        return CreateTextureFromSurface(pSurface, sizeOut);
+        Vec2Int sizeOut = {};
+        auto* pTexture = CreateTextureFromSurface(pSurface, sizeOut);
+
+        return BLEACH_NEW(TextureData(pTexture, sizeOut.x, sizeOut.y));
     }
 
     template<>
-    void ResourceContainer<SDL_Texture>::FreeResourceImpl(SDL_Texture* pTexture)
+    void ResourceContainer<TextureData, DiskResourceRequest>::FreeResourceImpl(TextureData* pTextureData)
     {
-        SDL_DestroyTexture(pTexture);
+        SDL_DestroyTexture(static_cast<SDL_Texture*>(pTextureData->pTexture));
+        BLEACH_DELETE(pTextureData);
+        pTextureData = nullptr;
     }
+#endif
 
     //--------------------------------------------------------------------------------------------------------
-    //      MIX_CHUNK
+    //      AUDIO RESOURCE DATA
     //--------------------------------------------------------------------------------------------------------
 
-    template <>
-    template <>
-    Mix_Chunk* ResourceContainer<Mix_Chunk>::LoadFromDiskImpl(const char* pFilePath)
+    Mix_Chunk* LoadMixChunk(const char* pPath)
     {
-        auto* pChunk = Mix_LoadWAV(pFilePath);
+        auto* pChunk = Mix_LoadWAV(pPath);
         if (!pChunk)
         {
-            MCP_ERROR("SDL", "Failed to load Mix_Chunk at filepath: ", pFilePath);
+            MCP_ERROR("SDL", "Failed to load Mix_Chunk at filepath: ", pPath);
             return nullptr;
         }
 
         return pChunk;
     }
 
-    template <>
-    template <>
-    Mix_Chunk* ResourceContainer<Mix_Chunk>::LoadFromRawDataImpl(char* pRawData, const int dataSize)
+    Mix_Chunk* LoadMixChunkRaw(void* pRawData, const int dataSize)
     {
         SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
         auto* pChunk = Mix_LoadWAV_RW(pSdlData, 0);
@@ -115,33 +99,19 @@ namespace mcp
         return pChunk;
     }
 
-    template <>
-    void ResourceContainer<Mix_Chunk>::FreeResourceImpl(Mix_Chunk* pChunk)
+    Mix_Music* LoadMixMusic(const char* pPath)
     {
-        Mix_FreeChunk(pChunk);
-    }
-
-    //--------------------------------------------------------------------------------------------------------
-    //      MIX_MUSIC
-    //--------------------------------------------------------------------------------------------------------
-
-    template <>
-    template <>
-    Mix_Music* ResourceContainer<Mix_Music>::LoadFromDiskImpl(const char* pFilePath)
-    {
-        auto* pMusic = Mix_LoadMUS(pFilePath);
+        auto* pMusic = Mix_LoadMUS(pPath);
         if (!pMusic)
         {
-            MCP_ERROR("SDL", "Failed to load Mix_Music at filepath: ", pFilePath);
+            MCP_ERROR("SDL", "Failed to load Mix_Music at filepath: ", pPath);
             return nullptr;
         }
 
         return pMusic;
     }
 
-    template <>
-    template <>
-    Mix_Music* ResourceContainer<Mix_Music>::LoadFromRawDataImpl(char* pRawData, const int dataSize)
+    Mix_Music* LoadMixMusicRaw(void* pRawData, const int dataSize)
     {
         SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
         auto* pMusic = Mix_LoadMUS_RW(pSdlData, 0);
@@ -155,9 +125,252 @@ namespace mcp
     }
 
     template <>
-    void ResourceContainer<Mix_Music>::FreeResourceImpl(Mix_Music* pMusic)
+    AudioResourceData* ResourceContainer<AudioResourceData, AudioResourceRequest>::LoadFromDiskImpl(const AudioResourceRequest& request)
     {
-        Mix_FreeMusic(pMusic);
+        if (request.isMusicResource)
+        {
+            auto* pResource = LoadMixMusic(request.path.GetCStr());
+            if (!pResource)
+                return nullptr;
+
+            auto* pResourceData =  BLEACH_NEW(AudioResourceData);
+            pResourceData->isMusicResource = true;
+            pResourceData->pResource = pResource;
+            return pResourceData;
+        }
+        
+        auto* pResource = LoadMixChunk(request.path.GetCStr());
+        if (!pResource)
+                return nullptr;
+
+        auto* pResourceData =  BLEACH_NEW(AudioResourceData);
+        pResourceData->isMusicResource = false;
+        pResourceData->pResource = pResource;
+        return pResourceData;
     }
 
+    template <>
+    AudioResourceData* ResourceContainer<AudioResourceData, AudioResourceRequest>::LoadFromRawDataImpl(char* pRawData, const int dataSize, const AudioResourceRequest& request)
+    {
+        if (request.isMusicResource)
+        {
+            auto* pResource = LoadMixChunkRaw(pRawData, dataSize);
+            if (!pResource)
+                return nullptr;
+
+            auto* pResourceData =  BLEACH_NEW(AudioResourceData);
+            pResourceData->isMusicResource = true;
+            pResourceData->pResource = pResource;
+            return pResourceData;
+        }
+
+        auto* pResource = LoadMixChunkRaw(pRawData, dataSize);
+        if (!pResource)
+                return nullptr;
+
+        auto* pResourceData =  BLEACH_NEW(AudioResourceData);
+        pResourceData->isMusicResource = false;
+        pResourceData->pResource = pResource;
+        return pResourceData;
+    }
+
+    template <>
+    void ResourceContainer<AudioResourceData, AudioResourceRequest>::FreeResourceImpl(AudioResourceData* pResourceData)
+    {
+        if (pResourceData->isMusicResource)
+        {
+            Mix_FreeMusic(static_cast<Mix_Music*>(pResourceData->pResource));
+        }
+
+        else
+        {
+            Mix_FreeChunk(static_cast<Mix_Chunk*>(pResourceData->pResource));
+        }
+
+        BLEACH_DELETE(pResourceData);
+        pResourceData = nullptr;
+    }
+
+    //--------------------------------------------------------------------------------------------------------
+    //      MIX_CHUNK
+    //--------------------------------------------------------------------------------------------------------
+
+    template <>
+    Mix_Chunk* ResourceContainer<Mix_Chunk, DiskResourceRequest>::LoadFromDiskImpl(const DiskResourceRequest& request)
+    {
+        auto* pChunk = Mix_LoadWAV(request.path.GetCStr());
+        if (!pChunk)
+        {
+            MCP_ERROR("SDL", "Failed to load Mix_Chunk at filepath: ", request.path.GetCStr());
+            return nullptr;
+        }
+
+        return pChunk;
+    }
+
+    template <>
+    Mix_Chunk* ResourceContainer<Mix_Chunk, DiskResourceRequest>::LoadFromRawDataImpl(char* pRawData, const int dataSize, [[maybe_unused]] const DiskResourceRequest& request)
+    {
+        SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
+        auto* pChunk = Mix_LoadWAV_RW(pSdlData, 0);
+        if (!pChunk)
+        {
+            MCP_ERROR("SDL", "Failed to load Mix_Chunk from data! SDL_Error: ", Mix_GetError());
+            return nullptr;
+        }
+
+        return pChunk;
+    }
+
+    template <>
+    void ResourceContainer<Mix_Chunk, DiskResourceRequest>::FreeResourceImpl(Mix_Chunk* pChunk)
+    {
+        Mix_FreeChunk(pChunk);
+    }
+
+    //--------------------------------------------------------------------------------------------------------
+    //      MIX_MUSIC
+    //--------------------------------------------------------------------------------------------------------
+
+    template <>
+    Mix_Music* ResourceContainer<Mix_Music, DiskResourceRequest>::LoadFromDiskImpl(const DiskResourceRequest& request)
+    {
+        auto* pMusic = Mix_LoadMUS(request.path.GetCStr());
+        if (!pMusic)
+        {
+            MCP_ERROR("SDL", "Failed to load Mix_Music at filepath: ", request.path.GetCStr());
+            return nullptr;
+        }
+
+        return pMusic;
+    }
+
+    template <>
+    Mix_Music* ResourceContainer<Mix_Music, DiskResourceRequest>::LoadFromRawDataImpl(char* pRawData, const int dataSize, [[maybe_unused]] const DiskResourceRequest& request)
+    {
+        SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
+        auto* pMusic = Mix_LoadMUS_RW(pSdlData, 0);
+        if (!pMusic)
+        {
+            MCP_ERROR("SDL", "Failed to load Mix_Chunk from data! SDL_Error: ", Mix_GetError());
+            return nullptr;
+        }
+
+        return pMusic;
+    }
+
+    template <>
+    void ResourceContainer<Mix_Music, DiskResourceRequest>::FreeResourceImpl(Mix_Music* pFont)
+    {
+        Mix_FreeMusic(pFont);
+    }
+
+    //--------------------------------------------------------------------------------------------------------
+    //      TTF_FONTS
+    //--------------------------------------------------------------------------------------------------------
+
+    static TextureData* CreateGlyphTexture(const uint32_t glyphCode, _TTF_Font* pFont)
+    {
+        static constexpr SDL_Color kColor = {0,0,0,255};
+
+        // If the font does not support the code, then return nullptr
+        if (TTF_GlyphIsProvided32(pFont, glyphCode) == 0)
+            return nullptr;
+
+        auto* pSurface = TTF_RenderGlyph32_Blended(pFont, glyphCode, kColor);
+
+        Vec2Int imageSize;
+        auto* pTexture = CreateTextureFromSurface(pSurface, imageSize);
+        if (!pTexture)
+        {
+            MCP_ERROR("SDL", "Failed to create Glyph texture. Glyph code: ", glyphCode);
+            return nullptr;
+        }
+
+        return BLEACH_NEW(TextureData(pTexture, imageSize.x, imageSize.y));
+    }
+
+    template <>
+    FontData* ResourceContainer<FontData, FontResourceRequest>::LoadFromDiskImpl(const FontResourceRequest& request)
+    {
+        auto* pFont = TTF_OpenFont(request.path.GetCStr(), request.fontSize);
+
+        if (!pFont)
+        {
+            MCP_ERROR("SDL", "Failed to load TTF_Font from data! TTF_Error: ", TTF_GetError());
+            return nullptr;
+        }
+
+        // Create the resource:
+        auto* pFontData = BLEACH_NEW(FontData);
+        pFontData->pFontResource = pFont;
+        pFontData->m_glyphTextures.reserve(FontData::kGlyphCount);
+
+        // Create the Glyphs for the font.
+        for(uint32_t i = 0; i < FontData::kGlyphCount; ++i)
+        {
+            auto* pGlyphTextureData = CreateGlyphTexture(i, pFont);
+            if (!pGlyphTextureData)
+            {
+                pFontData->m_glyphTextures.emplace_back(nullptr);
+                continue;
+            }
+
+            pFontData->m_glyphTextures.emplace_back(pGlyphTextureData);
+        }
+
+        return pFontData;
+    }
+
+    template <>
+    FontData* ResourceContainer<FontData, FontResourceRequest>::LoadFromRawDataImpl(char* pRawData, const int dataSize, const FontResourceRequest& request)
+    {
+        SDL_RWops* pSdlData = SDL_RWFromMem(pRawData, dataSize);
+        auto* pFont = TTF_OpenFontRW(pSdlData, 0, request.fontSize);
+        if (!pFont)
+        {
+            MCP_ERROR("SDL", "Failed to load TTF_Font from raw data! TTF_Error: ", TTF_GetError());
+            return nullptr;
+        }
+
+        // Create the resource:
+        auto* pFontData = BLEACH_NEW(FontData);
+        pFontData->pFontResource = pFont;
+
+        pFontData->m_glyphTextures.reserve(FontData::kGlyphCount);
+
+        // Create the Glyphs for the font.
+        for(uint32_t i = 0; i < FontData::kGlyphCount; ++i)
+        {
+            auto* pGlyphTextureData = CreateGlyphTexture(i, pFont);
+            if (!pGlyphTextureData)
+            {
+                pFontData->m_glyphTextures.emplace_back(nullptr);
+                continue;
+            }
+
+            pFontData->m_glyphTextures.emplace_back(pGlyphTextureData);
+        }
+
+        return pFontData;
+    }
+
+    template <>
+    void ResourceContainer<FontData, FontResourceRequest>::FreeResourceImpl(FontData* pFont)
+    {
+        TTF_CloseFont(static_cast<_TTF_Font*>(pFont->pFontResource));
+
+        // Delete all of the created textures.
+        for (auto* pTextureData : pFont->m_glyphTextures)
+        {
+            if (!pTextureData)
+                continue;
+
+            SDL_DestroyTexture(static_cast<SDL_Texture*>(pTextureData->pTexture));
+            BLEACH_DELETE(pTextureData);
+            pTextureData = nullptr;
+        }
+
+        BLEACH_DELETE(pFont);
+    }
 }

@@ -6,19 +6,24 @@
 
 namespace mcp
 {
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : [NOT IMPLEMENTED YET]. This is going to be my 'Monobehavior' class.
+    //-----------------------------------------------------------------------------------------------------------------------------
     class ScriptComponent : public Component, public IUpdateable
     {
         MCP_DEFINE_COMPONENT_ID(ScriptComponent)
 
     public:
-        ScriptComponent(Object* pObject);
+        ScriptComponent();
         virtual ~ScriptComponent() override;
 
         virtual bool Init() override;
         virtual void Update(const float deltaTime) override = 0;
         virtual void OnLoad() = 0;
-
-        static bool AddFromData(const XMLElement, Object*) { return false; }
+        
+        static ScriptComponent* AddFromData(const XMLElement) { return nullptr; }
     };
 }
     

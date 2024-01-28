@@ -1,44 +1,72 @@
 #pragma once
 // SceneManager.h
 #include "Scene.h"
-#include "MCP/Core/GlobalManager.h"
+#include "MCP/Core/System.h"
+
+struct lua_State;
 
 namespace mcp
 {
-    class SceneManager final : public IProcess
+    class SceneEntity;
+    using SceneIdentifier = StringId;
+
+    struct SceneData
     {
-        using SceneIdentifier = const char*;
+        SceneData() = default;
 
-        DEFINE_GLOBAL_MANAGER(SceneManager)
-            
-        Scene* m_pActiveScene;
+        SceneData(const char* path, Scene* pScene)
+            : dataPath(path)
+            , pScene(pScene)
+        {
+            //
+        }
+
+        std::string dataPath;           // Path to the scene data on disk. To be used to load the scene.
+        Scene* pScene = nullptr;        // The Scene resource.
+    };
+
+    class SceneManager final : public System
+    {
+        using SceneList = std::unordered_map<SceneIdentifier, SceneData, StringIdHasher>;
+
+        MCP_DEFINE_SYSTEM(SceneManager)
+        SceneManager(SceneList&& sceneList, const SceneIdentifier startScene);
+
+        SceneList m_sceneList;
+        Scene* m_pActiveScene = nullptr;
+        SceneIdentifier m_startScene;
         SceneIdentifier m_sceneToTransitionTo;
-        bool m_transitionQueued;
 
-    public:
-        SceneManager(const SceneManager&) = delete;
-        SceneManager& operator=(const SceneManager&) = delete;
-        SceneManager(SceneManager&&) = delete;
-        SceneManager& operator=(SceneManager&&) = delete;
-    private:
-        SceneManager();
+#if MCP_EDITOR
+        const SceneIdentifier m_editorScene = "EditorScene";
+        XMLParser m_loadedAsset;
+#endif
+
+        bool m_transitionQueued = false;
         
     public:
-        // This should get the Default scene ready.
-        bool LoadSceneData(const char* pSceneFilePath);
-        void Update(const float deltaTimeMs);
-        void Render() const;
-        void QueueTransition(const SceneIdentifier& identifier); // Needs some kind of identifier to designate what scene to go to.
-
-        // TODO: TEMPORARY SOLUTION. WE SHOULD BE SETTING SCENE INFO FROM DATA.
-        void SetScene(Scene* pScene) { m_pActiveScene = pScene; }
-
+        void QueueTransition(const SceneIdentifier& identifier);
         [[nodiscard]] Scene* GetActiveScene() const { return m_pActiveScene; }
+
+#if MCP_EDITOR
+        // TODO:
+        //void MarkSceneDirty() {}
+#endif
+
+        static SceneManager* Get();
+        static SceneManager* AddFromData(const XMLElement element);
+        static void RegisterLuaFunctions(lua_State* pState);
 
     private:
         virtual bool Init() override;
         virtual void Close() override;
+        bool EnterStartScene();
+        void Update(const float deltaTimeMs);
+        void Render() const;
         bool TransitionToScene();
 
+#if MCP_EDITOR
+        bool LoadEditorScene();
+#endif
     };
 }

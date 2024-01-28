@@ -403,7 +403,7 @@ FodyWeavers.xsd
 *.sln.iml
 
 # Perforce
-.p4ignore.txt
+#.p4ignore.txt
 
 # Re-add any of my Engine materials that were cut out.
 !Engine/Source/**

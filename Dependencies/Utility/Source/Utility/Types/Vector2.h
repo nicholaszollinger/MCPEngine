@@ -99,7 +99,21 @@ struct Vector2
         return output;
     }
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Swaps the value of the x and y axes.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    void SwapAxes()
+    {
+        const auto temp = x;
+        x = y;
+        y = temp;
+    }
+
     // Operators
+
+    // Disable the 'unreachable code' warning.
+#pragma warning (push)
+#pragma warning (disable : 4702)
 
     bool operator==(const Vector2& right) const
     {
@@ -111,6 +125,8 @@ struct Vector2
 
         return x == right.x && y == right.y;
     }
+
+#pragma warning (pop)
 
     Vector2 operator+(const Vector2<Type>& right) const
     {
@@ -212,10 +228,16 @@ struct Vector2
         *this = *this / scalar;
         return *this;
     }
+
+    template<typename ToType>
+    Vector2<ToType> GetAs() const
+    {
+        return Vector2<ToType>( static_cast<ToType>(x), static_cast<ToType>(y));
+    }
     
     std::string ToString() const
     {
-        return CombineIntoString("(", x, ", " , y, ")");
+        return CombineIntoString("(x=", x, ", y=" , y, ")");
     }
 
     // Common Values.
@@ -228,6 +250,7 @@ struct Vector2
 
 using Vec2 = Vector2<float>;
 using Vec2Int = Vector2<int>;
+
 
 template<typename Type, typename ScalarType>
 Vector2<Type> operator*(const float scalar, const Vector2<Type>& vec)

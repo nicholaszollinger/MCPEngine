@@ -10,9 +10,6 @@
     <Filter Include="Platform\SDL2">
       <UniqueIdentifier>{f648ef7e-2c73-4c19-a6f1-da7494c63f55}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Platform\Tiled">
-      <UniqueIdentifier>{1aa8e0c0-409f-467a-9ec2-74b2d65f269e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Platform\TinyXML2">
       <UniqueIdentifier>{852214f2-58db-43e2-ac54-560abca36975}</UniqueIdentifier>
     </Filter>
@@ -67,8 +64,23 @@
     <Filter Include="MCP\Core\Resource\Parsers">
       <UniqueIdentifier>{895701ad-cbd4-44d6-8812-da2ad44d2edb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MCP\Scene\Layers">
+      <UniqueIdentifier>{6dadaeb4-36cc-4dbd-b0b6-42a9803dd7ea}</UniqueIdentifier>
+    </Filter>
     <Filter Include="MCP\Animation">
       <UniqueIdentifier>{215529a1-6a32-483a-acc2-095f3b720993}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Core\Resource\Parsers\XML">
+      <UniqueIdentifier>{e9d447cf-eb7f-4f33-ab4a-becedb95ed4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Scene\Entities">
+      <UniqueIdentifier>{7d1db196-fc24-48d6-9035-37944a0fd5d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Accessibility">
+      <UniqueIdentifier>{9d6fc5d8-bf76-47c1-8186-c1acdafdccf3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCP\Scripting">
+      <UniqueIdentifier>{a754d706-c0c5-44b1-9df1-ba9396497432}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -87,19 +99,10 @@
     <ClInclude Include="Source\Platform\SDL2\SDLRenderer.h">
       <Filter>Platform\SDL2</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Platform\Tiled\TiledMapComponent.h">
-      <Filter>Platform\Tiled</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Platform\Tiled\TiledTileSet.h">
-      <Filter>Platform\Tiled</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Platform\TinyXML2\tinyxml2.h">
       <Filter>Platform\TinyXML2</Filter>
     </ClInclude>
     <ClInclude Include="Source\MCP\Audio\AudioClip.h">
-      <Filter>MCP\Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MCP\Audio\AudioData.h">
       <Filter>MCP\Audio</Filter>
     </ClInclude>
     <ClInclude Include="Source\MCP\Audio\AudioManager.h">
@@ -174,7 +177,7 @@
     <ClInclude Include="Source\MCP\Lua\LuaDebug.h">
       <Filter>MCP\Lua</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MCP\Lua\LuaSystem.h">
+    <ClInclude Include="Source\MCP\Lua\LuaContext.h">
       <Filter>MCP\Lua</Filter>
     </ClInclude>
     <ClInclude Include="Source\MCP\Scene\SceneManager.h">
@@ -204,9 +207,6 @@
     <ClInclude Include="Source\MCP\Core\Event\Event.h">
       <Filter>MCP\Core\Event</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MCP\Core\Event\KeyEvent.h">
-      <Filter>MCP\Core\Event</Filter>
-    </ClInclude>
     <ClInclude Include="Source\MCP\Core\Event\Message.h">
       <Filter>MCP\Core\Event</Filter>
     </ClInclude>
@@ -228,16 +228,10 @@
     <ClInclude Include="Source\MCP\Core\Resource\ResourceManager.h">
       <Filter>MCP\Core\Resource</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MCP\Core\Resource\TextFile.h">
-      <Filter>MCP\Core\Resource</Filter>
-    </ClInclude>
     <ClInclude Include="Source\MCP\Core\Resource\Zip.h">
       <Filter>MCP\Core\Resource</Filter>
     </ClInclude>
     <ClInclude Include="Source\MCP\Core\Config.h">
-      <Filter>MCP\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MCP\Core\GlobalManager.h">
       <Filter>MCP\Core</Filter>
     </ClInclude>
     <ClInclude Include="Source\MCP\Core\Macros.h">
@@ -264,6 +258,132 @@
     <ClInclude Include="Source\MCP\Core\Resource\Parsers\XMLParser.h">
       <Filter>MCP\Core\Resource\Parsers</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Resource\Font.h">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Platform\SDL2\SDLText.h">
+      <Filter>Platform\SDL2</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\TextComponent.h">
+      <Filter>MCP\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Event\ApplicationEvent.h">
+      <Filter>MCP\Core\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\Widget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\WorldLayer.h">
+      <Filter>MCP\Scene\Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\SceneLayer.h">
+      <Filter>MCP\Scene\Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\UILayer.h">
+      <Filter>MCP\Scene\Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\ButtonWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\CanvasWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\ImageWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\WidgetFactory.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\TextWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\Resource\Parsers\XML\XMLAttribute.h">
+      <Filter>MCP\Core\Resource\Parsers\XML</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Lua\LuaResource.h">
+      <Filter>MCP\Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\ToggleWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\SliderWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\SelectionWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\HorizontalLayoutWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\VerticalLayoutWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\TextFieldWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Input\InputAction.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Input\InputActionValue.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\InputComponent.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Input\InputListener.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Input\InputModifier.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Input\InputControlScheme.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Input\InputControl.h">
+      <Filter>MCP\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\BarWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\AlignmentTypes.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\Layout.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\SceneAsset.h">
+      <Filter>MCP\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\EntryPoint.h">
+      <Filter>MCP\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scene\SceneEntity.h">
+      <Filter>MCP\Scene\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\TypeFactory.h">
+      <Filter>MCP\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Audio\AudioGroup.h">
+      <Filter>MCP\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Components\AudioSourceComponent.h">
+      <Filter>MCP\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Audio\AudioResource.h">
+      <Filter>MCP\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Core\System.h">
+      <Filter>MCP\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\UI\ScrollWidget.h">
+      <Filter>MCP\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Accessibility\Localization.h">
+      <Filter>MCP\Accessibility</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MCP\Scripting\Script.h">
+      <Filter>MCP\Scripting</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Platform\SDL2\SDL2Window.cpp">
@@ -283,12 +403,6 @@
     </ClCompile>
     <ClCompile Include="Source\Platform\SDL2\SDLResources.cpp">
       <Filter>Platform\SDL2</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Platform\Tiled\TiledMapComponent.cpp">
-      <Filter>Platform\Tiled</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Platform\Tiled\TiledTileSet.cpp">
-      <Filter>Platform\Tiled</Filter>
     </ClCompile>
     <ClCompile Include="Source\Platform\TinyXML2\tinyxml2.cpp">
       <Filter>Platform\TinyXML2</Filter>
@@ -356,7 +470,7 @@
     <ClCompile Include="Source\MCP\Lua\LuaDebug.cpp">
       <Filter>MCP\Lua</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MCP\Lua\LuaSystem.cpp">
+    <ClCompile Include="Source\MCP\Lua\LuaContext.cpp">
       <Filter>MCP\Lua</Filter>
     </ClCompile>
     <ClCompile Include="Source\MCP\Scene\SceneManager.cpp">
@@ -395,9 +509,6 @@
     <ClCompile Include="Source\MCP\Core\Resource\ResourceManager.cpp">
       <Filter>MCP\Core\Resource</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MCP\Core\Resource\TextFile.cpp">
-      <Filter>MCP\Core\Resource</Filter>
-    </ClCompile>
     <ClCompile Include="Source\MCP\Core\Resource\Zip.cpp">
       <Filter>MCP\Core\Resource</Filter>
     </ClCompile>
@@ -409,6 +520,114 @@
     </ClCompile>
     <ClCompile Include="Source\MCP\Core\Resource\Parsers\XMLParser.cpp">
       <Filter>MCP\Core\Resource\Parsers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Resource\Font.cpp">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Platform\SDL2\SDLText.cpp">
+      <Filter>Platform\SDL2</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\TextComponent.cpp">
+      <Filter>MCP\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\Widget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\WorldLayer.cpp">
+      <Filter>MCP\Scene\Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\SceneLayer.cpp">
+      <Filter>MCP\Scene\Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\UILayer.cpp">
+      <Filter>MCP\Scene\Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\ButtonWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\CanvasWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\ImageWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\TextWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Resource\Parsers\XML\XMLAttribute.cpp">
+      <Filter>MCP\Core\Resource\Parsers\XML</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Lua\LuaResource.cpp">
+      <Filter>MCP\Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\ToggleWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\SliderWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\SelectionWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\HorizontalLayoutWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\VerticalLayoutWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\TextFieldWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Event\ApplicationEvent.cpp">
+      <Filter>MCP\Core\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\InputComponent.cpp">
+      <Filter>MCP\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Input\InputModifier.cpp">
+      <Filter>MCP\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Input\InputActionValue.cpp">
+      <Filter>MCP\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Input\InputControl.cpp">
+      <Filter>MCP\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\BarWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\Layout.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\SceneAsset.cpp">
+      <Filter>MCP\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Input\InputCodes.cpp">
+      <Filter>MCP\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scene\SceneEntity.cpp">
+      <Filter>MCP\Scene\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Components\AudioSourceComponent.cpp">
+      <Filter>MCP\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Audio\AudioGroup.cpp">
+      <Filter>MCP\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Audio\AudioResource.cpp">
+      <Filter>MCP\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\UI\ScrollWidget.cpp">
+      <Filter>MCP\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Accessibility\Localization.cpp">
+      <Filter>MCP\Accessibility</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Core\Resource\Resource.cpp">
+      <Filter>MCP\Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCP\Scripting\Script.cpp">
+      <Filter>MCP\Scripting</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -4,11 +4,12 @@
 #include <cassert>
 #include <unordered_map>
 #include <vector>
+#include "Utility/Logging/Log.h"
 
 //-----------------------------------------------------------------------------------------------------------------------------
-//		NOTES:
+//		NOTES
 //
-///		@brief : A packed array is a std::vector whose order does not matter, and whose values are accessed through a keyValue.
+///		@brief : A Dense array is a std::vector whose order does not matter, and whose values are accessed through a keyValue.
 ///             Under the hood we have 2 std::unordered_maps that take care of mapping the values to indexes in the array and
 ///             vice versa. On removing an item from the array, the last element is swapped into the place of the removal
 ///             and the mappings are updated accordingly.
@@ -55,6 +56,9 @@ public:
     //-----------------------------------------------------------------------------------------------------------------------------
     void Add(const KeyType& key, const ValueType& value)
     {
+        if (const auto result = m_keyToIndexMap.find(key); result != m_keyToIndexMap.end())
+            return;
+
         const size_t newIndex = m_array.size();
         m_keyToIndexMap[key] = newIndex;
         m_indexToKeyMap[newIndex] = key;
@@ -83,6 +87,7 @@ public:
         m_indexToKeyMap[indexOfValueToRemove] = swappedKey;         // Set the Key at the removed index to the be the Key we swapped.
 
         // Erase the removed data.
+        m_indexToKeyMap.erase(indexOfBack);
         m_keyToIndexMap.erase(key);
         m_array.pop_back();
     }

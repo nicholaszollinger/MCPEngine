@@ -2,58 +2,117 @@
 // Application.h
 
 #include <string>
+#include <unordered_set>
 #include <vector>
+#include "MCP/Core/System.h"
+#include "MCP/Core/Event/ApplicationEvent.h"
+#include "MCP/Graphics/Graphics.h"
+
+struct lua_State;
 
 namespace mcp
 {
-    struct KeyEvent;
+    class KeyEvent;
     class Scene;
-    class IProcess;
 
-    struct ApplicationProperties
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Container for the arguments passed into the executable. The first argument will always be the executable's path.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    struct CommandLineArgs
     {
-        // Name to give the Application's Main Window.
-        std::string windowName;
+        size_t count = 0;
+        char** args = nullptr;
 
-        // Starting window width of the application. Setting either width or height to -1
-        // will default to fullscreen.
-        int defaultWindowWidth   = -1;
+	    const char* operator[](const size_t index) const
+	    {
+		    MCP_CHECK(index < count);
+		    return args[index];
+	    }
 
-        // Starting window height of the application. Setting either width or height to -1
-        // will default to fullscreen.
-        int defaultWindowHeight  = -1;
+        const char* operator[](const int index) const
+	    {
+		    MCP_CHECK(static_cast<size_t>(index) < count);
+		    return args[index];
+	    }
     };
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Data used to create this instance of the Application.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    struct ApplicationContext
+    {
+        // The arguments passed into the Application's executable
+        CommandLineArgs args;
+
+        // The root folder for relative asset search paths.
+        std::string workingDirectory;
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : The Application class manages the runtime of the program and all of the Systems.
+    //-----------------------------------------------------------------------------------------------------------------------------
     class Application
     {
         static inline Application* s_pInstance = nullptr;
 
-        std::vector<IProcess*> m_processes;
+        std::vector<System*> m_systems;
+        ApplicationContext m_context;
         bool m_isRunning;
 
     public:
-        static void Create();
+        static void Create(const ApplicationContext& context);
         static Application* Get() { return s_pInstance; }
         static void Destroy();
 
-    public:
-        Application();
+    private:
+        Application(const ApplicationContext& context);
         ~Application() = default;
 
+    public:
         Application(const Application&) = delete;
         Application& operator=(const Application&) = delete;
         Application(Application&&) = delete;
         Application& operator=(Application&&) = delete;
-        
-        bool Init(const ApplicationProperties& props, const char* pGameDataFilepath);
-        bool Init(const char* pGameDataFilepath);
+
+        bool Init(const char* pGameSystemsFilepath);
         void Run();
-        void Close() const;
+        void Quit();
+
+        template<typename SystemType>
+        SystemType* GetSystem() const;
+
+        [[nodiscard]] const ApplicationContext& GetContext() const { return m_context; }
+
+        static void RegisterLuaFunctions(lua_State* pState);
 
     private:
-        bool LoadApplicationProperties(ApplicationProperties& outProps, const char* pFilepath);
-        bool LoadGameData(const char* pGameDataFilepath);
+        bool LoadGameSystems(const char* pGameSystemsPath);
+        void Close();
     };
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Get one of the global Systems in our Application.
+    ///		@tparam SystemType : Type of system you are looking for. Example 'GraphicsSystem'.
+    ///		@returns : Pointer to the system, or nullptr if the system was not found.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template <typename SystemType>
+    SystemType* Application::GetSystem() const
+    {
+        static_assert(std::is_base_of_v<System, SystemType>, "SystemType must be a derived class of System!");
 
+        for (auto* pSystem : m_systems)
+        {
+            if (pSystem->GetTypeId() == SystemType::GetStaticTypeId())
+            {
+                // TODO: This should be checked_cast
+                return static_cast<SystemType*>(pSystem);
+            }
+        }
+
+        return nullptr;
+    }
 }

@@ -1,4 +1,5 @@
 #pragma once
+// MulticastDelegate.h
 
 #include <functional>
 #include "MCP/Debug/Log.h"

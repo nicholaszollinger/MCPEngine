@@ -4,13 +4,14 @@
 
 #pragma warning(push)
 #pragma warning(disable : 26819)
+#include <SDL_image.h>
 #include <SDL_render.h>
+#include <SDL_ttf.h>
 #pragma warning(pop)
 
 #include <cassert>
-#include <SDL_image.h>
-#include "MCP/Debug/Log.h"
 #include "MCP/Core/Application/Window/WindowBase.h"
+#include "MCP/Debug/Log.h"
 #include "MCP/Graphics/Graphics.h"
 #include "Platform/SDL2/SDLHelpers.h"
 
@@ -27,6 +28,12 @@ bool SdlRenderer::Init()
     {
         MCP_ERROR("SDL", "Failed to initialize SDL_Image! IMG_Error: ", IMG_GetError());
         return false;
+    }
+
+    // Initialize the sdl fonts.
+    if (TTF_Init() != 0)
+    {
+        MCP_ERROR("SDL", "Failed to initialize SDL_ttf! TTF_Error: ", TTF_GetError());
     }
 
     return true;
@@ -54,6 +61,7 @@ void SdlRenderer::Display()
 
 void SdlRenderer::Close()
 {
+    TTF_Quit();
     IMG_Quit();
     SDL_VideoQuit();
 }

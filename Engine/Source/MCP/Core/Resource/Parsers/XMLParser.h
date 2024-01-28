@@ -3,20 +3,20 @@
 
 #include <type_traits>
 #include "../Resource.h"
-#include "MCP/Debug/Assert.h"
-#include "MCP/Debug/Log.h"
+#include "XML/XMLAttribute.h"
 
 namespace mcp
 {
+    // TODO: Move this to its own file.
     class XMLElement
     {
         void* m_pHandle = nullptr;
 
     public:
+        XMLElement() = default;
         XMLElement(void* pHandle);
 
         // Get connected Elements
-        //const XMLElement* GetElement(const char* pElementName) const;
         XMLElement GetChildElement(const char* pChildName = nullptr) const;
         XMLElement GetSiblingElement(const char* pSiblingName = nullptr) const;
 
@@ -24,10 +24,14 @@ namespace mcp
         template<typename AttributeType> void SetAttribute(const char* pAttributeName, const AttributeType val);
 
         // Get Element Data
-        template<typename AttributeType> AttributeType GetAttribute(const char* pAttributeName, const AttributeType defaultVal = {}) const;
+        template<typename AttributeType> AttributeType GetAttributeValue(const char* pAttributeName, const AttributeType defaultVal = {}) const;
+        XMLAttribute GetFirstAttribute() const;
+        XMLAttribute GetAttribute(const char* pAttributeName) const;
+
         [[nodiscard]] const char* GetText() const;
         [[nodiscard]] const char* GetName() const;
         [[nodiscard]] bool IsValid() const;
+        [[nodiscard]] const void* GetHandle() const { return m_pHandle; }
 
     private:
         // Attributes
@@ -46,7 +50,6 @@ namespace mcp
 
 #pragma warning (push)
 #pragma warning (disable : 4702)
-
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
     //		
@@ -107,7 +110,7 @@ namespace mcp
     ///		@returns : Value of the attribute, or the default value in the event of an error.
     //-----------------------------------------------------------------------------------------------------------------------------
     template <typename AttributeType>
-    AttributeType XMLElement::GetAttribute(const char* pAttributeName, const AttributeType defaultVal) const
+    AttributeType XMLElement::GetAttributeValue(const char* pAttributeName, const AttributeType defaultVal) const
     {
         static_assert(std::is_arithmetic_v<AttributeType> 
             || std::is_same_v<AttributeType, bool> 
@@ -151,21 +154,29 @@ namespace mcp
 
 #pragma warning (pop)
 
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //      TODO: This is stupid that the parser owns the XMLFile. The XMLFile should be created by a static function on the parser.
+    //      I need to change this when I get a chance over break.
+    //		
+    ///		@brief : Class for loading XMLFiles from data.
+    //-----------------------------------------------------------------------------------------------------------------------------
     class XMLParser
     {
     private:
-        class XMLFile final : public Resource
+        class XMLFile final : public DiskResource
         {
         public:
-            virtual void Load(const char* pFilePath, const char* pPackageName, const bool isPersistent) override;
+            MCP_DEFINE_RESOURCE_DESTRUCTOR(XMLFile)
             virtual void Free() override;
+
+        private:
+            virtual void* LoadResourceType() override;
         };
 
         XMLFile m_loadedFile;
 
     public:
-        using Element = void;
-
         XMLParser() = default;
         ~XMLParser();
 
@@ -173,95 +184,11 @@ namespace mcp
         [[nodiscard]] bool LoadFile(const char* pFilepath);
         [[nodiscard]] bool HasFileLoaded() const;
         void CloseCurrentFile();
+        void SaveToFile();
 
-        XMLElement GetElement(const char* pElementName);
+        // Elements
+        XMLElement GetElement(const char* pElementName = nullptr) const;
+        [[nodiscard]] bool ElementIsInFile(const XMLElement element) const;
 
-        // Get Elements
-        const Element* GetElement(const char* pElementName) const;
-        const Element* GetChildElement(const Element* pElement, const char* pChildName = nullptr) const;
-        const Element* GetSiblingElement(const Element* pElement, const char* pSiblingName = nullptr) const;
-
-        // Get Element Data
-        const char* GetElementName(const Element* pElement) const;
-        template<typename AttributeType> bool GetAttribute(const Element* pElement, const char* pAttributeName, AttributeType& outVal);
-
-    private:
-        // Attributes
-        static bool GetIntAttribute(const Element* pElement, const char* pAttributeName, int64_t& outVal);
-        static bool GetUnsignedIntAttribute(const Element* pElement, const char* pAttributeName, uint64_t& outVal);
-        static bool GetDoubleAttribute(const Element* pElement, const char* pAttributeName, double& outVal);
-        static bool GetBoolAttribute(const Element* pElement, const char* pAttributeName, bool& outVal);
-        static bool GetStringAttribute(const Element* pElement, const char* pAttributeName, const char*& outVal);
     };
-
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //		
-    ///		@brief : Attempt to get an Attribute value from pElement.
-    ///		@tparam AttributeType : Type of Attribute you want to get; Attribute type must be a number type, bool or const char*.
-    ///		@param pElement : Element whose Attribute we want.
-    ///		@param pAttributeName : Name of the Attribute you are looking for.
-    ///		@param outVal : Value that will be written to.
-    ///		@returns : False if the Attribute does not exist or if the Attribute value cannot be converted to AttributeType.
-    //-----------------------------------------------------------------------------------------------------------------------------
-    template <typename AttributeType>
-    bool XMLParser::GetAttribute(const Element* pElement, const char* pAttributeName, AttributeType& outVal)
-    {
-        static_assert(std::is_arithmetic_v<AttributeType> 
-            || std::is_same_v<AttributeType, bool> 
-            || std::is_same_v<AttributeType, const char*>
-            , "Attribute type must be a number type, bool or const char*");
-
-        MCP_CHECK(pElement);
-        MCP_CHECK_MSG(m_loadedFile.IsValid(), "Failed to get XML Element! No valid file loaded!");
-
-        if constexpr (std::is_same_v<AttributeType, bool>)
-        {
-            return GetBoolAttribute(pElement, pAttributeName, outVal);
-        }
-
-        else if constexpr (std::is_same_v<AttributeType, const char*>)
-        {
-            return GetStringAttribute(pElement, pAttributeName, outVal);
-        }
-
-        else if constexpr (std::is_integral_v<AttributeType>)
-        {
-            if constexpr (std::is_unsigned_v<AttributeType>)
-            {
-                int64_t dummyVal{};
-                if (!GetIntAttribute(pElement, pAttributeName, dummyVal))
-                    return false;
-
-                outVal = static_cast<AttributeType>(dummyVal);
-                return true;
-            }
-
-            else
-            {
-                uint64_t dummyVal{};
-                if (!GetUnsignedIntAttribute(pElement, pAttributeName, dummyVal))
-                    return false;
-
-                outVal = static_cast<AttributeType>(dummyVal);
-                return true;
-            }
-        }
-
-        else if constexpr (std::is_floating_point_v<AttributeType>)
-        {
-            double dummyVal{};
-            if (!GetDoubleAttribute(pElement, pAttributeName, dummyVal))
-                return false;
-
-            outVal = static_cast<AttributeType>(dummyVal);
-            return true;
-        }
-
-        // Shouldn't be able to get here
-        return false;
-    }
-
-
-
 }

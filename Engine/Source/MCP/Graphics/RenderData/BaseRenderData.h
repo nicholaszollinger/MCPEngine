@@ -18,7 +18,7 @@ namespace mcp
         virtual ~BaseRenderData() = default;
 
         RectF destinationRect   = {};
-        RectInt crop              = {};
+        RectInt crop            = {};
         Vec2 anglePivot         = {};
         double angle            = 0.0;
         RenderFlip2D flip       = RenderFlip2D::kNone;

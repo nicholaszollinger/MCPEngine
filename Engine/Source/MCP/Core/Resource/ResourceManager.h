@@ -1,18 +1,20 @@
 #pragma once
-
 // ResourceManager.h
 
 //-----------------------------------------------------------------------------------------------------------------------------
-// Goal: This is going to be a singleton instance class, which holds references to each of the loaded
-//      assets. In my 275 project, I had the GraphicsManager hold onto graphics assets. Here, I want to
-//      have an interface for just loading and unloading any kind of asset.
+//      NOTES:
+//      This is going to be one of the main focuses of my refactoring over the Winter break. I want to get this on it's own
+//      thread, where the vague flow is:
+//              - Object puts in a request for an asset, sending the request to the resource thread.
+//              - The Resource thread processes any open requests, completing immediately if the resource is already loaded.
+//              - Part of the main thread is notify all Object resource requests of their completion.
 //
 //-----------------------------------------------------------------------------------------------------------------------------
 
 #include <unordered_map>
 #include "PackageManager.h"
 #include "Resource.h"
-#include "MCP/Core/GlobalManager.h"
+#include "MCP/Core/System.h"
 #include "MCP/Debug/Log.h"
 
 namespace mcp
@@ -49,140 +51,49 @@ namespace mcp
     //
     ///		@brief : This is the implementation details of the ResourceManager. Defining the functions LoadFromDiskImpl() and
     ///         FreeResourceImpl() is required to successfully load and unload assets of a certain type.
-    ///		@tparam ResourceType : 
+    ///		@tparam ResourceType :
+    ///     @tparam RequestType : Type that we use to determine if the Resource exists in our container or not. This contains data
+    ///             that is required to find the correct resource in memory. Could just be a filepath, or something more.
     //-----------------------------------------------------------------------------------------------------------------------------
-    template<typename ResourceType>
+    template<typename ResourceType, typename RequestType>
     class ResourceContainer
     {
-        using ResourceMap = std::unordered_map<const char*, ResourcePtr<ResourceType>>;
-
-    private:
+        using ResourceMap = std::unordered_map<RequestType, ResourcePtr<ResourceType>, RequestType>;
         ResourceMap m_resources;
 
     public:
         ResourceContainer() = default;
+        ~ResourceContainer();
 
-        ~ResourceContainer()
-        {
-            for (auto& [pPath, pResourceData] : m_resources)
-            {
-                FreeResourceImpl(pResourceData.pResource);
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------
-        //		NOTES:
-        //
-        ///		@brief : If we already have a resource loaded that matches the filePath, then we will just add to the refCount and return
-        ///             a pointer to the loaded asset. If we don't have it, then we will load the asset either from disk or from a loaded
-        ///             package.
-        ///		@tparam Args : Any type of arguments that are necessary.
-        ///		@param pFilePath : Path to the asset in memory. Either directly on the disk or inside a package.
-        ///		@param isPersistent : Whether the asset is going to stay in memory after the refCount hits zero.
-        ///		@param pPackagePath : Path to the package that stores the asset. If this is nullptr, then we load from disk.
-        ///		@param args : Any other arguments that are needed to load the asset.
-        ///		@returns : Ptr to the Resource in memory.
-        //-----------------------------------------------------------------------------------------------------------------------------
-        template<typename...Args>
-        ResourceType* Add(const char* pFilePath, const bool isPersistent, const char* pPackagePath, Args&&...args)
-        {
-            auto* pResourceData = GetResourcePtr(pFilePath);
-
-            // If we have the resource already, increase the refCount and return the resource.
-            if (pResourceData)
-            {
-                pResourceData->refCount += 1;
-                return pResourceData->pResource;
-            }
-
-            ResourceType* pResource = nullptr;
-
-            // If we have a path, then it is intended that we use it.
-            if (pPackagePath)
-            {
-                auto* pData = PackageManager::Get()->GetRawData(pPackagePath, pFilePath);
-                if (!pData)
-                {
-                    return nullptr;
-                }
-
-                pResource = LoadFromRawDataImpl(pData->pData, pData->size, args...);
-            }
-
-            // Otherwise, load from disk.
-            else
-            {
-                pResource = LoadFromDiskImpl(pFilePath, args...);
-                if (!pResource)
-                {
-                    MCP_ERROR("PackageManager", "Failed to load Resource at filePath: ", pFilePath);
-                    return nullptr;
-                }
-            }
-
-            // Add a new Resource<ResourceType> to our ResourceMap.
-            m_resources.emplace(std::make_pair(pFilePath, ResourcePtr<ResourceType>(pResource, isPersistent)));
-
-            return pResource;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------
-        //		NOTES:
-        //
-        ///		@brief : Remove a reference to this Resource. If the refCount to this Resource becomes 0, the Resource will be freed.
-        //-----------------------------------------------------------------------------------------------------------------------------
-        void RemoveRef(const char* pFilePath)
-        {
-            auto* pResourceData = GetResourcePtr(pFilePath);
-
-            if (!pResourceData)
-            {
-                MCP_WARN("Lua", "Tried to free a resource at filepath = '", pFilePath, "' that wasn't in memory!");
-                return;
-            }
-
-            pResourceData->refCount -= 1;
-
-            // If our refCount is now 0 and it isn't marked as persistent,
-            // then free the resource and erase it from our ResourceMap.
-            if (pResourceData->refCount == 0 && !pResourceData->isPersistent)
-            {
-                FreeResourceImpl(pResourceData->pResource);
-                m_resources.erase(pFilePath);
-            }
-        }
+        ResourceType* AddFromDisk(const RequestType& request);
+        void RemoveRef(const RequestType& request);
 
     private:
         //-----------------------------------------------------------------------------------------------------------------------------
         //		NOTES:
-        //      Interestingly enough, I can not have the function definition here, I can use declare and then in a
-        //      cpp somewhere, I can define it. I get the underline saying that it is mad, but 
+        //      Interestingly enough, I can not have the function definition here, I just declare it here and then in a it is on
+        //      the Resource type to define how it works in a cpp file.
         //
         ///		@brief : Load an asset of a certain ResourceType.
         ///         \n Example of Definition for an SDL_Texture:
         ///         \n\n template <>         <- For the ResourceType
         ///         \n template <>         <- For the Args
         ///         \n SDL_Texture* ResourceContainer<SDL_Texture>::LoadFromDiskImpl(const char* pFilePath, void* pRenderer, Vec2Int& sizeOut) {}
-        ///		@tparam Args : Any type of arguments that you need.
-        ///		@param pFilePath : Path to the asset in memory.
-        ///		@param args : Any other parameters that you may need.
+        ///		@param request : The request data for this resource.
         ///		@returns : Ptr to the loaded resource, or nullptr if it fails.
         //-----------------------------------------------------------------------------------------------------------------------------
-        template<typename...Args>
-        ResourceType* LoadFromDiskImpl(const char* pFilePath, Args&&...args);
+        ResourceType* LoadFromDiskImpl(const RequestType& request);
 
         //-----------------------------------------------------------------------------------------------------------------------------
         //		NOTES:
         //
         ///		@brief : Load an asset of a certain ResourceType from a rawData in memory.
-        ///		@tparam Args : Any type of arguments that you need.
         ///		@param pRawData : ptr to the array of raw bytes.
         ///		@param dataSize : size of the rawData.
-        ///		@param args : Any other parameters that you may need.
+        ///		@param request : The request data for this resource.
         ///		@returns : Ptr to the loaded resource, or nullptr if it fails.
         //-----------------------------------------------------------------------------------------------------------------------------
-        template<typename...Args>
-        ResourceType* LoadFromRawDataImpl(char* pRawData, const int dataSize, Args&&...args);
+        ResourceType* LoadFromRawDataImpl(char* pRawData, const int dataSize, const RequestType& request);
 
         //-----------------------------------------------------------------------------------------------------------------------------
         //		NOTES:
@@ -190,94 +101,201 @@ namespace mcp
         ///		@brief : Frees the resource from memory using a specific implementation.
         //-----------------------------------------------------------------------------------------------------------------------------
         void FreeResourceImpl(ResourceType*);
-
-        //-----------------------------------------------------------------------------------------------------------------------------
-        //		NOTES:
-        //
-        ///		@brief : Try to get the ResourcePtr from our ResourceMap at the pFilePath.
-        ///		@returns : Pointer to the ResourcePtr, or nullptr if no ResourcePtr was found.
-        //-----------------------------------------------------------------------------------------------------------------------------
-        ResourcePtr<ResourceType>* GetResourcePtr(const char* pFilePath)
-        {
-            auto result = m_resources.find(pFilePath);
-            if (result != m_resources.end())
-            {
-                return &((*result).second);
-            }
-
-            return nullptr;
-        }
+        
+        ResourcePtr<ResourceType>* GetResourcePtr(const RequestType& key);
     };
 
-    class ResourceManager final : public IProcess
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Resource Manager responsible for loading/freeing resources.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    class ResourceManager final : public System
     {
     private:
-        // This is the asset zip file. In the future, this may look different. This is purpose build right now.
+        // This is the asset zip file. In the future, this may look different. This is purpose built right now.
         static constexpr const char* kAssetDirectory = "AssetsPkg.zip";
 
-        DEFINE_GLOBAL_MANAGER(ResourceManager)
+        MCP_DEFINE_SYSTEM(ResourceManager)
 
     public:
-        ResourceManager(const ResourceManager&) = delete;
-        ResourceManager(ResourceManager&&) = delete;
-        ResourceManager& operator=(const ResourceManager&) = delete;
-        ResourceManager& operator=(ResourceManager&&) = delete;
+        template<typename ResourceType, typename DiskRequestType>
+        ResourceType* LoadFromDisk(const DiskRequestType& request);
 
-        //-----------------------------------------------------------------------------------------------------------------------------
-        //		NOTES:
-        //
-        ///		@brief : Load a resource.
-        ///		@tparam ResourceType : Type of resource that we want to load. Ex: A texture.
-        ///		@tparam Args : Any other parameters types that are required for the asset loading.
-        ///		@param loadData : Data that defines how and where we load the asset from.
-        ///		@param args : Other parameters that pertain to a specific type.
-        ///		@returns : A pointer reference to the asset.
-        //-----------------------------------------------------------------------------------------------------------------------------
-        template<typename ResourceType, typename ... Args>
-        ResourceType* Load(const ResourceLoadData& loadData, Args&& ...args)
-        {
-            // Get a reference to the container that is associated with this type.
-            auto& container = GetResourceContainer<ResourceType>();
+        template<typename ResourceType, typename RequestType>
+        void FreeResource(const RequestType& request);
 
-            ResourceType* pResource = container.Add(loadData.pFilePath, loadData.isPersistent, loadData.pPackageName, args...);
-
-            return pResource;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------
-        //		NOTES:
-        //
-        ///		@brief : Remove a resource from memory, using the filepath as a key.
-        //-----------------------------------------------------------------------------------------------------------------------------
-        template<typename ResourceType>
-        void FreeResource(const char* pFilePath)
-        {
-            // Get a reference to the container that is associated with this type.
-            auto& container = GetResourceContainer<ResourceType>();
-            container.RemoveRef(pFilePath);
-        }
+        static ResourceManager* Get();
+        static ResourceManager* AddFromData(const XMLElement) { return BLEACH_NEW(ResourceManager); }
 
     private:
-        ResourceManager() = default;
-
         virtual bool Init() override;
         virtual void Close() override;
-
-        //-----------------------------------------------------------------------------------------------------------------------------
-        //		NOTES:
-        //      This is a nifty trick for holding onto template data types. I don't want to be having a different ResourceManager
-        //      for every kind of Resource imaginable, I just want one resource manager to be able to handle any kind of resource.
-        //
-        ///		@brief : Get the static container of loaded resources. The first time this is called for a ResourceType, a static
-        ///          ResourceContainer is allocated.   
-        //-----------------------------------------------------------------------------------------------------------------------------
-        template<typename ResourceType>
-        ResourceContainer<ResourceType>& GetResourceContainer()
-        {
-            static ResourceContainer<ResourceType> sContainer;
-            return sContainer;
-        }
+        
+        template<typename ResourceType, typename RequestType>
+        ResourceContainer<ResourceType, RequestType>& GetResourceContainer();
     };
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		    TEMPLATE IMPLEMENTATIONS BELOW
+    //-----------------------------------------------------------------------------------------------------------------------------
+
+    template<typename ResourceType, typename RequestType>
+    ResourceContainer<ResourceType, RequestType>::~ResourceContainer()
+    {
+        for (auto& [pPath, pResourceData] : m_resources)
+        {
+            FreeResourceImpl(pResourceData.pResource);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Add a new Resource using the request data. If we already loaded the resource from an equal request, then we
+    ///         will return the previously loaded resource.
+    ///		@param request : The data that is necessary for loading the Resource.
+    ///		@returns : Ptr to the Resource in memory, or nullptr if the load failed.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template<typename ResourceType, typename RequestType>
+    ResourceType* ResourceContainer<ResourceType, RequestType>::AddFromDisk(const RequestType& request)
+    {
+        static_assert(std::is_convertible_v<RequestType, DiskResourceRequest>, "RequestType must be convertible to DiskResourceRequest!");
+
+        ResourcePtr<ResourceType>* pResourcePtr = GetResourcePtr(request);
+
+        // If we have the resource already, increase the refCount and return the resource.
+        if (pResourcePtr)
+        {
+            pResourcePtr->refCount += 1;
+            return pResourcePtr->pResource;
+        }
+
+        ResourceType* pResource = nullptr;
+
+        // If we have a path, then it is intended that we use it.
+        if (request.packagePath.IsValid())
+        {
+            auto* pData = PackageManager::Get()->GetRawData(request.packagePath.GetCStr(), request.path.GetCStr());
+            if (!pData)
+            {
+                return nullptr;
+            }
+
+            pResource = LoadFromRawDataImpl(pData->pData, pData->size, request);
+        }
+
+        // Otherwise, load from disk.
+        else
+        {
+            pResource = LoadFromDiskImpl(request);
+            if (!pResource)
+            {
+                MCP_ERROR("ResourceManager", "Failed to load Resource at filePath: ", request.path.GetCStr());
+                return nullptr;
+            }
+        }
+
+        // Add a new Resource<ResourceType> to our ResourceMap.
+        m_resources.emplace(std::make_pair(request, ResourcePtr<ResourceType>(pResource, request.isPersistent)));
+
+        return pResource;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //
+    ///		@brief : Remove a reference to a resource that was loaded with the Request. If the refCount to this Resource becomes 0,
+    ///         the Resource will be freed.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template<typename ResourceType, typename RequestType>
+    void ResourceContainer<ResourceType, RequestType>::RemoveRef(const RequestType& request)
+    {
+        auto* pResourcePtr = GetResourcePtr(request);
+
+        if (!pResourcePtr)
+        {
+            MCP_WARN("ResourceContainer", "Tried to free a resource at filepath = '", *request.path, "' that wasn't in memory!");
+            return;
+        }
+
+        pResourcePtr->refCount -= 1;
+
+        // If our refCount is now 0 and it isn't marked as persistent,
+        // then free the resource and erase it from our ResourceMap.
+        if (pResourcePtr->refCount == 0 && !pResourcePtr->isPersistent)
+        {
+            FreeResourceImpl(pResourcePtr->pResource);
+            m_resources.erase(request);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //
+    ///		@brief : Try to get the ResourcePtr from our ResourceMap at the pFilePath.
+    ///		@returns : Pointer to the ResourcePtr, or nullptr if no ResourcePtr was found.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template<typename ResourceType, typename RequestType>
+    ResourcePtr<ResourceType>* ResourceContainer<ResourceType, RequestType>::GetResourcePtr(const RequestType& key)
+    {
+        auto result = m_resources.find(key);
+        if (result != m_resources.end())
+        {
+            return &((*result).second);
+        }
+
+        return nullptr;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //		
+    ///		@brief : Load a resource from Disk.
+    ///		@tparam ResourceType : Type of resource we are loading.
+    ///		@tparam DiskRequestType : Type of request needed to load the resource.
+    ///		@param request : Data required to load the resource that we want.
+    ///		@returns : Pointer to the resource, or nullptr if it failed.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template<typename ResourceType, typename DiskRequestType>
+    ResourceType* ResourceManager::LoadFromDisk(const DiskRequestType& request)
+    {
+        static_assert(std::is_convertible_v<DiskRequestType, DiskResourceRequest>, "RequestType must be convertible to DiskResourceRequest!");
+        // Get a reference to the container that is associated with this type.
+        auto& container = GetResourceContainer<ResourceType, DiskRequestType>();
+
+        ResourceType* pResource = container.AddFromDisk(request);
+
+        return pResource;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //
+    ///		@brief : Remove a resource from memory, using the filepath as a key.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template<typename ResourceType, typename RequestType>
+    void ResourceManager::FreeResource(const RequestType& request)
+    {
+        // Get a reference to the container that is associated with this type.
+        auto& container = GetResourceContainer<ResourceType, RequestType>();
+        container.RemoveRef(request);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //		NOTES:
+    //      This is a nifty trick for holding onto template data types. I don't want to be having a different ResourceManager
+    //      for every kind of Resource imaginable, I just want one resource manager to be able to handle any kind of resource.
+    //
+    ///		@brief : Get the static container of loaded resources. The first time this is called for a ResourceType, a static
+    ///          ResourceContainer is allocated.   
+    //-----------------------------------------------------------------------------------------------------------------------------
+    template<typename ResourceType, typename RequestType>
+    ResourceContainer<ResourceType, RequestType>& ResourceManager::GetResourceContainer()
+    {
+        static ResourceContainer<ResourceType, RequestType> sContainer;
+        return sContainer;
+    }
 }
 
 

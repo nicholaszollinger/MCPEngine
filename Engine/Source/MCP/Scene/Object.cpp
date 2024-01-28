@@ -6,11 +6,8 @@
 
 namespace mcp
 {
-    Object::Object(Scene* pScene)
-        : m_pScene(pScene)
-        , m_objectId(s_idCounter++)
-        , m_isActive(true)
-        , m_isQueuedForDeletion(false)
+    Object::Object(const SceneEntityConstructionData& data)
+        : SceneEntity(data)
     {
         //
     }
@@ -26,6 +23,19 @@ namespace mcp
         }
     }
 
+    bool Object::Init()
+    {
+        for (auto* pComponent : m_components)
+        {
+            if(!pComponent->Init())
+            {
+                MCP_ERROR("Object", "Failed to initialize Object!");
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
@@ -33,7 +43,7 @@ namespace mcp
     ///		@brief : Initialization step when the scene has finished loading. Used to 
     ///		@returns : 
     //-----------------------------------------------------------------------------------------------------------------------------
-    bool Object::PostLoadInit() const
+    bool Object::PostLoadInit()
     {
         for (auto* pComponent : m_components)
         {
@@ -47,22 +57,82 @@ namespace mcp
         return true;
     }
 
-
     //-----------------------------------------------------------------------------------------------------------------------------
     //		NOTES:
-    //
-    ///		@brief : Queues the destruction of this Object. This will in turn call 'OnDestroy' for each component.
+    //		
+    ///		@brief : Add a previously created Component to this Object.
     //-----------------------------------------------------------------------------------------------------------------------------
-    void Object::Destroy()
+    void Object::AddComponent(Component* pComponent)
     {
-        // If we are already queued, don't do anything.
-        if (m_isQueuedForDeletion)
+        if (!pComponent)
+        {
+            MCP_WARN("Object", "Attempted to add Component* that was nullptr!");
             return;
+        }
 
-        // Queue the deletion.
-        m_isQueuedForDeletion = true;
-        m_pScene->DestroyObject(m_objectId);
+        // Set the owner directly.
+        pComponent->m_pOwner = this;
+        pComponent->Init();
 
+        // If this object as a parent, we need to let the component respond.
+        if (HasAParent())
+        {
+            pComponent->OnOwnerParentSet(GetParent());
+        }
+
+        // Set the Component to its starting active state.
+        pComponent->OnOwnerActiveChanged(IsActive());
+
+        // Add the Component to our list.
+        m_components.emplace_back(pComponent);
+    }
+
+    Object* Object::GetChildByTag(const StringId tag)
+    {
+        auto* pChild = SceneEntity::GetChildByTag(tag);
+        if (!pChild)
+            return nullptr;
+
+        return SafeCastEntity<Object>(pChild);
+    }
+
+    Object* Object::GetChildByTag(const StringId tag) const
+    {
+        auto* pChild = SceneEntity::GetChildByTag(tag);
+        if (!pChild)
+            return nullptr;
+
+        return SafeCastEntity<Object>(pChild);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    ///		@brief : Get the World Layer that this Object is in.
+    //-----------------------------------------------------------------------------------------------------------------------------
+    WorldLayer* Object::GetWorld() const
+    {
+        return SceneLayer::SafeCastLayer<WorldLayer>(GetLayer());
+    }
+
+    void Object::OnActive()
+    {
+        // Update our component's active state
+        for (auto* pComponent : m_components)
+        {
+            pComponent->OnOwnerActiveChanged(true);
+        }
+    }
+
+    void Object::OnInactive()
+    {
+        // Update our component's active state
+        for (auto* pComponent : m_components)
+        {
+            pComponent->OnOwnerActiveChanged(false);
+        }
+    }
+
+    void Object::OnDestroy()
+    {
         // Signal to the components that we are being destroyed.
         for (auto* pComponent : m_components)
         {
@@ -70,21 +140,11 @@ namespace mcp
         }
     }
 
-    //-----------------------------------------------------------------------------------------------------------------------------
-    //		NOTES:
-    //      Should the components' Active state be set to match the GameObject?
-    //          - No. I think the better option is to have Components check to see if their Owner is Active...hmm...
-    //
-    ///		@brief : Set whether the GameObject is Active or not.
-    ///		@param isActive : 
-    //-----------------------------------------------------------------------------------------------------------------------------
-    void Object::SetActive(const bool isActive)
+    void Object::OnParentSet()
     {
-        m_isActive = isActive;
-
-        /*for (auto* pComponent : m_components)
+        for (auto* pComponent : m_components)
         {
-            pComponent->SetIsActive(isActive);
-        }*/
+            pComponent->OnOwnerParentSet(static_cast<Object*>(GetParent()));
+        }
     }
 }

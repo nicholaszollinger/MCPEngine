@@ -8,7 +8,7 @@
 //  The goal here is to house all of my type constraints that I *would* use c++20 concepts for, but instead I will use some
 //      horrendous looking TMP type stuff that I have to look up to try and decipher.
 //      I will be posting sources to the research I find.
-//  If I decide to transition to C++20 later, this can be updated to use actual concepts.
+//  If I decide to transition to C++20 later, this can be removed in favor of concepts.
 //
 //  Sources:
 //  - https://stackoverflow.com/questions/54468896/implementation-of-concepts-in-c17

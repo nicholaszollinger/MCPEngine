@@ -5,7 +5,7 @@
 -- mcp.Modules.Debug = {};
 
 local m = {};
-m.DEBUG = false; -- TODO: Should this be set here? I was thinking that 
+m.DEBUG = false; -- TODO: Should this be set here? This should be set by the Engine in C++
 
 ------------------------------------------------------------------------------------------------------------
 ---Initialize a module with the MCP debug functions.
